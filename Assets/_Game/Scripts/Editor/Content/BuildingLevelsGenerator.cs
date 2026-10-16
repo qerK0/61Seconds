@@ -261,9 +261,14 @@ namespace SixtyOne.Editor
                 }
             }
 
+            // Old act folders hold PrepPhaseNode assets whose script is gone (missing script: FindAssets cannot type them).
             foreach (string stale in new[] { NodesDir + "/Act1", NodesDir + "/Act2" })
             {
-                if (AssetDatabase.IsValidFolder(stale) && Directory.Exists(stale) && Directory.GetFiles(stale, "*.asset").Length == 0) AssetDatabase.DeleteAsset(stale);
+                if (AssetDatabase.IsValidFolder(stale) && Directory.Exists(stale))
+                {
+                    AssetDatabase.DeleteAsset(stale);
+                    Debug.Log("[Generator] Deleted old folder " + stale);
+                }
             }
         }
     }

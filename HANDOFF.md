@@ -4,6 +4,102 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-16 23:45 UTC] CLOUD — Major design change: one quake, 300s building timer, floors 4→3→2 with checkpoints, survival systems, crafting, epilogue
+### Done
+- **Building timer replaces the 61s prep.** `BuildingTimer` (pure) + `SurvivalController`: 300s on `Data/LevelConfig.asset`, pulse at 60s, alarm + ticks in the last 30s, collapse at 0 = death with a macro rewind. Every action cost (choices, interactables, dialogue lines, crafting, item use) subtracts from it via `ActionCostRouter`. Moves cost extra per injured member.
+- **Checkpoints:** `SceneNode.isCheckpoint` (f4.intro, f3.aftershock, f2.aftershock). `RewindTarget.Checkpoint` = macro (restores timer, stamina, poison, borrow ledger, family positions); `LastNode` = micro. LoopCount, tips, revealed anchors and KnowledgeSet persist.
+- **Floor 4:** intro dialogue (Sevim; "Kısa kes" loses the whistle and the Flat 12 info) → opening quake placement → salon/kitchen (valve)/hall (breaker) → corridor (Hasan gives food + water) → Flat 12 (borrow + "Not bırak").
+- **Floor 3:** aftershock placement → corridor trader (needs-aware) → Flat 9 fuse puzzle (gloves or insulated grip + tape, else electrocution) → cable descent (heavy; needs the child harness) / Flat 10 (dark, gas, lighter = explosion, flashlight, collapsed floor).
+- **Floor 2:** strong aftershock placement in Flat 7 (gas leak) → corridor dog gate (food is consumed, whistle is kept, walking past = bitten + injured + pushed back) → Flat 8 → stairs → street epilogue (family line, borrow line by ledger + LeftNote, loop count).
+- **Systems:**
+  - panic + input delay (0 below 0.7, at most 0.3s, instant ring feedback, Reduce Effects = 0)
+  - stamina (HUD bar; drains over time and per heavy action; food/water restore it; at 0 heavy actions lock and everything costs more time)
+  - poison (gas zones per room with a valve flag; darkening overlay + director vignette/saturation; the wet cloth halves it)
+  - crafting (3 recipes in `Data/Recipes`; BagUI: tap an item, tap again to use, tap another to combine)
+  - DialogueNode (per-line time cost)
+  - hidden item hotspots (salon food, hall whistle, Flat 10 tape, Flat 8 water)
+- **ContentValidator** now runs node checks again, plus:
+  - dialogue lines (keys, cost ≥ 0)
+  - recipes
+  - traders
+  - every gas room has a valve choice
+  - unreachable checkpoints
+  - placement rooms have safe + trap anchors and an unplaced hazard
+  - no firearm ids
+- **Text:** `strings_tr.csv` has 252 rows; every new key has a `TODO:` placeholder.
+- **Tests:** 95 EditMode tests pass under the mono runner (new: BuildingTimer, Dialogue, Survival, Floor3Rules, Floor2Rules, HiddenItem). The generator was also run under mono against the real CSV:
+  - 0 missing or unused keys
+  - all 20 nodes reachable
+  - validator: 0 problems; the negative checks fire
+  - 11 scripted playthroughs pass, including both routes to the epilogue. The cable route used 114s of 300 in action costs (realtime drain not included).
+- CLAUDE.md "The Game", folder tree and Core concepts are updated.
+- **Why one scene:** one GameManager, GameState and UI, so floor checkpoints and rewinds never load scenes; `RoomSwitcher` shows one room and the family snaps to its spawns.
+
+### Files created / changed
+- Runtime:
+  - Building/ (LevelConfig, BuildingTimer, SurvivalModel, SurvivalController, GasZone, EpilogueNode/Text/Controller)
+  - Dialogue/, Items/ (Recipe, RecipeBook, Crafting, ItemUse, TraderProfile, TraderLogic), Puzzles/
+  - World/ (renamed from Prep; WorldInteractable, PickupItem, HiddenItemHotspot)
+  - Core routers, Snapshot/GameState/GameSession, Choice/ChoiceView/Condition/Outcome/NodePlayer, PlacementNode/Controller
+  - CinematicDirector/Mixer/Profile, IsoPicker, CameraShake
+  - UI: BagUI, ChoicePanel, ChoiceButton, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, FusePuzzlePanel
+- Removed: Prep/* (PrepPhaseNode, PrepCountdown, PrepController…), CountdownDisplay, ActionProgressBar, RoomTabs, SampleAct1Generator, and the Prep tests.
+- Editor:
+  - BuildingLevelsGenerator(.Floor4/.Floor3/.Floor2).cs
+  - SceneBuild/BuildingLayout, HiddenItems, SceneKit, TestSceneBuilder, TestSceneUi, TestSceneCinematic
+  - ContentValidator
+- Tests: BuildingTimerTests, DialogueTests, SurvivalTests, Floor3RulesTests, Floor2RulesTests, HiddenItemTests.
+- `Content/Text/strings_tr.csv`, `CLAUDE.md`.
+
+### Needs local wiring (checklist for the MCP session)
+1. `git pull`, open Unity and let it compile. Expect 0 errors. New scripts have no .meta files yet (the cloud never writes them), so Unity creates them on import.
+2. **SixtyOne > Generate Building Levels.**
+   - It deletes the old `Data/Nodes/Act1`, `Data/Nodes/Act2`, the old items (console, crowbar, gold, laptop, wrench) and `tip.leave_quickly`.
+   - It creates the `Floor4/3/2` nodes, `Traders/`, `Recipes/` and `LevelConfig.asset`.
+   - If any asset with a missing script is left under `Data/`, delete it.
+3. **SixtyOne > Cinematic > Generate Profiles.** Floor stages 1–3 map to CinematicAct1–3.
+4. **SixtyOne > Build Test Scene.** This builds `Scenes/Test_Building.unity` and deletes `Test_Act1.unity`.
+5. With the scene open, run **SixtyOne > Validate Content**. Expect 0 problems; the placement anchor checks only run while the scene is open.
+6. Run **SixtyOne > Text > Validate**. Expect no missing or unused keys.
+7. Run the Test Runner (EditMode). Expect 95 passing.
+8. Play-through in Play mode:
+   1. Intro lines tick the timer. "Kısa kes" skips them.
+   2. Opening quake placement (10s).
+   3. Kitchen: the gas raises poison, the overlay darkens and the valve stops it.
+   4. Hall breaker → exit.
+   5. Hasan → Flat 12: borrow cloth + rope, leave a note.
+   6. Combine cloth + rope in the bag into the harness.
+   7. Stairs → F3 aftershock.
+   8. Trader → Flat 9: repair needs gloves/grip + tape, then the fuse panel pattern 1,3,4 ON → cables.
+   9. F2 strong aftershock → Flat 7 valve → dog (whistle or food) → stairs → out → epilogue text.
+   10. Also check: the last-30s alarm, collapse at 0 → floor checkpoint, stamina 0 locking heavy moves, the click ring and delay at high panic, and the hidden-item sparkle after 25s.
+9. Tune `LevelConfig` (timer, stamina drain, poison rates, panic) and `GameSettings` (panic threshold, maxInputDelay, sparkle) by feel.
+
+### Not verified / risks
+- Compiled only with mcs against API stubs. The editor-side Unity APIs that are new this session:
+  - `Component.GetComponentInParent<T>(bool)`
+  - `Image.fillMethod`/`fillAmount` for the click ring
+  - `ContactFilter2D.noFilter`
+- Not seen in Unity at all yet:
+  - the UI layout (stamina bar, building timer, fuse panel, poison overlay)
+  - camera framing for the new rooms (f2_corridor, flat8, f2_stairs, street)
+  - the family snapping between floors
+- `AssetDatabase.FindAssets("t:SceneNode")` is relied on for subclasses; the validator also loads each subtype explicitly to be safe.
+- Balance is untested. 300s may be generous: the scripted action costs for the full cable route are about 114s, while the realtime tick runs on top.
+- The epilogue is text only (no buttons, no restart). The win look comes from the `CinematicDirector` exit node `f2.epilogue`.
+
+### Cut / simplified
+- Crafting is "tap item A, then item B" in the bag. There is no drag-and-drop.
+- Flat 8 is an empty placeholder with one hidden item (water), as specified.
+- Hidden items use placeholder "painted overlay" blocks until the artist's room art exists. Swap `PaintedOverlay` for the painted sprite.
+- Nothing from the priority list was cut.
+
+### Next suggested step
+- LOCAL: run the checklist, take screenshots of each floor, and tune timer and stamina numbers.
+- The writer: replace the `TODO:` texts in `strings_tr.csv`.
+
+---
+
 ## [2026-10-17 00:50] LOCAL — Cinematic look verified in Unity, Act 1–3 profiles tuned, world labels made readable
 ### Done
 - **Compile:** Safe Mode is exited. The `Unity.RenderPipelines.Universal.2D.Runtime` reference (needed for Light2D) is in both asmdefs. 0 errors. Fixed the 2 remaining warnings: `ContactFilter2D.noFilter` in IsoPicker, and removed the obsolete `VolumeProfile.isDirty` line in CinematicDirector (not needed for a runtime profile).

@@ -4,39 +4,46 @@
 Speed beats polish. Small, working, testable steps. Never leave the project in a non-compiling state.
 
 ## The Game
-Linear earthquake-escape game. The player, their **wife** and their **child** start on the 6th floor of an apartment building and must get out alive. There is NO dog. AFAD alerts trigger three escalating quakes: 6.0 on floor 6, 7.0 on floor 4 and 8.0 on floor 2. Between quakes the player explores isometric rooms, collects items into a 4-slot bag, deals with odd neighbors, shuts off gas/electricity/water, and descends via stairs or holes in the floor.
+Linear earthquake-escape game. The player, their **wife** and their **child** live in Flat 11 on the 4th floor and must get out of the building alive: **Floor 4 → Floor 3 → Floor 2 → exit**. There is ONE earthquake for the whole game, plus aftershocks.
 
-**The 61 seconds (where the title comes from).** The game opens with an AFAD early-warning popup: "Deprem 61 saniye sonra", and a big 61s countdown starts.
-1. **Prep phase** (61s → `placementWindowSeconds`, default 10): the player explores the apartment (living room, kitchen, bedroom) and fills the 4-slot bag. Every action costs countdown time: picking up from an open surface 1s, opening a drawer or cabinet 3s, switching off the breaker 4s, closing the gas valve 5s (each interactable sets its own cost). Input is blocked while an action runs, but the countdown keeps going. Trap items (gold, laptop, game console) can be picked up; they just waste a slot and time.
-2. **Placement window** (last 10s): a "ÇÖK-KAPAN-TUTUN" alert appears and input switches to placement: wife and child first, the player last.
-3. **Quake** at 0: hazards resolve, then post-quake exploration, then the stairs.
-Acts 2 and 3 reuse the same node type with a short prep or none (zero prep goes straight to placement).
+**The building timer (where the tension comes from).** A `BuildingTimer` (default 300s, on the `LevelConfig` asset) starts with the game. At 0 the building collapses: death and rewind. It pulses the UI at 60s and sounds an alarm with ticks in the last 30s. Every action subtracts its time cost (moving between rooms, opening drawers, closing valves, talking, crafting); injured family members make moves slower until treated with the first aid kit.
+
+**Flow.**
+- Floor 4: the neighbour Sevim visits (dialogue; each line costs time, "Kısa kes" skips her info and whistle), then the opening quake (placement moment), then Flat 11 (gas valve, breaker), the corridor (a kind neighbour gives food + water) and Flat 12 (borrow cloth, rope, tape, flashlight, lighter, first aid; "Not bırak" leaves a note).
+- Floor 3: aftershock placement on arrival; a needs-aware trader in the corridor; Flat 9 fuse puzzle (needs insulated gloves or the crafted grip + tape, else electrocution) which unlocks the cable descent (needs the child harness); Flat 10 (dark, gas leak, lighter = explosion, flashlight is safe, collapsed floor = alternative way down).
+- Floor 2: strong aftershock placement in Flat 7 (gas leak); a frightened dog blocks the corridor (feed it or use the whistle; walking past = bitten, injured, pushed back); stairs → street → epilogue (family state, borrow line, loop count).
+
+**Survival systems.** Stamina (food/water restore it; it drains over time and per heavy action; at 0 heavy actions are locked and everything costs more time), poison (gas rooms with an open valve; darkening + vignette; max = death with a gas tip; the wet cloth halves it), panic (rises as the timer falls, when poisoned and on aftershocks; above `panicDelayThreshold` clicks get an input delay up to `maxInputDelay`, with instant visual feedback; Reduce Effects forces 0), crafting (two bag items → one, order-independent; the bag stays 4 slots), hidden items (invisible hotspots in the room art; optional sparkle in later loops or after N seconds).
 
 Choices work like Henry Stickmin. A wrong choice ("what NOT to do in an earthquake") causes a death, a visible LOOP counter goes up, and each death shows a one-line real earthquake safety tip ("Deprem Notu"). Tips are collected across loops. **The loop has two layers:**
 - **Micro rewind:** a wrong placement or choice rewinds to the last decision node.
-- **Macro rewind:** a death caused by missing gear rewinds to the START of the prep phase (empty bag, flags reset, family back at their start positions). Example: a jammed door that needs the crowbar. The locked option stays clickable and kills with "Keşke yanıma alsaydım..." and the missing item's icon.
-- These persist across ALL rewinds: `LoopCount`, collected tips, revealed anchor labels, and the **KnowledgeSet** (ids of items the player died for lacking). In later loops those items get a subtle highlight during prep, which can be turned off in the `GameSettings` asset.
+- **Macro rewind:** a death caused by missing gear or the building collapsing rewinds to the current **floor checkpoint** (the start of the floor, timer included). Locked "missing gear" options stay clickable and kill with the missing item's text.
+- These persist across ALL rewinds: `LoopCount`, collected tips, revealed anchor labels, and the **KnowledgeSet** (items the player died for lacking, hidden spots found). The borrow ledger is reset with the checkpoint.
 
 **Tone rule:** absurd or comic deaths are only for the player character and "do-not-do" traps. The wife is never shown dying on screen: cut to black, play a sound and show one line of text. The child never dies: the child gets a `Trapped` state that triggers the rewind.
 
-**Safety content must match AFAD guidance.** Drop-Cover-Hold On is correct. All of the following are TRAPS: "triangle of life", doorways, balconies, windows, elevators, running down the stairs during shaking, lighting a flame, and flipping switches when there is a gas smell.
+**Safety content must match AFAD guidance.** Drop-Cover-Hold On is correct. All of the following are TRAPS: "triangle of life", doorways, balconies, windows, elevators, running down the stairs during shaking, lighting a flame, and flipping switches when there is a gas smell. NO firearms anywhere (the validator checks item ids). Taking from neighbours is always "ödünç al" — never "yağma", "loot" or "çalmak".
 
 ## Architecture (data-driven: new content = new data, not new code)
 
 Root folder: `Assets/_Game/`
 ```
-Scripts/Core/        GameState, Flags, Inventory, Snapshot, LoopCounter, GameEvents, Tween helper
+Scripts/Core/        GameState, Flags, Inventory, Snapshot, BorrowLedger, KnowledgeSet, GameEvents, routers (ActionCost, InputDelay, ExplorationGate)
 Scripts/Text/        CSV parser, TextDB, TextKey (lore/dialogue/UI strings)
-Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer
-Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver
-Scripts/Prep/        PrepPhaseNode, PrepCountdown + PrepAction (pure), PrepController, PrepInteractable, PickupItem
+Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer, ChoiceView
+Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver, Room/RoomSwitcher
+Scripts/Building/    LevelConfig, BuildingTimer + SurvivalModel (pure), SurvivalController, GasZone, Epilogue*
+Scripts/Dialogue/    DialogueLine, DialogueNode, DialogueController
+Scripts/Items/       Recipe, RecipeBook, Crafting, ItemUse, TraderProfile, TraderLogic
+Scripts/Puzzles/     FusePuzzle (pure), FusePuzzleNode, FusePuzzleController
+Scripts/World/       WorldInteractable, PickupItem, HiddenItemHotspot
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
-Scripts/Cinematic/   CinematicProfile (SO, one per act), CinematicMixer (pure), CinematicDirector, LetterboxBars
+Scripts/Cinematic/   CinematicProfile, CinematicMixer (pure), CinematicDirector, LetterboxBars
 Scripts/Audio/       AudioCue (SO), AudioService
-Scripts/UI/          ChoicePanel, TimerBar, CountdownDisplay, ActionProgressBar, RoomTabs, BagUI, LoopCounterUI, DeathCard, TipJournal, RewindFX
-Scripts/Editor/      Validators, content generators, test-scene builder
+Scripts/UI/          ChoicePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, FusePuzzlePanel, LoopCounterUI, DeathCard, TipJournal, RewindFX
+Scripts/Editor/      Validators, BuildingLevelsGenerator (one partial per floor), test-scene builder (BuildingLayout tables)
 Content/Text/        strings_tr.csv  ← the lore writer edits this
-Data/                Nodes/ Hazards/ Items/ Tips/ Audio/ (ScriptableObject assets)
+Data/                Nodes/Floor4..2 Hazards/ Items/ Tips/ Traders/ Recipes/ Audio/ LevelConfig (ScriptableObject assets)
 Prefabs/  Scenes/  Art/  Audio/
 Tests/EditMode/      Pure-logic tests
 ```
@@ -44,47 +51,30 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 
 ### Core concepts
 - **GameState** is plain C#, owned by a `GameManager` MonoBehaviour. It holds:
-  - `Inventory` (max 4 item ids)
-  - `Flags` (string → bool, e.g. `GasOff`, `PowerOff`, `WaterOff`, `WifeInjured`)
-  - the family members' states and anchor positions
-  - the current node id and the current act (1–3)
-  - `LoopCount`, the collected tip ids, revealed anchor labels and the `KnowledgeSet` (all four persist across every rewind)
-- **Snapshot:** a deep copy of GameState taken at the start of every decision or placement node. A prep phase also takes a dedicated **PrepStart** snapshot. On death, `DeathInfo.RewindTarget` picks the snapshot:
-  - `LastNode` (micro): restore the latest snapshot, or a specific node for delayed bombs. Family members stay at their LAST chosen positions, so the player only has to fix the wrong placement.
-  - `PrepStart` (macro): restore the prep-start snapshot, which also resets family positions.
+  - `Inventory` (max 4 item ids), `Flags` (string → bool, e.g. `GasOff`, `PowerCut_F3`, `LeftNote`, `DogGone`)
+  - the family members' states and anchor positions, the current node id and floor stage
+  - `BuildingTime`, `Stamina`, `Poison` and the `BorrowLedger` (all restored by snapshots)
+  - `LoopCount`, the collected tip ids, revealed anchor labels and the `KnowledgeSet` (these persist across every rewind)
+- **Snapshot:** a deep copy of GameState taken at the start of every node. Nodes marked `isCheckpoint` (the start of each floor) also become the **floor checkpoint**. On death, `DeathInfo.RewindTarget` picks the snapshot:
+  - `LastNode` (micro): restore the latest snapshot. Family members stay at their LAST chosen positions.
+  - `Checkpoint` (macro): restore the floor checkpoint, including the building timer, and reset family positions.
   - Either way: keep the persistent data above, increment `LoopCount`, play the rewind FX (longer for macro rewinds).
-- **SceneNode** (ScriptableObject) has:
-  - an id, title/body text keys and a room ref
-  - timer seconds (0 = untimed)
-  - a list of `Choice`
-  - optional `onEnter` outcomes
-  - optional "bomb checks": conditions evaluated on enter that can kill or injure someone
-- **Choice** has:
-  - a label key and a type (`Normal` or `Trap`)
-  - a list of `Condition`s: has item, flag is true/false, member state
-  - a fail behaviour for when the conditions are not met: `Hide`, `ShowLocked`, or `ShowLockedFatal` (shown locked but clickable; it kills with a missing-item text key, adds the item to the KnowledgeSet and macro-rewinds)
-  - a list of `Outcome`s: `GoToNode`, `Death`, `SetFlag`, `AddItem`, `RemoveItem`, `SetMemberState`
-  - a death text key, a tip ref, an audio cue and a rewind target (`LastNode` or `PrepStart`)
-  - A **delayed bomb** is an outcome that sets a flag now, plus a later node whose bomb check reads that flag.
-- **PrepPhaseNode** is a SceneNode subtype that opens an act. It holds the duration (61 in Act 1), `placementWindowSeconds`, the prep room ids, a linked PlacementNode (its timer must equal the window), the alert text keys and audio cues (countdown ticks in the last 10s, alarms). `PrepController` drives it with the pure `PrepCountdown`, which raises events at the placement window, on each of the last 10 seconds and at zero. The countdown keeps ticking through the placement window.
-- **PrepInteractable** (IClickable) has a time cost, an optional required item, the item it grants and/or extra outcomes (e.g. SetFlag `GasOff`), one-shot vs repeatable, and a label key. One-shot uses are stored as `Used_<id>` flags so rewinds restore them. `PickupItem` is the open-surface preset (1s, disappears).
-- **PlacementNode** is a SceneNode subtype with a timed phase:
+- **SceneNode** (ScriptableObject) has an id, title/body text keys, a room id, a timer (0 = untimed), `Choice`s, optional `onEnter` outcomes and "bomb checks" (conditions evaluated on enter that can kill). Subtypes are driven by `INodeHandler`s: `PlacementNode` (PlacementController), `DialogueNode` (DialogueController), `FusePuzzleNode` (FusePuzzleController), `EpilogueNode` (EpilogueController). With no handler the room is explorable (`ExplorationGate`).
+- **Choice** has a label key, a type (`Normal`/`Trap`), `Condition`s (has item, has any item, flag, member state), a fail behaviour (`Hide`, `ShowLocked` with a reason, `ShowLockedFatal` = clickable death naming the first missing item), `Outcome`s (`GoToNode`, `Death`, `SetFlag`, `AddItem`, `RemoveItem`, `SetMemberState`, `TraderGive`, `ShowMessage`), and costs: time seconds, stamina, `heavy` (locked at 0 stamina), `isMove` (slower with injured members). A **delayed bomb** sets a flag now; a later node's bomb check reads it.
+- **Action costs** go through `ActionCostRouter` to the `SurvivalController` (building timer + stamina). Clicks go through `InputDelayRouter` (panic delay); `ClickFeedback` shows the instant ring.
+- **DialogueNode** has lines (speaker key, text key, time cost per line) and choices that show during the lines (e.g. "hurry") or at the end.
+- **WorldInteractable** (IClickable): time/stamina cost, optional required item, granted item, `borrowed` (recorded in the BorrowLedger), extra outcomes, one-shot as `Used_<id>` flags. `PickupItem` = open-surface preset; `HiddenItemHotspot` = invisible collider + painted overlay + sparkle.
+- **Recipe** (inputA, inputB, output, time, stamina) in a `RecipeBook`; BagUI: tap an item, tap it again to use it (food/water/first aid), tap another to combine.
+- **TraderProfile**: ordered needs + fallback food/water; the trader gives the first need the player lacks.
+- **LevelConfig**: building timer thresholds and texts, stamina, poison (`GasZone` per room with its valve flag), panic and input delay curves.
+- **PlacementNode** is a SceneNode subtype with a timed phase (opening quake and each aftershock; magnitude + shake per node):
   - the player taps a family member and the valid anchors highlight
   - the player taps an anchor, and the member is repositioned instantly (no walk animation)
   - when the timer ends, the quake plays and each Hazard resolves against the members on its anchor
-- **Anchor** is a MonoBehaviour in the room. It has:
-  - a tag (`Safe` or `Trap`) and a capacity (a table holds 2)
-  - a linked Hazard and an adjacency list
-  - a label text key that stays hidden until the player has died to it once (this persists across loops)
-- **Hazard** (ScriptableObject) has:
-  - which quake(s) trigger it (a bitmask of acts)
-  - the outcome per member type: player → Death, wife → Death or Injured, child → Trapped
-  - a text key and an audio cue
-  - a motion type (`Topple`, `Drop`, `Shatter` or `None`), played as a code tween on the hazard prop
-- **FamilyMember rules:**
-  - the wife goes wherever she is told
-  - the child must be on the same anchor as an adult, or on an adjacent one
-  - the player is placed last
+- **Anchor** is a MonoBehaviour in the room: a tag (`Safe` or `Trap`), a capacity (a table holds 2), a linked Hazard, an adjacency list and a label key hidden until the player has died to it once.
+- **Hazard** (ScriptableObject): outcome per member type (player → Death, wife → Death or Injured, child → Trapped), text keys, a tip, and a motion type (`Topple`, `Drop`, `Shatter` or `None`) played as a code tween on the hazard prop.
+- **FamilyMember rules:** the wife goes wherever she is told; the child must be on the same anchor as an adult, or on an adjacent one; the player is placed last. Between rooms and floors the family follows the player (snaps to the room's spawns).
+- **One scene** (`Test_Building.unity`) holds every room of every floor; `RoomSwitcher` shows one room at a time. One GameManager, GameState and UI means checkpoints and rewinds never load scenes.
 
 ### Isometric (2.5D) rules
 - Art is pre-rendered isometric sprites (2:1 diamond). The camera is orthographic.
@@ -109,8 +99,8 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 
 ### Cinematic look
 - Renderer: URP **2D Renderer** (`Assets/Settings/Renderer2D.asset`), so lighting uses `Light2D` (a global light plus warm practicals that flicker and die at the quake).
-- `CinematicDirector` reacts only to GameEvents and the prep countdown. It drives an instantiated copy of the global volume profile (never the asset), uses unscaled time only and never touches `Time.timeScale`.
-- All strengths live on `Assets/_Game/Data/Cinematic/CinematicAct1-3.asset`. Each act is darker and harsher. `GameSettings.ReduceEffects` disables the flash, chromatic aberration, lens wobble, tilt and rotational shake, and scales down CameraShake.
+- `CinematicDirector` reacts only to GameEvents, the building timer (tension) and poison. It drives an instantiated copy of the global volume profile (never the asset), uses unscaled time only and never touches `Time.timeScale`.
+- All strengths live on `Assets/_Game/Data/Cinematic/CinematicAct1-3.asset`, one per floor stage (Floor 4 = 1, Floor 3 = 2, Floor 2 = 3). Each floor is darker and harsher. `GameSettings.ReduceEffects` disables the flash, chromatic aberration, lens wobble, tilt and rotational shake, and scales down CameraShake.
 
 ### Art
 - The artist delivers high-quality isometric art. Code must never require specific frame counts.
