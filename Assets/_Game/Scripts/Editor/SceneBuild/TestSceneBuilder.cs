@@ -57,6 +57,7 @@ namespace SixtyOne.Editor
 
             var systems = new GameObject("Game");
             GameManager gameManager = systems.AddComponent<GameManager>();
+            SerializedWire.Set(gameManager, "settings", data.Settings);
 
             TextDBLoader loader = systems.AddComponent<TextDBLoader>();
             SerializedWire.Set(loader, "settings", data.TextSettings);
@@ -72,15 +73,32 @@ namespace SixtyOne.Editor
 
             RoomSwitcher switcher = systems.AddComponent<RoomSwitcher>();
             PlacementController placement = systems.AddComponent<PlacementController>();
+            PrepController prep = systems.AddComponent<PrepController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
 
             List<FamilyMember> family = BuildFamily();
+            Room living = BuildLivingRoom(data);
+            Room kitchen = BuildSimpleRoom("Room_Kitchen", SampleAct1Generator.Kitchen, 4, new Color(0.7f, 0.8f, 0.78f, 1f), stairs: false);
+            Room bedroom = BuildSimpleRoom("Room_Bedroom", SampleAct1Generator.Bedroom, 4, new Color(0.8f, 0.72f, 0.82f, 1f), stairs: false);
             var rooms = new List<Room>
             {
-                BuildLivingRoom(data),
+                living,
+                kitchen,
+                bedroom,
                 BuildSimpleRoom("Room_Stairwell", SampleAct1Generator.Stairwell, 3, new Color(0.55f, 0.55f, 0.6f, 1f), stairs: true),
                 BuildSimpleRoom("Room_Floor4", SampleAct1Generator.Floor4, 4, new Color(0.75f, 0.6f, 0.45f, 1f), stairs: false)
             };
+
+            var roomsById = new Dictionary<string, Transform>
+            {
+                { SampleAct1Generator.LivingRoom, living.transform },
+                { SampleAct1Generator.Kitchen, kitchen.transform },
+                { SampleAct1Generator.Bedroom, bedroom.transform }
+            };
+            foreach (InteractableSpec spec in PrepSpecs())
+            {
+                BuildInteractable(roomsById[spec.Room], spec, data, prep);
+            }
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
 
@@ -91,13 +109,16 @@ namespace SixtyOne.Editor
             SerializedWire.Set(placement, "gameManager", gameManager);
             SerializedWire.Set(placement, "rooms", switcher);
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, art);
+            SerializedWire.Set(prep, "gameManager", gameManager);
+            SerializedWire.Set(prep, "rooms", switcher);
+
+            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, art, prep, switcher, SampleAct1Generator.PrepRooms);
 
             SerializedWire.Set(nodePlayer, "gameManager", gameManager);
             SerializedWire.Set(nodePlayer, "content", data.Content);
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
-            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { placement });
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { prep, placement });
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -211,15 +232,6 @@ namespace SixtyOne.Editor
             Prop(t, "door_frame", "DoorLintel", 4.0f, 5.95f, 1.0f, new Vector2(1.0f, 0.25f), new Color(0.35f, 0.22f, 0.12f, 1f), dropDistance: 0.9f);
             Prop(t, "balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, new Vector2(1.0f, 0.5f), new Color(0.5f, 0.5f, 0.55f, 1f), dropDistance: 0.6f);
             Prop(t, "ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, new Vector2(0.5f, 0.35f), new Color(1f, 0.95f, 0.6f, 1f), dropDistance: 1.4f);
-
-            // Pickups, only clickable during the post-quake exploration node.
-            string[] exploreOnly = { SampleAct1Generator.NodeExplore };
-            Pickup(t, data.Items["wrench"], 1.2f, 2.0f, new Color(0.7f, 0.7f, 0.75f, 1f), exploreOnly);
-            Pickup(t, data.Items["gloves"], 3.6f, 1.0f, new Color(1f, 0.85f, 0.2f, 1f), exploreOnly);
-            Pickup(t, data.Items["first_aid"], 4.4f, 3.0f, new Color(1f, 0.25f, 0.25f, 1f), exploreOnly);
-            Pickup(t, data.Items["flashlight"], 1.8f, 4.2f, new Color(0.3f, 0.3f, 0.35f, 1f), exploreOnly);
-            Pickup(t, data.Items["gold"], 3.0f, 4.4f, new Color(1f, 0.75f, 0f, 1f), exploreOnly);
-            Pickup(t, data.Items["laptop"], 3.2f, 3.4f, new Color(0.2f, 0.2f, 0.25f, 1f), exploreOnly);
 
             SetSpawns(room, new Vector2(0.9f, 0.9f), new Vector2(1.5f, 0.5f), new Vector2(0.5f, 1.5f));
             return room;
@@ -350,37 +362,107 @@ namespace SixtyOne.Editor
             SerializedWire.SetFloat(prop, "dropDistance", dropDistance);
         }
 
-        private static void Pickup(Transform parent, Item item, float gx, float gy, Color color, string[] activeNodeIds)
+        /// <summary>One prep interactable placed in a room.</summary>
+        private sealed class InteractableSpec
         {
-            var go = new GameObject("Pickup_" + item.Id);
+            public string Id;
+            public string Room;
+            public string ItemId;
+            public string RequiredItemId;
+            public string Flag;
+            public float Cost;
+            public bool Surface;
+            public float Gx;
+            public float Gy;
+            public Color Color;
+        }
+
+        private static InteractableSpec Spec(string id, string room, float cost, float gx, float gy, Color color,
+            string itemId = null, string flag = null, string required = null, bool surface = false)
+        {
+            return new InteractableSpec { Id = id, Room = room, Cost = cost, Gx = gx, Gy = gy, Color = color, ItemId = itemId, Flag = flag, RequiredItemId = required, Surface = surface };
+        }
+
+        /// <summary>
+        /// Act 1 prep layout: 12 interactables over three rooms. Costs: open surface 1s, drawer/cabinet 3s,
+        /// breaker 4s, gas valve 5s. Gold, laptop and console are useless valuables.
+        /// </summary>
+        private static IEnumerable<InteractableSpec> PrepSpecs()
+        {
+            string lr = SampleAct1Generator.LivingRoom;
+            string kt = SampleAct1Generator.Kitchen;
+            string br = SampleAct1Generator.Bedroom;
+            var gold = new Color(1f, 0.75f, 0f, 1f);
+            var dark = new Color(0.25f, 0.25f, 0.3f, 1f);
+            var wood = new Color(0.55f, 0.38f, 0.22f, 1f);
+
+            yield return Spec("whistle", lr, 1f, 1.2f, 2.0f, new Color(0.9f, 0.9f, 1f, 1f), itemId: "whistle", surface: true);
+            yield return Spec("gold", lr, 1f, 3.0f, 4.4f, gold, itemId: "gold", surface: true);
+            yield return Spec("laptop", lr, 1f, 3.3f, 3.4f, dark, itemId: "laptop", surface: true);
+            yield return Spec("console", lr, 1f, 3.6f, 1.0f, new Color(0.3f, 0.3f, 0.8f, 1f), itemId: "console", surface: true);
+            yield return Spec("breaker", lr, 4f, 0.3f, 3.5f, new Color(0.6f, 0.6f, 0.65f, 1f), flag: FlagNames.PowerOff);
+
+            yield return Spec("gas_valve", kt, 5f, 3.6f, 1.5f, new Color(1f, 0.85f, 0.2f, 1f), flag: FlagNames.GasOff, required: "wrench");
+            yield return Spec("water", kt, 1f, 1.0f, 1.0f, new Color(0.4f, 0.7f, 1f, 1f), itemId: "water", surface: true);
+            yield return Spec("first_aid", kt, 3f, 3.5f, 3.2f, new Color(1f, 0.25f, 0.25f, 1f), itemId: "first_aid");
+            yield return Spec("gloves", kt, 1f, 1.8f, 2.8f, new Color(1f, 0.9f, 0.3f, 1f), itemId: "gloves", surface: true);
+
+            yield return Spec("wrench", br, 3f, 3.5f, 1.0f, wood, itemId: "wrench");
+            yield return Spec("flashlight", br, 3f, 0.8f, 3.4f, wood, itemId: "flashlight");
+            yield return Spec("crowbar", br, 3f, 2.0f, 2.0f, new Color(0.5f, 0.3f, 0.45f, 1f), itemId: "crowbar");
+        }
+
+        private static void BuildInteractable(Transform parent, InteractableSpec spec, SampleAct1Assets data, PrepController prep)
+        {
+            var go = new GameObject("Prep_" + spec.Id);
             go.transform.SetParent(parent, false);
-            go.transform.localPosition = IsoMath.GridToWorld(gx, gy);
+            go.transform.localPosition = IsoMath.GridToWorld(spec.Gx, spec.Gy);
 
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
-            r.sprite = art.Dot;
-            r.color = color;
+            r.color = spec.Color;
+            if (spec.Surface)
+            {
+                r.sprite = art.Dot;
+                CircleCollider2D circle = go.AddComponent<CircleCollider2D>();
+                circle.radius = 0.19f;
+            }
+            else
+            {
+                // Furniture (drawer, cabinet, valve, breaker): a small block, pivot at the feet.
+                r.sprite = art.Block;
+                go.transform.localScale = new Vector3(0.7f, 0.55f, 1f);
+                BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+                box.size = new Vector2(0.5f, 1f);
+                box.offset = new Vector2(0f, 0.5f);
+            }
 
-            CircleCollider2D collider = go.AddComponent<CircleCollider2D>();
-            collider.radius = 0.19f;
-
+            string labelKey = "prep." + spec.Id;
             var labelGo = new GameObject("Label");
             labelGo.transform.SetParent(go.transform, false);
-            labelGo.transform.localPosition = new Vector3(0f, 0.3f, 0f);
+            labelGo.transform.localPosition = new Vector3(0f, spec.Surface ? 0.3f : 1.2f, 0f);
+            if (!spec.Surface) labelGo.transform.localScale = new Vector3(1f / 0.7f, 1f / 0.55f, 1f);
             TextMeshPro label = labelGo.AddComponent<TextMeshPro>();
-            label.fontSize = 1.6f;
+            label.fontSize = 1.4f;
             label.alignment = TextAlignmentOptions.Center;
             label.color = Color.white;
-            label.rectTransform.sizeDelta = new Vector2(2f, 0.3f);
+            label.rectTransform.sizeDelta = new Vector2(2.4f, 0.3f);
             label.sortingOrder = LabelOrder;
             LocalizedText localized = labelGo.AddComponent<LocalizedText>();
-            SerializedWire.SetTextKey(localized, "key", item.NameKey.Key);
+            SerializedWire.SetTextKey(localized, "key", labelKey);
 
             IsoSorter sorter = go.AddComponent<IsoSorter>();
             sorter.Mode = IsoSortMode.Static;
             sorter.Apply();
 
-            PickupItem pickup = go.AddComponent<PickupItem>();
-            SerializedWire.Set(pickup, "grantsItem", item);
+            Item grants = spec.ItemId != null ? data.Items[spec.ItemId] : null;
+            Item required = spec.RequiredItemId != null ? data.Items[spec.RequiredItemId] : null;
+            var outcomes = new List<Outcome>();
+            if (spec.Flag != null) outcomes.Add(Outcome.SetFlag(spec.Flag));
+
+            PrepInteractable interactable = spec.Surface ? go.AddComponent<PickupItem>() : go.AddComponent<PrepInteractable>();
+            interactable.Configure(spec.Id, labelKey, spec.Cost, grants, required, required != null ? labelKey + ".needs" : null,
+                isOneShot: true, hide: spec.Surface, extraOutcomes: outcomes, driver: prep, mainSprite: r);
+            EditorUtility.SetDirty(interactable);
         }
     }
 }

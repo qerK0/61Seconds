@@ -110,6 +110,23 @@ namespace SixtyOne.Prep
             hideWhenUsed = hide;
         }
 
+        /// <summary>Authoring helper for generators / scene builders.</summary>
+        public void Configure(string interactableId, TextKey label, float cost, Item grants, Item required, TextKey missingRequirement,
+            bool isOneShot, bool hide, IEnumerable<Outcome> extraOutcomes, PrepController driver, SpriteRenderer mainSprite)
+        {
+            id = interactableId;
+            labelKey = label;
+            timeCost = cost;
+            grantsItem = grants;
+            requiredItem = required;
+            missingRequirementKey = missingRequirement;
+            oneShot = isOneShot;
+            hideWhenUsed = hide;
+            outcomes = extraOutcomes != null ? new List<Outcome>(extraOutcomes) : new List<Outcome>();
+            controller = driver;
+            body = mainSprite;
+        }
+
         public void OnClicked()
         {
             if (controller != null) controller.RequestInteract(this);
