@@ -4,7 +4,7 @@ using SixtyOne.Nodes;
 
 namespace SixtyOne.Tests
 {
-    /// <summary>Two-layer loop: micro rewind (last node) vs macro rewind (prep start), plus what persists.</summary>
+    /// <summary>Two-layer loop: micro rewind (last node) vs macro rewind (floor checkpoint), plus what persists.</summary>
     public class RewindTargetTests
     {
         private TestData data;
@@ -17,10 +17,10 @@ namespace SixtyOne.Tests
             data = new TestData();
             session = new GameSession();
 
-            // Prep start: empty bag, no flags, family unplaced.
-            session.TakePrepStartSnapshot("act1.n01_prep");
+            // Checkpoint: empty bag, no flags, family unplaced.
+            session.TakeCheckpoint("f4.intro");
 
-            // During prep: collect gear, close gas.
+            // Later on the floor: collect gear, close gas.
             session.State.Inventory.TryAdd("wrench");
             session.State.Flags.Set(FlagNames.GasOff, true);
             session.State.GetMember(MemberType.Wife).AnchorId = "lr_table";
@@ -45,13 +45,13 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void MacroRewindRestoresPrepStart()
+        public void MacroRewindRestoresCheckpoint()
         {
             session.State.CollectedTips.Add("tip.wardrobe");
             session.State.RevealedAnchors.Add("lr_wardrobe");
-            session.Die(new DeathInfo { TextKey = "death.missing.crowbar", RewindTarget = RewindTarget.PrepStart, MissingItemId = "crowbar", TipId = "tip.emergency_bag" });
+            session.Die(new DeathInfo { TextKey = "death.missing.crowbar", RewindTarget = RewindTarget.Checkpoint, MissingItemId = "crowbar", TipId = "tip.emergency_bag" });
 
-            Assert.AreEqual("act1.n01_prep", session.Rewind());
+            Assert.AreEqual("f4.intro", session.Rewind());
             Assert.IsTrue(session.LastRewindWasMacro);
             Assert.AreEqual(0, session.State.Inventory.Count, "empty bag");
             Assert.IsFalse(session.State.Flags.Get(FlagNames.GasOff), "flags reset");
@@ -65,11 +65,11 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void MacroWithoutPrepSnapshotFallsBackToLatest()
+        public void MacroWithoutCheckpointFallsBackToLatest()
         {
             var plain = new GameSession();
             plain.TakeSnapshot("n1");
-            plain.Die(new DeathInfo { RewindTarget = RewindTarget.PrepStart });
+            plain.Die(new DeathInfo { RewindTarget = RewindTarget.Checkpoint });
             Assert.AreEqual("n1", plain.Rewind());
             Assert.IsFalse(plain.LastRewindWasMacro);
         }
@@ -77,7 +77,7 @@ namespace SixtyOne.Tests
         [Test]
         public void KnowledgePersistsAcrossMacroAndMicroRewinds()
         {
-            session.Die(new DeathInfo { RewindTarget = RewindTarget.PrepStart, MissingItemId = "crowbar" });
+            session.Die(new DeathInfo { RewindTarget = RewindTarget.Checkpoint, MissingItemId = "crowbar" });
             Assert.IsTrue(session.State.Knowledge.Contains("crowbar"));
             session.Rewind();
             Assert.IsTrue(session.State.Knowledge.Contains("crowbar"), "survives macro rewind");
@@ -108,7 +108,7 @@ namespace SixtyOne.Tests
             Assert.IsTrue(views[0].Clickable);
 
             DeathInfo info = door.Choices[0].BuildMissingItemDeath();
-            Assert.AreEqual(RewindTarget.PrepStart, info.RewindTarget);
+            Assert.AreEqual(RewindTarget.Checkpoint, info.RewindTarget);
             Assert.AreEqual("crowbar", info.MissingItemId);
             Assert.AreEqual("death.missing.crowbar", info.TextKey);
             Assert.AreEqual("tip.emergency_bag", info.TipId);
@@ -122,8 +122,8 @@ namespace SixtyOne.Tests
         [Test]
         public void DeathDataCarriesRewindTarget()
         {
-            var death = new DeathData("death.x", data.Tip("tip.x"), target: RewindTarget.PrepStart);
-            Assert.AreEqual(RewindTarget.PrepStart, death.ToInfo().RewindTarget);
+            var death = new DeathData("death.x", data.Tip("tip.x"), target: RewindTarget.Checkpoint);
+            Assert.AreEqual(RewindTarget.Checkpoint, death.ToInfo().RewindTarget);
             Assert.AreEqual(RewindTarget.LastNode, new DeathData("death.y", null).ToInfo().RewindTarget);
         }
     }

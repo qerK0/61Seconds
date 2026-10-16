@@ -57,12 +57,21 @@ namespace SixtyOne.Nodes
         {
             GameEvents.Died += OnDied;
             GameEvents.Rewound += OnRewound;
+            GameEvents.ItemAdded += OnInventoryChanged;
+            GameEvents.ItemRemoved += OnInventoryChanged;
         }
 
         private void OnDisable()
         {
             GameEvents.Died -= OnDied;
             GameEvents.Rewound -= OnRewound;
+            GameEvents.ItemAdded -= OnInventoryChanged;
+            GameEvents.ItemRemoved -= OnInventoryChanged;
+        }
+
+        private void OnInventoryChanged(string itemId)
+        {
+            if (!InputGate.IsBlocked) RefreshCurrentChoices();
         }
 
         private void Start()
@@ -125,20 +134,21 @@ namespace SixtyOne.Nodes
                     return;
                 }
 
-                if (node.IsPrepStart) gameManager.TakePrepStartSnapshot(node.Id);
+                if (node.IsCheckpoint) gameManager.TakeCheckpoint(node.Id);
                 else gameManager.TakeSnapshot(node.Id);
             }
 
             GameEvents.RaiseNodeEntered(node.Id);
             if (node.AfadAlertOnEnter)
             {
-                GameEvents.RaiseAfadAlert(QuakeInfo.MagnitudeForAct(node.Act));
+                GameEvents.RaiseAfadAlert(node.AlertMagnitude);
             }
 
             // Timer first: a handler may finish synchronously and enter the next node.
             Timer.Start(node.TimerSeconds);
             PresentChoices();
             activeHandler = FindHandler(node);
+            ExplorationGate.Allowed = activeHandler == null;
             activeHandler?.Begin(node, OnHandlerFinished);
         }
 
@@ -170,6 +180,12 @@ namespace SixtyOne.Nodes
                 return;
             }
 
+            if (ChoiceView.IsExhaustedFor(choice, State))
+            {
+                GameEvents.RaiseMessage(SixtyOne.Text.UiKeys.StaminaExhausted);
+                return;
+            }
+
             Execute(choice);
         }
 
@@ -178,6 +194,14 @@ namespace SixtyOne.Nodes
             choicePresenter?.Clear();
             GameEvents.RaiseChoiceMade(Current.Id, choice.LabelKey.Key);
             AudioService.PlayCue(choice.Cue);
+
+            // Costs first: running out of building time while acting still kills (collapse).
+            ActionCostRouter.SpendStamina(choice.StaminaCost);
+            ActionCostRouter.SpendTime(choice.TimeCost, choice.IsMove);
+            if (gameManager.IsDead)
+            {
+                return;
+            }
 
             OutcomeResult result = OutcomeExecutor.Execute(choice.Outcomes, State);
             if (result.Died || choice.Type == ChoiceType.Trap)
@@ -194,7 +218,16 @@ namespace SixtyOne.Nodes
             }
 
             // Same node (e.g. "close the gas valve"): refresh choices, timer keeps running.
-            PresentChoices();
+            if (activeHandler is IChoiceRefresher refresher) refresher.RefreshChoices();
+            else PresentChoices();
+        }
+
+        /// <summary>Re-lists the current node's choices (e.g. after a bag item changed what is available).</summary>
+        public void RefreshCurrentChoices()
+        {
+            if (Current == null || gameManager.IsDead) return;
+            if (activeHandler is IChoiceRefresher refresher) refresher.RefreshChoices();
+            else if (activeHandler == null) PresentChoices();
         }
 
         private void PresentChoices()
@@ -238,6 +271,7 @@ namespace SixtyOne.Nodes
 
         private void OnDied(DeathInfo info)
         {
+            ExplorationGate.Allowed = false;
             StopActive();
             choicePresenter?.Clear();
         }

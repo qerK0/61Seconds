@@ -5,26 +5,30 @@ using SixtyOne.Nodes;
 using SixtyOne.Text;
 using UnityEngine;
 
-namespace SixtyOne.Prep
+namespace SixtyOne.World
 {
     /// <summary>
-    /// Something the player can use during prep: pick up an item, open a drawer, close the gas valve,
-    /// switch off the breaker. Every use costs countdown time (input blocked while it runs).
-    /// One-shot uses are stored as a Used_ flag so rewinds restore them.
+    /// Something the player can use while exploring: pick up an item, open a drawer, borrow supplies.
+    /// Using it subtracts its time cost from the building timer. One-shot uses are stored as a Used_ flag so
+    /// rewinds restore them. Borrowed items are recorded in the BorrowLedger ("ödünç al").
     /// </summary>
-    public class PrepInteractable : MonoBehaviour, IClickable
+    public class WorldInteractable : MonoBehaviour, IClickable
     {
         [Tooltip("Unique id (used for the Used_ flag).")]
         [SerializeField] private string id;
 
-        [Tooltip("Action label (progress bar), e.g. 'Çekmeceyi aç'.")]
+        [Tooltip("Label shown above it, e.g. 'Çekmeceyi aç'.")]
         [SerializeField] private TextKey labelKey;
 
-        [Tooltip("Countdown seconds this action takes (surface 1, drawer 3, breaker 4, gas valve 5).")]
+        [Tooltip("Building-timer seconds (surface 1, drawer/cabinet 3).")]
         [Min(0f)]
         [SerializeField] private float timeCost = 1f;
 
-        [Tooltip("Item needed to do this (e.g. wrench for the gas valve). Optional.")]
+        [Tooltip("Stamina spent (heavy things).")]
+        [Min(0f)]
+        [SerializeField] private float staminaCost;
+
+        [Tooltip("Item needed to do this. Optional.")]
         [SerializeField] private Item requiredItem;
 
         [Tooltip("Message when the required item is missing. Empty = generic.")]
@@ -33,7 +37,10 @@ namespace SixtyOne.Prep
         [Tooltip("Item added to the bag. Optional.")]
         [SerializeField] private Item grantsItem;
 
-        [Tooltip("Extra effects (e.g. SetFlag GasOff).")]
+        [Tooltip("Taken from a neighbour's flat: recorded as borrowed (epilogue).")]
+        [SerializeField] private bool borrowed;
+
+        [Tooltip("Extra effects (e.g. SetFlag).")]
         [SerializeField] private List<Outcome> outcomes = new List<Outcome>();
 
         [Tooltip("Can only be used once per timeline.")]
@@ -42,10 +49,7 @@ namespace SixtyOne.Prep
         [Tooltip("Hide after use (pickups). Otherwise it is dimmed.")]
         [SerializeField] private bool hideWhenUsed;
 
-        [Tooltip("Prep driver that runs the timed action.")]
-        [SerializeField] private PrepController controller;
-
-        [Tooltip("Main sprite (dimmed when used, pulses when highlighted).")]
+        [Tooltip("Main sprite (dimmed when used, pulses when highlighted). Optional.")]
         [SerializeField] private SpriteRenderer body;
 
         [Tooltip("Tint when used.")]
@@ -60,8 +64,8 @@ namespace SixtyOne.Prep
         public TextKey LabelKey => labelKey;
         public float TimeCost => timeCost;
         public Item RequiredItem => requiredItem;
-        public TextKey MissingRequirementKey => missingRequirementKey;
         public Item GrantsItem => grantsItem;
+        public bool Borrowed => borrowed;
         public IReadOnlyList<Outcome> Outcomes => outcomes;
         public bool OneShot => oneShot;
 
@@ -77,7 +81,14 @@ namespace SixtyOne.Prep
             }
         }
 
-        public bool IsClickable => isActiveAndEnabled && controller != null && controller.CanInteract && !IsUsed;
+        public virtual bool IsClickable
+        {
+            get
+            {
+                GameManager gm = GameManager.Instance;
+                return isActiveAndEnabled && gm != null && !gm.IsDead && ExplorationGate.Allowed && !InputGate.IsBlocked && !IsUsed;
+            }
+        }
 
         protected virtual void Awake()
         {
@@ -112,7 +123,7 @@ namespace SixtyOne.Prep
 
         /// <summary>Authoring helper for generators / scene builders.</summary>
         public void Configure(string interactableId, TextKey label, float cost, Item grants, Item required, TextKey missingRequirement,
-            bool isOneShot, bool hide, IEnumerable<Outcome> extraOutcomes, PrepController driver, SpriteRenderer mainSprite)
+            bool isOneShot, bool hide, IEnumerable<Outcome> extraOutcomes, SpriteRenderer mainSprite, bool isBorrowed = false, float stamina = 0f)
         {
             id = interactableId;
             labelKey = label;
@@ -123,21 +134,47 @@ namespace SixtyOne.Prep
             oneShot = isOneShot;
             hideWhenUsed = hide;
             outcomes = extraOutcomes != null ? new List<Outcome>(extraOutcomes) : new List<Outcome>();
-            controller = driver;
             body = mainSprite;
+            borrowed = isBorrowed;
+            staminaCost = stamina;
         }
 
         public void OnClicked()
         {
-            if (controller != null) controller.RequestInteract(this);
+            GameManager gm = GameManager.Instance;
+            if (gm == null || !IsClickable) return;
+            GameState state = gm.State;
+
+            if (requiredItem != null && !state.Inventory.Has(requiredItem.Id))
+            {
+                GameEvents.RaiseMessage(missingRequirementKey.IsEmpty ? UiKeys.NeedsItem : missingRequirementKey.Key);
+                return;
+            }
+
+            if (grantsItem != null && state.Inventory.IsFull)
+            {
+                // Refuse before wasting time.
+                GameEvents.RaiseMessage(UiKeys.BagFull);
+                return;
+            }
+
+            ActionCostRouter.SpendStamina(staminaCost);
+            ActionCostRouter.SpendTime(timeCost);
+            if (gm.IsDead) return;
+            Apply(state);
         }
 
         /// <summary>Applies the effects. Returns false if the item could not be added (bag full).</summary>
         public bool Apply(GameState state)
         {
-            if (grantsItem != null && !StateOps.TryAddItem(state, grantsItem.Id))
+            if (grantsItem != null)
             {
-                return false;
+                if (!StateOps.TryAddItem(state, grantsItem.Id)) return false;
+                if (borrowed)
+                {
+                    state.Borrowed.Add(grantsItem.Id);
+                    GameEvents.RaiseMessage(UiKeys.Borrowed);
+                }
             }
 
             OutcomeExecutor.Execute(outcomes, state);
@@ -147,7 +184,7 @@ namespace SixtyOne.Prep
         }
 
         /// <summary>Updates used/hidden/highlight visuals from the current state.</summary>
-        public void Refresh()
+        public virtual void Refresh()
         {
             if (renderers == null) CacheParts();
             bool used = IsUsed;
@@ -155,15 +192,20 @@ namespace SixtyOne.Prep
             foreach (Renderer r in renderers) if (r != null) r.enabled = visible;
             foreach (Collider2D c in colliders) if (c != null) c.enabled = visible;
 
-            GameManager gm = GameManager.Instance;
-            GameSettings settings = gm != null ? gm.Settings : null;
-            bool highlightOn = settings == null || settings.KnowledgeHighlight;
-            highlighted = highlightOn && !used && grantsItem != null && gm != null && gm.State.Knowledge.Contains(grantsItem.Id);
-
+            highlighted = !used && IsKnownItem();
             if (body != null) body.color = used ? baseColor * usedTint : baseColor;
         }
 
-        private void Update()
+        /// <summary>True if the knowledge highlight applies (setting on, item in the KnowledgeSet).</summary>
+        protected bool IsKnownItem()
+        {
+            GameManager gm = GameManager.Instance;
+            GameSettings settings = gm != null ? gm.Settings : null;
+            bool highlightOn = settings == null || settings.KnowledgeHighlight;
+            return highlightOn && grantsItem != null && gm != null && gm.State.Knowledge.Contains(grantsItem.Id);
+        }
+
+        protected virtual void Update()
         {
             if (!highlighted || body == null) return;
             GameManager gm = GameManager.Instance;

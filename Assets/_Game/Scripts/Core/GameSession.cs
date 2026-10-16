@@ -21,10 +21,10 @@ namespace SixtyOne.Core
         /// <summary>The most recent snapshot (default rewind target).</summary>
         public Snapshot Latest { get; private set; }
 
-        /// <summary>Snapshot taken when the prep phase started (macro rewind target).</summary>
-        public Snapshot PrepStart { get; private set; }
+        /// <summary>Snapshot of the current floor's checkpoint (macro rewind target).</summary>
+        public Snapshot Checkpoint { get; private set; }
 
-        /// <summary>True if the last Rewind() went back to the prep start.</summary>
+        /// <summary>True if the last Rewind() went back to the checkpoint.</summary>
         public bool LastRewindWasMacro { get; private set; }
 
         public GameSession(GameState state = null)
@@ -42,11 +42,11 @@ namespace SixtyOne.Core
             }
         }
 
-        /// <summary>Snapshots the start of a prep phase: used for its node and as the macro rewind target.</summary>
-        public void TakePrepStartSnapshot(string nodeId)
+        /// <summary>Snapshots a floor checkpoint: used for its node and as the macro rewind target.</summary>
+        public void TakeCheckpoint(string nodeId)
         {
             TakeSnapshot(nodeId);
-            PrepStart = Latest;
+            Checkpoint = Latest;
         }
 
         /// <summary>True if a snapshot exists for the node.</summary>
@@ -87,7 +87,7 @@ namespace SixtyOne.Core
         }
 
         /// <summary>
-        /// Restores the target snapshot (prep start for macro deaths, else DeathInfo.RewindNodeId or the latest), bumps the loop
+        /// Restores the target snapshot (checkpoint for macro deaths, else DeathInfo.RewindNodeId or the latest), bumps the loop
         /// counter and raises Rewound. Returns the node id to re-enter, or null.
         /// </summary>
         public string Rewind()
@@ -99,9 +99,9 @@ namespace SixtyOne.Core
 
             Snapshot target = Latest;
             bool macro = false;
-            if (LastDeath != null && LastDeath.RewindTarget == RewindTarget.PrepStart && PrepStart != null)
+            if (LastDeath != null && LastDeath.RewindTarget == RewindTarget.Checkpoint && Checkpoint != null)
             {
-                target = PrepStart;
+                target = Checkpoint;
                 macro = true;
             }
             else if (LastDeath != null && !string.IsNullOrEmpty(LastDeath.RewindNodeId)

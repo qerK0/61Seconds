@@ -12,7 +12,11 @@ namespace SixtyOne.Nodes
         SetFlag,
         AddItem,
         RemoveItem,
-        SetMemberState
+        SetMemberState,
+        /// <summary>The trader gives the first item the player lacks (TraderProfile).</summary>
+        TraderGive,
+        /// <summary>Shows a toast message (messageKey).</summary>
+        ShowMessage
     }
 
     /// <summary>One effect of a choice, bomb check or node entry.</summary>
@@ -34,6 +38,12 @@ namespace SixtyOne.Nodes
         [Tooltip("Item for AddItem / RemoveItem.")]
         [SerializeField] private Item item;
 
+        [Tooltip("Trader for TraderGive.")]
+        [SerializeField] private SixtyOne.Items.TraderProfile trader;
+
+        [Tooltip("Message for ShowMessage.")]
+        [SerializeField] private SixtyOne.Text.TextKey messageKey;
+
         [Tooltip("Member for SetMemberState.")]
         [SerializeField] private MemberType member;
 
@@ -46,6 +56,8 @@ namespace SixtyOne.Nodes
         public bool FlagValue => flagValue;
         public Item Item => item;
         public MemberType Member => member;
+        public SixtyOne.Items.TraderProfile Trader => trader;
+        public SixtyOne.Text.TextKey MessageKey => messageKey;
         public MemberHealth Health => health;
 
         public Outcome()
@@ -57,6 +69,8 @@ namespace SixtyOne.Nodes
         public static Outcome SetFlag(string flag, bool value = true) => new Outcome { type = OutcomeType.SetFlag, flag = flag, flagValue = value };
         public static Outcome AddItem(Item item) => new Outcome { type = OutcomeType.AddItem, item = item };
         public static Outcome RemoveItem(Item item) => new Outcome { type = OutcomeType.RemoveItem, item = item };
+        public static Outcome GiveFromTrader(SixtyOne.Items.TraderProfile profile) => new Outcome { type = OutcomeType.TraderGive, trader = profile };
+        public static Outcome Message(SixtyOne.Text.TextKey key) => new Outcome { type = OutcomeType.ShowMessage, messageKey = key };
         public static Outcome SetMember(MemberType member, MemberHealth health) => new Outcome { type = OutcomeType.SetMemberState, member = member, health = health };
     }
 }

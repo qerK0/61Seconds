@@ -3,7 +3,8 @@ namespace SixtyOne.Core
     /// <summary>
     /// Deep copy of GameState taken when a decision/placement node starts.
     /// Restoring keeps the live LoopCount, collected tips, revealed anchor labels and knowledge.
-    /// Member anchor positions are kept for micro rewinds and restored for macro (prep start) rewinds.
+    /// Member anchor positions are kept for micro rewinds and restored for macro (checkpoint) rewinds.
+    /// The building timer, stamina, poison and borrow ledger come back with the snapshot.
     /// </summary>
     public sealed class Snapshot
     {
@@ -34,6 +35,10 @@ namespace SixtyOne.Core
             live.Flags.CopyFrom(saved.Flags);
             live.CurrentNodeId = NodeId;
             live.Act = saved.Act;
+            live.BuildingTime = saved.BuildingTime;
+            live.Stamina = saved.Stamina;
+            live.Poison = saved.Poison;
+            live.Borrowed.CopyFrom(saved.Borrowed);
 
             foreach (FamilyMemberState member in live.Members)
             {

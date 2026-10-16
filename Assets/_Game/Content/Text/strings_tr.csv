@@ -1,146 +1,172 @@
 key,text,notes
-ui.loop,TODO: LOOP #{0},{0} = loop count
-ui.rewind,TODO: GERİ SAR,
-ui.tip_header,TODO: Deprem Notu,header above the safety tip on the death card
-ui.journal.open,TODO: Notlar,journal button
-ui.journal.title,TODO: Deprem Notları,
-ui.journal.count,TODO: {0}/{1},collected/total
-ui.journal.locked,TODO: ???,tip not collected yet
-ui.journal.close,TODO: Kapat,
-ui.afad.title,TODO: AFAD DEPREM UYARISI,
-ui.afad.body,TODO: {0} büyüklüğünde deprem bekleniyor. Hemen güvenli yere geçin!,{0} = magnitude
-ui.bag.title,TODO: Çanta,
-ui.bag.full,TODO: Çanta dolu!,
-ui.locked,TODO: Kilitli,
-ui.quake,TODO: SARSINTI! ({0}),{0} = magnitude
-ui.placement.hint,"TODO: Bir aile üyesine, sonra güvenli bir noktaya dokun.",
-ui.placement.player_last,TODO: Önce eşini ve çocuğunu yerleştir.,
-ui.placement.no_room,TODO: Orada yer kalmadı.,
-ui.placement.child_alone,TODO: Çocuk bir yetişkinin yanında olmalı.,
-ui.placement.invalid,TODO: Oraya geçilemez.,
-act1.n01.title,TODO: 6. Kat - 61 saniye,
-act1.n01.body,"TODO: Deprem geliyor! Gerekli eşyaları çantana al, gaz ve elektriği kapat. Her hareket zaman yer.",AFAD alert node
-act1.n01.c_elevator,TODO: Asansöre koş,
-act1.n01.c_balcony,TODO: Balkona çık,
-act1.n02.title,TODO: Çök - Kapan - Tutun,
-act1.n02.body,TODO: Sarsıntı başlamak üzere. Herkesi bir yere yerleştir!,
-act1.n03.title,TODO: Sarsıntı geçti,
-act1.n03.body,"TODO: Toz duman. Artçılar gelmeden işe yarar şeyleri al, vanaları kapat ve çık.",
-act1.n03.c_gas,TODO: Gaz vanasını kapat,
-act1.n03.c_gas.locked,TODO: Vana sıkışmış. Bir İngiliz anahtarı lazım.,
-act1.n03.c_power,TODO: Sigortayı indir,
-act1.n03.c_power.locked,TODO: Gaz kokusu var! Önce gazı kapat.,
-act1.n03.c_water,TODO: Su vanasını kapat,
-act1.n03.c_light,TODO: Karanlık... ışığı aç,
-act1.n03.c_tea,"TODO: Sinirler bozuk, bir çay demle",
-act1.n03.c_leave,TODO: Merdivene çık,
-act1.n03.c_aftershock,TODO: (süre doldu),"timeout only, never shown"
-act1.n05.title,TODO: Merdiven boşluğu,
-act1.n05.body,TODO: Basamaklar çatlak ama sağlam görünüyor.,
-act1.n05.c_down,TODO: Dikkatlice aşağı in,
-act1.n05.c_elevator,TODO: Asansörü çağır,
-act2.n01.title,TODO: 4. Kat,
-act2.n01.body,TODO: 4. kata ulaştın. (Act 2 burada devam edecek.),end of sample content
-item.wrench.name,TODO: İngiliz anahtarı,
-item.wrench.desc,TODO: Gaz vanası için.,
-item.gloves.name,TODO: Lastik eldiven,
-item.gloves.desc,TODO: Cam kırıklarına karşı.,
-item.first_aid.name,TODO: İlk yardım çantası,
-item.first_aid.desc,TODO: Yaralar için.,
-item.flashlight.name,TODO: El feneri,
-item.flashlight.desc,"TODO: Elektrik yok, ışık lazım.",
-item.gold.name,TODO: Altınlar,
-item.gold.desc,TODO: Çeyiz altınları. Şimdi mi?,
-item.laptop.name,TODO: Dizüstü bilgisayar,
-item.laptop.desc,TODO: İş dosyaları içinde...,
-anchor.table,TODO: Sağlam masa,
+anchor.balcony,TODO: Balkon,
+anchor.doorway,TODO: Kapı eşiği,
 anchor.inner_wall,TODO: İç duvar dibi,
+anchor.table,TODO: Sağlam masa,
 anchor.wardrobe,TODO: Dolap önü,
 anchor.window,TODO: Pencere kenarı,
-anchor.doorway,TODO: Kapı eşiği,
-anchor.balcony,TODO: Balkon,
-death.elevator,TODO: Asansör kat arasında durdu. Sonsuza dek.,"player, comic allowed"
-death.balcony_jump,"TODO: Balkon, binadan önce pes etti.",
-death.wardrobe,TODO: Dolap sana sarılmaya karar verdi.,
-death.window,TODO: Pencere sana doğru patladı.,
-death.doorway,TODO: Kapı kasası seni korumadı. Hiç korumaz.,
 death.balcony,"TODO: Balkon aşağı, sen de onunla.",
-death.open_room,TODO: Odanın ortasında avize seni buldu.,
-death.switch_gas,TODO: Bir kıvılcım. Ve gaz.,
-death.stove,TODO: Çay demlenmedi. Bina demlendi.,
-death.aftershock,TODO: Oyalandın. Artçı oyalanmadı.,
-death.elevator_after,TODO: Elektrik kesik. Asansör boşluğu değil.,
-death.kitchen_fire,TODO: Yukarıda açık kalan gaz alev aldı. Merdivenler duman içinde.,delayed bomb from act 1 gas valve
-death.wife.wardrobe,TODO: Dolap devrildi. Eşinden ses gelmiyor.,"wife: cut to black, one line, no comedy"
-death.wife.window,TODO: Cam kırıkları... Eşin yaralandı.,wife injured line (not fatal)
-death.wife.doorway,TODO: Kapı kasası çöktü. Eşin yaralandı.,wife injured line (not fatal)
-death.wife.balcony,TODO: Balkon çöktü. Eşin orada duruyordu.,"wife: cut to black, one line, no comedy"
-death.wife.open_room,TODO: Avize düştü. Eşin yaralandı.,wife injured line (not fatal)
+death.child.balcony,TODO: Çocuk balkonda mahsur kaldı!,
+death.child.doorway,"TODO: Kapı çöktü, çocuk arkada mahsur kaldı!",
+death.child.open_room,TODO: Çocuk düşen eşyaların altında mahsur kaldı!,
 death.child.wardrobe,TODO: Dolap çocuğun önünü kapattı. Sıkıştı!,"child trapped, never dies"
 death.child.window,TODO: Cam kırıkları arasında çocuk mahsur kaldı!,
-death.child.doorway,"TODO: Kapı çöktü, çocuk arkada mahsur kaldı!",
-death.child.balcony,TODO: Çocuk balkonda mahsur kaldı!,
-death.child.open_room,TODO: Çocuk düşen eşyaların altında mahsur kaldı!,
 death.child_alone,TODO: Çocuk tek başına kaldı ve mahsur kaldı!,
-tip.drop_cover_hold.title,TODO: Çök - Kapan - Tutun,
-tip.drop_cover_hold,"TODO: Sarsıntıda yere çök, sağlam bir masanın altına kapan ve sarsıntı bitene kadar tutun.",AFAD
-tip.no_elevator.title,TODO: Asansör kullanma,
-tip.no_elevator,TODO: Deprem sırasında ve sonrasında asansör kullanılmaz.,AFAD
-tip.no_balcony.title,TODO: Balkondan uzak dur,
-tip.no_balcony,"TODO: Balkonlar depremde en önce çöken yerlerdendir. Balkona çıkma, atlama.",AFAD
-tip.wardrobe.title,TODO: Dolapları sabitle,
-tip.wardrobe,TODO: Devrilebilecek dolap ve rafların yanında durma; onları duvara sabitle.,AFAD
-tip.no_window.title,TODO: Pencerelerden uzak dur,
-tip.no_window,TODO: Cam kırıkları ciddi yaralanmalara yol açar. Pencere ve camlardan uzak dur.,AFAD
-tip.no_doorway.title,TODO: Kapı eşiği güvenli değil,
-tip.no_doorway,TODO: Kapı eşiğinde durmak koruma sağlamaz. Sağlam bir eşyanın yanında Çök-Kapan-Tutun.,AFAD
-tip.keep_child_close.title,TODO: Çocuğu yalnız bırakma,
-tip.keep_child_close,"TODO: Çocuklar bir yetişkinin yanında, birlikte korunmalı.",
-tip.no_switch_gas.title,TODO: Gaz kokusunda düğmeye dokunma,
-tip.no_switch_gas,"TODO: Gaz kokusu varsa elektrik düğmelerine dokunma, çakmak yakma; önce gaz vanasını kapat.",AFAD
-tip.no_flame.title,TODO: Ateş yakma,
-tip.no_flame,"TODO: Deprem sonrası kibrit, çakmak ve ocak yakma; gaz kaçağı olabilir.",AFAD
-tip.leave_quickly.title,TODO: Artçılara hazır ol,
-tip.leave_quickly,TODO: Sarsıntı bitince binayı sakin ama hızlı terk et; artçı sarsıntılar gelebilir.,AFAD
-tip.gas_off.title,TODO: Gazı kapat,
-tip.gas_off,"TODO: Binayı terk etmeden önce gaz, elektrik ve su vanalarını kapat.",AFAD
-ui.prep.needs_item,TODO: Bunun için bir alet lazım.,
-ui.prep.travel,TODO: Diğer odaya geçiliyor...,progress bar label while walking
-ui.death.missing_item,TODO: Eksik: {0},"{0} = item name, death card"
-room.living_room,TODO: Salon,room tab
-room.kitchen,TODO: Mutfak,room tab
-room.bedroom,TODO: Yatak odası,room tab
-act1.prep.alert.title,TODO: AFAD DEPREM UYARISI,
-act1.prep.alert.body,TODO: Deprem {0} saniye sonra!,{0} = seconds
-act1.prep.place.title,TODO: ÇÖK-KAPAN-TUTUN!,
-act1.prep.place.body,"TODO: Önce eşini ve çocuğunu, sonra kendini güvenli yere yerleştir!",
-prep.whistle,TODO: Düdüğü al,1s
-prep.gold,TODO: Altınları topla,"1s, useless valuable"
-prep.laptop,TODO: Laptopu al,"1s, useless valuable"
-prep.console,TODO: Oyun konsolunu al,"1s, useless valuable"
-prep.breaker,TODO: Sigortayı indir,4s
-prep.gas_valve,TODO: Gaz vanasını kapat,"5s, needs wrench"
-prep.gas_valve.needs,TODO: Vana çok sıkı. İngiliz anahtarı lazım.,
-prep.water,TODO: Suyu al,1s
-prep.first_aid,TODO: Dolabı aç: ilk yardım çantası,3s
-prep.gloves,TODO: Eldivenleri al,1s
-prep.wrench,TODO: Çekmeceyi aç: İngiliz anahtarı,3s
-prep.flashlight,TODO: Komodini aç: el feneri,3s
-prep.crowbar,TODO: Yatağın altına bak: levye,3s
-item.crowbar.name,TODO: Levye,
-item.crowbar.desc,TODO: Sıkışan kapılar için.,
-item.whistle.name,TODO: Düdük,
-item.whistle.desc,TODO: Enkaz altında sesini duyurmak için.,
-item.water.name,TODO: Su,
+death.collapse,TODO: Bina daha fazla dayanamadı.,building timer hit 0
+death.doorway,TODO: Kapı kasası seni korumadı. Hiç korumaz.,
+death.elevator,TODO: Asansör kat arasında durdu. Sonsuza dek.,"player, comic allowed"
+death.gas_poison,TODO: Gözlerin karardı. Gaz seni yere indirdi.,
+death.kitchen_fire,TODO: Yukarıda açık kalan gaz alev aldı. Merdivenler duman içinde.,delayed bomb from act 1 gas valve
+death.open_room,TODO: Odanın ortasında avize seni buldu.,
+death.stove,TODO: Çay demlenmedi. Bina demlendi.,
+death.switch_gas,TODO: Bir kıvılcım. Ve gaz.,
+death.wardrobe,TODO: Dolap sana sarılmaya karar verdi.,
+death.wife.balcony,TODO: Balkon çöktü. Eşin orada duruyordu.,"wife: cut to black, one line, no comedy"
+death.wife.doorway,TODO: Kapı kasası çöktü. Eşin yaralandı.,wife injured line (not fatal)
+death.wife.open_room,TODO: Avize düştü. Eşin yaralandı.,wife injured line (not fatal)
+death.wife.wardrobe,TODO: Dolap devrildi. Eşinden ses gelmiyor.,"wife: cut to black, one line, no comedy"
+death.wife.window,TODO: Cam kırıkları... Eşin yaralandı.,wife injured line (not fatal)
+death.window,TODO: Pencere sana doğru patladı.,
+f3.aftershock.body,TODO: 3. kata indin. (Kat 3 içeriği burada devam edecek.),placeholder until Floor 3 lands
+f3.aftershock.title,TODO: 3. Kat,
+f4.corridor.body,TODO: Koridor tozla dolu. Merdiven aşağıya iniyor.,
+f4.corridor.c_down,TODO: Merdivenden 3. kata in,
+f4.corridor.c_elevator,TODO: Asansörü çağır,trap
+f4.corridor.c_flat12,TODO: 12 numaraya gir,
+f4.corridor.c_home,TODO: Daireye dön,
+f4.corridor.c_search,TODO: Kapıları yokla,"8s, finds Flat 12"
+f4.corridor.c_talk,TODO: Hasan Amca'yla konuş,
+f4.corridor.msg_found,TODO: 12 numaranın kapısı açık!,
+f4.corridor.title,TODO: 4. Kat koridoru,
+f4.flat12.body,TODO: Komşular evde yok. Lazım olanı ödünç alabilirsin.,"use ödünç al, never yağma/çalmak"
+f4.flat12.c_back,TODO: Koridora dön,
+f4.flat12.c_note,TODO: Not bırak,"2s, sets LeftNote"
+f4.flat12.msg_note,TODO: Not bıraktın: 'Aldıklarımızı geri getireceğiz. — 11 numara',
+f4.flat12.title,TODO: Daire 12,
+f4.hall.body,TODO: Sigorta kutusu ve daire kapısı burada.,
+f4.hall.c_back,TODO: Salona dön,
+f4.hall.c_breaker,TODO: Ana sigortayı indir,
+f4.hall.c_exit,TODO: Daireden çık,
+f4.hall.title,TODO: Antre,
+f4.intro.body,TODO: Kapı çalıyor. Komşun Sevim Teyze içeri giriyor.,
+f4.intro.c_hurry,TODO: Kısa kes,"consequence: no info, no whistle"
+f4.intro.c_thanks,TODO: Sağ ol Sevim Teyze,
+f4.intro.l1,"TODO: Kızım şeker kalmış mı sizde? Bu sabah yer biraz sallandı, fark ettiniz mi?",each line costs building time
+f4.intro.l2,"TODO: 12 numaradakiler tatilde, kapıyı açık bırakmışlar. Her şeyleri içeride.",info: Flat 12
+f4.intro.l3,"TODO: Bak, bu düdüğü deprem çantamdan aldım. Siz de bir tane bulundurun.",gives whistle
+f4.intro.l4,"TODO: Neyse, ben gideyim de...",
+f4.intro.title,TODO: Daire 11,
+f4.kitchen.body,TODO: Ağır bir gaz kokusu var.,gas room: poison rises until the valve is closed
+f4.kitchen.c_back,TODO: Salona dön,
+f4.kitchen.c_light,TODO: Karanlık... ışığı aç,trap with gas
+f4.kitchen.c_tea,"TODO: Sinirler bozuk, bir çay demle",trap
+f4.kitchen.c_valve,TODO: Gaz vanasını kapat,
+f4.kitchen.title,TODO: Mutfak,
+f4.neighbor.body,"TODO: Yaşlı komşun kapısının önünde, elinde bir poşet.",
+f4.neighbor.c_hurry,TODO: Acelemiz var amca,
+f4.neighbor.c_thanks,TODO: Allah razı olsun,
+f4.neighbor.l1,TODO: Evladım iyi misiniz? Çocuk iyi mi?,
+f4.neighbor.l2,"TODO: Al şunları, yolda lazım olur. Bir ekmek, bir su.",gives food + water
+f4.neighbor.title,TODO: Hasan Amca,
+f4.quake.body,"TODO: Bina sallanıyor! Önce eşini ve çocuğunu, sonra kendini güvenli yere yerleştir.",
+f4.quake.title,TODO: DEPREM!,
+f4.salon.body,"TODO: Toz duman. Elektrik gitti. Bina her an çökebilir, çıkman lazım.",
+f4.salon.c_hall,TODO: Antreye geç,
+f4.salon.c_kitchen,TODO: Mutfağa geç,
+f4.salon.title,TODO: Salon,
+item.child_harness.desc,TODO: Bez ve ipten. Çocuğu sırtına bağlar.,
+item.child_harness.name,TODO: Çocuk taşıma kuşağı,
+item.cloth.desc,"TODO: Islatılabilir, sarılabilir.",
+item.cloth.name,TODO: Bez,
+item.first_aid.desc,TODO: Yaralar için.,
+item.first_aid.name,TODO: İlk yardım çantası,
+item.flashlight.desc,"TODO: Elektrik yok, ışık lazım.",
+item.flashlight.name,TODO: El feneri,
+item.food.desc,TODO: Güç verir.,
+item.food.name,TODO: Ekmek,
+item.gloves.desc,TODO: Cam kırıklarına karşı.,
+item.gloves.name,TODO: Lastik eldiven,
+item.insulated_grip.desc,TODO: Bant ve eldivenden. Elektriğe karşı.,
+item.insulated_grip.name,TODO: Yalıtımlı tutamak,
+item.lighter.desc,TODO: Gaz varken asla.,
+item.lighter.name,TODO: Çakmak,
+item.rope.desc,TODO: Sağlam bir çamaşır ipi.,
+item.rope.name,TODO: İp,
+item.tape.desc,TODO: Elektrik bandı.,
+item.tape.name,TODO: Bant,
 item.water.desc,TODO: Saatlerce yardım gelmeyebilir.,
-item.console.name,TODO: Oyun konsolu,
-item.console.desc,TODO: Şimdi mi?,
-act1.n04.title,TODO: Kapı sıkıştı,
-act1.n04.body,TODO: Deprem kapı kasasını eğmiş. Daire kapısı açılmıyor.,
-act1.n04.c_crowbar,TODO: Levyeyle kapıyı zorla,ShowLockedFatal without crowbar
-act1.n04.c_crowbar.locked,TODO: Levye yok...,locked reason; still clickable
-act1.n04.c_jump,TODO: Pencereden aşağı atla,
-death.missing.crowbar,TODO: Keşke yanıma levyeyi alsaydım...,"missing-item death, macro rewind to prep"
-death.door_jump,TODO: 6. kattan atlamak... çıkış yolu değildi.,
-tip.emergency_bag.title,TODO: Deprem çantası,
+item.water.name,TODO: Su,
+item.wet_cloth.desc,"TODO: Ağzını kapat, gazı daha az soluyacaksın.",
+item.wet_cloth.name,TODO: Islak bez,
+item.whistle.desc,TODO: Enkaz altında sesini duyurmak için.,
+item.whistle.name,TODO: Düdük,
+npc.hasan.name,TODO: Hasan Amca,kind corridor neighbour
+npc.sevim.name,TODO: Sevim Teyze,intro neighbour
+tip.aftershock,TODO: Artçı sarsıntılarda da Çök-Kapan-Tutun; pencere ve devrilebilecek eşyalardan uzak dur.,AFAD
+tip.aftershock.title,TODO: Artçılar gelir,
+tip.collapse,"TODO: Sarsıntı bitince hasarlı binayı vakit kaybetmeden, sakin ve güvenli yoldan terk et.",AFAD
+tip.collapse.title,TODO: Hasarlı binada oyalanma,
+tip.drop_cover_hold,"TODO: Sarsıntıda yere çök, sağlam bir masanın altına kapan ve sarsıntı bitene kadar tutun.",AFAD
+tip.drop_cover_hold.title,TODO: Çök - Kapan - Tutun,
+tip.electric,"TODO: Hasarlı elektrik tesisatına çıplak elle dokunma; önce sigortayı kapat, yalıtımlı eldiven kullan.",AFAD
+tip.electric.title,TODO: Açık kablolara dokunma,
 tip.emergency_bag,"TODO: Deprem çantanda levye, düdük, su, el feneri ve ilk yardım malzemesi olsun. Değerli eşya için vakit kaybetme.",AFAD
+tip.emergency_bag.title,TODO: Deprem çantası,
+tip.gas_off,"TODO: Binayı terk etmeden önce gaz, elektrik ve su vanalarını kapat.",AFAD
+tip.gas_off.title,TODO: Gazı kapat,
+tip.gas_poison,"TODO: Gaz kokusu varsa vanayı kapat, ortamı terk et; ağzını ıslak bezle kapatmak solumayı azaltır.",AFAD
+tip.gas_poison.title,TODO: Gaz kaçağında,
+tip.keep_child_close,"TODO: Çocuklar bir yetişkinin yanında, birlikte korunmalı.",
+tip.keep_child_close.title,TODO: Çocuğu yalnız bırakma,
+tip.no_balcony,"TODO: Balkonlar depremde en önce çöken yerlerdendir. Balkona çıkma, atlama.",AFAD
+tip.no_balcony.title,TODO: Balkondan uzak dur,
+tip.no_doorway,TODO: Kapı eşiğinde durmak koruma sağlamaz. Sağlam bir eşyanın yanında Çök-Kapan-Tutun.,AFAD
+tip.no_doorway.title,TODO: Kapı eşiği güvenli değil,
+tip.no_elevator,TODO: Deprem sırasında ve sonrasında asansör kullanılmaz.,AFAD
+tip.no_elevator.title,TODO: Asansör kullanma,
+tip.no_flame,"TODO: Deprem sonrası kibrit, çakmak ve ocak yakma; gaz kaçağı olabilir.",AFAD
+tip.no_flame.title,TODO: Ateş yakma,
+tip.no_switch_gas,"TODO: Gaz kokusu varsa elektrik düğmelerine dokunma, çakmak yakma; önce gaz vanasını kapat.",AFAD
+tip.no_switch_gas.title,TODO: Gaz kokusunda düğmeye dokunma,
+tip.no_window,TODO: Cam kırıkları ciddi yaralanmalara yol açar. Pencere ve camlardan uzak dur.,AFAD
+tip.no_window.title,TODO: Pencerelerden uzak dur,
+tip.wardrobe,TODO: Devrilebilecek dolap ve rafların yanında durma; onları duvara sabitle.,AFAD
+tip.wardrobe.title,TODO: Dolapları sabitle,
+ui.afad.body,TODO: {0} büyüklüğünde deprem! Çök-Kapan-Tutun!,{0} = magnitude; shown when a quake/aftershock hits
+ui.afad.title,TODO: DEPREM!,
+ui.bag.full,TODO: Çanta dolu!,
+ui.bag.not_usable,TODO: Bunu tek başına kullanamazsın.,
+ui.bag.select_hint,"TODO: Kullanmak için tekrar dokun, birleştirmek için başka eşyaya dokun.",
+ui.bag.title,TODO: Çanta,
+ui.bag.used,TODO: Kullandın: {0},{0} = item name
+ui.borrowed,TODO: Ödünç aldın.,never say yağma/loot/çalmak
+ui.building.alarm,TODO: BİNA ÇÖKÜYOR!,alarm banner
+ui.building.label,TODO: Bina çökmeden,caption under the building timer
+ui.craft.done,TODO: Yaptın: {0},{0} = crafted item name
+ui.craft.fail,TODO: Bunlar birleşmiyor.,
+ui.death.missing_item,TODO: Eksik: {0},"{0} = item name, death card"
+ui.dialogue.continue,TODO: Devam,dialogue continue button
+ui.fuse.solved,TODO: Akım kesildi.,
+ui.fuse.title,TODO: Sigorta kutusu,
+ui.fuse.try,TODO: Şalteri kaldır,
+ui.fuse.wrong,TODO: Kıvılcım! Yanlış sıra.,
+ui.journal.close,TODO: Kapat,
+ui.journal.count,TODO: {0}/{1},collected/total
+ui.journal.locked,TODO: ???,tip not collected yet
+ui.journal.open,TODO: Notlar,journal button
+ui.journal.title,TODO: Deprem Notları,
+ui.locked,TODO: Kilitli,
+ui.loop,TODO: LOOP #{0},{0} = loop count
+ui.needs_item,TODO: Bunun için bir alet lazım.,
+ui.placement.child_alone,TODO: Çocuk bir yetişkinin yanında olmalı.,
+ui.placement.hint,"TODO: Bir aile üyesine, sonra güvenli bir noktaya dokun.",
+ui.placement.invalid,TODO: Oraya geçilemez.,
+ui.placement.no_room,TODO: Orada yer kalmadı.,
+ui.placement.player_last,TODO: Önce eşini ve çocuğunu yerleştir.,
+ui.poison.warning,TODO: Gaz kokusu! Başın dönüyor.,
+ui.quake,TODO: SARSINTI! ({0}),{0} = magnitude
+ui.rewind,TODO: GERİ SAR,
+ui.stamina.exhausted,TODO: Çok yorgunsun. Bir şey ye ya da iç.,heavy action locked at 0 stamina
+ui.stamina.label,TODO: Güç,stamina bar label
+ui.time_spent,TODO: -{0} sn,{0} = seconds spent
+ui.tip_header,TODO: Deprem Notu,header above the safety tip on the death card

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using SixtyOne.Core;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
-using SixtyOne.Prep;
+using SixtyOne.World;
 using SixtyOne.Text;
 using UnityEditor;
 using UnityEngine;
@@ -30,15 +30,7 @@ namespace SixtyOne.Editor
                 if (!nodes.Contains(placementNode)) nodes.Add(placementNode);
             }
 
-            foreach (PrepPhaseNode prepNode in LoadAll<PrepPhaseNode>())
-            {
-                if (!nodes.Contains(prepNode)) nodes.Add(prepNode);
-            }
 
-            foreach (SceneNode node in nodes)
-            {
-                problems += CheckNode(node);
-            }
 
             foreach (Hazard hazard in LoadAll<Hazard>())
             {
@@ -46,7 +38,7 @@ namespace SixtyOne.Editor
             }
 
             problems += CheckHazardLinks(nodes);
-            problems += CheckPrepInteractables();
+            problems += CheckWorldInteractables();
             problems += CheckReachability(nodes);
             problems += CheckTextKeys();
 
@@ -92,10 +84,7 @@ namespace SixtyOne.Editor
                 problems += Report($"node '{node.Id}' has a timer but no timeout choice and no Trap choice.", node);
             }
 
-            if (node is PrepPhaseNode prep)
-            {
-                problems += CheckPrep(prep);
-            }
+
 
             if (node is PlacementNode placement)
             {
@@ -128,30 +117,7 @@ namespace SixtyOne.Editor
             return problems;
         }
 
-        private static int CheckPrep(PrepPhaseNode prep)
-        {
-            int problems = 0;
-            string where = $"prep node '{prep.Id}'";
-            if (prep.PlacementNode == null)
-            {
-                return Report($"{where} has no linked PlacementNode.", prep);
-            }
-
-            if (prep.HasPrep && Mathf.Abs(prep.PlacementNode.TimerSeconds - prep.PlacementWindowSeconds) > 0.01f)
-            {
-                problems += Report($"{where}: placement node '{prep.PlacementNode.Id}' timer ({prep.PlacementNode.TimerSeconds}s) should equal the placement window ({prep.PlacementWindowSeconds}s).", prep);
-            }
-
-            if (prep.HasPrep && prep.AlertBodyKey.IsEmpty) problems += Report($"{where} has no alert text.", prep);
-            if (prep.HasPrep && prep.PlacementAlertTitleKey.IsEmpty) problems += Report($"{where} has no ÇÖK-KAPAN-TUTUN alert text.", prep);
-
-            bool startsInPrepRoom = false;
-            foreach (string roomId in prep.RoomIds) if (roomId == prep.RoomId) startsInPrepRoom = true;
-            if (prep.HasPrep && !startsInPrepRoom) problems += Report($"{where}: its room '{prep.RoomId}' is not in its prep room list.", prep);
-            return problems;
-        }
-
-        private static int CheckPrepInteractables()
+        private static int CheckWorldInteractables()
         {
             int problems = 0;
             for (int i = 0; i < SceneManager.sceneCount; i++)
@@ -160,13 +126,11 @@ namespace SixtyOne.Editor
                 if (!scene.isLoaded) continue;
                 foreach (GameObject root in scene.GetRootGameObjects())
                 {
-                    foreach (PrepInteractable interactable in root.GetComponentsInChildren<PrepInteractable>(true))
+                    foreach (WorldInteractable interactable in root.GetComponentsInChildren<WorldInteractable>(true))
                     {
-                        string where = $"prep interactable '{interactable.Id}'";
+                        string where = $"interactable '{interactable.Id}'";
                         if (interactable.LabelKey.IsEmpty) problems += Report($"{where} has no label key.", interactable);
                         if (interactable.GrantsItem == null && interactable.Outcomes.Count == 0) problems += Report($"{where} does nothing (no item, no outcomes).", interactable);
-                        var so = new SerializedObject(interactable);
-                        if (so.FindProperty("controller").objectReferenceValue == null) problems += Report($"{where} has no PrepController.", interactable);
                     }
                 }
             }
@@ -301,7 +265,6 @@ namespace SixtyOne.Editor
             }
 
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
-            if (node is PrepPhaseNode prep && prep.PlacementNode != null) yield return prep.PlacementNode;
         }
 
         private static int CheckTextKeys()

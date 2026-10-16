@@ -31,6 +31,18 @@ namespace SixtyOne.Core
         /// <summary>Anchor ids whose label is revealed. Persists across rewinds.</summary>
         public HashSet<string> RevealedAnchors { get; private set; } = new HashSet<string>(StringComparer.Ordinal);
 
+        /// <summary>Seconds left until the building collapses. Restored by snapshots.</summary>
+        public float BuildingTime { get; set; }
+
+        /// <summary>Stamina (0..LevelConfig.StaminaMax). Restored by snapshots.</summary>
+        public float Stamina { get; set; } = 100f;
+
+        /// <summary>Gas poisoning 0..1 (1 = death). Restored by snapshots.</summary>
+        public float Poison { get; set; }
+
+        /// <summary>Items borrowed from neighbours' flats. Restored by snapshots (reset by checkpoint rewinds).</summary>
+        public BorrowLedger Borrowed { get; private set; } = new BorrowLedger();
+
         /// <summary>Items the player died for lacking. Persists across every rewind.</summary>
         public KnowledgeSet Knowledge { get; private set; } = new KnowledgeSet();
 
@@ -61,6 +73,10 @@ namespace SixtyOne.Core
                 Loop = new LoopCounter(Loop.Count),
                 CurrentNodeId = CurrentNodeId,
                 Act = Act,
+                BuildingTime = BuildingTime,
+                Stamina = Stamina,
+                Poison = Poison,
+                Borrowed = Borrowed.Clone(),
                 CollectedTips = new HashSet<string>(CollectedTips, StringComparer.Ordinal),
                 RevealedAnchors = new HashSet<string>(RevealedAnchors, StringComparer.Ordinal),
                 Knowledge = Knowledge.Clone()

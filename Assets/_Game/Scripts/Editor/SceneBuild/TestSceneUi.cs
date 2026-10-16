@@ -2,7 +2,7 @@ using SixtyOne.Nodes;
 using SixtyOne.Cinematic;
 using SixtyOne.Core;
 using SixtyOne.Placement;
-using SixtyOne.Prep;
+using SixtyOne.Building;
 using SixtyOne.Text;
 using SixtyOne.UI;
 using TMPro;
@@ -20,7 +20,7 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            PrepController prep, RoomSwitcher rooms, string[] prepRooms, out LetterboxBars letterbox)
+            SurvivalController survival, out LetterboxBars letterbox)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -36,9 +36,7 @@ namespace SixtyOne.Editor
 
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             BuildTimerBar(root, nodePlayer);
-            BuildCountdown(root, prep, nodePlayer);
-            BuildActionProgress(root, prep);
-            BuildRoomTabs(root, prep, rooms, prepRooms);
+            BuildBuildingTimer(root, survival);
             BuildLoopCounter(root, gameManager);
             BuildBag(root, gameManager, content, art);
             BuildToast(root);
@@ -74,7 +72,8 @@ namespace SixtyOne.Editor
             label.fontSizeMax = 24f;
 
             Image lockIcon = UiFactory.MakeImage("Lock", button.transform, new Vector2(0.01f, 0.15f), new Vector2(0.06f, 0.85f), Accent, sprite: art.Lock);
-            TextMeshProUGUI reason = UiFactory.MakeLabel("Reason", button.transform, new Vector2(0.68f, 0f), new Vector2(0.99f, 1f), 16f, TextAlignmentOptions.Right, new Color(1f, 0.7f, 0.4f, 1f));
+            TextMeshProUGUI reason = UiFactory.MakeLabel("Reason", button.transform, new Vector2(0.68f, 0f), new Vector2(0.99f, 0.6f), 16f, TextAlignmentOptions.Right, new Color(1f, 0.7f, 0.4f, 1f));
+            TextMeshProUGUI cost = UiFactory.MakeLabel("Cost", button.transform, new Vector2(0.80f, 0.55f), new Vector2(0.99f, 1f), 16f, TextAlignmentOptions.Right, new Color(1f, 0.55f, 0.45f, 1f));
             reason.enableAutoSizing = true;
             reason.fontSizeMin = 10f;
             reason.fontSizeMax = 16f;
@@ -84,6 +83,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(choiceButton, "label", label);
             SerializedWire.Set(choiceButton, "lockIcon", lockIcon.gameObject);
             SerializedWire.Set(choiceButton, "reasonText", reason);
+            SerializedWire.Set(choiceButton, "costText", cost);
             button.gameObject.SetActive(false);
 
             ChoicePanel panel = bg.gameObject.AddComponent<ChoicePanel>();
@@ -120,55 +120,19 @@ namespace SixtyOne.Editor
             return bars;
         }
 
-        private static void BuildCountdown(Transform root, PrepController prep, NodePlayer nodePlayer)
+        private static void BuildBuildingTimer(Transform root, SurvivalController survival)
         {
-            RectTransform rect = UiFactory.MakeRect("Countdown", root, new Vector2(0.4f, 0.85f), new Vector2(0.6f, 0.95f));
-            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
-            TextMeshProUGUI label = UiFactory.MakeLabel("Number", rect, Vector2.zero, Vector2.one, 90f, TextAlignmentOptions.Center, Color.white, bold: true);
+            RectTransform rect = UiFactory.MakeRect("BuildingTimer", root, new Vector2(0.4f, 0.86f), new Vector2(0.6f, 0.95f));
+            TextMeshProUGUI label = UiFactory.MakeLabel("Time", rect, Vector2.zero, Vector2.one, 72f, TextAlignmentOptions.Center, Color.white, bold: true);
+            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(1f, 0.1f), new Vector2(1.5f, 0.9f), 34f, TextAlignmentOptions.Left, new Color(1f, 0.45f, 0.35f, 1f), bold: true);
+            TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, -0.35f), new Vector2(1f, 0f), 20f, TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.7f));
+            LocalizedText localized = caption.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(localized, "key", UiKeys.BuildingTimerLabel);
 
-            CountdownDisplay display = rect.gameObject.AddComponent<CountdownDisplay>();
-            SerializedWire.Set(display, "prep", prep);
-            SerializedWire.Set(display, "nodePlayer", nodePlayer);
-            SerializedWire.Set(display, "group", group);
+            BuildingTimerDisplay display = rect.gameObject.AddComponent<BuildingTimerDisplay>();
+            SerializedWire.Set(display, "survival", survival);
             SerializedWire.Set(display, "label", label);
-        }
-
-        private static void BuildActionProgress(Transform root, PrepController prep)
-        {
-            Image bg = UiFactory.MakeImage("ActionProgress", root, new Vector2(0.33f, 0.42f), new Vector2(0.67f, 0.47f), new Color(0f, 0f, 0f, 0.7f));
-            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
-            Image fill = UiFactory.MakeImage("Fill", bg.transform, Vector2.zero, Vector2.one, new Color(0.35f, 0.85f, 0.45f, 0.9f));
-            fill.rectTransform.pivot = new Vector2(0f, 0.5f);
-            TextMeshProUGUI label = UiFactory.MakeLabel("Label", bg.transform, Vector2.zero, Vector2.one, 24f, TextAlignmentOptions.Center, Color.white, bold: true);
-
-            ActionProgressBar bar = bg.gameObject.AddComponent<ActionProgressBar>();
-            SerializedWire.Set(bar, "prep", prep);
-            SerializedWire.Set(bar, "group", group);
-            SerializedWire.Set(bar, "fill", fill.rectTransform);
-            SerializedWire.Set(bar, "label", label);
-        }
-
-        private static void BuildRoomTabs(Transform root, PrepController prep, RoomSwitcher rooms, string[] roomIds)
-        {
-            RectTransform rect = UiFactory.MakeRect("RoomTabs", root, new Vector2(0.005f, 0.45f), new Vector2(0.13f, 0.78f));
-            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
-            var buttons = new Object[roomIds.Length];
-            float step = 1f / Mathf.Max(1, roomIds.Length);
-            for (int i = 0; i < roomIds.Length; i++)
-            {
-                float top = 1f - i * step;
-                Button button = UiFactory.MakeButton("Tab_" + roomIds[i], rect, new Vector2(0f, top - step + 0.03f), new Vector2(1f, top), ButtonColor, 24f, out TextMeshProUGUI label);
-                LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
-                SerializedWire.SetTextKey(localized, "key", "room." + roomIds[i]);
-                buttons[i] = button;
-            }
-
-            RoomTabs tabs = rect.gameObject.AddComponent<RoomTabs>();
-            SerializedWire.Set(tabs, "prep", prep);
-            SerializedWire.Set(tabs, "group", group);
-            SerializedWire.Set(tabs, "rooms", rooms);
-            SerializedWire.SetStringArray(tabs, "roomIds", roomIds);
-            SerializedWire.SetArray(tabs, "buttons", buttons);
+            SerializedWire.Set(display, "spentLabel", spent);
         }
 
         private static void BuildLoopCounter(Transform root, GameManager gameManager)

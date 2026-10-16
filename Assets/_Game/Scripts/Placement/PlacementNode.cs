@@ -22,10 +22,26 @@ namespace SixtyOne.Placement
         [Tooltip("Seconds of shaking before results.")]
         [SerializeField] private float quakeSeconds = 4f;
 
+        [Tooltip("Magnitude shown for this quake/aftershock. 0 = act default.")]
+        [SerializeField] private float magnitude;
+
+        [Tooltip("Camera shake multiplier (1 = act default).")]
+        [SerializeField] private float shakeScale = 1f;
+
         public SceneNode NextNode => nextNode;
         public Hazard UnplacedHazard => unplacedHazard;
         public DeathData ChildAloneDeath => childAloneDeath;
         public float QuakeSeconds => quakeSeconds;
+        public float Magnitude => magnitude;
+        public override float AlertMagnitude => magnitude > 0f ? magnitude : base.AlertMagnitude;
+        public float ShakeScale => shakeScale;
+
+        /// <summary>Authoring helper: magnitude and shake strength of this quake moment.</summary>
+        public void ConfigureQuake(float quakeMagnitude, float cameraShakeScale)
+        {
+            magnitude = quakeMagnitude;
+            shakeScale = cameraShakeScale;
+        }
 
         /// <summary>Authoring helper for generators (call after Configure).</summary>
         public void ConfigurePlacement(SceneNode next, Hazard unplaced, DeathData childAlone, float shakeSeconds)

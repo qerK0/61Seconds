@@ -7,11 +7,16 @@ namespace SixtyOne.Core
         public readonly float Magnitude;
         public readonly float Duration;
 
-        public QuakeInfo(int act, float duration)
+        /// <summary>Camera shake multiplier for this quake (1 = act default).</summary>
+        public readonly float ShakeScale;
+
+        /// <summary>magnitude &lt;= 0 uses the act default; shakeScale &lt;= 0 means 1.</summary>
+        public QuakeInfo(int act, float duration, float magnitude = 0f, float shakeScale = 1f)
         {
             Act = act;
-            Magnitude = MagnitudeForAct(act);
+            Magnitude = magnitude > 0f ? magnitude : MagnitudeForAct(act);
             Duration = duration;
+            ShakeScale = shakeScale > 0f ? shakeScale : 1f;
         }
 
         /// <summary>6.0 on floor 6 (act 1), 7.0 on floor 4 (act 2), 8.0 on floor 2 (act 3).</summary>

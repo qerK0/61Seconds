@@ -3,7 +3,7 @@ using SixtyOne.Cinematic;
 using SixtyOne.Core;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
-using SixtyOne.Prep;
+using SixtyOne.Building;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -32,7 +32,7 @@ namespace SixtyOne.Editor
         }
 
         public static CinematicDirector Build(CinematicAssets assets, Camera camera, GameManager gameManager, NodePlayer nodePlayer,
-            PrepController prep, LetterboxBars letterbox, Transform player, List<Light2D> practicals)
+            SurvivalController survival, LetterboxBars letterbox, Transform player, List<Light2D> practicals, string[] exitNodeIds)
         {
             camera.GetUniversalAdditionalCameraData().renderPostProcessing = true;
 
@@ -70,7 +70,8 @@ namespace SixtyOne.Editor
             SerializedWire.Set(director, "targetCamera", camera);
             SerializedWire.Set(director, "gameManager", gameManager);
             SerializedWire.Set(director, "nodePlayer", nodePlayer);
-            SerializedWire.Set(director, "prep", prep);
+            SerializedWire.Set(director, "survival", survival);
+            SerializedWire.SetStringArray(director, "exitNodeIds", exitNodeIds);
             SerializedWire.Set(director, "globalLight", global);
             SerializedWire.SetArray(director, "practicalLights", practicals.ToArray());
             SerializedWire.Set(director, "flashlight", flashlight);

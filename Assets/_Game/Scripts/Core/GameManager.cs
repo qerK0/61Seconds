@@ -52,10 +52,10 @@ namespace SixtyOne.Core
             Session.TakeSnapshot(nodeId);
         }
 
-        /// <summary>Snapshots the start of a prep phase (macro rewind target).</summary>
-        public void TakePrepStartSnapshot(string nodeId)
+        /// <summary>Snapshots a floor checkpoint (macro rewind target).</summary>
+        public void TakeCheckpoint(string nodeId)
         {
-            Session.TakePrepStartSnapshot(nodeId);
+            Session.TakeCheckpoint(nodeId);
         }
 
         /// <summary>Kills (or traps) someone and starts the death flow.</summary>

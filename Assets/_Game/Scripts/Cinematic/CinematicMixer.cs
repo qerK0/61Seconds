@@ -12,6 +12,8 @@ namespace SixtyOne.Cinematic
         public float Death;
         public float Rewind;
         public float Win;
+        /// <summary>Gas poisoning 0..1: darkens and desaturates progressively (never fully black).</summary>
+        public float Poison;
         public float Flash;
         /// <summary>Current quake chromatic aberration (already shaped by the pulse).</summary>
         public float Chromatic;
@@ -44,16 +46,17 @@ namespace SixtyOne.Cinematic
             var f = new CinematicFrame();
 
             float flash = s.ReduceEffects ? 0f : s.Flash;
-            f.PostExposure = p.PostExposure + p.PostQuakeExposureOffset * s.PostQuake + p.FlashExposure * flash;
+            f.PostExposure = p.PostExposure + p.PostQuakeExposureOffset * s.PostQuake + p.FlashExposure * flash + p.PoisonExposure * s.Poison;
 
             float sat = Mathf.Lerp(p.Saturation, p.PrepSaturationEnd, prep);
             sat = Mathf.Lerp(sat, p.PostQuakeSaturation, s.PostQuake);
+            sat += p.PoisonSaturation * s.Poison;
             sat = Mathf.Lerp(sat, p.WinSaturation, s.Win);
             f.Saturation = Mathf.Lerp(sat, p.DeathSaturation, s.Death);
 
             float vig = Mathf.Lerp(p.Vignette, p.PrepVignetteEnd, prep);
             vig = Mathf.Lerp(vig, p.PostQuakeVignette, s.PostQuake);
-            vig += p.HeartbeatVignette * s.Heartbeat;
+            vig += p.HeartbeatVignette * s.Heartbeat + p.PoisonVignette * s.Poison;
             vig = Mathf.Lerp(vig, p.WinVignette, s.Win);
             f.Vignette = Mathf.Clamp01(Mathf.Lerp(vig, p.DeathVignette, s.Death));
 

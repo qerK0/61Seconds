@@ -177,7 +177,7 @@ namespace SixtyOne.Placement
 
             Dictionary<MemberType, string> placements = CurrentPlacements();
             List<PlacementResult> results = PlacementResolver.Resolve(layout, placements, node.Act);
-            var info = new QuakeInfo(node.Act, node.QuakeSeconds);
+            var info = new QuakeInfo(node.Act, node.QuakeSeconds, node.Magnitude, node.ShakeScale);
 
             GameEvents.RaiseQuakeStarted(info);
             AnimateHazards(placements);
@@ -188,6 +188,7 @@ namespace SixtyOne.Placement
             quaking = false;
             Subscribe(false);
             active = false;
+            StateOps.SetFlag(State, FlagNames.QuakeHappened, true);
 
             foreach (PlacementResult result in results)
             {

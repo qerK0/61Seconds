@@ -45,7 +45,7 @@ namespace SixtyOne.Iso
         private void OnQuakeStarted(QuakeInfo info)
         {
             int index = Mathf.Clamp(info.Act - 1, 0, intensityPerAct.Length - 1);
-            float magnitude = intensityPerAct.Length > 0 ? intensityPerAct[index] : 0.15f;
+            float magnitude = (intensityPerAct.Length > 0 ? intensityPerAct[index] : 0.15f) * info.ShakeScale;
             GameManager gm = GameManager.Instance;
             GameSettings settings = gm != null ? gm.Settings : null;
             if (settings != null && settings.ReduceEffects) magnitude *= settings.ReducedShakeScale;

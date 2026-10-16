@@ -9,6 +9,12 @@ namespace SixtyOne.Nodes
         /// <summary>Shows node text and buttons. onChosen receives ChoiceView.Index. Empty list = text only.</summary>
         void Present(SceneNode node, IReadOnlyList<ChoiceView> choices, Action<int> onChosen);
 
+        /// <summary>
+        /// Shows free text (dialogue line, epilogue) with an optional continue button and extra choices.
+        /// continueLabel null = no continue button.
+        /// </summary>
+        void PresentText(string title, string body, string continueLabel, Action onContinue, IReadOnlyList<ChoiceView> choices, Action<int> onChosen);
+
         /// <summary>Hides everything.</summary>
         void Clear();
     }

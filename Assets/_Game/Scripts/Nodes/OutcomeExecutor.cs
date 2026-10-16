@@ -52,6 +52,13 @@ namespace SixtyOne.Nodes
                     case OutcomeType.SetMemberState:
                         StateOps.SetHealth(state, o.Member, o.Health);
                         break;
+                    case OutcomeType.TraderGive:
+                        Item given = SixtyOne.Items.TraderLogic.Pick(o.Trader, state.Inventory);
+                        if (given != null) StateOps.TryAddItem(state, given.Id);
+                        break;
+                    case OutcomeType.ShowMessage:
+                        if (!o.MessageKey.IsEmpty) GameEvents.RaiseMessage(o.MessageKey.Key);
+                        break;
                 }
             }
 

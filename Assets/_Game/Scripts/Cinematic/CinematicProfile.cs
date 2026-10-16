@@ -47,26 +47,26 @@ namespace SixtyOne.Cinematic
         [Tooltip("Intensity of practical lights (lamps, windows) while power is on.")]
         [SerializeField] private float practicalLightIntensity = 1.1f;
 
-        [Header("Prep tension (61 -> 0)")]
-        [Tooltip("Shape of the build-up over the countdown (x = 0 at start .. 1 at zero, y = amount 0..1).")]
+        [Header("Building tension (timer -> 0)")]
+        [Tooltip("Shape of the build-up over the building timer (x = 0 at start .. 1 at collapse, y = amount 0..1).")]
         [SerializeField] private AnimationCurve prepCurve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
-        [Tooltip("Vignette at the end of the countdown.")]
+        [Tooltip("Vignette when the building timer reaches zero.")]
         [Range(0f, 1f)] [SerializeField] private float prepVignetteEnd = 0.55f;
-        [Tooltip("Saturation at the end of the countdown.")]
+        [Tooltip("Saturation when the building timer reaches zero.")]
         [Range(-100f, 100f)] [SerializeField] private float prepSaturationEnd = -45f;
-        [Tooltip("Slow push-in: percent the orthographic size shrinks by the end of the countdown.")]
+        [Tooltip("Slow push-in: percent the orthographic size shrinks by the time the building collapses.")]
         [Range(0f, 30f)] [SerializeField] private float prepZoomPercent = 8f;
 
-        [Header("Placement window (last seconds)")]
+        [Header("Placement moments")]
         [Tooltip("Letterbox aspect ratio (2.35 = cinemascope).")]
         [SerializeField] private float letterboxAspect = 2.35f;
         [Tooltip("Seconds for the letterbox bars to slide in/out.")]
         [SerializeField] private float letterboxSlideSeconds = 0.4f;
-        [Tooltip("Extra vignette on each heartbeat (synced to the countdown ticks).")]
+        [Tooltip("Extra vignette on each heartbeat (placement-timer seconds and building alarm ticks).")]
         [Range(0f, 0.3f)] [SerializeField] private float heartbeatVignette = 0.08f;
         [Tooltip("Seconds a heartbeat pulse takes to fade.")]
         [SerializeField] private float heartbeatSeconds = 0.35f;
-        [Tooltip("Low-pass cutoff (Hz) on all audio during the window. 0 = off.")]
+        [Tooltip("Low-pass cutoff (Hz) on all audio during placement moments. 0 = off.")]
         [SerializeField] private float placementLowPassHz = 1800f;
 
         [Header("Quake")]
@@ -114,6 +114,14 @@ namespace SixtyOne.Cinematic
         [SerializeField] private float flashlightIntensity = 1.2f;
         [Tooltip("Flashlight radius (world units).")]
         [SerializeField] private float flashlightRadius = 2.4f;
+
+        [Header("Poison (gas)")]
+        [Tooltip("Exposure added at full poison (EV, negative = darker).")]
+        [SerializeField] private float poisonExposure = -0.9f;
+        [Tooltip("Saturation added at full poison.")]
+        [SerializeField] private float poisonSaturation = -35f;
+        [Tooltip("Vignette added at full poison.")]
+        [Range(0f, 0.5f)] [SerializeField] private float poisonVignette = 0.25f;
 
         [Header("Death")]
         [Tooltip("Seconds to blend to near black and white before the death card.")]
@@ -189,6 +197,9 @@ namespace SixtyOne.Cinematic
         public string FlashlightItemId => flashlightItemId;
         public float FlashlightIntensity => flashlightIntensity;
         public float FlashlightRadius => flashlightRadius;
+        public float PoisonExposure => poisonExposure;
+        public float PoisonSaturation => poisonSaturation;
+        public float PoisonVignette => poisonVignette;
         public float DeathBlendSeconds => deathBlendSeconds;
         public float DeathSaturation => deathSaturation;
         public float DeathContrast => deathContrast;

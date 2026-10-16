@@ -20,6 +20,13 @@ namespace SixtyOne.Nodes
                 case ConditionType.FlagTrue: return state.Flags.Get(condition.Flag);
                 case ConditionType.FlagFalse: return !state.Flags.Get(condition.Flag);
                 case ConditionType.MemberState: return state.GetMember(condition.Member).Health == condition.Health;
+                case ConditionType.HasAnyItem:
+                    foreach (Item item in condition.AnyItems)
+                    {
+                        if (item != null && state.Inventory.Has(item.Id)) return true;
+                    }
+
+                    return false;
                 default: return false;
             }
         }

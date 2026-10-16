@@ -53,20 +53,53 @@ namespace SixtyOne.UI
             RefreshText();
             ClearButtons();
 
+            AddChoices(choices, onChosen);
+        }
+
+        public void PresentText(string title, string body, string continueLabel, Action onContinue, IReadOnlyList<ChoiceView> choices, Action<int> onChosen)
+        {
+            shownNode = null;
+            picked = false;
+            UIVisibility.Set(group, true);
+            if (titleText != null) titleText.text = title ?? string.Empty;
+            if (bodyText != null) bodyText.text = body ?? string.Empty;
+            ClearButtons();
+
+            if (continueLabel != null && buttonTemplate != null)
+            {
+                ChoiceButton button = NewButton();
+                button.BindCustom(continueLabel, () => Click(() => onContinue?.Invoke()));
+            }
+
+            AddChoices(choices, onChosen);
+        }
+
+        private void AddChoices(IReadOnlyList<ChoiceView> choices, Action<int> onChosen)
+        {
             if (choices == null || buttonTemplate == null) return;
             foreach (ChoiceView view in choices)
             {
-                ChoiceButton button = Instantiate(buttonTemplate, buttonContainer);
-                button.gameObject.SetActive(true);
                 int index = view.Index;
-                button.Bind(view, () =>
-                {
-                    if (picked || SixtyOne.Core.InputGate.IsBlocked) return;
-                    picked = true;
-                    onChosen?.Invoke(index);
-                });
-                spawned.Add(button);
+                NewButton().Bind(view, () => Click(() => onChosen?.Invoke(index)));
             }
+        }
+
+        private ChoiceButton NewButton()
+        {
+            ChoiceButton button = Instantiate(buttonTemplate, buttonContainer);
+            button.gameObject.SetActive(true);
+            spawned.Add(button);
+            return button;
+        }
+
+        /// <summary>One click per presentation, routed through the panic input delay (with instant feedback).</summary>
+        private void Click(Action action)
+        {
+            if (picked || SixtyOne.Core.InputGate.IsBlocked) return;
+            picked = true;
+            UnityEngine.InputSystem.Pointer pointer = UnityEngine.InputSystem.Pointer.current;
+            Vector2 position = pointer != null ? pointer.position.ReadValue() : Vector2.zero;
+            SixtyOne.Core.InputDelayRouter.Run(action, position);
         }
 
         public void Clear()

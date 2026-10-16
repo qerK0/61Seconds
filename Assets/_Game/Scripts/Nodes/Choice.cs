@@ -53,6 +53,26 @@ namespace SixtyOne.Nodes
         [Tooltip("ShowLockedFatal: death line, e.g. 'Keşke yanıma alsaydım...'.")]
         [SerializeField] private TextKey missingItemTextKey;
 
+        [Tooltip("ShowLockedFatal: where the missing-item death rewinds to (Checkpoint = floor start).")]
+        [SerializeField] private RewindTarget missingItemRewind = RewindTarget.Checkpoint;
+
+        [Tooltip("Seconds subtracted from the building timer when picked.")]
+        [Min(0f)]
+        [SerializeField] private float timeCost;
+
+        [Tooltip("Stamina spent when picked.")]
+        [Min(0f)]
+        [SerializeField] private float staminaCost;
+
+        [Tooltip("Heavy action (climbing, forcing, crafting): locked when stamina is 0.")]
+        [SerializeField] private bool heavy;
+
+        [Tooltip("A move between rooms/floors: injured family members and exhaustion make it slower.")]
+        [SerializeField] private bool isMove;
+
+        [Tooltip("Dialogue nodes: offered while lines are still playing (e.g. 'Kısa kes').")]
+        [SerializeField] private bool duringDialogue;
+
         [Tooltip("Never shown; only fired when the node timer runs out.")]
         [SerializeField] private bool timeoutOnly;
 
@@ -74,6 +94,12 @@ namespace SixtyOne.Nodes
         public bool TimeoutOnly => timeoutOnly;
         public Item MissingItem => missingItem;
         public TextKey MissingItemTextKey => missingItemTextKey;
+        public RewindTarget MissingItemRewind => missingItemRewind;
+        public float TimeCost => timeCost;
+        public float StaminaCost => staminaCost;
+        public bool Heavy => heavy;
+        public bool IsMove => isMove;
+        public bool DuringDialogue => duringDialogue;
         public IReadOnlyList<Outcome> Outcomes => outcomes;
         public DeathData Death => death;
         public AudioCue Cue => cue;
@@ -99,7 +125,7 @@ namespace SixtyOne.Nodes
 
         /// <summary>
         /// Makes the choice ShowLockedFatal: requires the item; clicking it without the item kills with
-        /// the missing-item line and rewinds to the prep start.
+        /// the missing-item line and rewinds to the floor checkpoint (change with FatalRewind).
         /// </summary>
         public Choice FatalWithout(Item item, TextKey lockedReason, TextKey missingText)
         {
@@ -121,7 +147,7 @@ namespace SixtyOne.Nodes
                 TipId = death != null && death.Tip != null ? death.Tip.Id : null,
                 Cue = death != null ? death.Cue : null,
                 MissingItemId = missingItem != null ? missingItem.Id : null,
-                RewindTarget = RewindTarget.PrepStart
+                RewindTarget = missingItemRewind
             };
         }
 
@@ -130,6 +156,25 @@ namespace SixtyOne.Nodes
 
         /// <summary>Adds a Death outcome with its text and tip.</summary>
         public Choice Kills(DeathData deathData) { death = deathData; outcomes.Add(Outcome.Death()); return this; }
+
+        /// <summary>Time (building timer), stamina, heavy and move settings.</summary>
+        public Choice Costs(float seconds, float stamina = 0f, bool isHeavy = false, bool move = false)
+        {
+            timeCost = seconds;
+            staminaCost = stamina;
+            heavy = isHeavy;
+            isMove = move;
+            return this;
+        }
+
+        /// <summary>Shorthand for a room/floor move costing seconds.</summary>
+        public Choice Move(float seconds) => Costs(seconds, 0f, false, true);
+
+        /// <summary>Offer this choice while dialogue lines are still playing.</summary>
+        public Choice AsDuringDialogue() { duringDialogue = true; return this; }
+
+        /// <summary>Where a ShowLockedFatal death rewinds to.</summary>
+        public Choice FatalRewind(RewindTarget target) { missingItemRewind = target; return this; }
 
         /// <summary>Sets death data (tip/cue) without adding a Death outcome (used by ShowLockedFatal).</summary>
         public Choice WithDeath(DeathData deathData) { death = deathData; return this; }

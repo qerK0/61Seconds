@@ -22,7 +22,7 @@ namespace SixtyOne.Nodes
         [Tooltip("Who dies. The child is always Trapped instead.")]
         [SerializeField] private MemberType victim = MemberType.Player;
 
-        [Tooltip("LastNode = micro rewind; PrepStart = macro rewind to the start of the prep phase.")]
+        [Tooltip("LastNode = micro rewind; Checkpoint = macro rewind to the floor checkpoint.")]
         [SerializeField] private RewindTarget rewindTarget = RewindTarget.LastNode;
 
         [Tooltip("LastNode only: rewind to this node instead of the latest snapshot (delayed bombs).")]

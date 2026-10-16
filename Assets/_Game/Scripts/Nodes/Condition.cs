@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SixtyOne.Core;
 using UnityEngine;
 
@@ -11,7 +12,9 @@ namespace SixtyOne.Nodes
         LacksItem,
         FlagTrue,
         FlagFalse,
-        MemberState
+        MemberState,
+        /// <summary>At least one of the listed items is in the bag.</summary>
+        HasAnyItem
     }
 
     /// <summary>A single requirement on the game state (item, flag or member health).</summary>
@@ -23,6 +26,9 @@ namespace SixtyOne.Nodes
 
         [Tooltip("Item for HasItem / LacksItem.")]
         [SerializeField] private Item item;
+
+        [Tooltip("Items for HasAnyItem (any one is enough).")]
+        [SerializeField] private List<Item> anyItems = new List<Item>();
 
         [Tooltip("Flag name for FlagTrue / FlagFalse (e.g. GasOff).")]
         [SerializeField] private string flag;
@@ -37,6 +43,7 @@ namespace SixtyOne.Nodes
         public Item Item => item;
         public string ItemId => item != null ? item.Id : null;
         public string Flag => flag;
+        public IReadOnlyList<Item> AnyItems => anyItems;
         public MemberType Member => member;
         public MemberHealth Health => health;
 
@@ -48,6 +55,7 @@ namespace SixtyOne.Nodes
         public static Condition LacksItem(Item item) => new Condition { type = ConditionType.LacksItem, item = item };
         public static Condition FlagTrue(string flag) => new Condition { type = ConditionType.FlagTrue, flag = flag };
         public static Condition FlagFalse(string flag) => new Condition { type = ConditionType.FlagFalse, flag = flag };
+        public static Condition HasAnyItem(params Item[] items) => new Condition { type = ConditionType.HasAnyItem, anyItems = new List<Item>(items) };
         public static Condition MemberIs(MemberType member, MemberHealth health) => new Condition { type = ConditionType.MemberState, member = member, health = health };
     }
 }

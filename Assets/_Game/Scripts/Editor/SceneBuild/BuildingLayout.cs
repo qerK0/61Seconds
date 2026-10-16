@@ -1,0 +1,174 @@
+using System.Collections.Generic;
+using SixtyOne.Placement;
+using UnityEngine;
+
+namespace SixtyOne.Editor
+{
+    /// <summary>Data tables for every room of the test building (positions in iso grid cells).</summary>
+    public static class BuildingLayout
+    {
+        public sealed class AnchorSpec
+        {
+            public string Id;
+            public float Gx;
+            public float Gy;
+            public AnchorTag Tag;
+            public int Capacity = 1;
+            public string HazardId;
+            public string LabelKey;
+            public string[] Adjacent = new string[0];
+        }
+
+        public sealed class PropSpec
+        {
+            public string PropId;
+            public string Name;
+            public float Gx;
+            public float Gy;
+            public float Lift;
+            public Vector2 Scale;
+            public Color Color;
+            public float Topple = -80f;
+            public float Drop = 0.8f;
+        }
+
+        public sealed class ItemSpec
+        {
+            public string Id;
+            public string ItemId;
+            public float Gx;
+            public float Gy;
+            public float Cost = 1f;
+            public bool Surface = true;
+            public bool Borrowed;
+            public bool Hidden;
+            public Color Color = Color.white;
+        }
+
+        public sealed class LightSpec
+        {
+            public string Name;
+            public float Gx;
+            public float Gy;
+            public float Lift;
+            public Color Color;
+            public float Radius;
+        }
+
+        public sealed class RoomSpec
+        {
+            public string Id;
+            public int Width = 4;
+            public int Height = 4;
+            public Color Floor;
+            public Vector2 PlayerSpawn;
+            public Vector2 WifeSpawn;
+            public Vector2 ChildSpawn;
+            public List<AnchorSpec> Anchors = new List<AnchorSpec>();
+            public List<PropSpec> Props = new List<PropSpec>();
+            public List<ItemSpec> Items = new List<ItemSpec>();
+            public List<LightSpec> Lights = new List<LightSpec>();
+            public List<Vector2> ExtraTiles = new List<Vector2>();
+        }
+
+        private static readonly Color Warm = new Color(1f, 0.78f, 0.5f, 1f);
+        private static readonly Color Wood = new Color(0.55f, 0.38f, 0.22f, 1f);
+
+        private static RoomSpec Room(string id, int w, int h, Color floor)
+        {
+            float cx = w * 0.5f;
+            float cy = h * 0.5f;
+            return new RoomSpec
+            {
+                Id = id, Width = w, Height = h, Floor = floor,
+                PlayerSpawn = new Vector2(cx - 0.6f, cy - 0.6f), WifeSpawn = new Vector2(cx, cy - 0.9f), ChildSpawn = new Vector2(cx - 0.9f, cy)
+            };
+        }
+
+        private static AnchorSpec A(string id, float gx, float gy, AnchorTag tag, int cap, string hazard, string label, params string[] adjacent)
+        {
+            return new AnchorSpec { Id = id, Gx = gx, Gy = gy, Tag = tag, Capacity = cap, HazardId = hazard, LabelKey = label, Adjacent = adjacent };
+        }
+
+        private static PropSpec P(string propId, string name, float gx, float gy, float lift, float sx, float sy, Color color, float topple = -80f, float drop = 0.8f)
+        {
+            return new PropSpec { PropId = propId, Name = name, Gx = gx, Gy = gy, Lift = lift, Scale = new Vector2(sx, sy), Color = color, Topple = topple, Drop = drop };
+        }
+
+        private static ItemSpec I(string itemId, float gx, float gy, Color color, float cost = 1f, bool surface = true, bool borrowed = false, bool hidden = false, string id = null)
+        {
+            return new ItemSpec { Id = id ?? itemId, ItemId = itemId, Gx = gx, Gy = gy, Color = color, Cost = cost, Surface = surface, Borrowed = borrowed, Hidden = hidden };
+        }
+
+        private static LightSpec L(string name, float gx, float gy, float lift, float radius, Color? color = null)
+        {
+            return new LightSpec { Name = name, Gx = gx, Gy = gy, Lift = lift, Radius = radius, Color = color ?? Warm };
+        }
+
+        /// <summary>All rooms, top floor first.</summary>
+        public static List<RoomSpec> Rooms()
+        {
+            var rooms = new List<RoomSpec>();
+            rooms.AddRange(Floor4());
+            rooms.AddRange(Floor3());
+            return rooms;
+        }
+
+        private static IEnumerable<RoomSpec> Floor4()
+        {
+            // Flat 11 salon: the opening-quake placement room.
+            RoomSpec salon = Room(BuildingLevelsGenerator.Flat11Salon, 6, 6, new Color(0.78f, 0.74f, 0.66f, 1f));
+            salon.ExtraTiles.Add(new Vector2(6.5f, 0.5f));
+            salon.ExtraTiles.Add(new Vector2(6.5f, 1.5f));
+            salon.PlayerSpawn = new Vector2(0.9f, 0.9f);
+            salon.WifeSpawn = new Vector2(1.5f, 0.5f);
+            salon.ChildSpawn = new Vector2(0.5f, 1.5f);
+            salon.Anchors.Add(A("lr_table", 2.5f, 2.5f, AnchorTag.Safe, 2, null, "anchor.table", "lr_inner_wall", "lr_doorway", "lr_wardrobe", "lr_window"));
+            salon.Anchors.Add(A("lr_inner_wall", 1.0f, 5.3f, AnchorTag.Safe, 1, null, "anchor.inner_wall", "lr_table", "lr_doorway"));
+            salon.Anchors.Add(A("lr_doorway", 4.0f, 5.4f, AnchorTag.Trap, 1, "hz.doorway", "anchor.doorway", "lr_inner_wall", "lr_table"));
+            salon.Anchors.Add(A("lr_wardrobe", 5.3f, 4.0f, AnchorTag.Trap, 1, "hz.wardrobe", "anchor.wardrobe", "lr_table", "lr_window"));
+            salon.Anchors.Add(A("lr_window", 5.3f, 1.6f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_balcony", "lr_table"));
+            salon.Anchors.Add(A("lr_balcony", 6.5f, 1.0f, AnchorTag.Trap, 1, "hz.balcony", "anchor.balcony", "lr_window"));
+            salon.Props.Add(P(null, "Table", 2.5f, 2.5f, -0.12f, 1.5f, 0.45f, Wood));
+            salon.Props.Add(P("wardrobe", "Wardrobe", 5.85f, 4.0f, 0f, 1.3f, 1.9f, new Color(0.4f, 0.25f, 0.15f, 1f), topple: 80f));
+            salon.Props.Add(P("window", "Window", 5.95f, 1.6f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
+            salon.Props.Add(P("door_frame", "DoorLintel", 4.0f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
+            salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, new Color(0.5f, 0.5f, 0.55f, 1f), drop: 0.6f));
+            salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
+            salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
+            salon.Lights.Add(L("Window", 5.95f, 1.6f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
+            yield return salon;
+
+            RoomSpec kitchen = Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f));
+            kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
+            kitchen.Items.Add(I("gloves", 1.2f, 3.3f, Wood, cost: 3f, surface: false, id: "kitchen_drawer"));
+            kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
+            yield return kitchen;
+
+            RoomSpec hall = Room(BuildingLevelsGenerator.Flat11Hall, 3, 4, new Color(0.72f, 0.68f, 0.6f, 1f));
+            hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
+            hall.Props.Add(P(null, "FlatDoor", 2.8f, 3.6f, 0f, 0.9f, 1.5f, Wood));
+            yield return hall;
+
+            RoomSpec corridor = Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f));
+            corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
+            corridor.Props.Add(P(null, "StairsDown", 0.4f, 1.0f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
+            yield return corridor;
+
+            // Flat 12: the neighbours' open flat. Everything here is borrowed ("ödünç al").
+            RoomSpec flat12 = Room(BuildingLevelsGenerator.Flat12, 4, 4, new Color(0.74f, 0.7f, 0.78f, 1f));
+            flat12.Items.Add(I("cloth", 0.8f, 1.0f, new Color(0.85f, 0.85f, 0.9f, 1f), borrowed: true));
+            flat12.Items.Add(I("rope", 1.6f, 0.6f, new Color(0.8f, 0.65f, 0.4f, 1f), borrowed: true));
+            flat12.Items.Add(I("tape", 2.6f, 0.8f, new Color(0.6f, 0.6f, 0.65f, 1f), borrowed: true));
+            flat12.Items.Add(I("flashlight", 3.4f, 1.6f, new Color(0.3f, 0.3f, 0.35f, 1f), borrowed: true));
+            flat12.Items.Add(I("lighter", 3.2f, 2.8f, new Color(1f, 0.4f, 0.2f, 1f), borrowed: true));
+            flat12.Items.Add(I("first_aid", 1.0f, 3.2f, new Color(1f, 0.25f, 0.25f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_cabinet"));
+            yield return flat12;
+        }
+
+        private static IEnumerable<RoomSpec> Floor3()
+        {
+            yield return Room(BuildingLevelsGenerator.F3Corridor, 6, 3, new Color(0.55f, 0.55f, 0.6f, 1f));
+        }
+    }
+}

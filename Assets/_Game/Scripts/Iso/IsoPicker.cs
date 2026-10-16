@@ -52,8 +52,13 @@ namespace SixtyOne.Iso
                 return;
             }
 
-            target.OnClicked();
-            Clicked?.Invoke(target);
+            // Panic input delay: instant feedback now, the action after the delay (if still valid).
+            SixtyOne.Core.InputDelayRouter.Run(() =>
+            {
+                if (!target.IsClickable) return;
+                target.OnClicked();
+                Clicked?.Invoke(target);
+            }, screen);
         }
 
         /// <summary>Top-most clickable under a screen position, or null.</summary>

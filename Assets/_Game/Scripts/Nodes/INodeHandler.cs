@@ -17,4 +17,10 @@ namespace SixtyOne.Nodes
         /// <summary>Abort (death, rewind, node change).</summary>
         void Cancel();
     }
+
+    /// <summary>Handlers that re-present their own UI after a choice that stays in the node.</summary>
+    public interface IChoiceRefresher
+    {
+        void RefreshChoices();
+    }
 }

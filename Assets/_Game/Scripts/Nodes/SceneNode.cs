@@ -30,6 +30,9 @@ namespace SixtyOne.Nodes
         [Tooltip("Index of the choice fired on timeout. -1 = first Trap choice.")]
         [SerializeField] private int timeoutChoiceIndex = -1;
 
+        [Tooltip("Floor checkpoint: its entry snapshot is the macro rewind target (incl. the building timer).")]
+        [SerializeField] private bool isCheckpoint;
+
         [Tooltip("Show the AFAD alert popup when entering.")]
         [SerializeField] private bool afadAlertOnEnter;
 
@@ -54,8 +57,11 @@ namespace SixtyOne.Nodes
         public IReadOnlyList<Outcome> OnEnter => onEnter;
         public IReadOnlyList<BombCheck> BombChecks => bombChecks;
 
-        /// <summary>True for nodes whose entry snapshot is the macro rewind target (prep phases).</summary>
-        public virtual bool IsPrepStart => false;
+        /// <summary>Magnitude shown by the alert popup when entering (AfadAlertOnEnter).</summary>
+        public virtual float AlertMagnitude => SixtyOne.Core.QuakeInfo.MagnitudeForAct(act);
+
+        /// <summary>True for floor checkpoints (macro rewind target).</summary>
+        public bool IsCheckpoint => isCheckpoint;
 
         /// <summary>Choice fired when the timer runs out: the designated one, else the first Trap.</summary>
         public Choice GetTimeoutChoice()
@@ -87,6 +93,7 @@ namespace SixtyOne.Nodes
             timerSeconds = timer;
             timeoutChoiceIndex = -1;
             afadAlertOnEnter = false;
+            isCheckpoint = false;
             choices.Clear();
             onEnter.Clear();
             bombChecks.Clear();
@@ -103,5 +110,6 @@ namespace SixtyOne.Nodes
         public void AddBombCheck(BombCheck bomb) => bombChecks.Add(bomb);
         public void SetTimeoutChoice(int index) => timeoutChoiceIndex = index;
         public void SetAfadAlert(bool enabled) => afadAlertOnEnter = enabled;
+        public void SetCheckpoint(bool checkpoint) => isCheckpoint = checkpoint;
     }
 }

@@ -4,7 +4,7 @@ using SixtyOne.Audio;
 using SixtyOne.Core;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
-using SixtyOne.Prep;
+using SixtyOne.Building;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
@@ -12,8 +12,8 @@ using UnityEngine.Rendering.Universal;
 namespace SixtyOne.Cinematic
 {
     /// <summary>
-    /// Drives the cinematic look from GameEvents: per-act base grade, prep tension (61 -> 0), placement
-    /// letterbox + heartbeat, quake flash/aberration/wobble/flicker/dust/tilt, dark post-quake with the
+    /// Drives the cinematic look from GameEvents and the building timer: per-floor base grade, building tension
+    /// (timer -> 0), placement letterbox + heartbeat, poison darkening, quake flash/aberration/wobble/flicker/dust/tilt, dark post-quake with the
     /// flashlight, death black-and-white, rewind spike and the win look. Works on an instantiated copy of
     /// the volume profile (never edits the asset) and uses unscaled time only; Time.timeScale is never touched.
     /// </summary>
@@ -34,11 +34,11 @@ namespace SixtyOne.Cinematic
         [Tooltip("State owner.")]
         [SerializeField] private GameManager gameManager;
 
-        [Tooltip("Current node (prep / placement / post-quake detection).")]
+        [Tooltip("Current node (placement detection).")]
         [SerializeField] private NodePlayer nodePlayer;
 
-        [Tooltip("Prep countdown source.")]
-        [SerializeField] private PrepController prep;
+        [Tooltip("Building timer and poison source.")]
+        [SerializeField] private SurvivalController survival;
 
         [Tooltip("Global Light2D (ambient).")]
         [SerializeField] private Light2D globalLight;
@@ -86,7 +86,7 @@ namespace SixtyOne.Cinematic
         private bool powerOut;
         private bool flickering;
         private bool lowPassOn;
-        private int lastAct = -1;
+        private int lastPlacementSecond = -1;
         private Coroutine flickerRoutine;
 
         /// <summary>Profile of the current act.</summary>
@@ -130,7 +130,7 @@ namespace SixtyOne.Cinematic
             GameEvents.Died += OnDied;
             GameEvents.Rewound += OnRewound;
             GameEvents.NodeEntered += OnNodeEntered;
-            GameEvents.PrepTick += OnPrepTick;
+            GameEvents.BuildingTick += OnHeartbeat;
         }
 
         private void OnDisable()
@@ -140,7 +140,7 @@ namespace SixtyOne.Cinematic
             GameEvents.Died -= OnDied;
             GameEvents.Rewound -= OnRewound;
             GameEvents.NodeEntered -= OnNodeEntered;
-            GameEvents.PrepTick -= OnPrepTick;
+            GameEvents.BuildingTick -= OnHeartbeat;
             SetLowPass(false, 0f);
         }
 
@@ -212,12 +212,21 @@ namespace SixtyOne.Cinematic
             float dt = Time.unscaledDeltaTime;
             bool reduce = ReduceEffects;
 
-            bool inWindow = false;
-            state.Prep = 0f;
-            if (prep != null && prep.Countdown.Running && prep.Countdown.Total > 0f)
+            // Tension follows the building timer over the whole game.
+            state.Prep = survival != null ? survival.Timer.ElapsedFraction(survival.Remaining) : 0f;
+            state.Poison = gameManager != null ? gameManager.State.Poison : 0f;
+
+            bool inWindow = nodePlayer != null && nodePlayer.Current is PlacementNode && nodePlayer.Timer.Running;
+            if (inWindow)
             {
-                state.Prep = 1f - prep.Countdown.Remaining / prep.Countdown.Total;
-                inWindow = prep.Countdown.InPlacementWindow;
+                // Heartbeat on every placement-timer second.
+                int second = Mathf.CeilToInt(nodePlayer.Timer.Remaining);
+                if (second != lastPlacementSecond) state.Heartbeat = 1f;
+                lastPlacementSecond = second;
+            }
+            else
+            {
+                lastPlacementSecond = -1;
             }
 
             state.Heartbeat = CinematicMixer.Approach(state.Heartbeat, 0f, p.HeartbeatSeconds, dt);
@@ -391,8 +400,12 @@ namespace SixtyOne.Cinematic
                 dust.Emit(p.DustBurstCount);
             }
 
-            StopFlicker();
-            flickerRoutine = StartCoroutine(Flicker(p));
+            // Aftershocks in the dark don't bring the lights back for a flicker.
+            if (!powerOut)
+            {
+                StopFlicker();
+                flickerRoutine = StartCoroutine(Flicker(p));
+            }
         }
 
         private void OnQuakeEnded(QuakeInfo info)
@@ -418,40 +431,23 @@ namespace SixtyOne.Cinematic
             StopFlicker();
         }
 
-        private void OnPrepTick(int secondsLeft)
+        private void OnHeartbeat(int secondsLeft)
         {
-            if (prep != null && prep.Countdown.InPlacementWindow) state.Heartbeat = 1f;
+            state.Heartbeat = 1f;
         }
 
         private void OnNodeEntered(string nodeId)
         {
             CinematicProfile p = Profile;
-            int act = gameManager != null ? gameManager.State.Act : 1;
-            if (act != lastAct)
-            {
-                lastAct = act;
-                quakeHappened = false;
-                powerOut = false;
-                postQuakeTarget = 0f;
-                winTarget = 0f;
-            }
+            quaking = false;
+            StopFlicker();
 
-            SceneNode node = nodePlayer != null ? nodePlayer.Current : null;
-            if (node is PrepPhaseNode || node is PlacementNode)
-            {
-                // Before the quake (also after rewinding into prep/placement): power on, prep look.
-                quaking = false;
-                StopFlicker();
-                powerOut = false;
-                postQuakeTarget = 0f;
-                if (node is PrepPhaseNode) quakeHappened = false;
-            }
-            else if (quakeHappened && p != null)
-            {
-                powerOut = PowerCut(p);
-                postQuakeTarget = 1f;
-            }
+            // The QuakeHappened flag lives in GameState, so this is right after any rewind too.
+            quakeHappened = gameManager != null && gameManager.State.Flags.Get(FlagNames.QuakeHappened);
+            powerOut = quakeHappened && p != null && PowerCut(p);
+            postQuakeTarget = quakeHappened ? 1f : 0f;
 
+            winTarget = 0f;
             foreach (string id in exitNodeIds)
             {
                 if (id == nodeId) winTarget = 1f;

@@ -23,8 +23,24 @@ namespace SixtyOne.Text
         public const string PlacementNoRoom = "ui.placement.no_room";
         public const string PlacementChildAlone = "ui.placement.child_alone";
         public const string PlacementInvalid = "ui.placement.invalid";
-        public const string PrepNeedsItem = "ui.prep.needs_item";
-        public const string PrepTravel = "ui.prep.travel";
+        public const string NeedsItem = "ui.needs_item";
         public const string DeathMissingItem = "ui.death.missing_item";
+        public const string DialogueContinue = "ui.dialogue.continue";
+        public const string StaminaExhausted = "ui.stamina.exhausted";
+        public const string StaminaLabel = "ui.stamina.label";
+        public const string TimeSpent = "ui.time_spent";
+        public const string BuildingTimerLabel = "ui.building.label";
+        public const string BuildingAlarm = "ui.building.alarm";
+        public const string CraftFail = "ui.craft.fail";
+        public const string CraftDone = "ui.craft.done";
+        public const string BagSelectHint = "ui.bag.select_hint";
+        public const string ItemUsed = "ui.bag.used";
+        public const string ItemNotUsable = "ui.bag.not_usable";
+        public const string PoisonWarning = "ui.poison.warning";
+        public const string FuseTitle = "ui.fuse.title";
+        public const string FuseTry = "ui.fuse.try";
+        public const string FuseWrong = "ui.fuse.wrong";
+        public const string FuseSolved = "ui.fuse.solved";
+        public const string Borrowed = "ui.borrowed";
     }
 }
