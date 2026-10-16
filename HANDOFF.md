@@ -6,7 +6,7 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ## [2026-10-16 22:10] CLOUD — Cinematic look: CinematicDirector + per-act CinematicProfiles (dark, dramatic, event-driven)
 ### Done
-- Rebased on top of the 23:05 LOCAL entry (prep wiring, family click fix); no code conflicts.
+- Rebased on top of the 23:05 LOCAL entry (prep wiring, family click fix); no code conflicts. Timestamp is the cloud clock (UTC); local entries use local time, which is why 22:10 sits above 23:05.
 - **This was requested as a LOCAL session with MCP Play Mode verification, but it ran in the cloud.** No Unity Editor or Unity MCP server was reachable (nothing on localhost:8080, no MCP tools). Code and generators are done. **No screenshots were taken and no visual tuning was done**; that is the first item in the checklist below.
 - **Render setup (from project files):** every quality level uses `Assets/Settings/UniversalRP.asset`. Its only renderer is `Renderer2D.asset` (**2D Renderer**), with post-process data assigned and HDR on. So: Light2D + post-processing. The director forces `renderPostProcessing = true` on the camera at runtime, and the scene builder sets it too.
 - **New `Scripts/Cinematic/`:**
