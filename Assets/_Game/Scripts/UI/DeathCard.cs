@@ -53,6 +53,9 @@ namespace SixtyOne.UI
         [Tooltip("Fade-in seconds (not used for the wife: hard cut).")]
         [SerializeField] private float fadeSeconds = 0.6f;
 
+        [Tooltip("Seconds to wait before fading in (lets the cinematic black-and-white blend play). Not used for the wife's hard cut.")]
+        [SerializeField] private float showDelaySeconds;
+
         [Tooltip("Delay before the rewind button appears.")]
         [SerializeField] private float buttonDelay = 0.8f;
 
@@ -106,6 +109,7 @@ namespace SixtyOne.UI
             }
             else
             {
+                if (showDelaySeconds > 0f) yield return new WaitForSecondsRealtime(showDelaySeconds);
                 yield return Tween.Fade(group, 1f, fadeSeconds);
             }
 

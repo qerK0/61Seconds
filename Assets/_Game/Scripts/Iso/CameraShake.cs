@@ -46,6 +46,9 @@ namespace SixtyOne.Iso
         {
             int index = Mathf.Clamp(info.Act - 1, 0, intensityPerAct.Length - 1);
             float magnitude = intensityPerAct.Length > 0 ? intensityPerAct[index] : 0.15f;
+            GameManager gm = GameManager.Instance;
+            GameSettings settings = gm != null ? gm.Settings : null;
+            if (settings != null && settings.ReduceEffects) magnitude *= settings.ReducedShakeScale;
             Shake(info.Duration, magnitude);
         }
 

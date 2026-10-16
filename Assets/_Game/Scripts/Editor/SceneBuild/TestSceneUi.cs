@@ -1,4 +1,5 @@
 using SixtyOne.Nodes;
+using SixtyOne.Cinematic;
 using SixtyOne.Core;
 using SixtyOne.Placement;
 using SixtyOne.Prep;
@@ -19,7 +20,7 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            PrepController prep, RoomSwitcher rooms, string[] prepRooms)
+            PrepController prep, RoomSwitcher rooms, string[] prepRooms, out LetterboxBars letterbox)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -29,6 +30,9 @@ namespace SixtyOne.Editor
             scaler.referenceResolution = new Vector2(1920f, 1080f);
             scaler.matchWidthOrHeight = 0.5f;
             Transform root = canvasGo.transform;
+
+            // First child: everything else draws on top, so the bars only crop the world.
+            letterbox = BuildLetterbox(root);
 
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             BuildTimerBar(root, nodePlayer);
@@ -103,6 +107,17 @@ namespace SixtyOne.Editor
             SerializedWire.Set(bar, "group", group);
             SerializedWire.Set(bar, "fill", fill.rectTransform);
             SerializedWire.Set(bar, "fillImage", fill);
+        }
+
+        private static LetterboxBars BuildLetterbox(Transform root)
+        {
+            RectTransform rect = UiFactory.MakeRect("Letterbox", root, Vector2.zero, Vector2.one);
+            Image top = UiFactory.MakeImage("Top", rect, new Vector2(0f, 1f), Vector2.one, Color.black);
+            Image bottom = UiFactory.MakeImage("Bottom", rect, Vector2.zero, new Vector2(1f, 0f), Color.black);
+            LetterboxBars bars = rect.gameObject.AddComponent<LetterboxBars>();
+            SerializedWire.Set(bars, "top", top.rectTransform);
+            SerializedWire.Set(bars, "bottom", bottom.rectTransform);
+            return bars;
         }
 
         private static void BuildCountdown(Transform root, PrepController prep, NodePlayer nodePlayer)
@@ -283,6 +298,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(card, "missingIcon", missingIcon);
             SerializedWire.Set(card, "missingLabel", missingLabel);
             SerializedWire.Set(card, "rewindButton", rewind);
+            SerializedWire.SetFloat(card, "showDelaySeconds", 0.5f);
             SerializedWire.Set(card, "rewindLabel", rewindLabel);
         }
 

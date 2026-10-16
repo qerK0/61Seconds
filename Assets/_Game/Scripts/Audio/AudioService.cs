@@ -151,6 +151,25 @@ namespace SixtyOne.Audio
             playing.Remove(music);
         }
 
+        /// <summary>Muffles all audio (low-pass on the AudioListener). Used for the placement window tension.</summary>
+        public void SetLowPass(float cutoffHz)
+        {
+            AudioListener listener = FindAnyObjectByType<AudioListener>();
+            if (listener == null) return;
+            AudioLowPassFilter filter = listener.GetComponent<AudioLowPassFilter>();
+            if (filter == null) filter = listener.gameObject.AddComponent<AudioLowPassFilter>();
+            filter.cutoffFrequency = cutoffHz;
+            filter.enabled = true;
+        }
+
+        /// <summary>Removes the low-pass muffle.</summary>
+        public void ClearLowPass()
+        {
+            AudioListener listener = FindAnyObjectByType<AudioListener>();
+            AudioLowPassFilter filter = listener != null ? listener.GetComponent<AudioLowPassFilter>() : null;
+            if (filter != null) filter.enabled = false;
+        }
+
         private AudioSource NextSource()
         {
             foreach (AudioSource source in pool)

@@ -31,6 +31,7 @@ Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer
 Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver
 Scripts/Prep/        PrepPhaseNode, PrepCountdown + PrepAction (pure), PrepController, PrepInteractable, PickupItem
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
+Scripts/Cinematic/   CinematicProfile (SO, one per act), CinematicMixer (pure), CinematicDirector, LetterboxBars
 Scripts/Audio/       AudioCue (SO), AudioService
 Scripts/UI/          ChoicePanel, TimerBar, CountdownDisplay, ActionProgressBar, RoomTabs, BagUI, LoopCounterUI, DeathCard, TipJournal, RewindFX
 Scripts/Editor/      Validators, content generators, test-scene builder
@@ -105,6 +106,11 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 - An `AudioCue` ScriptableObject holds an id, clips[], volume, a pitch range and a mixer group. Gameplay code raises cues by reference or id through `AudioService`.
 - A missing clip logs a warning once and stays silent. It never throws.
 - The sound designer only swaps clips on cue assets.
+
+### Cinematic look
+- Renderer: URP **2D Renderer** (`Assets/Settings/Renderer2D.asset`), so lighting uses `Light2D` (a global light plus warm practicals that flicker and die at the quake).
+- `CinematicDirector` reacts only to GameEvents and the prep countdown. It drives an instantiated copy of the global volume profile (never the asset), uses unscaled time only and never touches `Time.timeScale`.
+- All strengths live on `Assets/_Game/Data/Cinematic/CinematicAct1-3.asset`. Each act is darker and harsher. `GameSettings.ReduceEffects` disables the flash, chromatic aberration, lens wobble, tilt and rotational shake, and scales down CameraShake.
 
 ### Art
 - The artist delivers high-quality isometric art. Code must never require specific frame counts.

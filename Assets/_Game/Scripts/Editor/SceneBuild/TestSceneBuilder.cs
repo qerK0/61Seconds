@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using SixtyOne.Audio;
+using SixtyOne.Cinematic;
 using SixtyOne.Core;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
@@ -13,6 +14,7 @@ using UnityEditor.SceneManagement;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 
 namespace SixtyOne.Editor
@@ -52,6 +54,7 @@ namespace SixtyOne.Editor
 
             SampleAct1Assets data = SampleAct1Generator.Generate();
             art = PlaceholderArt.Generate();
+            CinematicAssets cinematic = CinematicAssetsGenerator.Generate(art.Dot.texture);
 
             Camera camera = BuildCamera();
             BuildEventSystem();
@@ -81,6 +84,16 @@ namespace SixtyOne.Editor
             Room living = BuildLivingRoom(data);
             Room kitchen = BuildSimpleRoom("Room_Kitchen", SampleAct1Generator.Kitchen, 4, new Color(0.7f, 0.8f, 0.78f, 1f), stairs: false);
             Room bedroom = BuildSimpleRoom("Room_Bedroom", SampleAct1Generator.Bedroom, 4, new Color(0.8f, 0.72f, 0.82f, 1f), stairs: false);
+
+            // Warm practical lights (lamps, windows): they flicker and die with the power at the quake.
+            var warm = new Color(1f, 0.78f, 0.5f, 1f);
+            var practicals = new List<Light2D>
+            {
+                TestSceneCinematic.PracticalLight(living.transform, "CeilingLamp", 2.5f, 3.4f, 1.6f, warm, 3.2f),
+                TestSceneCinematic.PracticalLight(living.transform, "Window", 5.95f, 1.6f, 0.6f, new Color(1f, 0.86f, 0.62f, 1f), 2.2f),
+                TestSceneCinematic.PracticalLight(kitchen.transform, "KitchenLamp", 2f, 2f, 1.5f, warm, 2.8f),
+                TestSceneCinematic.PracticalLight(bedroom.transform, "BedsideLamp", 0.8f, 3.4f, 0.6f, warm, 2.2f)
+            };
             var rooms = new List<Room>
             {
                 living,
@@ -113,7 +126,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(prep, "gameManager", gameManager);
             SerializedWire.Set(prep, "rooms", switcher);
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, art, prep, switcher, SampleAct1Generator.PrepRooms);
+            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, art, prep, switcher, SampleAct1Generator.PrepRooms,
+                out LetterboxBars letterbox);
+            TestSceneCinematic.Build(cinematic, camera, gameManager, nodePlayer, prep, letterbox, family[0].transform, practicals);
 
             SerializedWire.Set(nodePlayer, "gameManager", gameManager);
             SerializedWire.Set(nodePlayer, "content", data.Content);

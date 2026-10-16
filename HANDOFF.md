@@ -4,6 +4,72 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-16 22:10] CLOUD — Cinematic look: CinematicDirector + per-act CinematicProfiles (dark, dramatic, event-driven)
+### Done
+- Rebased on top of the 23:05 LOCAL entry (prep wiring, family click fix); no code conflicts.
+- **This was requested as a LOCAL session with MCP Play Mode verification, but it ran in the cloud.** No Unity Editor or Unity MCP server was reachable (nothing on localhost:8080, no MCP tools). Code and generators are done. **No screenshots were taken and no visual tuning was done**; that is the first item in the checklist below.
+- **Render setup (from project files):** every quality level uses `Assets/Settings/UniversalRP.asset`. Its only renderer is `Renderer2D.asset` (**2D Renderer**), with post-process data assigned and HDR on. So: Light2D + post-processing. The director forces `renderPostProcessing = true` on the camera at runtime, and the scene builder sets it too.
+- **New `Scripts/Cinematic/`:**
+  - `CinematicProfile` (SO per act; every value has a [Tooltip]; `ApplyActDefaults(act)` makes each act darker, more desaturated and harsher, and only Act 3 gets the 2.5° dutch tilt).
+  - `CinematicMixer` (pure layered blend: prep / heartbeat / post-quake / death / rewind / win / flash / quake aberration).
+  - `CinematicDirector` (deep-copies the volume profile at runtime, never edits the asset; unscaled time only; never touches `Time.timeScale`; reacts to NodeEntered, PrepTick, QuakeStarted/Ended, Died, Rewound).
+  - `LetterboxBars` (2.35:1, first child of the canvas so all UI stays on top).
+- **Behaviour:**
+  - Base look: ACES, color adjustments (−EV, +contrast, −20 sat, cool filter), split toning (cold shadows / warm highlights), vignette 0.35, subtle grain, low bloom (threshold 1.1).
+  - Prep: curve-driven vignette 0.35→0.55, saturation −20→−45, 8% ortho push-in over 61→0.
+  - Placement window: letterbox slides in over 0.4s, a vignette heartbeat on every countdown tick, audio low-pass at 1800 Hz.
+  - Quake: 0.08s exposure flash, chromatic 0→0.8→0.1, lens wobble, 3–5 light flickers then power off (unless `keepLightsFlag`), dust burst, rotational shake on top of CameraShake, dutch tilt in Act 3.
+  - Post-quake: darker (−0.4 EV, global light 0.3), and a soft player light when `flashlight` is in the bag.
+  - Death: 0.5s blend to sat −100 / contrast 40 / vignette 0.6, and DeathCard now waits 0.5s (`showDelaySeconds`; the wife's hard cut is unchanged).
+  - Rewind: chromatic + grain spike over 0.9s, alongside RewindFX; the base look is restored.
+  - Win: warm, low-vignette blend on any `exitNodeIds` node.
+- **Accessibility:** `GameSettings.ReduceEffects` turns off the flash, chromatic aberration, lens wobble, tilt and rotational shake, and scales CameraShake by `reducedShakeScale` (0.35).
+- **Other:** `AudioService.SetLowPass/ClearLowPass` (AudioLowPassFilter on the listener). The asmdefs now reference `Unity.RenderPipelines.Core.Runtime` + `Unity.RenderPipelines.Universal.Runtime`.
+- **Editor:**
+  - New menus SixtyOne > Cinematic > Generate Profiles and > Reset Profiles To Act Defaults. They create `Assets/_Game/Data/Cinematic/CinematicAct1-3.asset`, `CinematicBaseVolume.asset` and `CinematicDust.mat`. Existing profiles keep their tuned values.
+  - Build Test Scene now adds: a global Volume (priority 10), a Global Light2D, 4 warm practical Light2Ds (living-room ceiling lamp, window, kitchen lamp, bedside lamp), the flashlight Light2D, the QuakeDust particle system, the letterbox and CinematicDirector (all wired).
+- **Gameplay timing:** unchanged. No countdown, timer or `Time.timeScale` changes. CameraShake still runs on scaled time as before.
+- **Tests:** 70 EditMode tests, 10 new (CinematicMixerTests). All pass under Mono with Unity API stubs (stub math made real); not yet run in Unity.
+### Files created / changed
+- Assets/_Game/Scripts/Cinematic/{CinematicProfile, CinematicMixer, CinematicDirector, LetterboxBars}.cs — new
+- Assets/_Game/Scripts/Core/GameSettings.cs — ReduceEffects + ReducedShakeScale
+- Assets/_Game/Scripts/Iso/CameraShake.cs — scales by ReducedShakeScale when ReduceEffects is on
+- Assets/_Game/Scripts/Audio/AudioService.cs — SetLowPass / ClearLowPass
+- Assets/_Game/Scripts/UI/DeathCard.cs — showDelaySeconds
+- Assets/_Game/Scripts/SixtyOne.Runtime.asmdef, Editor/SixtyOne.Editor.asmdef — URP Core/Universal references
+- Assets/_Game/Scripts/Editor/Cinematic/CinematicAssetsGenerator.cs, Editor/SceneBuild/TestSceneCinematic.cs — new; TestSceneBuilder.cs, TestSceneUi.cs — cinematic wiring + letterbox
+- Assets/_Game/Tests/EditMode/CinematicMixerTests.cs — new
+- CLAUDE.md (Cinematic folder + "Cinematic look" rules), HANDOFF.md
+### Needs local wiring (checklist for the MCP session)
+- [ ] Open Unity, let it compile. Check that the URP asmdef references resolve (`Unity.RenderPipelines.Universal.Runtime`, `Unity.RenderPipelines.Core.Runtime`). Fix any compile errors first.
+- [ ] Run menu: SixtyOne > Cinematic > Generate Profiles (creates the `Data/Cinematic/` assets)
+- [ ] Run menu: SixtyOne > Generate Sample Act 1
+- [ ] Run menu: SixtyOne > Build Test Scene (rebuilds Test_Act1 with the Volume, Light2Ds, dust, letterbox and director)
+- [ ] Check on `Main Camera`: Rendering > Post Processing is ticked. Check on each Light2D: Target Sorting Layers includes Default; if not, set "All".
+- [ ] Run menu: SixtyOne > Validate Content, then SixtyOne > Text > Validate. Expect 0 problems.
+- [ ] Test Runner > EditMode > Run All (70 tests)
+- [ ] Play loop 1 + loop 2 (see the 18:17 entry) and take MCP screenshots at: **prep start (T=61)**, **T=10 (letterbox + heartbeat)**, **quake (flash/aberration/flicker/dust)**, **post-quake (dark; flashlight light if carried)**, **death card (B&W blend first)**, **rewind (aberration + grain spike)**.
+- [ ] Tune `CinematicAct1.asset` until UI and interactable labels read clearly and blacks aren't crushed. Likely knobs: `postExposure`, `globalLightIntensity`, `postQuakeGlobalLight`, `prepVignetteEnd`, `vignetteSmoothness`. Then press SixtyOne > Cinematic > Reset Profiles To Act Defaults only if you want to start over.
+- [ ] Toggle `GameSettings.asset` > Reduce Effects and replay the quake: no flash, no aberration, no tilt, lighter shake.
+- [ ] Console: confirm no new errors or warnings (especially Light2D/Volume/ParticleSystem material).
+- [ ] Optional: add an exit/win node id to CinematicDirector > Exit Node Ids once one exists (none in the sample yet).
+### Not verified / risks
+- **Nothing visual has been verified**: no Play Mode run and no screenshots. All default strengths are educated guesses.
+- Compiled only against hand-written stubs. The riskiest real-API spots:
+  - `Light2D.lightType`/`pointLightOuterRadius` setters
+  - `camera.GetUniversalAdditionalCameraData()`
+  - `VolumeProfile.Add<T>(true)` + `AssetDatabase.AddObjectToAsset` for the base profile
+  - `ParticleSystem` module setup in edit mode
+  - Shader name `Universal Render Pipeline/2D/Sprite-Unlit-Default`
+- Light2D created via `AddComponent` may not target all sorting layers by default (the project only has "Default", so it should be fine).
+- Sprites use the default Lit material, so the darker global light darkens the world. TMP world labels and the overlay UI are unlit and stay readable. Verify interactable labels against the post-quake darkness.
+- The dust particle uses a generated material; if it renders magenta, assign a Sprite-Unlit material by hand.
+- No "exit building" node exists yet, so the win look is untested in the sample flow.
+### Next suggested step
+- LOCAL (MCP): run the checklist above, take the six screenshots, tune the three CinematicAct profiles, then commit the tuned assets.
+
+---
+
 ## [2026-10-16 23:05] LOCAL — Prep phase wired + loop 1/loop 2 play-test, 2 fixes
 ### Done
 - Compile: 0 errors, 0 warnings (Runtime 149 types, Editor 39, Tests 22). The `PickupItem.cs` move had lost its GUID, so I restored the original GUID (`4c106fd3…`) on `Scripts/Prep/PickupItem.cs.meta`.
