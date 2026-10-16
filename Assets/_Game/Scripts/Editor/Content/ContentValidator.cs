@@ -1,6 +1,10 @@
 using System.Collections.Generic;
+using SixtyOne.Building;
 using SixtyOne.Core;
+using SixtyOne.Dialogue;
+using SixtyOne.Items;
 using SixtyOne.Nodes;
+using SixtyOne.Puzzles;
 using SixtyOne.Placement;
 using SixtyOne.World;
 using SixtyOne.Text;
@@ -12,9 +16,11 @@ namespace SixtyOne.Editor
 {
     /// <summary>
     /// SixtyOne > Validate Content. Checks: GoToNode targets, Trap/Death text + tip, ShowLockedFatal
-    /// missing-item text + item, PrepPhaseNode -> PlacementNode links, hazards linked to an anchor (open
-    /// scenes + prefabs) or used as an unplaced hazard, prep interactables wired, reachability from the
-    /// start node, and that every referenced text key exists. Each problem is a clickable console entry.
+    /// missing-item text + item, dialogue lines (keys, cost &gt;= 0), recipes (inputs + output exist), trader
+    /// items, every gas room has a valve choice, checkpoints reachable, every placement moment has anchors
+    /// (safe + trap) and hazards in its room (open scene), hazards linked to an anchor or used as an unplaced
+    /// hazard, world interactables wired, no firearm item ids, reachability from the start node, and that every
+    /// referenced text key exists. Each problem is a clickable console entry.
     /// </summary>
     public static class ContentValidator
     {
@@ -25,12 +31,15 @@ namespace SixtyOne.Editor
         {
             int problems = 0;
             List<SceneNode> nodes = LoadAll<SceneNode>();
-            foreach (PlacementNode placementNode in LoadAll<PlacementNode>())
+            AddAll<PlacementNode>(nodes);
+            AddAll<DialogueNode>(nodes);
+            AddAll<FusePuzzleNode>(nodes);
+            AddAll<EpilogueNode>(nodes);
+
+            foreach (SceneNode node in nodes)
             {
-                if (!nodes.Contains(placementNode)) nodes.Add(placementNode);
+                problems += CheckNode(node);
             }
-
-
 
             foreach (Hazard hazard in LoadAll<Hazard>())
             {
@@ -39,6 +48,11 @@ namespace SixtyOne.Editor
 
             problems += CheckHazardLinks(nodes);
             problems += CheckWorldInteractables();
+            problems += CheckRecipes();
+            problems += CheckTraders();
+            problems += CheckGasValves(nodes);
+            problems += CheckPlacementRooms(nodes);
+            problems += CheckNoFirearms();
             problems += CheckReachability(nodes);
             problems += CheckTextKeys();
 
@@ -84,6 +98,22 @@ namespace SixtyOne.Editor
                 problems += Report($"node '{node.Id}' has a timer but no timeout choice and no Trap choice.", node);
             }
 
+            if (node is DialogueNode dialogue)
+            {
+                if (dialogue.Lines.Count == 0) problems += Report($"dialogue node '{node.Id}' has no lines.", node);
+                for (int i = 0; i < dialogue.Lines.Count; i++)
+                {
+                    DialogueLine line = dialogue.Lines[i];
+                    if (line == null || line.TextKey.IsEmpty) problems += Report($"dialogue node '{node.Id}' line {i} has no text key.", node);
+                    else if (line.SpeakerKey.IsEmpty) problems += Report($"dialogue node '{node.Id}' line {i} has no speaker key.", node);
+                    if (line != null && line.TimeCost < 0f) problems += Report($"dialogue node '{node.Id}' line {i} has a negative time cost.", node);
+                }
+            }
+
+            if (node is FusePuzzleNode fuse && (fuse.Solution == null || fuse.Solution.Length == 0))
+            {
+                problems += Report($"fuse node '{node.Id}' has no solution pattern.", node);
+            }
 
 
             if (node is PlacementNode placement)
@@ -106,7 +136,9 @@ namespace SixtyOne.Editor
             bool requiresItem = false;
             foreach (Condition condition in choice.Conditions)
             {
-                if (condition != null && condition.Type == ConditionType.HasItem && condition.Item == choice.MissingItem) requiresItem = true;
+                if (condition == null) continue;
+                if (condition.Type == ConditionType.HasItem && condition.Item == choice.MissingItem) requiresItem = true;
+                if (condition.Type == ConditionType.HasAnyItem && Contains(condition.AnyItems, choice.MissingItem)) requiresItem = true;
             }
 
             if (choice.MissingItem != null && !requiresItem)
@@ -136,6 +168,137 @@ namespace SixtyOne.Editor
             }
 
             return problems;
+        }
+
+        private static int CheckRecipes()
+        {
+            int problems = 0;
+            foreach (Recipe recipe in LoadAll<Recipe>())
+            {
+                if (recipe.InputA == null || recipe.InputB == null) problems += Report($"recipe '{recipe.name}' is missing an input item.", recipe);
+                if (recipe.Output == null) problems += Report($"recipe '{recipe.name}' has no output item.", recipe);
+                if (recipe.TimeCost < 0f || recipe.StaminaCost < 0f) problems += Report($"recipe '{recipe.name}' has a negative cost.", recipe);
+            }
+
+            foreach (RecipeBook book in LoadAll<RecipeBook>())
+            {
+                foreach (Recipe recipe in book.Recipes)
+                {
+                    if (recipe == null) problems += Report($"recipe book '{book.name}' has an empty entry.", book);
+                }
+            }
+
+            return problems;
+        }
+
+        private static int CheckTraders()
+        {
+            int problems = 0;
+            foreach (TraderProfile trader in LoadAll<TraderProfile>())
+            {
+                if (trader.Fallback.Count == 0) problems += Report($"trader '{trader.name}' has no fallback food/water.", trader);
+                foreach (Item item in trader.Needs) if (item == null) problems += Report($"trader '{trader.name}' has an empty need entry.", trader);
+                foreach (Item item in trader.Fallback) if (item == null) problems += Report($"trader '{trader.name}' has an empty fallback entry.", trader);
+            }
+
+            return problems;
+        }
+
+        /// <summary>Every gas zone needs a choice in that room that sets its valve flag (otherwise poison is unavoidable).</summary>
+        private static int CheckGasValves(List<SceneNode> nodes)
+        {
+            int problems = 0;
+            foreach (LevelConfig level in LoadAll<LevelConfig>())
+            {
+                foreach (GasZone zone in level.GasZones)
+                {
+                    if (zone == null) continue;
+                    if (string.IsNullOrEmpty(zone.ValveFlag))
+                    {
+                        problems += Report($"gas zone in room '{zone.RoomId}' has no valve flag.", level);
+                        continue;
+                    }
+
+                    bool hasValve = false;
+                    foreach (SceneNode node in nodes)
+                    {
+                        if (node.RoomId != zone.RoomId) continue;
+                        foreach (Choice choice in node.Choices)
+                        {
+                            if (choice != null && SetsFlag(choice.Outcomes, zone.ValveFlag)) hasValve = true;
+                        }
+                    }
+
+                    if (!hasValve) problems += Report($"gas room '{zone.RoomId}' has no choice that closes its valve ('{zone.ValveFlag}').", level);
+                }
+            }
+
+            return problems;
+        }
+
+        /// <summary>Placement moments need a safe anchor, a trap anchor with a hazard (open scene) and an unplaced hazard.</summary>
+        private static int CheckPlacementRooms(List<SceneNode> nodes)
+        {
+            int problems = 0;
+            var safe = new Dictionary<string, int>();
+            var traps = new Dictionary<string, int>();
+            bool anyRoom = false;
+            foreach (Anchor anchor in FindAnchors())
+            {
+                Room room = anchor.GetComponentInParent<Room>(true);
+                if (room == null) continue;
+                anyRoom = true;
+                Dictionary<string, int> bucket = anchor.Tag == AnchorTag.Trap ? traps : safe;
+                if (anchor.Tag == AnchorTag.Trap && anchor.Hazard == null) continue;
+                bucket.TryGetValue(room.RoomId, out int count);
+                bucket[room.RoomId] = count + 1;
+            }
+
+            foreach (SceneNode node in nodes)
+            {
+                if (!(node is PlacementNode placement)) continue;
+                if (placement.UnplacedHazard == null) problems += Report($"placement node '{node.Id}' has no unplaced hazard.", node);
+                if (!anyRoom) continue;
+                if (!safe.ContainsKey(node.RoomId)) problems += Report($"placement node '{node.Id}': room '{node.RoomId}' has no safe anchor (open Test_Building).", node);
+                if (!traps.ContainsKey(node.RoomId)) problems += Report($"placement node '{node.Id}': room '{node.RoomId}' has no trap anchor with a hazard.", node);
+            }
+
+            if (!anyRoom) Debug.Log("[Content] No room in the open scene; placement anchor checks skipped (open Test_Building to run them).");
+            return problems;
+        }
+
+        private static readonly string[] FirearmWords = { "gun", "pistol", "rifle", "shotgun", "revolver", "firearm", "silah", "tabanca", "tufek", "tüfek" };
+
+        private static int CheckNoFirearms()
+        {
+            int problems = 0;
+            foreach (Item item in LoadAll<Item>())
+            {
+                string id = (item.Id ?? string.Empty).ToLowerInvariant();
+                foreach (string word in FirearmWords)
+                {
+                    if (id.Contains(word)) problems += Report($"item '{item.Id}' looks like a firearm; firearms are not allowed in this game.", item);
+                }
+            }
+
+            return problems;
+        }
+
+        private static bool SetsFlag(IReadOnlyList<Outcome> outcomes, string flag)
+        {
+            foreach (Outcome o in outcomes)
+            {
+                if (o != null && o.Type == OutcomeType.SetFlag && o.Flag == flag && o.FlagValue) return true;
+            }
+
+            return false;
+        }
+
+        private static bool Contains(IReadOnlyList<Item> items, Item item)
+        {
+            if (items == null) return false;
+            foreach (Item i in items) if (i == item) return true;
+            return false;
         }
 
         private static int CheckOutcomes(IReadOnlyList<Outcome> outcomes, Object owner, string where)
@@ -197,7 +360,7 @@ namespace SixtyOne.Editor
             {
                 if (!linked.Contains(hazard))
                 {
-                    problems += Report($"hazard '{hazard.Id}' is not linked to any anchor (open the scene that uses it, e.g. Test_Act1).", hazard);
+                    problems += Report($"hazard '{hazard.Id}' is not linked to any anchor (open the scene that uses it, e.g. Test_Building).", hazard);
                 }
             }
 
@@ -233,7 +396,9 @@ namespace SixtyOne.Editor
 
                 foreach (SceneNode node in nodes)
                 {
-                    if (!reached.Contains(node)) problems += Report($"node '{node.Id}' is unreachable from '{content.StartNode.Id}'.", node);
+                    if (reached.Contains(node)) continue;
+                    string what = node.IsCheckpoint ? "floor checkpoint" : "node";
+                    problems += Report($"{what} '{node.Id}' is unreachable from '{content.StartNode.Id}'.", node);
                 }
 
                 foreach (SceneNode node in reached)
@@ -265,6 +430,7 @@ namespace SixtyOne.Editor
             }
 
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
+            if (node is FusePuzzleNode fuse && fuse.NextNode != null) yield return fuse.NextNode;
         }
 
         private static int CheckTextKeys()
@@ -308,6 +474,14 @@ namespace SixtyOne.Editor
                 var prefab = AssetDatabase.LoadAssetAtPath<GameObject>(AssetDatabase.GUIDToAssetPath(guid));
                 if (prefab == null) continue;
                 foreach (Anchor anchor in prefab.GetComponentsInChildren<Anchor>(true)) yield return anchor;
+            }
+        }
+
+        private static void AddAll<T>(List<SceneNode> nodes) where T : SceneNode
+        {
+            foreach (T node in LoadAll<T>())
+            {
+                if (!nodes.Contains(node)) nodes.Add(node);
             }
         }
 

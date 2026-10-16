@@ -136,6 +136,7 @@ namespace SixtyOne.Editor
             salon.Props.Add(P("door_frame", "DoorLintel", 4.0f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
             salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, new Color(0.5f, 0.5f, 0.55f, 1f), drop: 0.6f));
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
+            salon.Items.Add(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food"));
             salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
             salon.Lights.Add(L("Window", 5.95f, 1.6f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
             yield return salon;
@@ -149,6 +150,8 @@ namespace SixtyOne.Editor
             RoomSpec hall = Room(BuildingLevelsGenerator.Flat11Hall, 3, 4, new Color(0.72f, 0.68f, 0.6f, 1f));
             hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
             hall.Props.Add(P(null, "FlatDoor", 2.8f, 3.6f, 0f, 0.9f, 1.5f, Wood));
+            // Old emergency bag behind the coats: a second chance at a whistle for players who cut the intro short.
+            hall.Items.Add(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle"));
             yield return hall;
 
             RoomSpec corridor = Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f));
@@ -236,6 +239,7 @@ namespace SixtyOne.Editor
             // Flat 10: dark (no practical lights), stove leaking gas, collapsed floor.
             RoomSpec flat10 = Room(BuildingLevelsGenerator.Flat10, 4, 4, new Color(0.42f, 0.42f, 0.46f, 1f));
             flat10.Props.Add(P(null, "Stove", 3.5f, 1.2f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
+            flat10.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
             flat10.Props.Add(P(null, "CollapsedFloor", 1.6f, 2.6f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
             yield return flat10;
         }
