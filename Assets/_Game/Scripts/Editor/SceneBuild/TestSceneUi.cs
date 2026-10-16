@@ -38,12 +38,15 @@ namespace SixtyOne.Editor
             BuildTimerBar(root, nodePlayer);
             BuildBuildingTimer(root, survival);
             BuildLoopCounter(root, gameManager);
-            BuildBag(root, gameManager, content, art);
+            BuildBag(root, gameManager, content, art, survival);
+            BuildStamina(root, survival);
             BuildToast(root);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
             BuildDeathCard(root, gameManager, content, art);
+            BuildPoisonOverlay(root);
             BuildRewindFx(root, camera);
+            BuildClickFeedback(root, art);
             return choicePanel;
         }
 
@@ -135,6 +138,39 @@ namespace SixtyOne.Editor
             SerializedWire.Set(display, "spentLabel", spent);
         }
 
+        private static void BuildStamina(Transform root, SurvivalController survival)
+        {
+            Image bg = UiFactory.MakeImage("Stamina", root, new Vector2(0.865f, 0.375f), new Vector2(0.995f, 0.405f), new Color(0f, 0f, 0f, 0.6f));
+            Image fill = UiFactory.MakeImage("Fill", bg.transform, Vector2.zero, Vector2.one, new Color(0.4f, 0.85f, 0.45f, 1f));
+            fill.rectTransform.pivot = new Vector2(0f, 0.5f);
+            TextMeshProUGUI label = UiFactory.MakeLabel("Label", bg.transform, Vector2.zero, Vector2.one, 18f, TextAlignmentOptions.Center, Color.white, bold: true);
+            LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(localized, "key", UiKeys.StaminaLabel);
+
+            StaminaBar bar = bg.gameObject.AddComponent<StaminaBar>();
+            SerializedWire.Set(bar, "survival", survival);
+            SerializedWire.Set(bar, "fill", fill.rectTransform);
+            SerializedWire.Set(bar, "fillImage", fill);
+        }
+
+        private static void BuildPoisonOverlay(Transform root)
+        {
+            Image overlay = UiFactory.MakeImage("PoisonOverlay", root, Vector2.zero, Vector2.one, new Color(0.02f, 0.05f, 0.02f, 0f));
+            PoisonOverlay poison = overlay.gameObject.AddComponent<PoisonOverlay>();
+            SerializedWire.Set(poison, "overlay", overlay);
+        }
+
+        private static void BuildClickFeedback(Transform root, PlaceholderSprites art)
+        {
+            RectTransform rect = UiFactory.MakeRect("ClickFeedback", root, Vector2.zero, Vector2.one);
+            Image ring = UiFactory.MakeImage("Ring", rect, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), new Color(1f, 1f, 1f, 0.85f), sprite: art.Ring);
+            ring.rectTransform.sizeDelta = new Vector2(64f, 32f);
+            ring.type = Image.Type.Filled;
+            ring.fillMethod = Image.FillMethod.Radial360;
+            ClickFeedback feedback = rect.gameObject.AddComponent<ClickFeedback>();
+            SerializedWire.Set(feedback, "ring", ring);
+        }
+
         private static void BuildLoopCounter(Transform root, GameManager gameManager)
         {
             TextMeshProUGUI label = UiFactory.MakeLabel("LoopCounter", root, new Vector2(0.01f, 0.91f), new Vector2(0.26f, 0.99f), 44f, TextAlignmentOptions.Left, Accent, bold: true);
@@ -143,7 +179,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(counter, "label", label);
         }
 
-        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art)
+        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival)
         {
             Image bg = UiFactory.MakeImage("Bag", root, new Vector2(0.865f, 0.42f), new Vector2(0.995f, 0.90f), new Color(0f, 0f, 0f, 0.6f));
             TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 1f), 26f, TextAlignmentOptions.Center, Accent, bold: true);
@@ -153,10 +189,14 @@ namespace SixtyOne.Editor
             var icons = new Object[Inventory.DefaultCapacity];
             var labels = new Object[Inventory.DefaultCapacity];
             var backgrounds = new Object[Inventory.DefaultCapacity];
+            var buttons = new Object[Inventory.DefaultCapacity];
             for (int i = 0; i < Inventory.DefaultCapacity; i++)
             {
                 float top = 0.86f - i * 0.215f;
-                Image slot = UiFactory.MakeImage("Slot" + i, bg.transform, new Vector2(0.05f, top - 0.2f), new Vector2(0.95f, top), new Color(1f, 1f, 1f, 0.12f));
+                Image slot = UiFactory.MakeImage("Slot" + i, bg.transform, new Vector2(0.05f, top - 0.2f), new Vector2(0.95f, top), new Color(1f, 1f, 1f, 0.12f), raycast: true);
+                Button slotButton = slot.gameObject.AddComponent<Button>();
+                slotButton.targetGraphic = slot;
+                buttons[i] = slotButton;
                 Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.03f, 0.1f), new Vector2(0.33f, 0.9f), Color.white, sprite: art.Dot);
                 icon.enabled = false;
                 TextMeshProUGUI name = UiFactory.MakeLabel("Name", slot.transform, new Vector2(0.36f, 0f), new Vector2(0.98f, 1f), 20f, TextAlignmentOptions.Left, Color.white);
@@ -174,6 +214,8 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(bag, "slotIcons", icons);
             SerializedWire.SetArray(bag, "slotLabels", labels);
             SerializedWire.SetArray(bag, "slotBackgrounds", backgrounds);
+            SerializedWire.SetArray(bag, "slotButtons", buttons);
+            SerializedWire.Set(bag, "survival", survival);
         }
 
         private static void BuildToast(Transform root)

@@ -7,8 +7,10 @@ using UnityEngine;
 namespace SixtyOne.Building
 {
     /// <summary>
-    /// Drives the building timer (real time + action costs). Collapse at 0 kills and rewinds to the floor
-    /// checkpoint. Implements IActionCostSink so choices, interactables, dialogue and the bag pay time and stamina.
+    /// Drives survival: the building timer (real time + action costs; collapse at 0 rewinds to the floor
+    /// checkpoint), stamina drain, gas poisoning in leaking rooms (max = death), and panic (from the timer,
+    /// poison and aftershocks) which feeds the click delay. Implements IActionCostSink so choices,
+    /// interactables, dialogue and the bag pay time and stamina.
     /// </summary>
     [DefaultExecutionOrder(-300)]
     public sealed class SurvivalController : MonoBehaviour, IActionCostSink
@@ -25,7 +27,26 @@ namespace SixtyOne.Building
         [Tooltip("Dialogue driver (the real-time tick pauses while lines play).")]
         [SerializeField] private DialogueController dialogue;
 
+        /// <summary>Poison at which the warning toast appears.</summary>
+        private const float PoisonWarningLevel = 0.2f;
+
         public BuildingTimer Timer { get; } = new BuildingTimer();
+
+        /// <summary>Current panic 0..1 (not part of GameState; recomputed after rewinds).</summary>
+        public float Panic01 { get; private set; }
+
+        /// <summary>Click delay right now (0 below the panic threshold or with Reduce Effects).</summary>
+        public float CurrentInputDelay
+        {
+            get
+            {
+                GameSettings settings = gameManager != null ? gameManager.Settings : null;
+                float threshold = settings != null ? settings.PanicDelayThreshold : 0.7f;
+                float max = settings != null ? settings.MaxInputDelay : 0.3f;
+                bool reduce = settings != null && settings.ReduceEffects;
+                return SurvivalModel.InputDelay(Panic01, threshold, max, reduce);
+            }
+        }
         public LevelConfig Config => config;
         public float Remaining => gameManager != null ? gameManager.State.BuildingTime : 0f;
         public float Total => Timer.Total;
@@ -51,32 +72,81 @@ namespace SixtyOne.Building
             Timer.AlarmTick += OnAlarmTick;
             Timer.Zero += OnCollapse;
             ActionCostRouter.Sink = this;
+            InputDelayRouter.DelayProvider = () => CurrentInputDelay;
         }
 
         private void OnDestroy()
         {
             if (ActionCostRouter.Sink == (IActionCostSink)this) ActionCostRouter.Sink = null;
+            InputDelayRouter.DelayProvider = null;
         }
 
         private void OnEnable()
         {
             GameEvents.Rewound += OnRewound;
+            GameEvents.QuakeStarted += OnQuakeStarted;
         }
 
         private void OnDisable()
         {
             GameEvents.Rewound -= OnRewound;
+            GameEvents.QuakeStarted -= OnQuakeStarted;
         }
 
         private void Update()
         {
             if (config == null || gameManager == null || gameManager.IsDead) return;
 
+            float dt = Time.deltaTime;
             bool paused = config.PauseInDialogue && dialogue != null && dialogue.IsPlayingLines;
             if (config.RealtimeTick && !paused)
             {
-                State.BuildingTime = Timer.Advance(State.BuildingTime, Time.deltaTime);
+                State.BuildingTime = Timer.Advance(State.BuildingTime, dt);
+                State.Stamina = SurvivalModel.DrainStamina(State.Stamina, config.StaminaDrainPerSecond, dt);
             }
+
+            if (gameManager.IsDead) return;
+            UpdatePoison(dt);
+            if (gameManager.IsDead) return;
+            Panic01 = SurvivalModel.StepPanic(Panic01, PanicBaseline(), config.PanicCalmPerSecond, dt);
+        }
+
+        private void UpdatePoison(float dt)
+        {
+            SceneNode node = nodePlayer != null ? nodePlayer.Current : null;
+            GasZone zone = config.ZoneFor(node != null ? node.RoomId : null);
+            bool openGas = zone != null && !State.Flags.Get(zone.ValveFlag);
+            bool wetCloth = config.WetClothItem != null && State.Inventory.Has(config.WetClothItem.Id);
+            float before = State.Poison;
+            State.Poison = SurvivalModel.StepPoison(before, openGas, zone != null ? zone.PoisonPerSecond : 0f, wetCloth,
+                config.WetClothFactor, config.PoisonDecayPerSecond, dt);
+
+            if (before < PoisonWarningLevel && State.Poison >= PoisonWarningLevel)
+            {
+                GameEvents.RaiseMessage(SixtyOne.Text.UiKeys.PoisonWarning);
+            }
+
+            if (State.Poison >= 1f)
+            {
+                gameManager.Die(new DeathInfo
+                {
+                    Victim = MemberType.Player,
+                    TextKey = config.PoisonTextKey.Key,
+                    TipId = config.PoisonTip != null ? config.PoisonTip.Id : null,
+                    RewindTarget = RewindTarget.LastNode
+                });
+            }
+        }
+
+        private float PanicBaseline()
+        {
+            float timerPanic = config.EvaluateTimerPanic(Timer.ElapsedFraction(State.BuildingTime));
+            return SurvivalModel.PanicBaseline(timerPanic, State.Poison, config.PanicFromPoison);
+        }
+
+        private void OnQuakeStarted(QuakeInfo info)
+        {
+            if (config != null) Panic01 = Mathf.Clamp01(Panic01 + config.AftershockPanic);
         }
 
         public void SpendTime(float seconds, bool isMove)
@@ -123,6 +193,7 @@ namespace SixtyOne.Building
         private void OnRewound(string nodeId)
         {
             Timer.Sync(State.BuildingTime);
+            if (config != null) Panic01 = PanicBaseline();
         }
     }
 }
