@@ -169,7 +169,43 @@ namespace SixtyOne.Editor
 
         private static IEnumerable<RoomSpec> Floor2()
         {
-            yield return Room(BuildingLevelsGenerator.Flat7, 5, 5, new Color(0.66f, 0.62f, 0.58f, 1f));
+            // Flat 7: arrival from the cables / collapsed floor; strong aftershock placement; gas leak.
+            RoomSpec flat7 = Room(BuildingLevelsGenerator.Flat7, 5, 5, new Color(0.66f, 0.62f, 0.58f, 1f));
+            flat7.PlayerSpawn = new Vector2(0.7f, 0.7f);
+            flat7.WifeSpawn = new Vector2(1.3f, 0.5f);
+            flat7.ChildSpawn = new Vector2(0.5f, 1.3f);
+            flat7.Anchors.Add(A("f7_desk", 2.0f, 2.0f, AnchorTag.Safe, 2, null, "anchor.table", "f7_inner_wall", "f7_bookshelf", "f7_window"));
+            flat7.Anchors.Add(A("f7_inner_wall", 0.8f, 4.3f, AnchorTag.Safe, 1, null, "anchor.inner_wall", "f7_desk", "f7_bookshelf"));
+            flat7.Anchors.Add(A("f7_bookshelf", 3.2f, 4.4f, AnchorTag.Trap, 1, "hz.f7_bookshelf", "anchor.bookshelf", "f7_inner_wall", "f7_desk"));
+            flat7.Anchors.Add(A("f7_window", 4.4f, 1.6f, AnchorTag.Trap, 1, "hz.f7_window", "anchor.window", "f7_desk"));
+            flat7.Props.Add(P(null, "Desk", 2.0f, 2.0f, -0.12f, 1.3f, 0.45f, Wood));
+            flat7.Props.Add(P("bookshelf", "Bookshelf", 3.2f, 4.85f, 0f, 1.2f, 1.8f, new Color(0.45f, 0.3f, 0.18f, 1f), topple: 80f));
+            flat7.Props.Add(P("f7_window", "Window", 4.95f, 1.6f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
+            flat7.Props.Add(P("f7_ceiling", "CeilingPlaster", 2.6f, 3.0f, 1.8f, 0.7f, 0.25f, new Color(0.7f, 0.68f, 0.64f, 1f), drop: 1.6f));
+            flat7.Props.Add(P(null, "Stove", 4.5f, 3.6f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
+            flat7.Props.Add(P(null, "Cables", 0.4f, 0.4f, 0.6f, 0.15f, 1.4f, new Color(0.15f, 0.15f, 0.15f, 1f)));
+            yield return flat7;
+
+            // Corridor: the frightened dog blocks the stairs.
+            RoomSpec corridor = Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f));
+            corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
+            corridor.Props.Add(P(null, "StairsDown", 0.4f, 1.0f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
+            corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
+            yield return corridor;
+
+            // Flat 8: empty placeholder flat (at most one hidden item).
+            RoomSpec flat8 = Room(BuildingLevelsGenerator.Flat8, 4, 4, new Color(0.7f, 0.66f, 0.62f, 1f));
+            flat8.Items.Add(I("water", 3.3f, 3.2f, new Color(0.45f, 0.7f, 1f, 1f), cost: 2f, surface: false, hidden: true, id: "flat8_hidden_water"));
+            yield return flat8;
+
+            RoomSpec stairs = Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f));
+            stairs.Props.Add(P(null, "StairsDown", 1.5f, 4.3f, 0f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
+            stairs.Props.Add(P(null, "Elevator", 2.7f, 1.5f, 0f, 0.6f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
+            yield return stairs;
+
+            RoomSpec street = Room(BuildingLevelsGenerator.Street, 6, 4, new Color(0.4f, 0.42f, 0.45f, 1f));
+            street.Lights.Add(L("StreetLamp", 5.0f, 3.0f, 2.0f, 3.5f, new Color(0.8f, 0.85f, 1f, 1f)));
+            yield return street;
         }
 
         private static IEnumerable<RoomSpec> Floor3()

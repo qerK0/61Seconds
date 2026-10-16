@@ -26,6 +26,8 @@ namespace SixtyOne.Editor
         public Dictionary<string, Tip> Tips = new Dictionary<string, Tip>();
         public Dictionary<string, SceneNode> Nodes = new Dictionary<string, SceneNode>();
         public SixtyOne.Items.TraderProfile Trader;
+        public SixtyOne.Items.RecipeBook RecipeBook;
+        public List<SixtyOne.Items.Recipe> Recipes = new List<SixtyOne.Items.Recipe>();
     }
 
     /// <summary>
@@ -73,7 +75,7 @@ namespace SixtyOne.Editor
         };
 
         /// <summary>Entering these nodes blends the cinematic look to "we got out".</summary>
-        public static readonly string[] ExitNodeIds = { };
+        public static readonly string[] ExitNodeIds = { F2Epilogue };
 
         private static readonly HashSet<string> Produced = new HashSet<string>();
         private static BuildingAssets result;
@@ -121,6 +123,8 @@ namespace SixtyOne.Editor
             BuildItems();
             BuildHazards();
             BuildFloor3Hazards();
+            BuildFloor2Hazards();
+            BuildRecipes();
 
             result.Level = Asset<LevelConfig>(DataRoot + "/LevelConfig.asset");
             result.Level.ConfigureTimer(300f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
@@ -128,6 +132,7 @@ namespace SixtyOne.Editor
 
             BuildFloor4();
             BuildFloor3();
+            BuildFloor2();
 
             result.Content = Asset<GameContent>(DataRoot + "/GameContent.asset");
             result.Content.Configure(result.Nodes[F4Intro], result.Nodes.Values, result.Items.Values, result.Tips.Values);
@@ -173,6 +178,7 @@ namespace SixtyOne.Editor
         {
             yield return new GasZone(Flat11Kitchen, GasOffF4, 0.025f);
             yield return new GasZone(Flat10, GasOffF3, 0.03f);
+            yield return new GasZone(Flat7, GasOffF2, 0.035f);
         }
 
         // ---------- helpers ----------

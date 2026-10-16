@@ -79,6 +79,7 @@ namespace SixtyOne.Editor
             DialogueController dialogue = systems.AddComponent<DialogueController>();
             FusePuzzleController fuse = systems.AddComponent<FusePuzzleController>();
             SurvivalController survival = systems.AddComponent<SurvivalController>();
+            EpilogueController epilogue = systems.AddComponent<EpilogueController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
 
             var familyRoot = new GameObject("Family").transform;
@@ -110,7 +111,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(survival, "config", data.Level);
             SerializedWire.Set(survival, "dialogue", dialogue);
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival,
+            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook,
                 out LetterboxBars letterbox, out FusePuzzlePanel fusePanel);
             SerializedWire.Set(fuse, "gameManager", gameManager);
             SerializedWire.Set(fuse, "panel", fusePanel);
@@ -121,11 +122,14 @@ namespace SixtyOne.Editor
             SerializedWire.Set(dialogue, "nodePlayer", nodePlayer);
             SerializedWire.Set(dialogue, "presenter", choicePanel);
 
+            SerializedWire.Set(epilogue, "gameManager", gameManager);
+            SerializedWire.Set(epilogue, "presenter", choicePanel);
+
             SerializedWire.Set(nodePlayer, "gameManager", gameManager);
             SerializedWire.Set(nodePlayer, "content", data.Content);
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
-            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, fuse });
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, fuse, epilogue });
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);

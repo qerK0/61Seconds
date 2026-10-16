@@ -1,3 +1,4 @@
+using SixtyOne.Items;
 using SixtyOne.Nodes;
 using SixtyOne.Cinematic;
 using SixtyOne.Core;
@@ -20,7 +21,7 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            SurvivalController survival, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
+            SurvivalController survival, RecipeBook recipes, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -38,7 +39,7 @@ namespace SixtyOne.Editor
             BuildTimerBar(root, nodePlayer);
             BuildBuildingTimer(root, survival);
             BuildLoopCounter(root, gameManager);
-            BuildBag(root, gameManager, content, art, survival);
+            BuildBag(root, gameManager, content, art, survival, recipes);
             BuildStamina(root, survival);
             BuildToast(root);
             BuildAfadPopup(root);
@@ -212,7 +213,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(counter, "label", label);
         }
 
-        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival)
+        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival, RecipeBook recipes)
         {
             Image bg = UiFactory.MakeImage("Bag", root, new Vector2(0.865f, 0.42f), new Vector2(0.995f, 0.90f), new Color(0f, 0f, 0f, 0.6f));
             TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 1f), 26f, TextAlignmentOptions.Center, Accent, bold: true);
@@ -249,6 +250,7 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(bag, "slotBackgrounds", backgrounds);
             SerializedWire.SetArray(bag, "slotButtons", buttons);
             SerializedWire.Set(bag, "survival", survival);
+            SerializedWire.Set(bag, "recipes", recipes);
         }
 
         private static void BuildToast(Transform root)

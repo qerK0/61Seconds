@@ -1,5 +1,6 @@
 key,text,notes
 anchor.balcony,TODO: Balkon,
+anchor.bookshelf,TODO: Kitaplığın önü,
 anchor.doorway,TODO: Kapı eşiği,
 anchor.inner_wall,TODO: İç duvar dibi,
 anchor.lamp,TODO: Lambanın altı,
@@ -9,7 +10,9 @@ anchor.table,TODO: Sağlam masa,
 anchor.wardrobe,TODO: Dolap önü,
 anchor.window,TODO: Pencere kenarı,
 death.balcony,"TODO: Balkon aşağı, sen de onunla.",
+death.bookshelf,TODO: Kitaplık üstüne devrildi.,
 death.child.balcony,TODO: Çocuk balkonda mahsur kaldı!,
+death.child.bookshelf,TODO: Kitaplık çocuğunun üstüne devrildi.,
 death.child.doorway,"TODO: Kapı çöktü, çocuk arkada mahsur kaldı!",
 death.child.lamp_fall,TODO: Düşen lambanın altında çocuk mahsur kaldı!,child trapped
 death.child.open_room,TODO: Çocuk düşen eşyaların altında mahsur kaldı!,
@@ -31,6 +34,7 @@ death.stove,TODO: Çay demlenmedi. Bina demlendi.,
 death.switch_gas,TODO: Bir kıvılcım. Ve gaz.,
 death.wardrobe,TODO: Dolap sana sarılmaya karar verdi.,
 death.wife.balcony,TODO: Balkon çöktü. Eşin orada duruyordu.,"wife: cut to black, one line, no comedy"
+death.wife.bookshelf,TODO: Kitaplık eşinin üstüne devrildi.,
 death.wife.doorway,TODO: Kapı kasası çöktü. Eşin yaralandı.,wife injured line (not fatal)
 death.wife.lamp_fall,TODO: Lamba düştü. Eşin yaralandı.,wife injured line
 death.wife.open_room,TODO: Avize düştü. Eşin yaralandı.,wife injured line (not fatal)
@@ -38,8 +42,41 @@ death.wife.stair_edge,TODO: Merdiven kenarı çöktü. Eşin oradaydı.,"wife: c
 death.wife.wardrobe,TODO: Dolap devrildi. Eşinden ses gelmiyor.,"wife: cut to black, one line, no comedy"
 death.wife.window,TODO: Cam kırıkları... Eşin yaralandı.,wife injured line (not fatal)
 death.window,TODO: Pencere sana doğru patladı.,
-f2.aftershock.body,TODO: 2. kata indin. (Kat 2 içeriği burada devam edecek.),placeholder until Floor 2 lands
-f2.aftershock.title,TODO: 2. Kat,
+f2.aftershock.body,TODO: 2. kata indiğiniz anda güçlü bir artçı! Aileni hemen güvenli yere yerleştir.,"strong aftershock placement, floor checkpoint"
+f2.aftershock.title,TODO: Güçlü artçı!,
+f2.corridor.body,TODO: Merdivenin başında korkmuş bir köpek havlıyor. Geçmene izin vermiyor.,dog gate; no weapons
+f2.corridor.c_flat7,TODO: 7 numaraya dön,
+f2.corridor.c_flat8,TODO: 8 numaraya bak,
+f2.corridor.c_food,TODO: Köpeğe yiyecek ver,food is consumed
+f2.corridor.c_food.locked,TODO: Verecek yiyeceğin yok.,
+f2.corridor.c_pass,TODO: Köpeğin yanından geçmeyi dene,"bitten: injured and pushed back, not death"
+f2.corridor.c_stairs,TODO: Merdivenden aşağı in,
+f2.corridor.c_whistle,TODO: Düdükle köpeği uzağa çağır,whistle is kept
+f2.corridor.c_whistle.locked,TODO: Düdüğün yok.,
+f2.corridor.msg_bitten,TODO: Köpek bacağını ısırdı! Geri çekilmek zorunda kaldın.,player injured; first aid heals
+f2.corridor.msg_fed,TODO: Köpek yiyeceği kapıp bir köşeye çekildi.,
+f2.corridor.msg_whistle,"TODO: Düdük sesine kulak kabarttı, koşup uzaklaştı.",
+f2.corridor.title,TODO: 2. Kat koridoru,
+f2.epilogue.body,TODO: Toplanma alanına yürüyorsunuz.,
+f2.epilogue.borrow_no_note,TODO: Komşulardan {0} eşya ödünç aldınız. Geri vermek için onları bulmanız gerekecek.,{0} = borrowed count; never judgemental
+f2.epilogue.borrow_none,TODO: Kimseden bir şey ödünç almadan çıktınız.,
+f2.epilogue.borrow_note,TODO: Komşulardan {0} eşya ödünç aldınız; bıraktığın not sayesinde kime ne borçlu olduğunuzu biliyorlar.,{0} = borrowed count
+f2.epilogue.family_hurt,TODO: Yaralısınız ama hayattasınız. Sağlık ekipleri yolda.,
+f2.epilogue.family_ok,TODO: Ailen sağ salim yanında.,
+f2.epilogue.loops,TODO: Bu sabahı {0} kez yaşadın.,{0} = loop count
+f2.epilogue.title,TODO: Dışarıdasınız,
+f2.exit.body,TODO: Aşağıdan dışarının ışığı geliyor.,
+f2.exit.c_elevator,"TODO: Asansörle in, daha hızlı",trap
+f2.exit.c_out,TODO: Dışarı çık,
+f2.exit.title,TODO: Merdiven,
+f2.flat7.body,TODO: Burnuna keskin bir gaz kokusu geliyor. Ocak tarafından tıslama sesi.,gas room: poison rises until the valve is closed
+f2.flat7.c_corridor,TODO: Koridora çık,
+f2.flat7.c_lighter,TODO: Çakmakla etrafı aydınlat,trap with gas
+f2.flat7.c_valve,TODO: Gaz vanasını kapat,
+f2.flat7.title,TODO: Daire 7,
+f2.flat8.body,TODO: Boş bir daire. Eşyalar devrilmiş.,placeholder flat
+f2.flat8.c_back,TODO: Koridora dön,
+f2.flat8.title,TODO: Daire 8,
 f3.aftershock.body,TODO: 3. kata iner inmez bir artçı! Aileni hemen güvenli yere yerleştir.,"aftershock placement, floor checkpoint"
 f3.aftershock.title,TODO: Artçı!,
 f3.corridor.body,TODO: Aşağı inen merdiven çökmüş. Başka bir yol bulmalısın: 9 veya 10 numara.,
