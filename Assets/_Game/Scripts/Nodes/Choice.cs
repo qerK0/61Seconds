@@ -137,18 +137,45 @@ namespace SixtyOne.Nodes
             return this;
         }
 
-        /// <summary>Runtime death for clicking a ShowLockedFatal choice without its item (macro rewind).</summary>
-        public DeathInfo BuildMissingItemDeath()
+        /// <summary>Sets the ShowLockedFatal fallback item and death line without adding requirements.</summary>
+        public Choice WithMissingText(Item fallbackItem, TextKey missingText)
         {
+            missingItem = fallbackItem;
+            missingItemTextKey = missingText;
+            return this;
+        }
+
+        /// <summary>
+        /// Runtime death for clicking a ShowLockedFatal choice without its item. With a state, the missing item
+        /// is the first unmet HasItem/HasAnyItem requirement (so the death card names what is really missing);
+        /// otherwise the authored missingItem.
+        /// </summary>
+        public DeathInfo BuildMissingItemDeath(GameState state = null)
+        {
+            Item missing = state != null ? FirstMissingItem(state) : null;
+            if (missing == null) missing = missingItem;
             return new DeathInfo
             {
                 Victim = MemberType.Player,
                 TextKey = missingItemTextKey.Key,
                 TipId = death != null && death.Tip != null ? death.Tip.Id : null,
                 Cue = death != null ? death.Cue : null,
-                MissingItemId = missingItem != null ? missingItem.Id : null,
+                MissingItemId = missing != null ? missing.Id : null,
                 RewindTarget = missingItemRewind
             };
+        }
+
+        /// <summary>First item requirement that the state does not meet, or null.</summary>
+        public Item FirstMissingItem(GameState state)
+        {
+            foreach (Condition condition in conditions)
+            {
+                if (condition == null || ConditionEvaluator.Evaluate(condition, state)) continue;
+                if (condition.Type == ConditionType.HasItem) return condition.Item;
+                if (condition.Type == ConditionType.HasAnyItem && condition.AnyItems.Count > 0) return condition.AnyItems[0];
+            }
+
+            return null;
         }
 
         /// <summary>Adds an outcome.</summary>

@@ -2,33 +2,76 @@ key,text,notes
 anchor.balcony,TODO: Balkon,
 anchor.doorway,TODO: Kapı eşiği,
 anchor.inner_wall,TODO: İç duvar dibi,
+anchor.lamp,TODO: Lambanın altı,
+anchor.pillar,TODO: Kolon dibi,
+anchor.stair_edge,TODO: Merdiven boşluğu,
 anchor.table,TODO: Sağlam masa,
 anchor.wardrobe,TODO: Dolap önü,
 anchor.window,TODO: Pencere kenarı,
 death.balcony,"TODO: Balkon aşağı, sen de onunla.",
 death.child.balcony,TODO: Çocuk balkonda mahsur kaldı!,
 death.child.doorway,"TODO: Kapı çöktü, çocuk arkada mahsur kaldı!",
+death.child.lamp_fall,TODO: Düşen lambanın altında çocuk mahsur kaldı!,child trapped
 death.child.open_room,TODO: Çocuk düşen eşyaların altında mahsur kaldı!,
+death.child.stair_edge,TODO: Çocuk çöken basamakların arasında mahsur kaldı!,child trapped
 death.child.wardrobe,TODO: Dolap çocuğun önünü kapattı. Sıkıştı!,"child trapped, never dies"
 death.child.window,TODO: Cam kırıkları arasında çocuk mahsur kaldı!,
 death.child_alone,TODO: Çocuk tek başına kaldı ve mahsur kaldı!,
 death.collapse,TODO: Bina daha fazla dayanamadı.,building timer hit 0
 death.doorway,TODO: Kapı kasası seni korumadı. Hiç korumaz.,
+death.electrocuted,TODO: Çıplak elle akımlı kabloya dokundun.,fuse box without insulated gloves/grip + tape
 death.elevator,TODO: Asansör kat arasında durdu. Sonsuza dek.,"player, comic allowed"
 death.gas_poison,TODO: Gözlerin karardı. Gaz seni yere indirdi.,
 death.kitchen_fire,TODO: Yukarıda açık kalan gaz alev aldı. Merdivenler duman içinde.,delayed bomb from act 1 gas valve
+death.lamp_fall,TODO: Koridor lambası tam tepene indi.,player
+death.lighter_explosion,TODO: Çakmağı çaktın. Mutfak gazla doluydu.,Flat 10 lighter before closing the valve
 death.open_room,TODO: Odanın ortasında avize seni buldu.,
+death.stair_edge,TODO: Merdiven boşluğunun kenarı seninle birlikte çöktü.,player
 death.stove,TODO: Çay demlenmedi. Bina demlendi.,
 death.switch_gas,TODO: Bir kıvılcım. Ve gaz.,
 death.wardrobe,TODO: Dolap sana sarılmaya karar verdi.,
 death.wife.balcony,TODO: Balkon çöktü. Eşin orada duruyordu.,"wife: cut to black, one line, no comedy"
 death.wife.doorway,TODO: Kapı kasası çöktü. Eşin yaralandı.,wife injured line (not fatal)
+death.wife.lamp_fall,TODO: Lamba düştü. Eşin yaralandı.,wife injured line
 death.wife.open_room,TODO: Avize düştü. Eşin yaralandı.,wife injured line (not fatal)
+death.wife.stair_edge,TODO: Merdiven kenarı çöktü. Eşin oradaydı.,"wife: cut to black, one line"
 death.wife.wardrobe,TODO: Dolap devrildi. Eşinden ses gelmiyor.,"wife: cut to black, one line, no comedy"
 death.wife.window,TODO: Cam kırıkları... Eşin yaralandı.,wife injured line (not fatal)
 death.window,TODO: Pencere sana doğru patladı.,
-f3.aftershock.body,TODO: 3. kata indin. (Kat 3 içeriği burada devam edecek.),placeholder until Floor 3 lands
-f3.aftershock.title,TODO: 3. Kat,
+f2.aftershock.body,TODO: 2. kata indin. (Kat 2 içeriği burada devam edecek.),placeholder until Floor 2 lands
+f2.aftershock.title,TODO: 2. Kat,
+f3.aftershock.body,TODO: 3. kata iner inmez bir artçı! Aileni hemen güvenli yere yerleştir.,"aftershock placement, floor checkpoint"
+f3.aftershock.title,TODO: Artçı!,
+f3.corridor.body,TODO: Aşağı inen merdiven çökmüş. Başka bir yol bulmalısın: 9 veya 10 numara.,
+f3.corridor.c_flat10,TODO: 10 numaraya gir,
+f3.corridor.c_flat9,TODO: 9 numaraya gir,
+f3.corridor.c_trader,TODO: Cemil Bey'le konuş,
+f3.corridor.title,TODO: 3. Kat koridoru,
+f3.flat10.body,TODO: Zifiri karanlık. Ocaktan gaz sızıyor; zemin bir yerde çökmüş.,gas room
+f3.flat10.c_back,TODO: Koridora dön,
+f3.flat10.c_flashlight,TODO: Feneri yak,
+f3.flat10.c_flashlight.locked,TODO: Zifiri karanlık. Bir ışık lazım.,
+f3.flat10.c_hole,TODO: Çökmüş zeminden aşağı in,heavy; alternative way down
+f3.flat10.c_lighter,TODO: Çakmakla etrafı aydınlat,trap while gas is open
+f3.flat10.c_valve,TODO: Ocak vanasını kapat,
+f3.flat10.title,TODO: Daire 10,
+f3.flat9.body,"TODO: Kablolar sarkıyor, asansör boşluğuna açılan bir delik var. Sigorta kutusunun etiketinde: '1, 3 ve 4'.",fuse hint
+f3.flat9.c_back,TODO: Koridora dön,
+f3.flat9.c_cables,TODO: Kablolardan aşağı in,heavy; needs child harness
+f3.flat9.c_cables.locked,TODO: Çocuğu taşıyamazsın: bir taşıma kuşağı lazım.,
+f3.flat9.c_repair,"TODO: Kabloyu onar, sigortaları ayarla","needs (gloves or insulated grip) + tape, else electrocution"
+f3.flat9.c_repair.locked,TODO: Çıplak kablo! Yalıtım ve bant lazım.,still clickable: kills
+f3.flat9.title,TODO: Daire 9,
+f3.fuse.body,"TODO: Etikette: '1, 3 ve 4 açık olmalı'. Yanlış sıra kıvılcım çıkarır.",
+f3.fuse.c_back,TODO: Vazgeç,
+f3.fuse.title,TODO: Sigorta kutusu,
+f3.trader.body,"TODO: Elinde dolu bir çanta, koridorda bekliyor.",
+f3.trader.c_hurry,TODO: Vaktimiz yok,consequence: no item
+f3.trader.c_take,TODO: Bir şey verebilir misiniz?,gives the first missing upcoming item
+f3.trader.l1,TODO: Siz de mi mahsur kaldınız? Merdiven gitti.,
+f3.trader.l2,"TODO: Benim çantada bir sürü şey var, ihtiyacınız olanı alın.",
+f3.trader.l3,"TODO: Çocuk için dikkat edin, aşağısı karanlık.",
+f3.trader.title,TODO: Cemil Bey,
 f4.corridor.body,TODO: Koridor tozla dolu. Merdiven aşağıya iniyor.,
 f4.corridor.c_down,TODO: Merdivenden 3. kata in,
 f4.corridor.c_elevator,TODO: Asansörü çağır,trap
@@ -100,6 +143,7 @@ item.wet_cloth.desc,"TODO: Ağzını kapat, gazı daha az soluyacaksın.",
 item.wet_cloth.name,TODO: Islak bez,
 item.whistle.desc,TODO: Enkaz altında sesini duyurmak için.,
 item.whistle.name,TODO: Düdük,
+npc.cemil.name,TODO: Cemil Bey,Floor 3 trader neighbour
 npc.hasan.name,TODO: Hasan Amca,kind corridor neighbour
 npc.sevim.name,TODO: Sevim Teyze,intro neighbour
 tip.aftershock,TODO: Artçı sarsıntılarda da Çök-Kapan-Tutun; pencere ve devrilebilecek eşyalardan uzak dur.,AFAD

@@ -174,7 +174,7 @@ namespace SixtyOne.Nodes
                     choicePresenter?.Clear();
                     GameEvents.RaiseChoiceMade(Current.Id, choice.LabelKey.Key);
                     Timer.Stop();
-                    gameManager.Die(choice.BuildMissingItemDeath());
+                    gameManager.Die(choice.BuildMissingItemDeath(State));
                 }
 
                 return;

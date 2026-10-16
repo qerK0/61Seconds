@@ -20,7 +20,7 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            SurvivalController survival, out LetterboxBars letterbox)
+            SurvivalController survival, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -43,6 +43,7 @@ namespace SixtyOne.Editor
             BuildToast(root);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
+            fusePanel = BuildFusePanel(root);
             BuildDeathCard(root, gameManager, content, art);
             BuildPoisonOverlay(root);
             BuildRewindFx(root, camera);
@@ -136,6 +137,38 @@ namespace SixtyOne.Editor
             SerializedWire.Set(display, "survival", survival);
             SerializedWire.Set(display, "label", label);
             SerializedWire.Set(display, "spentLabel", spent);
+        }
+
+        private static FusePuzzlePanel BuildFusePanel(Transform root)
+        {
+            Image bg = UiFactory.MakeImage("FusePuzzle", root, new Vector2(0.3f, 0.45f), new Vector2(0.7f, 0.8f), new Color(0.08f, 0.08f, 0.1f, 0.95f), raycast: true);
+            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
+            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.03f, 0.8f), new Vector2(0.97f, 0.97f), 30f, TextAlignmentOptions.Center, Accent, bold: true);
+            LocalizedText titleText = title.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(titleText, "key", UiKeys.FuseTitle);
+
+            var buttons = new Object[4];
+            var labels = new Object[4];
+            for (int i = 0; i < 4; i++)
+            {
+                float x = 0.06f + i * 0.23f;
+                Button sw = UiFactory.MakeButton("Switch" + (i + 1), bg.transform, new Vector2(x, 0.32f), new Vector2(x + 0.19f, 0.74f), ButtonColor, 44f, out TextMeshProUGUI label);
+                TextMeshProUGUI number = UiFactory.MakeLabel("Number", sw.transform, new Vector2(0f, -0.3f), new Vector2(1f, 0f), 20f, TextAlignmentOptions.Center, Color.white);
+                number.text = (i + 1).ToString();
+                buttons[i] = sw;
+                labels[i] = label;
+            }
+
+            Button tryButton = UiFactory.MakeButton("Try", bg.transform, new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.18f), new Color(0.8f, 0.4f, 0.1f, 1f), 26f, out TextMeshProUGUI tryLabel);
+            LocalizedText tryText = tryLabel.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(tryText, "key", UiKeys.FuseTry);
+
+            FusePuzzlePanel panel = bg.gameObject.AddComponent<FusePuzzlePanel>();
+            SerializedWire.Set(panel, "group", group);
+            SerializedWire.SetArray(panel, "switchButtons", buttons);
+            SerializedWire.SetArray(panel, "switchLabels", labels);
+            SerializedWire.Set(panel, "tryButton", tryButton);
+            return panel;
         }
 
         private static void BuildStamina(Transform root, SurvivalController survival)

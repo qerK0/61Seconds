@@ -7,6 +7,7 @@ using SixtyOne.Dialogue;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
+using SixtyOne.Puzzles;
 using SixtyOne.Text;
 using SixtyOne.UI;
 using TMPro;
@@ -76,6 +77,7 @@ namespace SixtyOne.Editor
             RoomSwitcher switcher = systems.AddComponent<RoomSwitcher>();
             PlacementController placement = systems.AddComponent<PlacementController>();
             DialogueController dialogue = systems.AddComponent<DialogueController>();
+            FusePuzzleController fuse = systems.AddComponent<FusePuzzleController>();
             SurvivalController survival = systems.AddComponent<SurvivalController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
 
@@ -108,7 +110,10 @@ namespace SixtyOne.Editor
             SerializedWire.Set(survival, "config", data.Level);
             SerializedWire.Set(survival, "dialogue", dialogue);
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, out LetterboxBars letterbox);
+            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival,
+                out LetterboxBars letterbox, out FusePuzzlePanel fusePanel);
+            SerializedWire.Set(fuse, "gameManager", gameManager);
+            SerializedWire.Set(fuse, "panel", fusePanel);
             TestSceneCinematic.Build(cinematic, camera, gameManager, nodePlayer, survival, letterbox, family[0].transform, practicals,
                 BuildingLevelsGenerator.ExitNodeIds);
 
@@ -120,7 +125,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(nodePlayer, "content", data.Content);
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
-            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement });
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, fuse });
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
