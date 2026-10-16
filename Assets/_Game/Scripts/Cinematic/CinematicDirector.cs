@@ -186,7 +186,6 @@ namespace SixtyOne.Cinematic
             filmGrain.type.Override(FilmGrainLookup.Medium1);
             vignette.color.Override(Color.black);
             vignette.rounded.Override(false);
-            runtimeProfile.isDirty = true;
 
             volume.isGlobal = true;
             volume.sharedProfile = runtimeProfile;

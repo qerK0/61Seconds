@@ -27,7 +27,7 @@ namespace SixtyOne.Iso
 
         private void Awake()
         {
-            filter = new ContactFilter2D().NoFilter();
+            filter = ContactFilter2D.noFilter;
             filter.SetLayerMask(layers);
             filter.useTriggers = true;
         }

@@ -4,6 +4,72 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 00:50] LOCAL — Cinematic look verified in Unity, Act 1–3 profiles tuned, world labels made readable
+### Done
+- **Compile:** Safe Mode is exited. The `Unity.RenderPipelines.Universal.2D.Runtime` reference (needed for Light2D) is in both asmdefs. 0 errors. Fixed the 2 remaining warnings: `ContactFilter2D.noFilter` in IsoPicker, and removed the obsolete `VolumeProfile.isDirty` line in CinematicDirector (not needed for a runtime profile).
+- **Risky APIs from the cloud handoff all work for real:**
+  - `Light2D.lightType` / `pointLightOuterRadius` setters
+  - `GetUniversalAdditionalCameraData()` (Post Processing = on)
+  - `VolumeProfile.Add<T>` + `AddObjectToAsset` (`CinematicBaseVolume` has 8 overrides)
+  - ParticleSystem setup in edit mode
+  - the shader `Universal Render Pipeline/2D/Sprite-Unlit-Default`
+  - Dust renders white, **not magenta**, so no manual material was needed.
+- **Checklist:** Generate Profiles → Generate Sample Act 1 → Build Test Scene all ran clean. Main Camera post-processing is on. All 6 Light2Ds target sorting layer 0 (Default), which is the project's only layer. Validate Content: 0 problems. Text > Validate: 145 referenced, 0 missing/empty/unused. **EditMode 70/70 passed.**
+- **CSV lock fix:** `strings_tr.csv` was open in LibreOffice. `File.ReadAllText` then threw "Sharing violation", which broke both validators and 1 test. Added `TextDB.ReadCsvFile` (FileShare.ReadWrite) and used it in TextDB, TextMenu, TextCsvPostprocessor and CsvParserTests. The writer can now keep the sheet open.
+- **World labels:** after tuning, the white TMP labels turned grey on light tiles (ACES + negative EV). New `WorldLabelStyle` gives prep and anchor labels a shared `Data/WorldLabel_SDF.mat`: HDR face 1.7, black outline 0.18 and an underlay. Build Test Scene applies it. They now read crisp white in every phase.
+- **Play-tested loops 1–2 + screenshots** (saved in `Captures/`, which is git-ignored):
+  - **T=61 prep start** (`01_*`): AFAD popup + 61 countdown readable; room moody but every prop visible. Grey labels were low-contrast, which led to the label fix.
+  - **T=10** (`02_T10_letterbox`): ÇÖK-KAPAN-TUTUN alert + red countdown. The letterbox bars are there but hard to see because the area outside the room is already black. Heartbeat vignette pulses on each tick.
+  - **Quake** (`03_quake-1`): dust specks across the screen, chromatic fringe on edges, lights flickering, "SARSINTI! (6,0)" readable. Measured peaks: flash +1.6 EV, chromatic 0.77, lens 0.20, roll 0.69°, cam offset 0.153.
+  - **Post-quake, no flashlight** (`04_postquake_noflashlight`): before tuning, the back walls were nearly crushed. After tuning, floor/characters/labels read and the walls are dark but separable.
+  - **Post-quake, flashlight** (`04b`, `12_tuned_*`): warm pool around the player, and the rest of the room stays readable.
+  - **Death** (`03a`, `05a_*`, `05_death_card_unplaced`): blends to sat −100 / contrast 40 / vignette 0.6 (values confirmed on the volume). The card fades in 0.5s later; text, Deprem Notu and GERİ SAR are all clear.
+  - **Rewind** (`06_rewind` micro → placement at T=10, LOOP #1, bag kept; `06b_rewind_macro` → 61s, LOOP #2, empty bag): RewindFX scanlines + grain/aberration spike.
+  - Loop 2: flashlight + crowbar from the bedroom, placement table/table/inner wall → everyone safe → explore.
+- **Reduce Effects ON** (measured during the quake): roll 0°, chromatic 0, lens 0, no flash (exposure stayed at the −0.15 base), cam shake offset 0.044 vs 0.153 (≈0.29×, matches the 0.35 scale). Set back to OFF afterwards.
+- **Final tuned values** (Act 1 tuned from the screenshots; Acts 2/3 step darker and harsher from it):
+
+  | field | Act 1 | Act 2 | Act 3 |
+  |---|---|---|---|
+  | postExposure | −0.15 | −0.30 | −0.45 |
+  | contrast | 12 | 18 | 24 |
+  | saturation | −20 | −28 | −36 |
+  | vignette / smoothness | 0.32 / 0.55 | 0.37 / 0.50 | 0.42 / 0.45 |
+  | grainIntensity | 0.20 | 0.28 | 0.36 |
+  | globalLightIntensity | 0.80 | 0.70 | 0.60 |
+  | prepVignetteEnd / prepSaturationEnd | 0.50 / −45 | 0.55 / −53 | 0.60 / −61 |
+  | postQuakeGlobalLight | 0.40 | 0.34 | 0.28 |
+  | postQuakeExposureOffset | −0.30 | −0.35 | −0.40 |
+  | postQuakeVignette / postQuakeSaturation | 0.48 / −45 | 0.52 / −53 | 0.56 / −61 |
+  | rotationalShake° / dutchTilt° | 0.5 / 0 | 0.85 / 0 | 1.2 / 2.5 |
+  | chromaticSettle / lensWobble | 0.10 / 0.20 | 0.15 / 0.26 | 0.20 / 0.32 |
+  | dustBurstCount | 80 | 140 | 200 |
+- `VersionControlSettings` was flipped to "Unity Version Control" twice by the Editor. Reset to **Visible Meta Files** (checked on disk).
+### Files created / changed
+- Assets/_Game/Scripts/SixtyOne.Runtime.asmdef, Editor/SixtyOne.Editor.asmdef — + `Unity.RenderPipelines.Universal.2D.Runtime` (Light2D)
+- Assets/_Game/Scripts/Iso/IsoPicker.cs, Cinematic/CinematicDirector.cs — obsolete-API warnings fixed
+- Assets/_Game/Scripts/Text/TextDB.cs (+ReadCsvFile), Editor/Text/TextMenu.cs, Editor/Text/TextCsvPostprocessor.cs, Tests/EditMode/CsvParserTests.cs — share-tolerant CSV reads
+- Assets/_Game/Scripts/Editor/SceneBuild/WorldLabelStyle.cs — new; TestSceneBuilder.cs applies it to both label kinds
+- Assets/_Game/Data/Cinematic/* — generated + tuned CinematicAct1–3, CinematicBaseVolume, CinematicDust.mat
+- Assets/_Game/Data/WorldLabel_SDF.mat — generated label material
+- Assets/_Game/Data/GameSettings.asset — new reduceEffects/reducedShakeScale fields serialized (reduceEffects = 0)
+- Assets/_Game/Scenes/Test_Act1.unity — rebuilt by Build Test Scene
+- Cloud script/test `.meta` files (Editor-generated); .gitignore (`.~lock.*#`, `/Captures/`)
+### Needs local wiring (checklist for the MCP session)
+- [ ] Hand-feel pass with real mouse + focused Game view: letterbox slide, heartbeat rhythm and the flicker timing on the real frame rate
+- [ ] Move overlapping bedroom labels apart ("Komodini aç: el feneri" vs "Yatağın altına bak: levye") in TestSceneBuilder specs
+- [ ] Assign audio clips to the cues (still all silent)
+- [ ] Optional: remove `com.unity.collab-proxy` from Packages/manifest.json; it keeps flipping the VCS mode (needs sign-off)
+### Not verified / risks
+- Acts 2 and 3 were tuned by extrapolation only; no Act 2/3 scene exists yet, so they were never seen on screen.
+- The letterbox is barely visible because the scene background is already black. Once real room art fills the frame, check whether 2.35:1 still reads.
+- **MCP play-testing caveat:** with the Editor unfocused, Play Mode only advances when `Application.runInBackground = true` is set at runtime. Twice during play, a script recompile + domain reload reset the session mid-run (`GameManager.Instance` null). This came from the MCP tooling, not game code. "Recompile After Finished Playing" (EditorPrefs) stopped it; I restored the pref to default afterwards.
+- The win look is still untested (no exit node yet).
+### Next suggested step
+- CLOUD: Act 2 content (floor 4, 7.0 quake, short/zero prep), then a LOCAL pass to eyeball the CinematicAct2 values on a real scene.
+
+---
+
 ## [2026-10-16 22:10] CLOUD — Cinematic look: CinematicDirector + per-act CinematicProfiles (dark, dramatic, event-driven)
 ### Done
 - Rebased on top of the 23:05 LOCAL entry (prep wiring, family click fix); no code conflicts. Timestamp is the cloud clock (UTC); local entries use local time, which is why 22:10 sits above 23:05.

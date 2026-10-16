@@ -74,9 +74,17 @@ namespace SixtyOne.Text
 #if UNITY_EDITOR
             if (!IsLoaded && System.IO.File.Exists(DefaultCsvPath))
             {
-                LoadFromCsv(System.IO.File.ReadAllText(DefaultCsvPath));
+                LoadFromCsv(ReadCsvFile(DefaultCsvPath));
             }
 #endif
+        }
+
+        /// <summary>Reads a CSV file even while a spreadsheet app (Excel, LibreOffice) holds it open for writing.</summary>
+        public static string ReadCsvFile(string path)
+        {
+            using var stream = new System.IO.FileStream(path, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite | System.IO.FileShare.Delete);
+            using var reader = new System.IO.StreamReader(stream, System.Text.Encoding.UTF8);
+            return reader.ReadToEnd();
         }
 
         /// <summary>True if the key has a row in the CSV (even with empty text).</summary>

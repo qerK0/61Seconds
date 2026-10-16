@@ -71,7 +71,7 @@ namespace SixtyOne.Editor
             }
             else
             {
-                string existing = File.ReadAllText(path);
+                string existing = TextDB.ReadCsvFile(path);
                 if (existing.Length > 0 && !existing.EndsWith("\n"))
                 {
                     builder.Append('\n');
@@ -93,7 +93,7 @@ namespace SixtyOne.Editor
         {
             if (File.Exists(TextDB.DefaultCsvPath))
             {
-                TextDB.LoadFromCsv(File.ReadAllText(TextDB.DefaultCsvPath));
+                TextDB.LoadFromCsv(TextDB.ReadCsvFile(TextDB.DefaultCsvPath));
             }
             else
             {

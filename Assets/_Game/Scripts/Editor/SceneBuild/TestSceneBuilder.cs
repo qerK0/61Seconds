@@ -336,6 +336,7 @@ namespace SixtyOne.Editor
             label.fontStyle = FontStyles.Bold;
             label.rectTransform.sizeDelta = new Vector2(2.2f, 0.4f);
             label.sortingOrder = LabelOrder;
+            WorldLabelStyle.Apply(label);
             labelGo.SetActive(false);
 
             Anchor anchor = go.AddComponent<Anchor>();
@@ -463,6 +464,7 @@ namespace SixtyOne.Editor
             label.color = Color.white;
             label.rectTransform.sizeDelta = new Vector2(2.4f, 0.3f);
             label.sortingOrder = LabelOrder;
+            WorldLabelStyle.Apply(label);
             LocalizedText localized = labelGo.AddComponent<LocalizedText>();
             SerializedWire.SetTextKey(localized, "key", labelKey);
 

@@ -13,5 +13,7 @@ MonoBehaviour:
   m_Name: GameSettings
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Core.GameSettings
   knowledgeHighlight: 1
+  reduceEffects: 0
+  reducedShakeScale: 0.35
   highlightColor: {r: 1, g: 0.95, b: 0.55, a: 1}
   highlightPulseSpeed: 1.5

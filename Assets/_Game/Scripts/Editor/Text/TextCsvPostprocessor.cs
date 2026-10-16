@@ -17,7 +17,7 @@ namespace SixtyOne.Editor
                     continue;
                 }
 
-                TextDB.LoadFromCsv(File.ReadAllText(path));
+                TextDB.LoadFromCsv(TextDB.ReadCsvFile(path));
                 Debug.Log("[TextDB] Reloaded " + path);
             }
         }

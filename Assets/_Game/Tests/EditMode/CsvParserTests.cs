@@ -107,7 +107,7 @@ namespace SixtyOne.Tests
                 // Restore the real CSV so editor previews are not left with test data.
                 if (System.IO.File.Exists(TextDB.DefaultCsvPath))
                 {
-                    TextDB.LoadFromCsv(System.IO.File.ReadAllText(TextDB.DefaultCsvPath));
+                    TextDB.LoadFromCsv(TextDB.ReadCsvFile(TextDB.DefaultCsvPath));
                 }
             }
         }
