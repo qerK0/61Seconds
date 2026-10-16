@@ -54,6 +54,9 @@ namespace SixtyOne.Nodes
         public IReadOnlyList<Outcome> OnEnter => onEnter;
         public IReadOnlyList<BombCheck> BombChecks => bombChecks;
 
+        /// <summary>True for nodes whose entry snapshot is the macro rewind target (prep phases).</summary>
+        public virtual bool IsPrepStart => false;
+
         /// <summary>Choice fired when the timer runs out: the designated one, else the first Trap.</summary>
         public Choice GetTimeoutChoice()
         {

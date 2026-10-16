@@ -11,11 +11,18 @@ namespace SixtyOne.Nodes
         public readonly Choice Choice;
         public readonly bool Locked;
 
-        public ChoiceView(int index, Choice choice, bool locked)
+        /// <summary>Locked but clickable (ShowLockedFatal): clicking kills.</summary>
+        public readonly bool Fatal;
+
+        /// <summary>True if the button reacts to clicks.</summary>
+        public bool Clickable => !Locked || Fatal;
+
+        public ChoiceView(int index, Choice choice, bool locked, bool fatal = false)
         {
             Index = index;
             Choice = choice;
             Locked = locked;
+            Fatal = locked && fatal;
         }
 
         /// <summary>Builds the visible list for a node: hides timeout-only/hidden choices, marks locked ones.</summary>
@@ -36,7 +43,7 @@ namespace SixtyOne.Nodes
                     continue;
                 }
 
-                views.Add(new ChoiceView(i, choice, !met));
+                views.Add(new ChoiceView(i, choice, !met, choice.FailBehaviour == FailBehaviour.ShowLockedFatal));
             }
 
             return views;
