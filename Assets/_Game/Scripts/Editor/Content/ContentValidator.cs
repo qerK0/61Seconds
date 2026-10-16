@@ -100,18 +100,17 @@ namespace SixtyOne.Editor
             foreach (Outcome outcome in outcomes)
             {
                 if (outcome == null) continue;
-                switch (outcome.Type)
+                if (outcome.Type == OutcomeType.GoToNode && outcome.TargetNode == null)
                 {
-                    case OutcomeType.GoToNode when outcome.TargetNode == null:
-                        problems += Report($"{where}: GoToNode without a target.", owner);
-                        break;
-                    case OutcomeType.SetFlag when string.IsNullOrEmpty(outcome.Flag):
-                        problems += Report($"{where}: SetFlag without a flag name.", owner);
-                        break;
-                    case OutcomeType.AddItem when outcome.Item == null:
-                    case OutcomeType.RemoveItem when outcome.Item == null:
-                        problems += Report($"{where}: {outcome.Type} without an item.", owner);
-                        break;
+                    problems += Report($"{where}: GoToNode without a target.", owner);
+                }
+                else if (outcome.Type == OutcomeType.SetFlag && string.IsNullOrEmpty(outcome.Flag))
+                {
+                    problems += Report($"{where}: SetFlag without a flag name.", owner);
+                }
+                else if ((outcome.Type == OutcomeType.AddItem || outcome.Type == OutcomeType.RemoveItem) && outcome.Item == null)
+                {
+                    problems += Report($"{where}: {outcome.Type} without an item.", owner);
                 }
             }
 
