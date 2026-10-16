@@ -46,10 +46,11 @@ namespace SixtyOne.Editor
                 return;
             }
 
+            // NewScene(Single) unloads unused assets, so open it before loading the data we wire in.
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+
             SampleAct1Assets data = SampleAct1Generator.Generate();
             art = PlaceholderArt.Generate();
-
-            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             Camera camera = BuildCamera();
             BuildEventSystem();
