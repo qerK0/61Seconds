@@ -21,11 +21,20 @@ namespace SixtyOne.UI
         [Tooltip("Slot name labels (4).")]
         [SerializeField] private TMP_Text[] slotLabels = new TMP_Text[Inventory.DefaultCapacity];
 
+        [Tooltip("Slot backgrounds, flashed red when the bag is full.")]
+        [SerializeField] private Image[] slotBackgrounds = new Image[Inventory.DefaultCapacity];
+
+        [Tooltip("Flash color for 'bag full'.")]
+        [SerializeField] private Color fullFlashColor = new Color(1f, 0.2f, 0.2f, 0.6f);
+
+        private Color[] backgroundColors;
+
         private void OnEnable()
         {
             GameEvents.ItemAdded += OnChanged;
             GameEvents.ItemRemoved += OnChanged;
             GameEvents.Rewound += OnChanged;
+            GameEvents.Message += OnMessage;
             Refresh();
         }
 
@@ -34,6 +43,42 @@ namespace SixtyOne.UI
             GameEvents.ItemAdded -= OnChanged;
             GameEvents.ItemRemoved -= OnChanged;
             GameEvents.Rewound -= OnChanged;
+            GameEvents.Message -= OnMessage;
+        }
+
+        private void OnMessage(string key)
+        {
+            if (key != SixtyOne.Text.UiKeys.BagFull) return;
+            StopAllCoroutines();
+            StartCoroutine(FlashFull());
+        }
+
+        private System.Collections.IEnumerator FlashFull()
+        {
+            if (backgroundColors == null)
+            {
+                backgroundColors = new Color[slotBackgrounds.Length];
+                for (int i = 0; i < slotBackgrounds.Length; i++)
+                {
+                    if (slotBackgrounds[i] != null) backgroundColors[i] = slotBackgrounds[i].color;
+                }
+            }
+
+            for (int blink = 0; blink < 3; blink++)
+            {
+                SetBackgrounds(fullFlashColor, useOriginal: false);
+                yield return new WaitForSecondsRealtime(0.12f);
+                SetBackgrounds(fullFlashColor, useOriginal: true);
+                yield return new WaitForSecondsRealtime(0.12f);
+            }
+        }
+
+        private void SetBackgrounds(Color color, bool useOriginal)
+        {
+            for (int i = 0; i < slotBackgrounds.Length; i++)
+            {
+                if (slotBackgrounds[i] != null) slotBackgrounds[i].color = useOriginal ? backgroundColors[i] : color;
+            }
         }
 
         private void OnChanged(string _) => Refresh();
