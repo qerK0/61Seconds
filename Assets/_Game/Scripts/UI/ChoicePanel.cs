@@ -61,7 +61,7 @@ namespace SixtyOne.UI
                 int index = view.Index;
                 button.Bind(view, () =>
                 {
-                    if (picked) return;
+                    if (picked || SixtyOne.Core.InputGate.IsBlocked) return;
                     picked = true;
                     onChosen?.Invoke(index);
                 });

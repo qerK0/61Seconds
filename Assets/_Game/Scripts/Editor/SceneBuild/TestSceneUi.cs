@@ -1,5 +1,7 @@
 using SixtyOne.Nodes;
 using SixtyOne.Core;
+using SixtyOne.Placement;
+using SixtyOne.Prep;
 using SixtyOne.Text;
 using SixtyOne.UI;
 using TMPro;
@@ -16,7 +18,8 @@ namespace SixtyOne.Editor
         private static readonly Color Accent = new Color(1f, 0.82f, 0.2f, 1f);
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
-        public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art)
+        public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
+            PrepController prep, RoomSwitcher rooms, string[] prepRooms)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -29,12 +32,15 @@ namespace SixtyOne.Editor
 
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             BuildTimerBar(root, nodePlayer);
+            BuildCountdown(root, prep, nodePlayer);
+            BuildActionProgress(root, prep);
+            BuildRoomTabs(root, prep, rooms, prepRooms);
             BuildLoopCounter(root, gameManager);
             BuildBag(root, gameManager, content, art);
             BuildToast(root);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
-            BuildDeathCard(root, gameManager, content);
+            BuildDeathCard(root, gameManager, content, art);
             BuildRewindFx(root, camera);
             return choicePanel;
         }
@@ -99,6 +105,57 @@ namespace SixtyOne.Editor
             SerializedWire.Set(bar, "fillImage", fill);
         }
 
+        private static void BuildCountdown(Transform root, PrepController prep, NodePlayer nodePlayer)
+        {
+            RectTransform rect = UiFactory.MakeRect("Countdown", root, new Vector2(0.4f, 0.85f), new Vector2(0.6f, 0.95f));
+            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
+            TextMeshProUGUI label = UiFactory.MakeLabel("Number", rect, Vector2.zero, Vector2.one, 90f, TextAlignmentOptions.Center, Color.white, bold: true);
+
+            CountdownDisplay display = rect.gameObject.AddComponent<CountdownDisplay>();
+            SerializedWire.Set(display, "prep", prep);
+            SerializedWire.Set(display, "nodePlayer", nodePlayer);
+            SerializedWire.Set(display, "group", group);
+            SerializedWire.Set(display, "label", label);
+        }
+
+        private static void BuildActionProgress(Transform root, PrepController prep)
+        {
+            Image bg = UiFactory.MakeImage("ActionProgress", root, new Vector2(0.33f, 0.42f), new Vector2(0.67f, 0.47f), new Color(0f, 0f, 0f, 0.7f));
+            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
+            Image fill = UiFactory.MakeImage("Fill", bg.transform, Vector2.zero, Vector2.one, new Color(0.35f, 0.85f, 0.45f, 0.9f));
+            fill.rectTransform.pivot = new Vector2(0f, 0.5f);
+            TextMeshProUGUI label = UiFactory.MakeLabel("Label", bg.transform, Vector2.zero, Vector2.one, 24f, TextAlignmentOptions.Center, Color.white, bold: true);
+
+            ActionProgressBar bar = bg.gameObject.AddComponent<ActionProgressBar>();
+            SerializedWire.Set(bar, "prep", prep);
+            SerializedWire.Set(bar, "group", group);
+            SerializedWire.Set(bar, "fill", fill.rectTransform);
+            SerializedWire.Set(bar, "label", label);
+        }
+
+        private static void BuildRoomTabs(Transform root, PrepController prep, RoomSwitcher rooms, string[] roomIds)
+        {
+            RectTransform rect = UiFactory.MakeRect("RoomTabs", root, new Vector2(0.005f, 0.45f), new Vector2(0.13f, 0.78f));
+            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
+            var buttons = new Object[roomIds.Length];
+            float step = 1f / Mathf.Max(1, roomIds.Length);
+            for (int i = 0; i < roomIds.Length; i++)
+            {
+                float top = 1f - i * step;
+                Button button = UiFactory.MakeButton("Tab_" + roomIds[i], rect, new Vector2(0f, top - step + 0.03f), new Vector2(1f, top), ButtonColor, 24f, out TextMeshProUGUI label);
+                LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
+                SerializedWire.SetTextKey(localized, "key", "room." + roomIds[i]);
+                buttons[i] = button;
+            }
+
+            RoomTabs tabs = rect.gameObject.AddComponent<RoomTabs>();
+            SerializedWire.Set(tabs, "prep", prep);
+            SerializedWire.Set(tabs, "group", group);
+            SerializedWire.Set(tabs, "rooms", rooms);
+            SerializedWire.SetStringArray(tabs, "roomIds", roomIds);
+            SerializedWire.SetArray(tabs, "buttons", buttons);
+        }
+
         private static void BuildLoopCounter(Transform root, GameManager gameManager)
         {
             TextMeshProUGUI label = UiFactory.MakeLabel("LoopCounter", root, new Vector2(0.01f, 0.91f), new Vector2(0.26f, 0.99f), 44f, TextAlignmentOptions.Left, Accent, bold: true);
@@ -116,6 +173,7 @@ namespace SixtyOne.Editor
 
             var icons = new Object[Inventory.DefaultCapacity];
             var labels = new Object[Inventory.DefaultCapacity];
+            var backgrounds = new Object[Inventory.DefaultCapacity];
             for (int i = 0; i < Inventory.DefaultCapacity; i++)
             {
                 float top = 0.86f - i * 0.215f;
@@ -127,6 +185,7 @@ namespace SixtyOne.Editor
                 name.fontSizeMin = 10f;
                 name.fontSizeMax = 20f;
                 icons[i] = icon;
+                backgrounds[i] = slot;
                 labels[i] = name;
             }
 
@@ -135,6 +194,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(bag, "content", content);
             SerializedWire.SetArray(bag, "slotIcons", icons);
             SerializedWire.SetArray(bag, "slotLabels", labels);
+            SerializedWire.SetArray(bag, "slotBackgrounds", backgrounds);
         }
 
         private static void BuildToast(Transform root)
@@ -149,7 +209,7 @@ namespace SixtyOne.Editor
 
         private static void BuildAfadPopup(Transform root)
         {
-            Image bg = UiFactory.MakeImage("AfadAlert", root, new Vector2(0.2f, 0.6f), new Vector2(0.8f, 0.88f), new Color(0.85f, 0.05f, 0.05f, 0.95f), raycast: true);
+            Image bg = UiFactory.MakeImage("AfadAlert", root, new Vector2(0.2f, 0.55f), new Vector2(0.8f, 0.84f), new Color(0.85f, 0.05f, 0.05f, 0.95f), raycast: true);
             CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
             Button dismiss = bg.gameObject.AddComponent<Button>();
             dismiss.targetGraphic = bg;
@@ -190,7 +250,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(journal, "closeLabel", closeLabel);
         }
 
-        private static void BuildDeathCard(Transform root, GameManager gameManager, GameContent content)
+        private static void BuildDeathCard(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art)
         {
             Image bg = UiFactory.MakeImage("DeathCard", root, Vector2.zero, Vector2.one, Color.black, raycast: true);
             CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
@@ -203,6 +263,12 @@ namespace SixtyOne.Editor
             tipText.fontSizeMin = 14f;
             tipText.fontSizeMax = 26f;
 
+            // "Keşke yanıma alsaydım" block: icon + "Eksik: <item>".
+            RectTransform missing = UiFactory.MakeRect("MissingItem", bg.transform, new Vector2(0.3f, 0.81f), new Vector2(0.7f, 0.93f));
+            Image missingIcon = UiFactory.MakeImage("Icon", missing, new Vector2(0f, 0f), new Vector2(0.18f, 1f), Accent, sprite: art.Dot);
+            TextMeshProUGUI missingLabel = UiFactory.MakeLabel("Label", missing, new Vector2(0.2f, 0f), new Vector2(1f, 1f), 34f, TextAlignmentOptions.Left, Accent, bold: true);
+            missing.gameObject.SetActive(false);
+
             Button rewind = UiFactory.MakeButton("RewindButton", bg.transform, new Vector2(0.4f, 0.06f), new Vector2(0.6f, 0.16f), new Color(0.8f, 0.12f, 0.12f, 1f), 32f, out TextMeshProUGUI rewindLabel);
 
             DeathCard card = bg.gameObject.AddComponent<DeathCard>();
@@ -213,6 +279,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(card, "tipRoot", tipRoot.gameObject);
             SerializedWire.Set(card, "tipHeader", tipHeader);
             SerializedWire.Set(card, "tipText", tipText);
+            SerializedWire.Set(card, "missingRoot", missing.gameObject);
+            SerializedWire.Set(card, "missingIcon", missingIcon);
+            SerializedWire.Set(card, "missingLabel", missingLabel);
             SerializedWire.Set(card, "rewindButton", rewind);
             SerializedWire.Set(card, "rewindLabel", rewindLabel);
         }

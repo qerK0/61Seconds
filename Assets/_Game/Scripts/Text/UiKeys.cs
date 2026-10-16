@@ -23,5 +23,8 @@ namespace SixtyOne.Text
         public const string PlacementNoRoom = "ui.placement.no_room";
         public const string PlacementChildAlone = "ui.placement.child_alone";
         public const string PlacementInvalid = "ui.placement.invalid";
+        public const string PrepNeedsItem = "ui.prep.needs_item";
+        public const string PrepTravel = "ui.prep.travel";
+        public const string DeathMissingItem = "ui.death.missing_item";
     }
 }

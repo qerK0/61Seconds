@@ -7,7 +7,10 @@ using UnityEngine.UI;
 
 namespace SixtyOne.UI
 {
-    /// <summary>One choice button. Locked choices show a lock icon and a reason line. Traps look normal on purpose.</summary>
+    /// <summary>
+    /// One choice button. Locked choices show a lock icon and a reason line. Traps look normal on purpose,
+    /// and ShowLockedFatal choices look locked but stay clickable.
+    /// </summary>
     public sealed class ChoiceButton : MonoBehaviour
     {
         [Tooltip("The clickable button.")]
@@ -28,8 +31,8 @@ namespace SixtyOne.UI
             if (label != null) label.text = view.Choice.LabelKey.Display;
 
             button.onClick.RemoveAllListeners();
-            button.interactable = !view.Locked;
-            if (!view.Locked && onClick != null)
+            button.interactable = view.Clickable;
+            if (view.Clickable && onClick != null)
             {
                 button.onClick.AddListener(() => onClick());
             }

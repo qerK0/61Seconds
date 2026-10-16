@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using SixtyOne.Core;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
+using SixtyOne.Prep;
 using SixtyOne.Text;
 using UnityEditor;
 using UnityEngine;
@@ -10,9 +11,10 @@ using UnityEngine.SceneManagement;
 namespace SixtyOne.Editor
 {
     /// <summary>
-    /// SixtyOne > Validate Content. Checks: GoToNode targets, Trap/Death text + tip, hazards linked to
-    /// an anchor (open scenes + prefabs) or used as an unplaced hazard, reachability from the start node,
-    /// and that every referenced text key exists. Each problem is a clickable console entry.
+    /// SixtyOne > Validate Content. Checks: GoToNode targets, Trap/Death text + tip, ShowLockedFatal
+    /// missing-item text + item, PrepPhaseNode -> PlacementNode links, hazards linked to an anchor (open
+    /// scenes + prefabs) or used as an unplaced hazard, prep interactables wired, reachability from the
+    /// start node, and that every referenced text key exists. Each problem is a clickable console entry.
     /// </summary>
     public static class ContentValidator
     {
@@ -28,14 +30,14 @@ namespace SixtyOne.Editor
                 if (!nodes.Contains(placementNode)) nodes.Add(placementNode);
             }
 
+            foreach (PrepPhaseNode prepNode in LoadAll<PrepPhaseNode>())
+            {
+                if (!nodes.Contains(prepNode)) nodes.Add(prepNode);
+            }
+
             foreach (SceneNode node in nodes)
             {
                 problems += CheckNode(node);
-            }
-
-            foreach (Item item in LoadAll<Item>())
-            {
-                if (item.IsTrap) problems += CheckDeath(item.TrapDeath, item, $"trap item '{item.Id}'");
             }
 
             foreach (Hazard hazard in LoadAll<Hazard>())
@@ -44,6 +46,7 @@ namespace SixtyOne.Editor
             }
 
             problems += CheckHazardLinks(nodes);
+            problems += CheckPrepInteractables();
             problems += CheckReachability(nodes);
             problems += CheckTextKeys();
 
@@ -67,6 +70,11 @@ namespace SixtyOne.Editor
                 {
                     problems += Report($"{where} is a Trap without a Death outcome (it still kills).", node);
                 }
+
+                if (choice.FailBehaviour == FailBehaviour.ShowLockedFatal)
+                {
+                    problems += CheckLockedFatal(choice, node, where);
+                }
             }
 
             problems += CheckOutcomes(node.OnEnter, node, $"node '{node.Id}' onEnter");
@@ -84,11 +92,83 @@ namespace SixtyOne.Editor
                 problems += Report($"node '{node.Id}' has a timer but no timeout choice and no Trap choice.", node);
             }
 
+            if (node is PrepPhaseNode prep)
+            {
+                problems += CheckPrep(prep);
+            }
+
             if (node is PlacementNode placement)
             {
                 if (placement.NextNode == null) problems += Report($"placement node '{node.Id}' has no next node.", node);
                 if (placement.TimerSeconds <= 0f) problems += Report($"placement node '{node.Id}' needs a timer (the quake starts on timeout).", node);
                 problems += CheckDeath(placement.ChildAloneDeath, node, $"placement node '{node.Id}' child-alone death");
+            }
+
+            return problems;
+        }
+
+        private static int CheckLockedFatal(Choice choice, Object owner, string where)
+        {
+            int problems = 0;
+            if (choice.MissingItem == null) problems += Report($"{where}: ShowLockedFatal without a missing item.", owner);
+            if (choice.MissingItemTextKey.IsEmpty) problems += Report($"{where}: ShowLockedFatal without a missing-item text key.", owner);
+            if (choice.Death == null || choice.Death.Tip == null) problems += Report($"{where}: ShowLockedFatal has no tip (set it with WithDeath).", owner);
+
+            bool requiresItem = false;
+            foreach (Condition condition in choice.Conditions)
+            {
+                if (condition != null && condition.Type == ConditionType.HasItem && condition.Item == choice.MissingItem) requiresItem = true;
+            }
+
+            if (choice.MissingItem != null && !requiresItem)
+            {
+                problems += Report($"{where}: ShowLockedFatal does not require its missing item '{choice.MissingItem.Id}' (HasItem condition).", owner);
+            }
+
+            return problems;
+        }
+
+        private static int CheckPrep(PrepPhaseNode prep)
+        {
+            int problems = 0;
+            string where = $"prep node '{prep.Id}'";
+            if (prep.PlacementNode == null)
+            {
+                return Report($"{where} has no linked PlacementNode.", prep);
+            }
+
+            if (prep.HasPrep && Mathf.Abs(prep.PlacementNode.TimerSeconds - prep.PlacementWindowSeconds) > 0.01f)
+            {
+                problems += Report($"{where}: placement node '{prep.PlacementNode.Id}' timer ({prep.PlacementNode.TimerSeconds}s) should equal the placement window ({prep.PlacementWindowSeconds}s).", prep);
+            }
+
+            if (prep.HasPrep && prep.AlertBodyKey.IsEmpty) problems += Report($"{where} has no alert text.", prep);
+            if (prep.HasPrep && prep.PlacementAlertTitleKey.IsEmpty) problems += Report($"{where} has no ÇÖK-KAPAN-TUTUN alert text.", prep);
+
+            bool startsInPrepRoom = false;
+            foreach (string roomId in prep.RoomIds) if (roomId == prep.RoomId) startsInPrepRoom = true;
+            if (prep.HasPrep && !startsInPrepRoom) problems += Report($"{where}: its room '{prep.RoomId}' is not in its prep room list.", prep);
+            return problems;
+        }
+
+        private static int CheckPrepInteractables()
+        {
+            int problems = 0;
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (!scene.isLoaded) continue;
+                foreach (GameObject root in scene.GetRootGameObjects())
+                {
+                    foreach (PrepInteractable interactable in root.GetComponentsInChildren<PrepInteractable>(true))
+                    {
+                        string where = $"prep interactable '{interactable.Id}'";
+                        if (interactable.LabelKey.IsEmpty) problems += Report($"{where} has no label key.", interactable);
+                        if (interactable.GrantsItem == null && interactable.Outcomes.Count == 0) problems += Report($"{where} does nothing (no item, no outcomes).", interactable);
+                        var so = new SerializedObject(interactable);
+                        if (so.FindProperty("controller").objectReferenceValue == null) problems += Report($"{where} has no PrepController.", interactable);
+                    }
+                }
             }
 
             return problems;
@@ -221,6 +301,7 @@ namespace SixtyOne.Editor
             }
 
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
+            if (node is PrepPhaseNode prep && prep.PlacementNode != null) yield return prep.PlacementNode;
         }
 
         private static int CheckTextKeys()

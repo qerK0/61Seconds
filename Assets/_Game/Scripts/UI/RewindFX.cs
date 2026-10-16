@@ -64,14 +64,18 @@ namespace SixtyOne.UI
 
         private IEnumerator Play()
         {
+            // Macro rewinds (back to the prep start) run longer so the jump reads as bigger.
+            GameManager gm = GameManager.Instance;
+            float length = gm != null && gm.Session.LastRewindWasMacro ? duration * 1.8f : duration;
+
             UIVisibility.Set(group, true, blocksWhenVisible: false);
-            if (shakeTarget != null) StartCoroutine(Tween.Shake(shakeTarget, duration, shakeMagnitude, grow: false, unscaled: true));
+            if (shakeTarget != null) StartCoroutine(Tween.Shake(shakeTarget, length, shakeMagnitude, grow: false, unscaled: true));
 
             float time = 0f;
-            while (time < duration)
+            while (time < length)
             {
                 time += Time.unscaledDeltaTime;
-                float k = time / duration;
+                float k = time / length;
                 if (scanlines != null)
                 {
                     // Lines roll upward fast (rewinding), slowing down at the end.

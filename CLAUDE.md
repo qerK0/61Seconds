@@ -1,12 +1,21 @@
 # 61 Seconds — Claude Code Project Guide
 
-48-hour game jam project (Civil Game Jam, 16–18 Oct 2026). Unity 6000.3, URP, **2.5D isometric**. Team: programmer (Bora), artist, sound designer, lore/narrative writer.
+48-hour game jam project (Civil Game Jam, 16–18 Oct 2026). Unity 6000.6 (see `ProjectSettings/ProjectVersion.txt`), URP, **2.5D isometric**. Team: programmer (Bora), artist, sound designer, lore/narrative writer.
 Speed beats polish. Small, working, testable steps. Never leave the project in a non-compiling state.
 
 ## The Game
 Linear earthquake-escape game. The player, their **wife** and their **child** start on the 6th floor of an apartment building and must get out alive. There is NO dog. AFAD alerts trigger three escalating quakes: 6.0 on floor 6, 7.0 on floor 4 and 8.0 on floor 2. Between quakes the player explores isometric rooms, collects items into a 4-slot bag, deals with odd neighbors, shuts off gas/electricity/water, and descends via stairs or holes in the floor.
 
-Choices work like Henry Stickmin. A wrong choice ("what NOT to do in an earthquake") causes a death. The game then rewinds to the last decision point, not the start, and a visible LOOP counter goes up. Each death shows a one-line real earthquake safety tip ("Deprem Notu"). Tips are collected across loops.
+**The 61 seconds (where the title comes from).** The game opens with an AFAD early-warning popup: "Deprem 61 saniye sonra", and a big 61s countdown starts.
+1. **Prep phase** (61s → `placementWindowSeconds`, default 10): the player explores the apartment (living room, kitchen, bedroom) and fills the 4-slot bag. Every action costs countdown time: picking up from an open surface 1s, opening a drawer or cabinet 3s, switching off the breaker 4s, closing the gas valve 5s (each interactable sets its own cost). Input is blocked while an action runs, but the countdown keeps going. Trap items (gold, laptop, game console) can be picked up; they just waste a slot and time.
+2. **Placement window** (last 10s): a "ÇÖK-KAPAN-TUTUN" alert appears and input switches to placement: wife and child first, the player last.
+3. **Quake** at 0: hazards resolve, then post-quake exploration, then the stairs.
+Acts 2 and 3 reuse the same node type with a short prep or none (zero prep goes straight to placement).
+
+Choices work like Henry Stickmin. A wrong choice ("what NOT to do in an earthquake") causes a death, a visible LOOP counter goes up, and each death shows a one-line real earthquake safety tip ("Deprem Notu"). Tips are collected across loops. **The loop has two layers:**
+- **Micro rewind:** a wrong placement or choice rewinds to the last decision node.
+- **Macro rewind:** a death caused by missing gear rewinds to the START of the prep phase (empty bag, flags reset, family back at their start positions). Example: a jammed door that needs the crowbar. The locked option stays clickable and kills with "Keşke yanıma alsaydım..." and the missing item's icon.
+- These persist across ALL rewinds: `LoopCount`, collected tips, revealed anchor labels, and the **KnowledgeSet** (ids of items the player died for lacking). In later loops those items get a subtle highlight during prep, which can be turned off in the `GameSettings` asset.
 
 **Tone rule:** absurd or comic deaths are only for the player character and "do-not-do" traps. The wife is never shown dying on screen: cut to black, play a sound and show one line of text. The child never dies: the child gets a `Trapped` state that triggers the rewind.
 
@@ -20,9 +29,10 @@ Scripts/Core/        GameState, Flags, Inventory, Snapshot, LoopCounter, GameEve
 Scripts/Text/        CSV parser, TextDB, TextKey (lore/dialogue/UI strings)
 Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer
 Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver
+Scripts/Prep/        PrepPhaseNode, PrepCountdown + PrepAction (pure), PrepController, PrepInteractable, PickupItem
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
 Scripts/Audio/       AudioCue (SO), AudioService
-Scripts/UI/          ChoicePanel, TimerBar, BagUI, LoopCounterUI, DeathCard, TipJournal, RewindFX
+Scripts/UI/          ChoicePanel, TimerBar, CountdownDisplay, ActionProgressBar, RoomTabs, BagUI, LoopCounterUI, DeathCard, TipJournal, RewindFX
 Scripts/Editor/      Validators, content generators, test-scene builder
 Content/Text/        strings_tr.csv  ← the lore writer edits this
 Data/                Nodes/ Hazards/ Items/ Tips/ Audio/ (ScriptableObject assets)
@@ -37,11 +47,11 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
   - `Flags` (string → bool, e.g. `GasOff`, `PowerOff`, `WaterOff`, `WifeInjured`)
   - the family members' states and anchor positions
   - the current node id and the current act (1–3)
-  - `LoopCount` and the collected tip ids
-- **Snapshot:** a deep copy of GameState taken at the start of every decision or placement node. On death:
-  - restore the latest snapshot, but keep `LoopCount` and the collected tips (they persist across loops)
-  - increment `LoopCount` and play the rewind FX
-  - family members go back to their LAST chosen positions, not the defaults, so the player only has to fix the wrong placement
+  - `LoopCount`, the collected tip ids, revealed anchor labels and the `KnowledgeSet` (all four persist across every rewind)
+- **Snapshot:** a deep copy of GameState taken at the start of every decision or placement node. A prep phase also takes a dedicated **PrepStart** snapshot. On death, `DeathInfo.RewindTarget` picks the snapshot:
+  - `LastNode` (micro): restore the latest snapshot, or a specific node for delayed bombs. Family members stay at their LAST chosen positions, so the player only has to fix the wrong placement.
+  - `PrepStart` (macro): restore the prep-start snapshot, which also resets family positions.
+  - Either way: keep the persistent data above, increment `LoopCount`, play the rewind FX (longer for macro rewinds).
 - **SceneNode** (ScriptableObject) has:
   - an id, title/body text keys and a room ref
   - timer seconds (0 = untimed)
@@ -51,10 +61,12 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 - **Choice** has:
   - a label key and a type (`Normal` or `Trap`)
   - a list of `Condition`s: has item, flag is true/false, member state
-  - a fail behaviour for when the conditions are not met: `Hide` or `ShowLocked`
+  - a fail behaviour for when the conditions are not met: `Hide`, `ShowLocked`, or `ShowLockedFatal` (shown locked but clickable; it kills with a missing-item text key, adds the item to the KnowledgeSet and macro-rewinds)
   - a list of `Outcome`s: `GoToNode`, `Death`, `SetFlag`, `AddItem`, `RemoveItem`, `SetMemberState`
-  - a death text key, a tip ref and an audio cue
+  - a death text key, a tip ref, an audio cue and a rewind target (`LastNode` or `PrepStart`)
   - A **delayed bomb** is an outcome that sets a flag now, plus a later node whose bomb check reads that flag.
+- **PrepPhaseNode** is a SceneNode subtype that opens an act. It holds the duration (61 in Act 1), `placementWindowSeconds`, the prep room ids, a linked PlacementNode (its timer must equal the window), the alert text keys and audio cues (countdown ticks in the last 10s, alarms). `PrepController` drives it with the pure `PrepCountdown`, which raises events at the placement window, on each of the last 10 seconds and at zero. The countdown keeps ticking through the placement window.
+- **PrepInteractable** (IClickable) has a time cost, an optional required item, the item it grants and/or extra outcomes (e.g. SetFlag `GasOff`), one-shot vs repeatable, and a label key. One-shot uses are stored as `Used_<id>` flags so rewinds restore them. `PickupItem` is the open-surface preset (1s, disappears).
 - **PlacementNode** is a SceneNode subtype with a timed phase:
   - the player taps a family member and the valid anchors highlight
   - the player taps an anchor, and the member is repositioned instantly (no walk animation)
@@ -116,7 +128,7 @@ Cloud sessions MUST NOT:
 ## Coding rules
 - Keep scripts small and single-purpose. Use `[SerializeField] private` with `[Tooltip]`, and give every data type a short XML summary.
 - No third-party packages. No DOTween: use the coroutine tween helper in `Core/`.
-- Input: the new Input System, which is already installed. UI: uGUI + TextMeshPro, with `InputSystemUIInputModule`.
+- Input: the new Input System, which is already installed. UI: uGUI + TextMeshPro, with `InputSystemUIInputModule`. asmdef references use the real assembly names: `Unity.InputSystem`, `Unity.TextMeshPro`, `UnityEngine.UI` (uGUI; there is no "Unity.ugui" assembly).
 - Use Unity 6 APIs (`FindFirstObjectByType` etc.) and no obsolete calls.
 - Code, comments and identifiers are in English. Player-facing text comes only from TextDB.
 - The project must compile after every task. If you can't verify compilation (cloud), say so in the handoff.

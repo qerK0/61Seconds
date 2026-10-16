@@ -21,6 +21,12 @@ namespace SixtyOne.Core
         /// <summary>The most recent snapshot (default rewind target).</summary>
         public Snapshot Latest { get; private set; }
 
+        /// <summary>Snapshot taken when the prep phase started (macro rewind target).</summary>
+        public Snapshot PrepStart { get; private set; }
+
+        /// <summary>True if the last Rewind() went back to the prep start.</summary>
+        public bool LastRewindWasMacro { get; private set; }
+
         public GameSession(GameState state = null)
         {
             State = state ?? new GameState();
@@ -34,6 +40,13 @@ namespace SixtyOne.Core
             {
                 byNode[nodeId] = Latest;
             }
+        }
+
+        /// <summary>Snapshots the start of a prep phase: used for its node and as the macro rewind target.</summary>
+        public void TakePrepStartSnapshot(string nodeId)
+        {
+            TakeSnapshot(nodeId);
+            PrepStart = Latest;
         }
 
         /// <summary>True if a snapshot exists for the node.</summary>
@@ -63,6 +76,8 @@ namespace SixtyOne.Core
                 State.RevealedAnchors.Add(info.AnchorId);
             }
 
+            State.Knowledge.Add(info.MissingItemId);
+
             // Tone rule: the child is never killed, only trapped.
             MemberHealth health = info.Victim == MemberType.Child ? MemberHealth.Trapped : MemberHealth.Dead;
             StateOps.SetHealth(State, info.Victim, health);
@@ -72,7 +87,7 @@ namespace SixtyOne.Core
         }
 
         /// <summary>
-        /// Restores the target snapshot (DeathInfo.RewindNodeId or the latest), bumps the loop
+        /// Restores the target snapshot (prep start for macro deaths, else DeathInfo.RewindNodeId or the latest), bumps the loop
         /// counter and raises Rewound. Returns the node id to re-enter, or null.
         /// </summary>
         public string Rewind()
@@ -83,7 +98,13 @@ namespace SixtyOne.Core
             }
 
             Snapshot target = Latest;
-            if (LastDeath != null && !string.IsNullOrEmpty(LastDeath.RewindNodeId)
+            bool macro = false;
+            if (LastDeath != null && LastDeath.RewindTarget == RewindTarget.PrepStart && PrepStart != null)
+            {
+                target = PrepStart;
+                macro = true;
+            }
+            else if (LastDeath != null && !string.IsNullOrEmpty(LastDeath.RewindNodeId)
                 && byNode.TryGetValue(LastDeath.RewindNodeId, out Snapshot specific))
             {
                 target = specific;
@@ -95,9 +116,10 @@ namespace SixtyOne.Core
                 return null;
             }
 
-            target.RestoreInto(State);
+            target.RestoreInto(State, keepMemberAnchors: !macro);
             State.Loop.Increment();
             Latest = target;
+            LastRewindWasMacro = macro;
             GameEvents.RaiseRewound(target.NodeId);
             return target.NodeId;
         }

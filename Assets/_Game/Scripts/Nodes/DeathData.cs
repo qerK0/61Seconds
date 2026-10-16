@@ -22,7 +22,10 @@ namespace SixtyOne.Nodes
         [Tooltip("Who dies. The child is always Trapped instead.")]
         [SerializeField] private MemberType victim = MemberType.Player;
 
-        [Tooltip("Rewind to this node instead of the latest snapshot (delayed bombs).")]
+        [Tooltip("LastNode = micro rewind; PrepStart = macro rewind to the start of the prep phase.")]
+        [SerializeField] private RewindTarget rewindTarget = RewindTarget.LastNode;
+
+        [Tooltip("LastNode only: rewind to this node instead of the latest snapshot (delayed bombs).")]
         [SerializeField] private SceneNode rewindTo;
 
         public TextKey TextKey => textKey;
@@ -30,13 +33,16 @@ namespace SixtyOne.Nodes
         public AudioCue Cue => cue;
         public MemberType Victim => victim;
         public SceneNode RewindTo => rewindTo;
+        public RewindTarget RewindTarget => rewindTarget;
 
         public DeathData()
         {
         }
 
-        public DeathData(TextKey textKey, Tip tip, MemberType victim = MemberType.Player, SceneNode rewindTo = null, AudioCue cue = null)
+        public DeathData(TextKey textKey, Tip tip, MemberType victim = MemberType.Player, SceneNode rewindTo = null, AudioCue cue = null,
+            RewindTarget target = RewindTarget.LastNode)
         {
+            rewindTarget = target;
             this.textKey = textKey;
             this.tip = tip;
             this.victim = victim;
@@ -54,6 +60,7 @@ namespace SixtyOne.Nodes
                 TipId = tip != null ? tip.Id : null,
                 AnchorId = anchorId,
                 RewindNodeId = rewindTo != null ? rewindTo.Id : null,
+                RewindTarget = rewindTarget,
                 Cue = cue
             };
         }

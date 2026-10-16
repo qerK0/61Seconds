@@ -43,25 +43,38 @@ namespace SixtyOne.UI
         private void OnEnable()
         {
             GameEvents.AfadAlert += OnAlert;
+            GameEvents.Alert += OnKeyedAlert;
             GameEvents.Died += OnDied;
         }
 
         private void OnDisable()
         {
             GameEvents.AfadAlert -= OnAlert;
+            GameEvents.Alert -= OnKeyedAlert;
             GameEvents.Died -= OnDied;
         }
 
         private void OnAlert(float magnitude)
         {
-            StopAllCoroutines();
-            StartCoroutine(Show(magnitude));
+            OnKeyedAlert(UiKeys.AfadTitle, UiKeys.AfadBody, magnitude.ToString("0.0"));
         }
 
-        private IEnumerator Show(float magnitude)
+        /// <summary>Shows any alert by text keys; arg fills {0} in the body.</summary>
+        private void OnKeyedAlert(string titleKey, string bodyKey, string arg)
         {
-            if (title != null) title.text = TextDB.GetDisplay(UiKeys.AfadTitle);
-            if (body != null) body.text = TextDB.Format(UiKeys.AfadBody, magnitude.ToString("0.0"));
+            StopAllCoroutines();
+            StartCoroutine(Show(titleKey, bodyKey, arg));
+        }
+
+        private IEnumerator Show(string titleKey, string bodyKey, string arg)
+        {
+            if (title != null) title.text = string.IsNullOrEmpty(titleKey) ? string.Empty : TextDB.GetDisplay(titleKey);
+            if (body != null)
+            {
+                body.text = string.IsNullOrEmpty(bodyKey) ? string.Empty
+                    : arg != null ? TextDB.Format(bodyKey, arg) : TextDB.GetDisplay(bodyKey);
+            }
+
             UIVisibility.Set(group, true);
 
             float time = 0f;

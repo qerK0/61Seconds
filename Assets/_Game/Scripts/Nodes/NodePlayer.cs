@@ -30,9 +30,7 @@ namespace SixtyOne.Nodes
         [Tooltip("Enter the start node on Start.")]
         [SerializeField] private bool autoStart = true;
 
-        private static readonly List<ChoiceView> NoChoices = new List<ChoiceView>();
-
-        private IChoicePresenter choicePresenter;
+            private IChoicePresenter choicePresenter;
         private IRoomPresenter rooms;
         private INodeHandler activeHandler;
 
@@ -122,12 +120,13 @@ namespace SixtyOne.Nodes
                 BombCheck bomb = BombCheckRunner.Run(node.BombChecks, State);
                 if (bomb != null)
                 {
-                    choicePresenter?.Present(node, NoChoices, null);
+                    choicePresenter?.Present(node, new List<ChoiceView>(), null);
                     gameManager.Die(bomb.Death.ToInfo());
                     return;
                 }
 
-                gameManager.TakeSnapshot(node.Id);
+                if (node.IsPrepStart) gameManager.TakePrepStartSnapshot(node.Id);
+                else gameManager.TakeSnapshot(node.Id);
             }
 
             GameEvents.RaiseNodeEntered(node.Id);
@@ -136,18 +135,11 @@ namespace SixtyOne.Nodes
                 GameEvents.RaiseAfadAlert(QuakeInfo.MagnitudeForAct(node.Act));
             }
 
-            activeHandler = FindHandler(node);
-            if (activeHandler != null)
-            {
-                choicePresenter?.Present(node, NoChoices, null);
-                activeHandler.Begin(node, OnHandlerFinished);
-            }
-            else
-            {
-                PresentChoices();
-            }
-
+            // Timer first: a handler may finish synchronously and enter the next node.
             Timer.Start(node.TimerSeconds);
+            PresentChoices();
+            activeHandler = FindHandler(node);
+            activeHandler?.Begin(node, OnHandlerFinished);
         }
 
         /// <summary>Picks a choice by its index in Current.Choices (UI callback).</summary>
@@ -158,9 +150,23 @@ namespace SixtyOne.Nodes
                 return;
             }
 
+            if (InputGate.IsBlocked)
+            {
+                return;
+            }
+
             Choice choice = Current.Choices[index];
             if (!ConditionEvaluator.AllMet(choice.Conditions, State))
             {
+                if (choice.FailBehaviour == FailBehaviour.ShowLockedFatal)
+                {
+                    // "Keşke yanıma alsaydım...": macro rewind to the prep start.
+                    choicePresenter?.Clear();
+                    GameEvents.RaiseChoiceMade(Current.Id, choice.LabelKey.Key);
+                    Timer.Stop();
+                    gameManager.Die(choice.BuildMissingItemDeath());
+                }
+
                 return;
             }
 

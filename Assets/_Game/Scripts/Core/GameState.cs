@@ -31,6 +31,9 @@ namespace SixtyOne.Core
         /// <summary>Anchor ids whose label is revealed. Persists across rewinds.</summary>
         public HashSet<string> RevealedAnchors { get; private set; } = new HashSet<string>(StringComparer.Ordinal);
 
+        /// <summary>Items the player died for lacking. Persists across every rewind.</summary>
+        public KnowledgeSet Knowledge { get; private set; } = new KnowledgeSet();
+
         /// <summary>All family members.</summary>
         public IEnumerable<FamilyMemberState> Members => members.Values;
 
@@ -59,7 +62,8 @@ namespace SixtyOne.Core
                 CurrentNodeId = CurrentNodeId,
                 Act = Act,
                 CollectedTips = new HashSet<string>(CollectedTips, StringComparer.Ordinal),
-                RevealedAnchors = new HashSet<string>(RevealedAnchors, StringComparer.Ordinal)
+                RevealedAnchors = new HashSet<string>(RevealedAnchors, StringComparer.Ordinal),
+                Knowledge = Knowledge.Clone()
             };
 
             foreach (KeyValuePair<MemberType, FamilyMemberState> pair in members)
