@@ -60,7 +60,8 @@ namespace SixtyOne.Placement
         public Vector3 GroundPoint => groundPoint != null ? groundPoint.position : transform.position;
         public bool IsHighlighted { get; private set; }
 
-        public bool IsClickable => isActiveAndEnabled;
+        // Only while something listens (placement), so anchors never block prep interactables underneath.
+        public bool IsClickable => isActiveAndEnabled && Clicked != null;
 
         private void Awake()
         {

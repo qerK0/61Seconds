@@ -41,6 +41,9 @@ MonoBehaviour:
     failBehaviour: 1
     lockedReasonKey:
       key: act1.n03.c_gas.locked
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
     timeoutOnly: 0
     outcomes:
     - type: 2
@@ -56,6 +59,7 @@ MonoBehaviour:
       tip: {fileID: 0}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -76,6 +80,9 @@ MonoBehaviour:
     failBehaviour: 1
     lockedReasonKey:
       key: act1.n03.c_power.locked
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
     timeoutOnly: 0
     outcomes:
     - type: 2
@@ -91,6 +98,7 @@ MonoBehaviour:
       tip: {fileID: 0}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -105,6 +113,9 @@ MonoBehaviour:
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 0
     outcomes:
@@ -121,6 +132,7 @@ MonoBehaviour:
       tip: {fileID: 0}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -135,6 +147,9 @@ MonoBehaviour:
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 0
     outcomes:
@@ -151,6 +166,7 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: 52ede234ce4db5747be7de556318e7f5, type: 2}
       cue: {fileID: 11400000, guid: 9cc098823089f7248b8ba26ceb3bd612, type: 2}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -160,6 +176,9 @@ MonoBehaviour:
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 0
     outcomes:
@@ -176,6 +195,7 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: bf1c0e7548de60b45819bdbf646b02b4, type: 2}
       cue: {fileID: 11400000, guid: 9cc098823089f7248b8ba26ceb3bd612, type: 2}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -186,10 +206,13 @@ MonoBehaviour:
     failBehaviour: 0
     lockedReasonKey:
       key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
     timeoutOnly: 0
     outcomes:
     - type: 0
-      targetNode: {fileID: 11400000, guid: 17b1de3280298264890812d17660d981, type: 2}
+      targetNode: {fileID: 11400000, guid: 762c4ba0405d782429dafa9351dd60b6, type: 2}
       flag: 
       flagValue: 1
       item: {fileID: 0}
@@ -201,6 +224,7 @@ MonoBehaviour:
       tip: {fileID: 0}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
@@ -210,6 +234,9 @@ MonoBehaviour:
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 1
     outcomes:
@@ -226,6 +253,7 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: 0d5b9ce6973227f4f8af14272bddd684, type: 2}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   onEnter: []

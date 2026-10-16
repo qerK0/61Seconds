@@ -19,7 +19,7 @@ MonoBehaviour:
     key: act1.n02.body
   roomId: living_room
   act: 1
-  timerSeconds: 15
+  timerSeconds: 10
   timeoutChoiceIndex: -1
   afadAlertOnEnter: 0
   choices: []
@@ -33,5 +33,6 @@ MonoBehaviour:
     tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
     cue: {fileID: 0}
     victim: 2
+    rewindTarget: 0
     rewindTo: {fileID: 0}
   quakeSeconds: 4

@@ -19,10 +19,3 @@ MonoBehaviour:
     key: item.laptop.desc
   icon: {fileID: 0}
   isTrap: 1
-  trapDeath:
-    textKey:
-      key: death.laptop
-    tip: {fileID: 11400000, guid: c9b10061e1a302a47bfc84b4286494cc, type: 2}
-    cue: {fileID: 0}
-    victim: 0
-    rewindTo: {fileID: 0}

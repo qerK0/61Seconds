@@ -45,4 +45,5 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: 20589765cbc2ebb4c8862eaa29bb9f9f, type: 2}
       cue: {fileID: 11400000, guid: 9cc098823089f7248b8ba26ceb3bd612, type: 2}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 11400000, guid: b07f1af27b53d5d4a934f1c6da27cfa6, type: 2}

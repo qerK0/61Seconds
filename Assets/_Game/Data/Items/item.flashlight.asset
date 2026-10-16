@@ -19,10 +19,3 @@ MonoBehaviour:
     key: item.flashlight.desc
   icon: {fileID: 0}
   isTrap: 0
-  trapDeath:
-    textKey:
-      key: 
-    tip: {fileID: 0}
-    cue: {fileID: 0}
-    victim: 0
-    rewindTo: {fileID: 0}

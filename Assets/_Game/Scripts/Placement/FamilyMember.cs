@@ -29,7 +29,8 @@ namespace SixtyOne.Placement
         private Color baseColor = Color.white;
 
         public MemberType Type => type;
-        public bool IsClickable => isActiveAndEnabled;
+        // Only while something listens (placement), so members never block prep interactables underneath.
+        public bool IsClickable => isActiveAndEnabled && Clicked != null;
 
         private void Awake()
         {

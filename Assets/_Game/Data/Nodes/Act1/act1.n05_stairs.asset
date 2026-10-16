@@ -10,13 +10,13 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
-  m_Name: act1.n04_stairs
+  m_Name: act1.n05_stairs
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
-  id: act1.n04_stairs
+  id: act1.n05_stairs
   titleKey:
-    key: act1.n04.title
+    key: act1.n05.title
   bodyKey:
-    key: act1.n04.body
+    key: act1.n05.body
   roomId: stairwell
   act: 1
   timerSeconds: 0
@@ -24,12 +24,15 @@ MonoBehaviour:
   afadAlertOnEnter: 0
   choices:
   - labelKey:
-      key: act1.n04.c_down
+      key: act1.n05.c_down
     type: 0
     showIf: []
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 0
     outcomes:
@@ -46,15 +49,19 @@ MonoBehaviour:
       tip: {fileID: 0}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
-      key: act1.n04.c_elevator
+      key: act1.n05.c_elevator
     type: 1
     showIf: []
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
       key: 
     timeoutOnly: 0
     outcomes:
@@ -71,6 +78,7 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: ee82e8506c736db46a4322b8e187554e, type: 2}
       cue: {fileID: 0}
       victim: 0
+      rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   onEnter: []

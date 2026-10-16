@@ -4,6 +4,38 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-16 23:05] LOCAL — Prep phase wired + loop 1/loop 2 play-test, 2 fixes
+### Done
+- Compile: 0 errors, 0 warnings (Runtime 149 types, Editor 39, Tests 22). The `PickupItem.cs` move had lost its GUID, so I restored the original GUID (`4c106fd3…`) on `Scripts/Prep/PickupItem.cs.meta`.
+- Generate Sample Act 1 + Build Test Scene ran clean.
+- Validate Content first reported 13 problems. All of them came from **stale assets left over from the old flow** that the generator doesn't delete: `act1.n01_alert`, `act1.n04_stairs`, `tip.no_stairs_during`, `tip.no_valuables`. After deleting them: **0 problems**. Text > Validate: 145 referenced, 0 missing/empty/unused.
+- EditMode tests: **60/60 passed** (before and after the fixes).
+- **Loop 1 works as specified:** the countdown starts at 61, gold and laptop go into the bag (pickups hide), the window fires at 10 with the ÇÖK-KAPAN-TUTUN alert, and placement works (wife+child on the table, player on the inner wall). Quake: everyone stays healthy → exploration (gas/breaker locked without the wrench) → door → the locked crowbar choice kills with "Keşke yanıma levyeyi alsaydım...", "Eksik: Levye" and the emergency-bag tip → GERİ SAR → 61s, empty bag, LOOP #1, crowbar in the KnowledgeSet, family positions reset.
+- **Loop 2 works as specified:** the crowbar pulses, then bedroom wrench (3s) → crowbar (3s) → kitchen gas valve (5s, GasOff) → salon. Micro rewind check: the player on the wardrobe dies ("Dolap sana sarılmaya…") → rewind to placement with the countdown at 10, LOOP #2, bag/GasOff and last positions kept, wardrobe label revealed. Then the inner wall → exploration (the gas/light traps are gone) → door opens with the crowbar → stairs "Dikkatlice aşağı in" → `act2.n01_entry` (Act 2, floor4). No kitchen fire.
+- Extra checks: if the window hits while you're in the bedroom, the game switches back to the salon correctly. Leaving a member unplaced triggers the chandelier death. The GameSettings Knowledge Highlight toggle off stops the pulse, and on restarts it.
+- **Bug fixed — family blocks prep clicks:** the family follows into each prep room and the player spawns on top of the bedroom crowbar, so `IsoPicker` picked `Player` instead of the crowbar. `FamilyMember`/`Anchor.IsClickable` now also require a listener (`Clicked != null`), so they're clickable only while PlacementController is subscribed. Verified: the crowbar picks during prep, and member/anchor picks still work during placement.
+- `ProjectSettings/VersionControlSettings.asset` had been flipped to "Unity Version Control" by the Editor. I set it back to **Visible Meta Files** via `VersionControlSettings.mode`.
+### Files created / changed
+- Assets/_Game/Scripts/Placement/FamilyMember.cs, Anchor.cs — IsClickable only while listened to (prep click fix)
+- Assets/_Game/Scripts/Prep/PickupItem.cs.meta — original GUID restored; Placement/PickupItem.cs.meta removed
+- Assets/_Game/Data/** — regenerated; 4 stale assets deleted, new prep/door/stairs nodes, GameSettings, cues, items
+- Assets/_Game/Scenes/Test_Act1.unity — rebuilt by Build Test Scene
+- *.meta for the new cloud scripts/tests (Editor-generated)
+### Needs local wiring (checklist for the MCP session)
+- [ ] Hand-feel play-test with a real mouse: prep is fully driven by code via `IsoPicker.Pick` + UI button onClick. Layout, readability and timing still need human eyes.
+- [ ] Assign clips to the cues (all 12 are silent; only "no clips" warnings in the console)
+- [ ] Optional: remove `com.unity.collab-proxy` from Packages/manifest.json if Unity keeps flipping the VCS mode (not done; manifest changes need sign-off)
+### Not verified / risks
+- The AFAD popup is shown while the countdown is already running (the "Kapat" button costs real seconds). This may be intended; decide by design.
+- The ChoicePanel keeps old buttons for one frame after a choice (deferred Destroy). Harmless in code; watch for double-clicks in real play.
+- The generator doesn't remove assets it no longer makes. After renaming or removing nodes/tips, delete the stale `.asset` files or Validate will complain.
+- Item icons are placeholders (`ph_dot`) on the death card and in the bag.
+- Budget: loop 2's optimal route used about 22s of the 51s prep, so there's lots of slack; consider more costs or a shorter prep after playtests.
+### Next suggested step
+- CLOUD: Act 2 content (PrepPhaseNode with short/zero prep, 7.0, floor 4) + neighbor NPC nodes; optionally make the generator delete stale node/tip assets under Data/.
+
+---
+
 ## [2026-10-16 18:17] CLOUD — Design change: 61-second prep phase + two-layer loop (micro/macro rewind, KnowledgeSet)
 ### Done
 - Same branch `cloud/foundation` (PR #1), one commit per milestone: Core → Nodes → Prep → UI → Content/Editor → Tests → Docs. Supersedes the Act 1 flow from the 17:40 entry; everything else from that entry still applies.
