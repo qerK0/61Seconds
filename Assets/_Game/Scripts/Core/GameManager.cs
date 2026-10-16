@@ -10,12 +10,16 @@ namespace SixtyOne.Core
         [Tooltip("Seconds before an automatic rewind after death. 0 = wait for the death card's rewind button.")]
         [SerializeField] private float autoRewindSeconds = 0f;
 
+        [Tooltip("Player options (knowledge highlight...). Optional.")]
+        [SerializeField] private GameSettings settings;
+
         /// <summary>Active instance in the scene.</summary>
         public static GameManager Instance { get; private set; }
 
         public GameSession Session { get; private set; } = new GameSession();
         public GameState State => Session.State;
         public bool IsDead => Session.IsDead;
+        public GameSettings Settings => settings;
 
         private void Awake()
         {
@@ -46,6 +50,12 @@ namespace SixtyOne.Core
         public void TakeSnapshot(string nodeId)
         {
             Session.TakeSnapshot(nodeId);
+        }
+
+        /// <summary>Snapshots the start of a prep phase (macro rewind target).</summary>
+        public void TakePrepStartSnapshot(string nodeId)
+        {
+            Session.TakePrepStartSnapshot(nodeId);
         }
 
         /// <summary>Kills (or traps) someone and starts the death flow.</summary>

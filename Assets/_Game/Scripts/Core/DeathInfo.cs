@@ -17,7 +17,13 @@ namespace SixtyOne.Core
         /// <summary>Anchor whose label gets revealed, if the death happened on one.</summary>
         public string AnchorId { get; set; }
 
-        /// <summary>Node to rewind to. Null = latest snapshot.</summary>
+        /// <summary>Micro (last node) or macro (prep start) rewind.</summary>
+        public RewindTarget RewindTarget { get; set; } = RewindTarget.LastNode;
+
+        /// <summary>Item the player lacked (ShowLockedFatal). Added to the KnowledgeSet.</summary>
+        public string MissingItemId { get; set; }
+
+        /// <summary>Node to rewind to for LastNode rewinds. Null = latest snapshot.</summary>
         public string RewindNodeId { get; set; }
 
         /// <summary>Optional sting played instead of the default death cue.</summary>

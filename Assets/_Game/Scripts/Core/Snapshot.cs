@@ -2,8 +2,8 @@ namespace SixtyOne.Core
 {
     /// <summary>
     /// Deep copy of GameState taken when a decision/placement node starts.
-    /// Restoring keeps the live LoopCount, collected tips, revealed anchor labels
-    /// and member anchor positions (members stay where the player last put them).
+    /// Restoring keeps the live LoopCount, collected tips, revealed anchor labels and knowledge.
+    /// Member anchor positions are kept for micro rewinds and restored for macro (prep start) rewinds.
     /// </summary>
     public sealed class Snapshot
     {
@@ -24,8 +24,11 @@ namespace SixtyOne.Core
             return new Snapshot(nodeId, live.Clone());
         }
 
-        /// <summary>Restores the saved state into the live state object.</summary>
-        public void RestoreInto(GameState live)
+        /// <summary>
+        /// Restores the saved state into the live state object.
+        /// keepMemberAnchors: true = members stay where the player last put them (micro rewind).
+        /// </summary>
+        public void RestoreInto(GameState live, bool keepMemberAnchors = true)
         {
             live.Inventory.CopyFrom(saved.Inventory);
             live.Flags.CopyFrom(saved.Flags);
@@ -34,8 +37,12 @@ namespace SixtyOne.Core
 
             foreach (FamilyMemberState member in live.Members)
             {
-                // Health comes back from the snapshot; AnchorId stays as last chosen.
-                member.Health = saved.GetMember(member.Type).Health;
+                FamilyMemberState savedMember = saved.GetMember(member.Type);
+                member.Health = savedMember.Health;
+                if (!keepMemberAnchors)
+                {
+                    member.AnchorId = savedMember.AnchorId;
+                }
             }
         }
     }
