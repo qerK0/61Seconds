@@ -20,6 +20,12 @@ namespace SixtyOne.Placement
         public Room Current { get; private set; }
         public IReadOnlyList<FamilyMember> Members => members;
 
+        /// <summary>Room with the id, or null.</summary>
+        public Room FindRoom(string roomId)
+        {
+            return rooms.Find(r => r != null && r.RoomId == roomId);
+        }
+
         public void ShowRoom(string roomId)
         {
             Room target = rooms.Find(r => r != null && r.RoomId == roomId);

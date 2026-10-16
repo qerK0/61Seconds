@@ -33,11 +33,6 @@ namespace SixtyOne.Editor
                 problems += CheckNode(node);
             }
 
-            foreach (Item item in LoadAll<Item>())
-            {
-                if (item.IsTrap) problems += CheckDeath(item.TrapDeath, item, $"trap item '{item.Id}'");
-            }
-
             foreach (Hazard hazard in LoadAll<Hazard>())
             {
                 problems += CheckHazard(hazard);

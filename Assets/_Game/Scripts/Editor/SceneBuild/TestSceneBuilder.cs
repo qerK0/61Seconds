@@ -4,6 +4,7 @@ using SixtyOne.Core;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
+using SixtyOne.Prep;
 using SixtyOne.Text;
 using SixtyOne.UI;
 using TMPro;
@@ -379,8 +380,7 @@ namespace SixtyOne.Editor
             sorter.Apply();
 
             PickupItem pickup = go.AddComponent<PickupItem>();
-            SerializedWire.Set(pickup, "item", item);
-            SerializedWire.SetStringArray(pickup, "activeNodeIds", activeNodeIds);
+            SerializedWire.Set(pickup, "grantsItem", item);
         }
     }
 }

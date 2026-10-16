@@ -35,7 +35,7 @@ namespace SixtyOne.Iso
         private void Update()
         {
             Pointer pointer = Pointer.current;
-            if (pointer == null || !pointer.press.wasPressedThisFrame)
+            if (pointer == null || !pointer.press.wasPressedThisFrame || SixtyOne.Core.InputGate.IsBlocked)
             {
                 return;
             }

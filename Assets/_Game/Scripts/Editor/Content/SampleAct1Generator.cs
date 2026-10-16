@@ -101,8 +101,8 @@ namespace SixtyOne.Editor
             MakeItem(result, "gloves");
             MakeItem(result, "first_aid");
             MakeItem(result, "flashlight");
-            MakeItem(result, "gold").ConfigureTrap(new DeathData("death.gold", tips["tip.no_valuables"]));
-            MakeItem(result, "laptop").ConfigureTrap(new DeathData("death.laptop", tips["tip.no_valuables"]));
+            MakeItem(result, "gold").ConfigureTrap();
+            MakeItem(result, "laptop").ConfigureTrap();
 
             // Hazards.
             MakeHazard(result, "hz.wardrobe", HazardEffect.Death, HazardEffect.Death, HazardMotion.Topple, "wardrobe", "wardrobe", tips["tip.wardrobe"], crash);

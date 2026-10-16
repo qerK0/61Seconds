@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace SixtyOne.Nodes
 {
-    /// <summary>A bag item. Trap items (gold, laptop...) kill when picked up.</summary>
+    /// <summary>A bag item. Trap items (gold, laptop, console) are pickable but useless: they waste a slot and time.</summary>
     [CreateAssetMenu(menuName = "SixtyOne/Item", fileName = "item_new")]
     public sealed class Item : ScriptableObject
     {
@@ -19,18 +19,14 @@ namespace SixtyOne.Nodes
         [Tooltip("Bag icon (artist).")]
         [SerializeField] private Sprite icon;
 
-        [Tooltip("Picking this up is a do-not-do (wasting time on valuables).")]
+        [Tooltip("A valuable that is useless in an earthquake (wastes a bag slot and prep time).")]
         [SerializeField] private bool isTrap;
-
-        [Tooltip("Death used when a trap item is picked up.")]
-        [SerializeField] private DeathData trapDeath = new DeathData();
 
         public string Id => string.IsNullOrEmpty(id) ? name : id;
         public TextKey NameKey => nameKey;
         public TextKey DescriptionKey => descriptionKey;
         public Sprite Icon => icon;
         public bool IsTrap => isTrap;
-        public DeathData TrapDeath => trapDeath;
 
         /// <summary>Authoring helper for generators.</summary>
         public void Configure(string itemId, TextKey itemName, TextKey description, Sprite itemIcon = null)
@@ -40,14 +36,12 @@ namespace SixtyOne.Nodes
             descriptionKey = description;
             if (itemIcon != null) icon = itemIcon;
             isTrap = false;
-            trapDeath = new DeathData();
         }
 
-        /// <summary>Marks the item as a trap pickup.</summary>
-        public void ConfigureTrap(DeathData death)
+        /// <summary>Marks the item as a useless valuable.</summary>
+        public void ConfigureTrap()
         {
             isTrap = true;
-            trapDeath = death;
         }
     }
 }
