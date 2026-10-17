@@ -63,6 +63,16 @@ namespace SixtyOne.Placement
         // The rewind after a death re-enters a node: no transition for that.
         private void OnDied(DeathInfo info) => instantNext = true;
 
+        /// <summary>Dev room jump: shows a room with no transition and snaps the family to its spawns.</summary>
+        public void JumpTo(string roomId)
+        {
+            if (FindRoom(roomId) == null) return;
+            FinishTransition();
+            instantNext = true;
+            ShowLocal(roomId, null);
+            SnapMembers();
+        }
+
         /// <summary>Completes a running transition now (room swapped, input unlocked).</summary>
         public void FinishTransition()
         {

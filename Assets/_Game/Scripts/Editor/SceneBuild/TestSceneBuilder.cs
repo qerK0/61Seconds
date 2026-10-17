@@ -49,9 +49,20 @@ namespace SixtyOne.Editor
                 return;
             }
 
-            if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo())
+            if (EditorApplication.isPlaying)
             {
+                Debug.LogWarning("[TestScene] Leave Play Mode before building the scene.");
                 return;
+            }
+
+            // No modal "save changes?" dialog (it blocks the editor and MCP): the test scene is regenerated anyway, so
+            // its unsaved edits are dropped (hand placement is saved through the Layout Editor); other saved scenes
+            // with changes are saved silently.
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene open = SceneManager.GetSceneAt(i);
+                if (!open.isDirty || open.path == ScenePath || string.IsNullOrEmpty(open.path)) continue;
+                EditorSceneManager.SaveScene(open);
             }
 
             // NewScene(Single) unloads unused assets, so open it before loading the data we wire in.
@@ -114,6 +125,9 @@ namespace SixtyOne.Editor
             streetLine = null;
             PlayerMover mover = systems.AddComponent<PlayerMover>();
             SerializedWire.Set(picker, "router", mover);
+            DevRoomJump roomJump = systems.AddComponent<DevRoomJump>();
+            SerializedWire.Set(roomJump, "rooms", switcher);
+            SerializedWire.Set(roomJump, "gameManager", gameManager);
 
             var familyRoot = new GameObject("Family").transform;
             var family = new List<FamilyMember>();
@@ -125,7 +139,9 @@ namespace SixtyOne.Editor
             var rooms = new List<Room>();
             var practicals = new List<Light2D>();
             TileArt.TileSets tileSets = TileArt.Generate();
-            List<BuildingLayout.RoomSpec> specs = BuildingLayout.Rooms();
+            // Code layout plus Bora's hand placement (Data/Layout/RoomLayoutOverrides.asset, SixtyOne > Layout Editor).
+            List<BuildingLayout.RoomSpec> specs = LayoutOverrides.Rooms();
+            foreach (string problem in LayoutOverrides.CheckAll()) Debug.LogWarning("[Layout] " + problem);
             DoorArt.Configure(WallRows(data));
             foreach (BuildingLayout.RoomSpec spec in specs)
             {
@@ -343,23 +359,33 @@ namespace SixtyOne.Editor
 
             foreach (BuildingLayout.PropSpec p in spec.Props)
             {
-                SceneKit.Prop(t, p.PropId, p.Name, p.Gx, p.Gy, p.Lift, p.Scale, p.Color, p.Topple, p.Drop);
+                SceneKit.Prop(t, p);
             }
 
+            // Every hand-placeable object gets a LayoutObject tag (Layout Editor); flipX mirrors its main sprite.
             foreach (BuildingLayout.ItemSpec i in spec.Items)
             {
-                Item item = data.Items[i.ItemId];
-                if (i.Hidden) HiddenItems.Build(t, i, item);
-                else SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly);
+                if (!data.Items.TryGetValue(i.ItemId ?? "", out Item item))
+                {
+                    Debug.LogError($"[TestScene] Room '{spec.Id}': item '{i.Id}' grants unknown item '{i.ItemId}' (layout override?).");
+                    continue;
+                }
+
+                GameObject go = i.Hidden ? HiddenItems.Build(t, i, item).gameObject
+                    : SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly).gameObject;
+                Flip(go, i.FlipX);
+                LayoutOverrides.Tag(go, i);
             }
 
             foreach (BuildingLayout.ContainerSpec c in spec.Containers)
             {
                 var items = new List<Item>();
-                foreach (string id in c.Items) items.Add(data.Items[id]);
+                foreach (string id in c.Items) if (data.Items.TryGetValue(id, out Item it)) items.Add(it);
                 var hidden = new List<Item>();
-                foreach (string id in c.Hidden) hidden.Add(data.Items[id]);
-                SceneKit.Container(t, spec, c, items, hidden, ContainerArt(c.Art), data.SearchCue, data.Content);
+                foreach (string id in c.Hidden) if (data.Items.TryGetValue(id, out Item it)) hidden.Add(it);
+                GameObject go = SceneKit.Container(t, spec, c, items, hidden, ContainerArt(c.Art), data.SearchCue, data.Content).gameObject;
+                Flip(go, c.FlipX);
+                LayoutOverrides.Tag(go, c);
             }
 
             foreach (BuildingLayout.RopeSpec rope in spec.Ropes)
@@ -377,12 +403,22 @@ namespace SixtyOne.Editor
 
             foreach (BuildingLayout.LightSpec l in spec.Lights)
             {
-                practicals.Add(TestSceneCinematic.PracticalLight(t, l.Name, l.Gx, l.Gy, l.Lift, l.Color, l.Radius));
+                Light2D light = TestSceneCinematic.PracticalLight(t, l.Name, l.Gx, l.Gy, l.Lift, l.Color, l.Radius);
+                LayoutOverrides.Tag(light.gameObject, l);
+                practicals.Add(light);
             }
 
             SceneKit.SetSpawns(room, spec.PlayerSpawn, spec.WifeSpawn, spec.ChildSpawn);
             SerializedWire.SetRect(room, "viewBounds", RoomTiles.ViewBounds(t, spec, WallRows(data)));
             return room;
+        }
+
+        /// <summary>Mirrors an object's first sprite (the body or icon).</summary>
+        private static void Flip(GameObject go, bool flip)
+        {
+            if (!flip) return;
+            SpriteRenderer r = go.GetComponentInChildren<SpriteRenderer>();
+            if (r != null) r.flipX = !r.flipX;
         }
 
         /// <summary>Second pass (every room exists): doors with arrival points inside their target rooms.</summary>

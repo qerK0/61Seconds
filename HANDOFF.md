@@ -4,6 +4,80 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 01:00] LOCAL — Task 09: Layout Editor (hand placement that survives rebuilds) + F9 room jump
+### Done
+- **Data: `Data/Layout/RoomLayoutOverrides.asset`** (`Editor/Layout/RoomLayoutOverrides.cs`).
+  - One entry per room id, each a list of placed objects.
+  - Each object: kind (Prop / Pickup / Container / HiddenItem / Light), id, gx/gy, lift, flipX, prop name, blocksNav; pickup data (item, cost, borrowed, surface, prepOnly); container data (type, contents, hidden contents, search seconds, building cost, borrowed); hazard prop (id, topple, drop); light radius / colour; block scale / tint; `removed`.
+  - Code objects keep stable ids: props are `Name`, `Name#2`... (`BuildingLayout.AssignPropIds`); items, containers and lights keep theirs. The same id replaces the code object, a new id adds one, and `removed` deletes one.
+- **Builder:** `LayoutOverrides.Rooms()` applies the overrides after `BuildingLayout`. Build Test Scene uses it.
+  - Every prop, pickup, container, hidden item and light gets a `LayoutObject` tag (`World/LayoutObject.cs`, pure data).
+  - flipX mirrors the main sprite.
+  - Hand-placed furniture with "Yolu kapatır" adds its cell to the room's blocked cells, so the runtime nav goes around it. Code props still don't block.
+  - An unknown item id logs an error instead of throwing.
+- **Checks:** `LayoutOverrides.Check` / `CheckAll` (also inside Validate Content and printed on every build):
+  - furniture on a required cell (spawns, anchors, door approaches, NPC hotspots, items, ropes, container approaches);
+  - furniture that cuts a required cell off (same groups as `DebrisPlanner`);
+  - unknown rooms / items.
+  - Messages give the room and the object id, e.g. `room 'flat8_living': 'wardrobe_on_door' blocks the door approach → flat8 cell (3, 1)`.
+  - A container may stand on its own approach cell; a free neighbour must stay reachable instead.
+- **Window `SixtyOne > Layout Editor`** (`Editor/Layout/LayoutEditorWindow.cs`):
+  - room list by floor (Kat 4 / 3 / 2 / Sokak, `*` = has edits) with Prev / Next; a selected room is shown + isolated with SceneVisibility, framed, and its root selected;
+  - palette: PropArtSet thumbnails, every item icon (pickup), the 8 container presets, a light. A click spawns a placeholder at the room centre, selected, Move tool on;
+  - inspector panel: item dropdown, cost, borrowed, surface, prep-only, container contents add/remove, search seconds, building cost, flipX, lift, blocks nav, hazard prop + id. Everything uses Undo;
+  - snap to the half-cell iso grid on mouse up (on by default, sits on the floor via lift); the iso grid with blocked cells in red; 🔒 gizmos for anchors / door approaches / hotspots / ropes / spawns;
+  - Ctrl+D: the copy gets a new id (and becomes a new object);
+  - Save room / Save all write only the edits against the code layout (unchanged objects are left out, so later code changes still reach them); Revert room to code; Rebuild scene.
+- **Build Test Scene** no longer shows the modal "save changes?" dialog. That dialog was what froze the editor and MCP in task 08. The test scene's unsaved edits are dropped (it is regenerated); other dirty saved scenes are saved silently; it refuses to run in Play Mode.
+- **F9 room jump** (`Placement/DevRoomJump.cs`, compiled only in the Editor / Development builds): a room list that shows the room at once and snaps the family there (`RoomSwitcher.JumpTo`), keeping the state and node.
+- **Bug fixed:** `Room.Links` cached its door list in edit mode. After a build the validator saw no doors and reported 25 false "no door in zone" problems. Edit mode now always recomputes the list.
+- **Tests:** new `LayoutOverrideTests`:
+  - unique prop ids;
+  - apply move / remove / add;
+  - a prop on a door approach is reported;
+  - the code layout has no problems;
+  - an unchanged room diffs to nothing;
+  - the diff keeps moves, adds and removals.
+  - EditMode **200 / 200**.
+- **Verified in the editor:**
+  - moved the Flat 11 salon wardrobe, added a chair + food pickup in Flat 8, a drawer with water + cloth in Flat 9, and removed the Flat 12 wall lamp;
+  - Save gave exactly 1 / 2 / 1 / 1 edits; after Rebuild all were still there as real objects;
+  - Play: the food pickup went into the bag; the drawer searched and opened "Ödünç al / Çekmece" with Su + Bez;
+  - a wardrobe on the Flat 8 door approach → Validate Content flagged it;
+  - the window isolates / frames the room and draws the locked gizmos (screenshot `Screenshots/t09_layout_editor_sceneview.png`).
+  - Then I **removed my test edits**, so the committed overrides asset is empty.
+- Validate Content: 0 problems. Text > Validate: 0 missing / empty / unused. 0 compile errors.
+- `docs/layout-editor.md`: a short Turkish how-to for Bora. CLAUDE.md: architecture note.
+
+### Files created / changed
+- New:
+  - `Scripts/World/LayoutObject.cs`, `Scripts/Placement/DevRoomJump.cs`;
+  - `Scripts/Editor/Layout/RoomLayoutOverrides.cs`, `LayoutOverrides.cs`, `LayoutEditorWindow.cs`;
+  - `Tests/EditMode/LayoutOverrideTests.cs`, `docs/layout-editor.md`, `Data/Layout/RoomLayoutOverrides.asset`.
+- Changed:
+  - `Editor/SceneBuild/BuildingLayout.cs`: ids / flip / blocksNav, `ContainerPreset`, `ContainerKinds`;
+  - `Editor/SceneBuild/SceneKit.cs`: `Prop(spec)`, `EffectiveLift`;
+  - `Editor/SceneBuild/TestSceneBuilder.cs`: overrides, tags, no modal dialog, DevRoomJump;
+  - `Editor/Content/ContentValidator.cs`: layout check;
+  - `Placement/RoomSwitcher.cs`: `JumpTo`;
+  - `Placement/Room.cs`: Links in edit mode;
+  - `Scenes/Test_Building.unity` (rebuilt), `CLAUDE.md`.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Bora: place furniture with `SixtyOne > Layout Editor`, then **commit `Assets/_Game/Data/Layout/RoomLayoutOverrides.asset`**. It is plain YAML, so every change shows in a git diff.
+- [ ] Still open from task 08: the street → sign death (`death.street_power`, path through the spark cells) and the dark street.
+
+### Not verified / risks
+- I drove the window with code (selection, save, rebuild), not by dragging with the mouse. The snap-on-mouse-up, the palette clicks and Ctrl+D id renaming were not exercised by hand.
+- Palette spawns are placeholders (sprite + tag). They become real pickups / containers only after Save + Rebuild scene.
+- Hand-placed props flagged as hazard props need a hazard whose prop id matches; nothing checks that yet.
+- When the editor is not focused, Play Mode can stall with `runInBackground` off. That is an editor setting, not a game bug.
+
+### Next suggested step
+- Bora places the furniture for every room with the Layout Editor. Then fix the street spark-path bug and run the full playthrough from task 08.
+
+---
+
 ## [2026-10-18 00:05] LOCAL — Task 08 (partial): Bora's 4 playtest fixes + cloud task 02 wiring; play checks stopped early
 ### Done
 - **Wiring:** compiled with 0 errors and ran these menus: Import Team Audio (34 cues), Import Prop Art (11 props, 6 chandelier frames, 2 debris), Generate Tile Sets (Rocky street set), Import Character Frames, Generate Building Levels, Build Test Scene (24 rooms).

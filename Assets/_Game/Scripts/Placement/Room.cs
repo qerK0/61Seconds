@@ -75,7 +75,8 @@ namespace SixtyOne.Placement
         {
             get
             {
-                if (links == null) links = GetComponentsInChildren<RoomLink>(true);
+                // Edit mode (scene builder, validators): never trust the cache, doors are added after rooms exist.
+                if (links == null || !Application.isPlaying) links = GetComponentsInChildren<RoomLink>(true);
                 return links;
             }
         }

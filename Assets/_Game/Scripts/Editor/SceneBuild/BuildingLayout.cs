@@ -26,8 +26,13 @@ namespace SixtyOne.Editor
 
         public sealed class PropSpec
         {
+            /// <summary>Stable id inside the room (Name, or Name#2, #3 for repeats); set by Rooms(). Layout overrides key on it.</summary>
+            public string Id;
             public string PropId;
             public string Name;
+            public bool FlipX;
+            /// <summary>Blocks its nav cell (hand-placed furniture; code props never did).</summary>
+            public bool BlocksNav;
             public float Gx;
             public float Gy;
             public float Lift;
@@ -49,6 +54,7 @@ namespace SixtyOne.Editor
             public bool Hidden;
             /// <summary>Our own flat: only usable during the pre-quake prep.</summary>
             public bool PrepOnly;
+            public bool FlipX;
             public Color Color = Color.white;
         }
 
@@ -68,6 +74,8 @@ namespace SixtyOne.Editor
             public float Seconds = 1.5f;
             public bool Borrowed;
             public bool PrepOnly;
+            public bool FlipX;
+            public bool BlocksNav;
             public Vector2 Scale = new Vector2(0.7f, 0.55f);
             public Color Color = Color.white;
         }
@@ -267,7 +275,21 @@ namespace SixtyOne.Editor
         /// <summary>A searchable piece of furniture (first search 3 s of building time + 1.5 s real time).</summary>
         private static ContainerSpec Box(string id, string kind, float gx, float gy, Color color, params string[] items)
         {
-            var spec = new ContainerSpec { Id = id, NameKey = "container." + kind, Gx = gx, Gy = gy, Items = items, Color = color };
+            ContainerSpec spec = ContainerPreset(id, kind);
+            spec.Gx = gx;
+            spec.Gy = gy;
+            spec.Items = items;
+            spec.Color = color;
+            return spec;
+        }
+
+        /// <summary>Container kinds the Layout Editor palette offers (container.&lt;kind&gt; name keys).</summary>
+        public static readonly string[] ContainerKinds = { "wardrobe", "cabinet", "bookshelf", "drawer", "medicine", "toolbox", "nightstand", "jewelry" };
+
+        /// <summary>A container of a kind with its art name and block size (position and contents left empty).</summary>
+        public static ContainerSpec ContainerPreset(string id, string kind)
+        {
+            var spec = new ContainerSpec { Id = id, NameKey = "container." + kind, Color = Wood };
             switch (kind)
             {
                 case "wardrobe": spec.Art = "Wardrobe"; spec.Scale = new Vector2(1.0f, 1.7f); break;
@@ -330,7 +352,21 @@ namespace SixtyOne.Editor
             rooms.AddRange(floor4);
             rooms.AddRange(floor3);
             rooms.AddRange(floor2);
+            foreach (RoomSpec room in rooms) AssignPropIds(room);
             return rooms;
+        }
+
+        /// <summary>Gives every prop a stable id: its name, then Name#2, Name#3 ... for repeats in the same room.</summary>
+        private static void AssignPropIds(RoomSpec room)
+        {
+            var counts = new Dictionary<string, int>();
+            foreach (PropSpec p in room.Props)
+            {
+                if (!string.IsNullOrEmpty(p.Id)) continue;
+                counts.TryGetValue(p.Name, out int n);
+                counts[p.Name] = ++n;
+                p.Id = n == 1 ? p.Name : p.Name + "#" + n;
+            }
         }
 
         /// <summary>Where the player stands to search a container: in front of it (camera side), on the floor.</summary>

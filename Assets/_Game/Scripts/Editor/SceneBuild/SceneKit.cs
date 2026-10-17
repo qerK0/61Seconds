@@ -96,6 +96,24 @@ namespace SixtyOne.Editor
         /// <summary>Fixtures that hang on a wall and keep their authored lift when they get real art.</summary>
         private static bool WallMounted(string objectName) => objectName == "FuseBox" || objectName == "WallLamp" || objectName == "Valve";
 
+        /// <summary>The lift a prop really gets: mapped floor-standing art sits on the floor (lift 0).</summary>
+        public static float EffectiveLift(string objectName, float lift)
+        {
+            PropArtSet set = Props != null ? Props : AssetDatabase.LoadAssetAtPath<PropArtSet>(PropArt.SetPath);
+            bool mapped = set != null && (set.Find(objectName) != null || (objectName == "CeilingLamp" && set.ChandelierFrames.Length > 0));
+            return mapped && !WallMounted(objectName) ? 0f : lift;
+        }
+
+        /// <summary>A code prop (BuildingLayout / layout overrides), flipped and tagged for the Layout Editor.</summary>
+        public static GameObject Prop(Transform parent, BuildingLayout.PropSpec p)
+        {
+            GameObject go = Prop(parent, p.PropId, p.Name, p.Gx, p.Gy, p.Lift, p.Scale, p.Color, p.Topple, p.Drop);
+            SpriteRenderer r = go.GetComponent<SpriteRenderer>();
+            if (r != null && p.FlipX) r.flipX = !r.flipX;
+            LayoutOverrides.Tag(go, p, EffectiveLift(p.Name, p.Lift));
+            return go;
+        }
+
         public static GameObject Prop(Transform parent, string propId, string objectName, float gx, float gy, float lift, Vector2 scale, Color color,
             float toppleAngle = -80f, float dropDistance = 0.8f)
         {

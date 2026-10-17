@@ -66,6 +66,7 @@ namespace SixtyOne.Editor
             problems += CheckReachability(nodes);
             problems += CheckPrep(nodes);
             problems += CheckTextKeys();
+            problems += CheckLayoutOverrides();
 
             string summary = $"[Content] Validate: {nodes.Count} nodes checked, {problems} problem(s).";
             if (problems > 0) Debug.LogWarning(summary); else Debug.Log(summary);
@@ -723,6 +724,14 @@ namespace SixtyOne.Editor
                 }
             }
 
+            return problems;
+        }
+
+        /// <summary>Hand placement (RoomLayoutOverrides): unknown rooms / items, furniture on or cutting off a required cell.</summary>
+        private static int CheckLayoutOverrides()
+        {
+            int problems = 0;
+            foreach (string problem in LayoutOverrides.CheckAll()) problems += Report("layout: " + problem, LayoutOverrides.Load());
             return problems;
         }
 
