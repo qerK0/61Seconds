@@ -29,6 +29,7 @@ namespace SixtyOne.Editor
         public SixtyOne.Items.RecipeBook RecipeBook;
         public SixtyOne.Placement.TransitionConfig Transition;
         public SixtyOne.Placement.MovementConfig Movement;
+        public SixtyOne.Placement.RoomVisualConfig Visual;
         public SixtyOne.QTE.QTEConfig QteBreaker;
         public SixtyOne.QTE.QTEConfig QteDog;
         public List<SixtyOne.Items.Recipe> Recipes = new List<SixtyOne.Items.Recipe>();
@@ -154,11 +155,16 @@ namespace SixtyOne.Editor
             result.Level.ConfigureBag(6, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
 
             result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
-            result.Transition.Configure(0.35f, 0.6f, 0.6f, 1.2f, door, footsteps, descend);
+            // Old room rises 0.35s, new room drops 0.4s (descend 0.65s, higher), wave 0.12s, family pops 0.15s.
+            result.Transition.Configure(0.35f, 0.4f, 0.65f, 1.2f, 1f, 2.5f, 0.12f, 0.05f, 0.1f, 0.1f, 0.15f, 0.25f, door, footsteps, descend);
 
             // Click-and-run: 2.4 u/s run, 1 s per door inside a flat, 12 fps run cycle, 1.6 s idle breath.
             result.Movement = Asset<SixtyOne.Placement.MovementConfig>(DataRoot + "/MovementConfig.asset");
             result.Movement.Configure(2.4f, 1f, 12f, 1.6f);
+
+            // Bigger rooms: one uniform scale for tiles, walls, props, anchors, hotspots, spawns and characters.
+            result.Visual = Asset<SixtyOne.Placement.RoomVisualConfig>(DataRoot + "/RoomVisualConfig.asset");
+            result.Visual.Configure(1.5f);
 
             // Tuned for ~60-70% first-try success (Monte Carlo: ~0.62s median 4-choice reaction, +0.35s to orient on
             // the first key, 2.5% wrong keys). Breaker ~65%; dog ~64% with longer sequences and a higher penalty.

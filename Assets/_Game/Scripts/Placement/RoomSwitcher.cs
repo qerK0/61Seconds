@@ -160,8 +160,7 @@ namespace SixtyOne.Placement
                 return;
             }
 
-            transition.SetDirection(RoomTransitionController.LateralDirection(rooms.IndexOf(Current), rooms.IndexOf(target)));
-            transition.Play(floorChanged ? TransitionKind.Descend : TransitionKind.Lateral, Current.RoomId, target.RoomId, () => Swap(target, arrival));
+            transition.Play(floorChanged ? TransitionKind.Descend : TransitionKind.Lateral, Current, target, () => Swap(target, arrival));
         }
 
         private void Swap(Room target, Vector3? arrival)
@@ -192,7 +191,7 @@ namespace SixtyOne.Placement
                 string anchorId = gm != null ? gm.State.GetMember(member.Type).AnchorId : null;
                 Anchor anchor = Current.FindAnchor(anchorId);
                 if (anchor != null) member.PlaceAt(anchor);
-                else if (arrival.HasValue) member.PlaceAt(Current.ClampToFloor(arrival.Value + (Vector3)ArrivalOffset(member.Type)));
+                else if (arrival.HasValue) member.PlaceAt(Current.ClampToFloor(arrival.Value + Current.WorldOffset(ArrivalOffset(member.Type))));
                 else member.PlaceAt(Current.GetSpawn(member.Type));
             }
         }

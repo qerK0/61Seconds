@@ -4,6 +4,119 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 06:27 UTC] CLOUD — Character animation gaps + tests, one WorldScale (1.5x) for all room visuals, tiles-fly-up / drop-in room transition
+(The cloud clock is UTC; the 08:59 LOCAL entry below came earlier in real time. Built on top of `28bec4b`.)
+
+### Done
+- **1. Character animation.** The 08:59 local session already built most of it: `Import Character Frames`, `CharacterAnimator`, breathing with panic, shadows, IsoSorter and the Lit material. I only filled the gaps:
+  - New runtime `FrameOrder` (pure numeric sort by "(n)"). The importer now uses it, so the sort is unit-tested.
+  - `CharacterAnimator` exposes pure rules: `StateFor` (Idle/Run), `RunFrameIndex`, `FlipFor`, `BreathRate`. The component uses them and exposes `State`.
+  - **Not changed on purpose:** idle holds the hand-picked "most neutral" frame per character (player 3, wife 10, child 3; `CharacterArt.IdleFrame`), not frame 1. The local session chose it from a contact sheet. Set it to 0 there if you really want frame 1.
+- **2. Bigger tiles and walls.**
+  - New `RoomVisualConfig` asset (`Data/RoomVisualConfig.asset`, `worldScale` = **1.5**).
+  - Build Test Scene puts every room and the family under one **World** root and scales it once. Floor Tilemaps, wall segments, props, anchors, hotspots, doors, spawns and characters therefore stay aligned. Tile PPU is untouched (no per-tile changes, so no new seams).
+  - Light2D radii under World are multiplied by the scale (they are world-space values).
+  - Runtime values tuned at scale 1 now read the scale from the hierarchy (`Room.Scale`, `Room.WorldOffset`):
+    - run speed and the animation speed ratio
+    - follower offsets, start and settle distances
+    - arrival offsets and anchor slot offsets
+    - dropped-item placement (now room-local)
+    - floor clamping (`ClampToFloor` via InverseTransformPoint)
+    - `Room.ViewBounds` (stored room-local, transformed to world)
+    - the flashlight radius and offset
+- **3. Room transition.** `RoomTransitionController` keeps its events, input lock, cues, `Finish()` and Play hooks.
+  - **OUT:** the old room's floor tiles (one sprite proxy per Tilemap cell, built once per room and reused; the real Tilemap is hidden meanwhile), wall segments and props rise and fade with ease-in. The wave runs from the far corner (highest local y) to the nearest piece, and the family fades too.
+  - **SWAP** at the midpoint; the old room's pieces return exactly to rest.
+  - **IN:** the new floor drops in first, then walls (+0.05s), then props (+0.1s), each wave-staggered, with ease-out-back (about 10% settle). Then the family pops in at the spawn (0.15s).
+  - **Descend** (floor change) uses a longer, higher drop. **Reduce Effects** uses a 0.25s fade through the overlay. **Rewinds** stay instant.
+  - Pure `TileTransitionPlan` schedules everything from `TransitionConfig`: depth, delays, piece durations, totals and easing.
+  - Floor and Walls containers are tagged with `TransitionLayerTag` by RoomTiles. Other room children with renderers are props. Lights and spawn points never move.
+  - The `TransitionPan` camera layer is gone again: CameraRig (framing) → Main Camera (shake/tilt).
+  - Unscaled time and coroutines only; no DOTween; `Time.timeScale` is never touched.
+
+  | TransitionConfig | Value |
+  |---|---|
+  | Out | 0.35s, rise 1.2 |
+  | In | 0.4s, drop 1.0 |
+  | Descend in | 0.65s, drop 2.5 |
+  | Stagger | 0.12s |
+  | Wall lag / prop lag | 0.05s / 0.1s |
+  | Bounce | 0.1 |
+  | Family pop | 0.15s |
+  | Reduce Effects fade | 0.25s |
+  | **Total** | **0.9s lateral, 1.15s descend** |
+
+  Heights are room-local, so they scale with WorldScale.
+- **Tests:** +10, **134/134**.
+  - `CharacterAnimationTests`: numeric sort, idle vs run, frame loop + flip, panic breathing.
+  - `TileTransitionTests`: far-before-near wave, floor < walls < props, every piece lands exactly at outDuration/inDuration, totals and descend from the config, extreme configs, easing and bounce.
+  - Generator harness: 25/25 nodes reachable, validator 0 problems, 12 playthroughs pass.
+  - Compile check now uses Roslyn at C# 9 (Unity 6's language level) against API stubs; it can only catch what the stubs cover. ContentValidator unchanged (not needed).
+
+### Files created / changed
+- New runtime:
+  - `Placement/FrameOrder.cs`, `RoomVisualConfig.cs`, `TileTransitionPlan.cs`, `RoomTransitionPieces.cs`, `TransitionLayerTag.cs`
+- Changed runtime:
+  - `Placement/`: `RoomTransitionController` (rewritten), `TransitionConfig` (new fields), `CharacterAnimator`, `CharacterMotor`, `Room`, `RoomSwitcher`, `PlayerMover`, `FamilyFollower`, `FamilyMember`
+  - `World/DroppedItemsPresenter`, `Cinematic/CinematicDirector`
+- Changed editor:
+  - `Art/CharacterArt` (uses FrameOrder)
+  - `SceneBuild/TestSceneBuilder` (World root + scale, transition characters, no TransitionPan)
+  - `SceneBuild/RoomTiles` (layer tags)
+  - `Content/BuildingLevelsGenerator` (RoomVisualConfig, new TransitionConfig values)
+- Tests: `CharacterAnimationTests`, `TileTransitionTests`. Docs: CLAUDE.md.
+
+### Needs local wiring (checklist for the MCP session, in run order)
+1. `git pull`, open Unity, wait for the compile; expect 0 errors.
+2. Run **SixtyOne > Generate Building Levels**. It writes `Data/RoomVisualConfig.asset` (1.5) and rewrites `Data/TransitionConfig.asset` with the new fields; the old pan/fade fields disappear.
+3. Run **SixtyOne > Art > Import Character Frames** (no change expected; it now sorts through `FrameOrder`), then **SixtyOne > Build Test Scene**.
+   - In the Hierarchy: a `World` root with scale (1.5, 1.5, 1) holds all 24 `Room_*` and `Family`. The `CameraRig` → `Main Camera` has no TransitionPan.
+4. Run **Validate Content** (0 problems) and **Text > Validate** (0 missing/unused).
+5. Run the EditMode Test Runner; expect **134/134**.
+6. **Character sizes** (Play, F4 prep salon, everyone standing). Screenshot each check.
+   - Player about 1.35 world units tall, which is about 1.3 floor-tile widths.
+   - The wife is a little shorter.
+   - The child is about 0.75 of the player.
+   - Feet sit on the floor (no floating or sinking) in salon, corridor and Flat 7.
+   - Run across a room: 12 fps loop, flips by direction, followers keep up. Run speed should look the same relative to the tiles as before (it is scaled by 1.5).
+7. **Seams after scaling:** zoom the Scene view into a floor and the back walls in a wood room (Flat 11 salon) and a stone room (F3 corridor). Look for hairline gaps between diamonds or between wall segments, and compare with the 08:59 screenshots.
+   - If lines appear, it is MSAA/bilinear at the new zoom, not PPU (unchanged). Try 1.4 or 1.6 in RoomVisualConfig before touching import settings.
+8. **Does it read bigger?** `RoomCameraFraming` fits every room to 90% of the playfield, so a uniform scale cannot make a room that already fills the screen bigger on screen.
+   - What grows is small rooms (those clamped by minOrthoSize 1.2) and everything relative to the unscaled HUD.
+   - Compare before/after screenshots of a small room (Flat 11 hall, F2 stairs) and a big one (F3 corridor).
+   - If big rooms still read small, the knob is `RoomCameraFraming.fill` (0.9) or less padding in `Room.ViewBounds`, not WorldScale. Tell the cloud session which you prefer.
+9. **Transition feel:**
+   - Salon → kitchen door (lateral): old tiles should rise from the far corner first, the new floor drop before walls, props last, a small settle, then the family pops in. Total about 0.9s.
+   - Corridor → stairs to F3 and the Flat 9 balcony rope (descend): a longer, higher drop.
+   - Click during a transition: it must be ignored (input lock).
+   - Die and rewind: an instant swap, no tile animation.
+   - Settings → Reduce Effects on: a plain 0.25s fade.
+   - Tune in `Data/TransitionConfig.asset`.
+10. **Performance during the transition:**
+    - Profiler (Play): the first visit to each room creates its floor proxies once (about 16–40 GameObjects), so watch for a one-frame spike on the first transition into a room.
+    - Later transitions should only move transforms and set colours (no GC per frame beyond the iterator).
+    - Check Batches/SetPass in the Stats window mid-transition: the per-tile proxies replace one chunked Tilemap draw.
+11. **Sanity:**
+    - After 5–6 transitions, every room's tiles, walls, props, labels, dropped items and door mats are back exactly in place with full alpha. Revisit Flat 11 hall, Flat 12 living and the F2 corridor.
+    - The flashlight circle (F3 Flat 10, power off) still covers about the same area around the player.
+
+### Not verified / risks
+- **Not run in Unity.** Compiled with Roslyn against API stubs. APIs used here for the first time:
+  - `Tilemap.cellBounds.allPositionsWithin`, `HasTile`, `GetSprite`, `GetColor`, `GetCellCenterLocal`
+  - `Renderer.sortingLayerID`
+  - `Rect.MinMaxRect`
+  - `Transform.TransformPoint` / `InverseTransformPoint` / `TransformVector`
+- **Tile proxies:** they share the floor's sorting order. Where the 254-PPU tiles overlap by ~1px the draw order between neighbours is arbitrary during the 0.75s animation (same texture, so it should be invisible).
+- **WorldInteractable highlight:** the pulse writes the body colour every frame, so a highlighted pickup may ignore the fade for ~0.4s.
+- **Dropped items:** `DroppedItemsPresenter` respawns them on node enter (mid-OUT), so dropped items in the old room do not rise with it.
+- **CameraShake:** magnitudes are world units and were not scaled. Where framing zooms out for the bigger world, quakes look about 1/1.5 as strong; tune intensityPerAct if needed.
+- The transition now takes about 0.9s instead of 0.35s. Each prep move costs that much of the 60s prep (5 moves ≈ 4.5s); re-check the prep budget.
+
+### Next suggested step
+- LOCAL: run the checklist above with screenshots (sizes, seams, a mid-transition frame, the profiler on a first visit), then tune RoomVisualConfig, TransitionConfig and RoomCameraFraming.fill by feel.
+
+---
+
 ## [2026-10-17 08:59] LOCAL — Visual + interaction overhaul: full-screen rooms, multi-room flats, doors + click-and-run, animated family, Inter + UITheme
 ### Done
 - **Rooms fill the screen.**

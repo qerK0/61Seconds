@@ -27,8 +27,9 @@ namespace SixtyOne.Editor
     /// every floor's rooms (RoomSwitcher shows one room at a time; floors are groups of rooms), the family,
     /// all systems and the full UI, wired to the generated building data. One scene keeps a single GameManager,
     /// GameState and UI, so checkpoints and rewinds need no scene loading. Room changes play the
-    /// RoomTransitionController (fade + pan of the TransitionPan transform); CameraRig (per-room framing) →
-    /// TransitionPan → Main Camera (shake/tilt), so framing, pan and shake never fight.
+    /// RoomTransitionController (old tiles rise, new tiles drop in). CameraRig (per-room framing) → Main Camera
+    /// (shake/tilt), so framing and shake never fight. Rooms and the family sit under one World root scaled by
+    /// RoomVisualConfig.WorldScale.
     /// </summary>
     public static class TestSceneBuilder
     {
@@ -62,7 +63,7 @@ namespace SixtyOne.Editor
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
-            Camera camera = BuildCamera(out Transform cameraRig, out Transform cameraPan);
+            Camera camera = BuildCamera(out Transform cameraRig);
             BuildEventSystem();
 
             var systems = new GameObject("Game");
@@ -115,6 +116,9 @@ namespace SixtyOne.Editor
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
 
+            // Room view bounds were measured at scale 1 (room-local); now scale everything together.
+            ApplyWorldScale(rooms, familyRoot, data.Visual != null ? data.Visual.WorldScale : 1f);
+
             SerializedWire.Set(switcher, "gameManager", gameManager);
             SerializedWire.SetArray(switcher, "rooms", rooms.ToArray());
             SerializedWire.SetArray(switcher, "members", family.ToArray());
@@ -165,7 +169,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(qte, "cameraShake", camera.GetComponent<CameraShake>());
             SerializedWire.Set(transition, "config", data.Transition);
             SerializedWire.Set(transition, "overlay", transitionOverlay);
-            SerializedWire.Set(transition, "cameraRig", cameraPan);
+            var familyTransforms = new Object[family.Count];
+            for (int i = 0; i < family.Count; i++) familyTransforms[i] = family[i].transform;
+            SerializedWire.SetArray(transition, "characters", familyTransforms);
             CinematicDirector director = TestSceneCinematic.Build(cinematic, camera, gameManager, nodePlayer, survival, letterbox, family[0].transform, practicals,
                 BuildingLevelsGenerator.ExitNodeIds);
 
@@ -195,6 +201,24 @@ namespace SixtyOne.Editor
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
             Debug.Log("[TestScene] Built " + ScenePath + " with " + rooms.Count + " rooms. Press Play.");
+        }
+
+        /// <summary>
+        /// Puts every room and the family under one World root and scales it (RoomVisualConfig.WorldScale), so tiles,
+        /// walls, props, anchors, hotspots, spawns and characters stay aligned and the tile PPU never changes.
+        /// Light2D radii are world-space values, so they are scaled to match.
+        /// </summary>
+        private static void ApplyWorldScale(List<Room> rooms, Transform familyRoot, float scale)
+        {
+            var world = new GameObject("World").transform;
+            foreach (Room room in rooms) room.transform.SetParent(world, false);
+            familyRoot.SetParent(world, false);
+            world.localScale = new Vector3(scale, scale, 1f);
+            foreach (Light2D light in world.GetComponentsInChildren<Light2D>(true))
+            {
+                light.pointLightInnerRadius *= scale;
+                light.pointLightOuterRadius *= scale;
+            }
         }
 
         private static Item[] KeyItems(BuildingAssets data)
@@ -303,16 +327,13 @@ namespace SixtyOne.Editor
             }
         }
 
-        private static Camera BuildCamera(out Transform rig, out Transform pan)
+        private static Camera BuildCamera(out Transform rig)
         {
-            // CameraRig moves per room (RoomCameraFraming); its TransitionPan child is offset by room transitions;
-            // the camera keeps its local pose for shake and tilt. Three layers, so none of them fight.
+            // CameraRig moves per room (RoomCameraFraming); the camera keeps its local pose for shake and tilt.
             rig = new GameObject("CameraRig").transform;
             rig.position = new Vector3(0.3f, 0.4f, 0f);
-            pan = new GameObject("TransitionPan").transform;
-            pan.SetParent(rig, false);
             var go = new GameObject("Main Camera") { tag = "MainCamera" };
-            go.transform.SetParent(pan, false);
+            go.transform.SetParent(rig, false);
             go.transform.localPosition = new Vector3(0f, 0f, -10f);
             Camera camera = go.AddComponent<Camera>();
             camera.orthographic = true;

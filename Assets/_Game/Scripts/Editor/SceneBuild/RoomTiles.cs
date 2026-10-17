@@ -1,4 +1,5 @@
 using SixtyOne.Iso;
+using SixtyOne.Placement;
 using SixtyOne.World;
 using UnityEditor;
 using UnityEngine;
@@ -28,6 +29,7 @@ namespace SixtyOne.Editor
         {
             var gridGo = new GameObject("Floor", typeof(Grid));
             gridGo.transform.SetParent(room, false);
+            gridGo.AddComponent<TransitionLayerTag>().Configure(TransitionLayer.Floor);
             Grid grid = gridGo.GetComponent<Grid>();
             grid.cellLayout = GridLayout.CellLayout.Isometric;
             grid.cellSize = new Vector3(1f, 0.5f, 1f);
@@ -64,6 +66,7 @@ namespace SixtyOne.Editor
             if (!set.HasWalls) return;
             var root = new GameObject("Walls").transform;
             root.SetParent(room, false);
+            root.gameObject.AddComponent<TransitionLayerTag>().Configure(TransitionLayer.Walls);
 
             // Back-left edge: grid y = Height, one segment per x. Back-right edge: grid x = Width, one per y.
             for (int x = 0; x < spec.Width; x++) Segment(root, spec, set, false, x, IsoMath.GridToWorld(x + 0.5f, spec.Height));
