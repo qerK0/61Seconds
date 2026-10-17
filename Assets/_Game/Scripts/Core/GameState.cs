@@ -8,8 +8,14 @@ namespace SixtyOne.Core
     {
         private readonly Dictionary<MemberType, FamilyMemberState> members = new Dictionary<MemberType, FamilyMemberState>();
 
-        /// <summary>The 4-slot bag.</summary>
+        /// <summary>The bag (6 slots by default; key items live in KeyItems instead).</summary>
         public Inventory Inventory { get; private set; } = new Inventory();
+
+        /// <summary>Key items (flashlight, whistle): no bag slot, cannot be dropped. Restored by snapshots.</summary>
+        public KeyItemState KeyItems { get; private set; } = new KeyItemState();
+
+        /// <summary>Items dropped per room. Restored by snapshots.</summary>
+        public RoomDropLedger Dropped { get; private set; } = new RoomDropLedger();
 
         /// <summary>Story flags.</summary>
         public Flags Flags { get; private set; } = new Flags();
@@ -21,6 +27,9 @@ namespace SixtyOne.Core
 
         /// <summary>Id of the node currently being played.</summary>
         public string CurrentNodeId { get; set; }
+
+        /// <summary>Room id of the current node (where dropped items land).</summary>
+        public string CurrentRoomId { get; set; }
 
         /// <summary>Current act (1-3).</summary>
         public int Act { get; set; } = 1;
@@ -75,6 +84,9 @@ namespace SixtyOne.Core
             var copy = new GameState
             {
                 Inventory = Inventory.Clone(),
+                KeyItems = KeyItems.Clone(),
+                Dropped = Dropped.Clone(),
+                CurrentRoomId = CurrentRoomId,
                 Flags = Flags.Clone(),
                 Loop = new LoopCounter(Loop.Count),
                 CurrentNodeId = CurrentNodeId,

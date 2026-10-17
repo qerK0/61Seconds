@@ -29,15 +29,28 @@ namespace SixtyOne.Items
 
             StateOps.RemoveItem(state, a);
             StateOps.RemoveItem(state, b);
-            StateOps.TryAddItem(state, recipe.Output.Id);
+            StateOps.TryAddItem(state, recipe.Output.Id, recipe.Output.IsKeyItem);
             return true;
         }
 
-        private static int CountOf(GameState state, string id)
+        /// <summary>True if the bag holds enough bedsheets to tie a rope.</summary>
+        public static bool CanTieRope(GameState state, string bedsheetId, int required)
         {
-            int count = 0;
-            foreach (string item in state.Inventory.Items) if (item == id) count++;
-            return count;
+            return !string.IsNullOrEmpty(bedsheetId) && required > 0 && state.Inventory.CountOf(bedsheetId) >= required;
         }
+
+        /// <summary>
+        /// Replaces `required` bedsheets with one rope (frees required-1 slots). False if there are too few sheets.
+        /// The caller pays the time/stamina cost.
+        /// </summary>
+        public static bool TieRope(GameState state, string bedsheetId, string ropeId, int required)
+        {
+            if (string.IsNullOrEmpty(ropeId) || !CanTieRope(state, bedsheetId, required)) return false;
+            for (int i = 0; i < required; i++) StateOps.RemoveItem(state, bedsheetId);
+            StateOps.TryAddItem(state, ropeId);
+            return true;
+        }
+
+        private static int CountOf(GameState state, string id) => state.Inventory.CountOf(id);
     }
 }

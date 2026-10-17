@@ -44,7 +44,7 @@ namespace SixtyOne.Nodes
                         StateOps.SetFlag(state, o.Flag, o.FlagValue);
                         break;
                     case OutcomeType.AddItem:
-                        if (o.Item != null) StateOps.TryAddItem(state, o.Item.Id);
+                        if (o.Item != null) StateOps.TryAddItem(state, o.Item.Id, o.Item.IsKeyItem);
                         break;
                     case OutcomeType.RemoveItem:
                         if (o.Item != null) StateOps.RemoveItem(state, o.Item.Id);
@@ -53,8 +53,8 @@ namespace SixtyOne.Nodes
                         StateOps.SetHealth(state, o.Member, o.Health);
                         break;
                     case OutcomeType.TraderGive:
-                        Item given = SixtyOne.Items.TraderLogic.Pick(o.Trader, state.Inventory);
-                        if (given != null) StateOps.TryAddItem(state, given.Id);
+                        Item given = SixtyOne.Items.TraderLogic.Pick(o.Trader, state);
+                        if (given != null) StateOps.TryAddItem(state, given.Id, given.IsKeyItem);
                         break;
                     case OutcomeType.ShowMessage:
                         if (!o.MessageKey.IsEmpty) GameEvents.RaiseMessage(o.MessageKey.Key);

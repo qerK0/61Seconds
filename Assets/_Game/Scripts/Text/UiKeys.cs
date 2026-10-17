@@ -38,10 +38,26 @@ namespace SixtyOne.Text
         public const string ItemUsed = "ui.bag.used";
         public const string ItemNotUsable = "ui.bag.not_usable";
         public const string PoisonWarning = "ui.poison.warning";
-        public const string FuseTitle = "ui.fuse.title";
-        public const string FuseTry = "ui.fuse.try";
-        public const string FuseWrong = "ui.fuse.wrong";
-        public const string FuseSolved = "ui.fuse.solved";
         public const string Borrowed = "ui.borrowed";
+
+        // Bag: drop, dropped items, bedsheet rope, key items.
+        public const string Drop = "ui.bag.drop";
+        public const string ItemDropped = "ui.bag.dropped";
+        public const string PickedUpAgain = "ui.bag.picked_up";
+        public const string RopeTie = "ui.rope.tie";
+        public const string RopeTied = "ui.rope.tied";
+        public const string RopeNeedsSheets = "ui.rope.needs_sheets";
+        public const string RopeDescentMissing = "ui.rope.descent_missing";
+        public const string RopeDescentLabel = "ui.rope.descent";
+        public const string KeyItemsTitle = "ui.key_items.title";
+        public const string KeyItemOwned = "ui.key_items.owned";
+        public const string KeyItemMissing = "ui.key_items.missing";
+
+        // WASD quick-time events.
+        public const string QteHint = "ui.qte.hint";
+        public const string QteBreakerTitle = "ui.qte.breaker";
+        public const string QteDogTitle = "ui.qte.dog";
+        public const string QteMiss = "ui.qte.miss";
+        public const string QteTimeout = "ui.qte.timeout";
     }
 }

@@ -7,7 +7,7 @@ using SixtyOne.Dialogue;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
-using SixtyOne.Puzzles;
+using SixtyOne.QTE;
 using SixtyOne.Text;
 using SixtyOne.UI;
 using SixtyOne.World;
@@ -26,7 +26,9 @@ namespace SixtyOne.Editor
     /// SixtyOne > Build Test Scene. Builds Assets/_Game/Scenes/Test_Building.unity from code: ONE scene with
     /// every floor's rooms (RoomSwitcher shows one room at a time; floors are groups of rooms), the family,
     /// all systems and the full UI, wired to the generated building data. One scene keeps a single GameManager,
-    /// GameState and UI, so checkpoints and rewinds need no scene loading.
+    /// GameState and UI, so checkpoints and rewinds need no scene loading. Room changes play the
+    /// RoomTransitionController (fade + pan of the TransitionPan transform); CameraRig (per-room framing) →
+    /// TransitionPan → Main Camera (shake/tilt), so framing, pan and shake never fight.
     /// </summary>
     public static class TestSceneBuilder
     {
@@ -59,7 +61,7 @@ namespace SixtyOne.Editor
             SceneKit.Art = PlaceholderArt.Generate();
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
 
-            Camera camera = BuildCamera();
+            Camera camera = BuildCamera(out Transform cameraRig, out Transform cameraPan);
             BuildEventSystem();
 
             var systems = new GameObject("Game");
@@ -81,7 +83,9 @@ namespace SixtyOne.Editor
             RoomSwitcher switcher = systems.AddComponent<RoomSwitcher>();
             PlacementController placement = systems.AddComponent<PlacementController>();
             DialogueController dialogue = systems.AddComponent<DialogueController>();
-            FusePuzzleController fuse = systems.AddComponent<FusePuzzleController>();
+            QTEController qte = systems.AddComponent<QTEController>();
+            RoomTransitionController transition = systems.AddComponent<RoomTransitionController>();
+            DroppedItemsPresenter dropped = systems.AddComponent<DroppedItemsPresenter>();
             SurvivalController survival = systems.AddComponent<SurvivalController>();
             SixtyOne.Prep.PrepPhase prepPhase = systems.AddComponent<SixtyOne.Prep.PrepPhase>();
             EpilogueController epilogue = systems.AddComponent<EpilogueController>();
@@ -100,7 +104,7 @@ namespace SixtyOne.Editor
             TileArt.TileSets tileSets = TileArt.Generate();
             foreach (BuildingLayout.RoomSpec spec in BuildingLayout.Rooms())
             {
-                rooms.Add(BuildRoom(spec, data, practicals, tileSets));
+                rooms.Add(BuildRoom(spec, data, practicals, tileSets, nodePlayer));
             }
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
@@ -108,6 +112,12 @@ namespace SixtyOne.Editor
             SerializedWire.Set(switcher, "gameManager", gameManager);
             SerializedWire.SetArray(switcher, "rooms", rooms.ToArray());
             SerializedWire.SetArray(switcher, "members", family.ToArray());
+            SerializedWire.Set(switcher, "transition", transition);
+
+            SerializedWire.Set(dropped, "gameManager", gameManager);
+            SerializedWire.Set(dropped, "rooms", switcher);
+            SerializedWire.Set(dropped, "content", data.Content);
+            SerializedWire.Set(dropped, "fallbackSprite", SceneKit.Art.Dot);
 
             SerializedWire.Set(placement, "gameManager", gameManager);
             SerializedWire.Set(placement, "rooms", switcher);
@@ -125,13 +135,17 @@ namespace SixtyOne.Editor
             SerializedWire.Set(prepPhase, "alertCue", data.Cues.Find(c => c != null && c.Id == "cue_afad_alert"));
 
             ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
-                out LetterboxBars letterbox, out FusePuzzlePanel fusePanel);
-            SerializedWire.Set(fuse, "gameManager", gameManager);
-            SerializedWire.Set(fuse, "panel", fusePanel);
+                data.Level.MaxInventorySlots, KeyItems(data), out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
+            SerializedWire.Set(qte, "gameManager", gameManager);
+            SerializedWire.Set(qte, "view", qteView);
+            SerializedWire.Set(qte, "cameraShake", camera.GetComponent<CameraShake>());
+            SerializedWire.Set(transition, "config", data.Transition);
+            SerializedWire.Set(transition, "overlay", transitionOverlay);
+            SerializedWire.Set(transition, "cameraRig", cameraPan);
             CinematicDirector director = TestSceneCinematic.Build(cinematic, camera, gameManager, nodePlayer, survival, letterbox, family[0].transform, practicals,
                 BuildingLevelsGenerator.ExitNodeIds);
 
-            RoomCameraFraming framing = camera.transform.parent.gameObject.AddComponent<RoomCameraFraming>();
+            RoomCameraFraming framing = cameraRig.gameObject.AddComponent<RoomCameraFraming>();
             SerializedWire.Set(framing, "rooms", switcher);
             SerializedWire.Set(framing, "targetCamera", camera);
             SerializedWire.Set(framing, "director", director);
@@ -148,14 +162,21 @@ namespace SixtyOne.Editor
             SerializedWire.Set(nodePlayer, "content", data.Content);
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
-            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, fuse, epilogue });
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, qte, epilogue });
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
             Debug.Log("[TestScene] Built " + ScenePath + " with " + rooms.Count + " rooms. Press Play.");
         }
 
-        private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets)
+        private static Item[] KeyItems(BuildingAssets data)
+        {
+            var items = new List<Item>();
+            foreach (string id in BuildingLevelsGenerator.KeyItemIds) items.Add(data.Items[id]);
+            return items.ToArray();
+        }
+
+        private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer)
         {
             Room room = SceneKit.NewRoom("Room_" + spec.Id, spec.Id);
             Transform t = room.transform;
@@ -210,6 +231,11 @@ namespace SixtyOne.Editor
                 else SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly);
             }
 
+            foreach (BuildingLayout.RopeSpec rope in spec.Ropes)
+            {
+                SceneKit.RopeDescent(t, rope.Id, rope.Gx, rope.Gy, data.Items["bedsheet_rope"], data.Nodes[rope.TargetNodeId], nodePlayer);
+            }
+
             foreach (BuildingLayout.LightSpec l in spec.Lights)
             {
                 practicals.Add(TestSceneCinematic.PracticalLight(t, l.Name, l.Gx, l.Gy, l.Lift, l.Color, l.Radius));
@@ -220,13 +246,16 @@ namespace SixtyOne.Editor
             return room;
         }
 
-        private static Camera BuildCamera()
+        private static Camera BuildCamera(out Transform rig, out Transform pan)
         {
-            // The rig moves per room (RoomCameraFraming); the camera keeps its local pose for shake and tilt.
-            var rig = new GameObject("CameraRig");
-            rig.transform.position = new Vector3(0.3f, 0.4f, 0f);
+            // CameraRig moves per room (RoomCameraFraming); its TransitionPan child is offset by room transitions;
+            // the camera keeps its local pose for shake and tilt. Three layers, so none of them fight.
+            rig = new GameObject("CameraRig").transform;
+            rig.position = new Vector3(0.3f, 0.4f, 0f);
+            pan = new GameObject("TransitionPan").transform;
+            pan.SetParent(rig, false);
             var go = new GameObject("Main Camera") { tag = "MainCamera" };
-            go.transform.SetParent(rig.transform, false);
+            go.transform.SetParent(pan, false);
             go.transform.localPosition = new Vector3(0f, 0f, -10f);
             Camera camera = go.AddComponent<Camera>();
             camera.orthographic = true;

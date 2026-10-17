@@ -4,7 +4,7 @@ using SixtyOne.Core;
 using SixtyOne.Dialogue;
 using SixtyOne.Items;
 using SixtyOne.Nodes;
-using SixtyOne.Puzzles;
+using SixtyOne.QTE;
 using SixtyOne.Placement;
 using SixtyOne.Prep;
 using SixtyOne.World;
@@ -20,8 +20,10 @@ namespace SixtyOne.Editor
     /// missing-item text + item, dialogue lines (keys, cost &gt;= 0), recipes (inputs + output exist), trader
     /// items, every gas room has a valve choice, checkpoints reachable, every placement moment has anchors
     /// (safe + trap) and hazards in its room (open scene), hazards linked to an anchor or used as an unplaced
-    /// hazard, world interactables wired, no firearm item ids, reachability from the start node, and that every
-    /// referenced text key exists. Each problem is a clickable console entry.
+    /// hazard, world interactables wired, no firearm item ids, key items (flashlight, whistle) flagged IsKeyItem,
+    /// bag/rope config, QTE nodes (config + next node) and rope descent points, reachability from the start node,
+    /// that every referenced text key exists, and that strings_tr.csv has no "TODO" anywhere (fails hard).
+    /// Each problem is a clickable console entry.
     /// </summary>
     public static class ContentValidator
     {
@@ -34,7 +36,7 @@ namespace SixtyOne.Editor
             List<SceneNode> nodes = LoadAll<SceneNode>();
             AddAll<PlacementNode>(nodes);
             AddAll<DialogueNode>(nodes);
-            AddAll<FusePuzzleNode>(nodes);
+            AddAll<QTENode>(nodes);
             AddAll<EpilogueNode>(nodes);
             AddAll<PrepPhaseNode>(nodes);
 
@@ -55,6 +57,11 @@ namespace SixtyOne.Editor
             problems += CheckGasValves(nodes);
             problems += CheckPlacementRooms(nodes);
             problems += CheckNoFirearms();
+            problems += CheckKeyItems();
+            problems += CheckBagConfig();
+            problems += CheckQteConfigs();
+            problems += CheckRopeDescents();
+            problems += CheckNoTodoStrings();
             problems += CheckReachability(nodes);
             problems += CheckPrep(nodes);
             problems += CheckTextKeys();
@@ -113,9 +120,13 @@ namespace SixtyOne.Editor
                 }
             }
 
-            if (node is FusePuzzleNode fuse && (fuse.Solution == null || fuse.Solution.Length == 0))
+            if (node is QTENode qte)
             {
-                problems += Report($"fuse node '{node.Id}' has no solution pattern.", node);
+                if (qte.Config == null) problems += Report($"QTE node '{node.Id}' has no QTEConfig.", node);
+                if (qte.NextNode == null) problems += Report($"QTE node '{node.Id}' has no next node.", node);
+                if (qte.PromptKey.IsEmpty) problems += Report($"QTE node '{node.Id}' has no prompt key.", node);
+                problems += CheckOutcomes(qte.SuccessOutcomes, node, $"QTE node '{node.Id}' success");
+                problems += CheckOutcomes(qte.FailOutcomes, node, $"QTE node '{node.Id}' fail");
             }
 
 
@@ -282,6 +293,85 @@ namespace SixtyOne.Editor
                 {
                     if (id.Contains(word)) problems += Report($"item '{item.Id}' looks like a firearm; firearms are not allowed in this game.", item);
                 }
+            }
+
+            return problems;
+        }
+
+        /// <summary>The flashlight and whistle must be key items (no bag slot, not droppable, corner HUD).</summary>
+        private static int CheckKeyItems()
+        {
+            int problems = 0;
+            var items = LoadAll<Item>();
+            foreach (string id in BuildingLevelsGenerator.KeyItemIds)
+            {
+                Item item = items.Find(i => i.Id == id);
+                if (item == null) problems += Report($"key item '{id}' does not exist.", null);
+                else if (!item.IsKeyItem) problems += Report($"item '{id}' must have IsKeyItem = true.", item);
+            }
+
+            return problems;
+        }
+
+        private static int CheckBagConfig()
+        {
+            int problems = 0;
+            foreach (LevelConfig level in LoadAll<LevelConfig>())
+            {
+                if (level.MaxInventorySlots < 1) problems += Report("LevelConfig has no bag slots.", level);
+                if (level.BedsheetItem == null || level.BedsheetRopeItem == null) problems += Report("LevelConfig is missing the bedsheet or bedsheet rope item.", level);
+                if (level.RequiredBedsheetsForRope > level.MaxInventorySlots) problems += Report("LevelConfig needs more bedsheets for the rope than the bag can hold.", level);
+            }
+
+            return problems;
+        }
+
+        private static int CheckQteConfigs()
+        {
+            int problems = 0;
+            foreach (QTEConfig config in LoadAll<QTEConfig>())
+            {
+                if (config.SequenceLengthMin < 1) problems += Report($"QTE config '{config.name}' has an empty sequence.", config);
+                if (config.TimePerKey <= 0f) problems += Report($"QTE config '{config.name}' needs a time per key above 0.", config);
+            }
+
+            return problems;
+        }
+
+        /// <summary>Rope descent points in open scenes need the rope item and a target node.</summary>
+        private static int CheckRopeDescents()
+        {
+            int problems = 0;
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene scene = SceneManager.GetSceneAt(i);
+                if (!scene.isLoaded) continue;
+                foreach (GameObject root in scene.GetRootGameObjects())
+                {
+                    foreach (RopeDescentInteractable rope in root.GetComponentsInChildren<RopeDescentInteractable>(true))
+                    {
+                        if (rope.RequiredItem == null) problems += Report($"rope descent '{rope.Id}' has no required item.", rope);
+                        if (rope.TargetNode == null) problems += Report($"rope descent '{rope.Id}' has no target node.", rope);
+                    }
+                }
+            }
+
+            return problems;
+        }
+
+        /// <summary>Fails if any key, text or note in strings_tr.csv contains "TODO" (any case).</summary>
+        private static int CheckNoTodoStrings()
+        {
+            TextAsset csv = AssetDatabase.LoadAssetAtPath<TextAsset>(TextDB.DefaultCsvPath);
+            string content = csv != null ? csv.text : (System.IO.File.Exists(TextDB.DefaultCsvPath) ? System.IO.File.ReadAllText(TextDB.DefaultCsvPath) : null);
+            if (content == null) return Report("strings_tr.csv not found; cannot check for TODO strings.", null);
+
+            int problems = 0;
+            foreach (string row in TextLint.TodoRows(content))
+            {
+                // Hard failure: placeholder text must never ship.
+                Debug.LogError("[Content] strings_tr.csv row contains TODO: " + row, csv);
+                problems++;
             }
 
             return problems;
@@ -486,7 +576,7 @@ namespace SixtyOne.Editor
             }
 
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
-            if (node is FusePuzzleNode fuse && fuse.NextNode != null) yield return fuse.NextNode;
+            if (node is QTENode qte && qte.NextNode != null) yield return qte.NextNode;
             if (node is PrepPhaseNode prep && prep.QuakeNode != null) yield return prep.QuakeNode;
         }
 

@@ -174,6 +174,35 @@ namespace SixtyOne.Editor
             return interactable;
         }
 
+        /// <summary>A balcony/window rope point: needs the bedsheet rope, climbs down to the target node.</summary>
+        public static RopeDescentInteractable RopeDescent(Transform parent, string id, float gx, float gy, Item rope, SceneNode target, NodePlayer nodePlayer)
+        {
+            var go = new GameObject("Rope_" + id);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = IsoMath.GridToWorld(gx, gy);
+            SpriteRenderer r = go.AddComponent<SpriteRenderer>();
+            r.sprite = Art.Block;
+            r.color = new Color(0.85f, 0.85f, 0.95f, 0.8f);
+            go.transform.localScale = new Vector3(0.35f, 0.9f, 1f);
+            BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(1f, 1f);
+            box.offset = new Vector2(0f, 0.5f);
+
+            TextMeshPro label = WorldLabel(go.transform, new Vector3(0f, 1.3f, 0f), 1.4f, Color.white);
+            label.transform.localScale = new Vector3(1f / 0.35f, 1f / 0.9f, 1f);
+            LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(localized, "key", UiKeys.RopeDescentLabel);
+
+            IsoSorter sorter = go.AddComponent<IsoSorter>();
+            sorter.Mode = IsoSortMode.Static;
+            sorter.Apply();
+
+            RopeDescentInteractable descent = go.AddComponent<RopeDescentInteractable>();
+            descent.Configure(id, UiKeys.RopeDescentLabel, rope, UiKeys.RopeDescentMissing, target, nodePlayer, 10f, 20f);
+            EditorUtility.SetDirty(descent);
+            return descent;
+        }
+
         public static FamilyMember Member(Transform parent, MemberType type, Color color, float scale)
         {
             var go = new GameObject(type.ToString());

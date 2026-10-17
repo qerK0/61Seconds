@@ -45,6 +45,8 @@ namespace SixtyOne.Placement
             Cancel();
             node = (PlacementNode)sceneNode;
             onFinished = done;
+            // A placement starts at once: finish any room transition so the anchors are in the shown room.
+            rooms?.FinishTransition();
             room = rooms != null ? rooms.Current : null;
             if (room == null)
             {

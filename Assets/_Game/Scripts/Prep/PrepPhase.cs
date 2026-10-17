@@ -84,7 +84,9 @@ namespace SixtyOne.Prep
         {
             Timer.Sync(State.PrepTime);
             if (!(nodePlayer.Current is PrepPhaseNode prep) || State.BuildingTimerStarted) return;
-            if (rooms != null && rooms.Current != null) rooms.Current.ResetProps();
+            // The node's own room: during a room transition rooms.Current is still the previous room.
+            SixtyOne.Placement.Room room = rooms != null ? rooms.FindRoom(prep.RoomId) : null;
+            if (room != null) room.ResetProps();
             if (!prep.ShowAlertOnEnter) return;
             GameEvents.RaiseAlert(prep.AlertTitleKey.Key, prep.AlertBodyKey.Key, Mathf.CeilToInt(State.PrepTime).ToString());
             AudioService.PlayCue(alertCue);

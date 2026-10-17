@@ -78,6 +78,8 @@ namespace SixtyOne.Core
             BuildingAlarm = null;
             BuildingTick = null;
             TimeSpent = null;
+            InventoryEvents.ClearAll();
+            NavigationEvents.ClearAll();
         }
     }
 }

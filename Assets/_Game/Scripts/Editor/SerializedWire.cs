@@ -68,6 +68,26 @@ namespace SixtyOne.Editor
             });
         }
 
+        /// <summary>
+        /// Replaces an array/List of [Serializable] elements whose fields are object references,
+        /// e.g. KeyItemCornerHUD.Slot { item, icon, frame }: one dictionary of field → value per element.
+        /// </summary>
+        public static void SetStructArray(Object target, string field, System.Collections.Generic.IReadOnlyList<System.Collections.Generic.IDictionary<string, Object>> elements)
+        {
+            Apply(target, field, p =>
+            {
+                p.arraySize = elements.Count;
+                for (int i = 0; i < elements.Count; i++)
+                {
+                    SerializedProperty element = p.GetArrayElementAtIndex(i);
+                    foreach (System.Collections.Generic.KeyValuePair<string, Object> pair in elements[i])
+                    {
+                        element.FindPropertyRelative(pair.Key).objectReferenceValue = pair.Value;
+                    }
+                }
+            });
+        }
+
         /// <summary>Replaces an array/List of strings.</summary>
         public static void SetStringArray(Object target, string field, string[] values)
         {

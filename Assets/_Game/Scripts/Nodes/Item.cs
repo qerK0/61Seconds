@@ -5,7 +5,8 @@ namespace SixtyOne.Nodes
 {
     /// <summary>
     /// A bag item. Usable items (food, water, first aid) are used by selecting their slot twice.
-    /// Trap items are pickable but useless: they waste a slot and time.
+    /// Trap items are pickable but useless: they waste a slot and time. Key items (flashlight, whistle) never
+    /// take a bag slot, cannot be dropped and show in the corner HUD.
     /// </summary>
     [CreateAssetMenu(menuName = "SixtyOne/Item", fileName = "item_new")]
     public sealed class Item : ScriptableObject
@@ -24,6 +25,9 @@ namespace SixtyOne.Nodes
 
         [Tooltip("A valuable that is useless in an earthquake (wastes a bag slot and time).")]
         [SerializeField] private bool isTrap;
+
+        [Tooltip("Key item: kept outside the bag (no slot), cannot be dropped, shown in the corner HUD.")]
+        [SerializeField] private bool isKeyItem;
 
         [Tooltip("Stamina restored when used (food, water). 0 = not a stamina item.")]
         [Min(0f)]
@@ -44,6 +48,7 @@ namespace SixtyOne.Nodes
         public TextKey DescriptionKey => descriptionKey;
         public Sprite Icon => icon;
         public bool IsTrap => isTrap;
+        public bool IsKeyItem => isKeyItem;
         public float StaminaRestore => staminaRestore;
         public bool HealsInjury => healsInjury;
         public bool ConsumedOnUse => consumedOnUse;
@@ -60,6 +65,7 @@ namespace SixtyOne.Nodes
             descriptionKey = description;
             if (itemIcon != null) icon = itemIcon;
             isTrap = false;
+            isKeyItem = false;
             staminaRestore = 0f;
             healsInjury = false;
             consumedOnUse = true;
@@ -73,6 +79,12 @@ namespace SixtyOne.Nodes
             healsInjury = heals;
             useSeconds = seconds;
             consumedOnUse = consumed;
+        }
+
+        /// <summary>Marks the item as a key item (no bag slot, not droppable).</summary>
+        public void ConfigureKeyItem()
+        {
+            isKeyItem = true;
         }
 
         /// <summary>Marks the item as a useless valuable.</summary>

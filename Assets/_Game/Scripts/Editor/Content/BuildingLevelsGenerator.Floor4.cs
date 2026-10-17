@@ -17,6 +17,7 @@ namespace SixtyOne.Editor
         public const string F4Kitchen = "f4.kitchen";
         public const string F4Hall = "f4.hall";
         public const string F4Sevim = "f4.sevim";
+        public const string F4Bedroom = "f4.bedroom";
         public const string F4CorridorNode = "f4.corridor";
         public const string F4Neighbor = "f4.neighbor";
         public const string F4Flat12 = "f4.flat12";
@@ -29,8 +30,9 @@ namespace SixtyOne.Editor
         /// 1. Prep (checkpoint): AFAD early warning, 60 s to loot our own flat (salon / kitchen / hall); costs come out
         ///    of the prep countdown, the building timer is not running yet.
         /// 2. Prep zero = quake: the building timer starts. 3. Opening quake placement in the salon.
-        /// 4. Post-quake flat (gas valve needs the wrench, breaker, exit) → corridor: Sevim Teyze's dialogue on the way
-        ///    out ("Kısa kes" = no whistle, no Flat 12 info) → Hasan's gift, Flat 12 borrow + "Not bırak", stairs down.
+        /// 4. Post-quake flat (gas valve needs the wrench, breaker, bedroom with bedsheets for the rope, exit) → corridor:
+        ///    Sevim Teyze's dialogue on the way out ("Kısa kes" = no whistle, no Flat 12 info) → Hasan's gift, Flat 12
+        ///    borrow + "Not bırak", stairs down.
         /// </summary>
         private static void BuildFloor4()
         {
@@ -43,6 +45,7 @@ namespace SixtyOne.Editor
             SceneNode kitchen = Node<SceneNode>(floor, F4Kitchen);
             SceneNode hall = Node<SceneNode>(floor, F4Hall);
             DialogueNode sevim = Node<DialogueNode>(floor, F4Sevim);
+            SceneNode bedroom = Node<SceneNode>(floor, F4Bedroom);
             SceneNode corridor = Node<SceneNode>(floor, F4CorridorNode);
             DialogueNode neighbor = Node<DialogueNode>(floor, F4Neighbor);
             SceneNode flat12 = Node<SceneNode>(floor, F4Flat12);
@@ -74,6 +77,11 @@ namespace SixtyOne.Editor
             Setup(salon, F4Salon, Flat11Salon, 1);
             salon.AddChoice(C(F4Salon, "kitchen").Move(2f).Then(Outcome.GoTo(kitchen)));
             salon.AddChoice(C(F4Salon, "hall").Move(2f).Then(Outcome.GoTo(hall)));
+            salon.AddChoice(C(F4Salon, "bedroom").Move(2f).Then(Outcome.GoTo(bedroom)));
+
+            // Bedroom: bedsheets (world pickups) for the rope; nothing else to do here.
+            Setup(bedroom, F4Bedroom, Flat11Bedroom, 1);
+            bedroom.AddChoice(C(F4Bedroom, "back").Move(2f).Then(Outcome.GoTo(salon)));
 
             // Kitchen after the quake: the gas leaks (poison) until the valve is closed (wrench). Switches and flames = death.
             Setup(kitchen, F4Kitchen, Flat11Kitchen, 1);

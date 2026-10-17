@@ -61,7 +61,7 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void CraftingSwapsInputsForOutputAndKeepsTheBagAtFour()
+        public void CraftingSwapsInputsForOutputAndKeepsTheBagSize()
         {
             var state = new GameState();
             state.Inventory.TryAdd("rope");
@@ -73,7 +73,7 @@ namespace SixtyOne.Tests
             Assert.IsFalse(state.Inventory.Has("rope"));
             Assert.IsFalse(state.Inventory.Has("cloth"));
             Assert.AreEqual(3, state.Inventory.Count);
-            Assert.AreEqual(Inventory.DefaultCapacity, state.Inventory.Capacity, "bag stays 4 slots");
+            Assert.AreEqual(Inventory.DefaultCapacity, state.Inventory.Capacity, "crafting never changes the bag size");
 
             Assert.IsFalse(Crafting.Craft(state, Crafting.Find(book, tape, gloves)), "inputs missing");
             Assert.IsFalse(state.Inventory.Has("insulated_grip"));
@@ -91,7 +91,6 @@ namespace SixtyOne.Tests
                 .Require(Condition.HasItem(whistle)).WhenLocked(FailBehaviour.ShowLocked, "f2.corridor.c_whistle.locked")
                 .Then(Outcome.SetFlag("DogGone")));
             corridor.AddChoice(new Choice("f2.corridor.c_pass").ShowWhen(Condition.FlagFalse("DogGone"))
-                .Then(Outcome.SetMember(MemberType.Player, MemberHealth.Injured))
                 .Then(Outcome.GoTo(flat7)));
             corridor.AddChoice(new Choice("f2.corridor.c_stairs").ShowWhen(Condition.FlagTrue("DogGone"))
                 .Then(Outcome.GoTo(exit)));
@@ -129,22 +128,12 @@ namespace SixtyOne.Tests
         {
             SceneNode corridor = DogCorridor(out _, out _);
             var state = new GameState();
-            state.Inventory.TryAdd("whistle");
+            whistle.ConfigureKeyItem();
+            StateOps.TryAddItem(state, "whistle", whistle.IsKeyItem);
+            Assert.IsFalse(Find(corridor, state, "f2.corridor.c_whistle").Locked, "a key item satisfies HasItem");
             OutcomeExecutor.Execute(Find(corridor, state, "f2.corridor.c_whistle").Choice.Outcomes, state);
-            Assert.IsTrue(state.Inventory.Has("whistle"));
+            Assert.IsTrue(StateOps.HasItem(state, "whistle"), "the whistle is kept");
             Assert.IsNotNull(Find(corridor, state, "f2.corridor.c_stairs").Choice);
-        }
-
-        [Test]
-        public void WalkingPastTheDogInjuresAndPushesBackWithoutDeath()
-        {
-            SceneNode corridor = DogCorridor(out SceneNode flat7, out _);
-            var state = new GameState();
-            OutcomeResult result = OutcomeExecutor.Execute(Find(corridor, state, "f2.corridor.c_pass").Choice.Outcomes, state);
-            Assert.IsFalse(result.Died);
-            Assert.AreSame(flat7, result.NextNode);
-            Assert.AreEqual(MemberHealth.Injured, state.GetMember(MemberType.Player).Health);
-            Assert.AreEqual(1, SurvivalModel.InjuredCount(state));
         }
 
         [Test]

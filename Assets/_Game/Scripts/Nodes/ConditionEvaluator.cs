@@ -15,15 +15,15 @@ namespace SixtyOne.Nodes
 
             switch (condition.Type)
             {
-                case ConditionType.HasItem: return state.Inventory.Has(condition.ItemId);
-                case ConditionType.LacksItem: return !state.Inventory.Has(condition.ItemId);
+                case ConditionType.HasItem: return StateOps.HasItem(state, condition.ItemId);
+                case ConditionType.LacksItem: return !StateOps.HasItem(state, condition.ItemId);
                 case ConditionType.FlagTrue: return state.Flags.Get(condition.Flag);
                 case ConditionType.FlagFalse: return !state.Flags.Get(condition.Flag);
                 case ConditionType.MemberState: return state.GetMember(condition.Member).Health == condition.Health;
                 case ConditionType.HasAnyItem:
                     foreach (Item item in condition.AnyItems)
                     {
-                        if (item != null && state.Inventory.Has(item.Id)) return true;
+                        if (item != null && StateOps.HasItem(state, item.Id)) return true;
                     }
 
                     return false;

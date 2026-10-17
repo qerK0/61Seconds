@@ -162,13 +162,13 @@ namespace SixtyOne.World
             if (gm == null || !IsClickable) return;
             GameState state = gm.State;
 
-            if (requiredItem != null && !state.Inventory.Has(requiredItem.Id))
+            if (requiredItem != null && !StateOps.HasItem(state, requiredItem.Id))
             {
                 GameEvents.RaiseMessage(missingRequirementKey.IsEmpty ? UiKeys.NeedsItem : missingRequirementKey.Key);
                 return;
             }
 
-            if (grantsItem != null && state.Inventory.IsFull)
+            if (grantsItem != null && !grantsItem.IsKeyItem && state.Inventory.IsFull)
             {
                 // Refuse before wasting time.
                 GameEvents.RaiseMessage(UiKeys.BagFull);
@@ -186,7 +186,7 @@ namespace SixtyOne.World
         {
             if (grantsItem != null)
             {
-                if (!StateOps.TryAddItem(state, grantsItem.Id)) return false;
+                if (!StateOps.TryAddItem(state, grantsItem.Id, grantsItem.IsKeyItem)) return false;
                 if (borrowed)
                 {
                     state.Borrowed.Add(grantsItem.Id);

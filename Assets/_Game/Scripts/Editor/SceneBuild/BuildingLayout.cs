@@ -60,6 +60,15 @@ namespace SixtyOne.Editor
         /// <summary>Which RoomTileSet a room uses.</summary>
         public enum RoomArt { Home, Corridor }
 
+        /// <summary>A window/balcony where the bedsheet rope lowers the family to another node.</summary>
+        public sealed class RopeSpec
+        {
+            public string Id;
+            public float Gx;
+            public float Gy;
+            public string TargetNodeId;
+        }
+
         public sealed class RoomSpec
         {
             public string Id;
@@ -80,6 +89,7 @@ namespace SixtyOne.Editor
             public List<ItemSpec> Items = new List<ItemSpec>();
             public List<LightSpec> Lights = new List<LightSpec>();
             public List<Vector2> ExtraTiles = new List<Vector2>();
+            public List<RopeSpec> Ropes = new List<RopeSpec>();
         }
 
         private static readonly Color Warm = new Color(1f, 0.78f, 0.5f, 1f);
@@ -189,6 +199,15 @@ namespace SixtyOne.Editor
             hall.Items.Add(Own(I("gold", 2.4f, 1.4f, new Color(0.9f, 0.75f, 0.2f, 1f), cost: 3f, surface: false, id: "hall_jewelry_box")));
             yield return hall;
 
+            // Flat 11 bedroom: two bedsheets for the rope (bed = open surface, wardrobe = 3s).
+            RoomSpec bedroom = Art(Room(BuildingLevelsGenerator.Flat11Bedroom, 4, 4, new Color(0.76f, 0.72f, 0.7f, 1f)), RoomArt.Home, gaps: "L0", windows: "R2");
+            bedroom.Props.Add(P(null, "Bed", 1.6f, 2.6f, -0.05f, 1.6f, 0.6f, new Color(0.85f, 0.85f, 0.9f, 1f)));
+            bedroom.Props.Add(P(null, "Wardrobe", 3.6f, 3.3f, 0f, 1.0f, 1.7f, Wood));
+            bedroom.Items.Add(I("bedsheet", 1.6f, 2.6f, new Color(0.92f, 0.92f, 1f, 1f), id: "bedroom_bed_sheet"));
+            bedroom.Items.Add(I("bedsheet", 3.4f, 3.1f, new Color(0.8f, 0.85f, 1f, 1f), cost: 3f, surface: false, id: "bedroom_wardrobe_sheet"));
+            bedroom.Lights.Add(L("BedLamp", 0.6f, 3.4f, 0.8f, 2.4f));
+            yield return bedroom;
+
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor, gaps: "L1 L4");
             corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
             corridor.Props.Add(P(null, "StairsDown", 0.4f, 1.0f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
@@ -201,6 +220,7 @@ namespace SixtyOne.Editor
             flat12.Items.Add(I("tape", 2.6f, 0.8f, new Color(0.6f, 0.6f, 0.65f, 1f), borrowed: true));
             flat12.Items.Add(I("flashlight", 3.4f, 1.6f, new Color(0.3f, 0.3f, 0.35f, 1f), borrowed: true));
             flat12.Items.Add(I("lighter", 3.2f, 2.8f, new Color(1f, 0.4f, 0.2f, 1f), borrowed: true));
+            flat12.Items.Add(I("bedsheet", 3.4f, 3.4f, new Color(0.85f, 0.8f, 0.95f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_wardrobe_sheet"));
             flat12.Items.Add(I("first_aid", 1.0f, 3.2f, new Color(1f, 0.25f, 0.25f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_cabinet"));
             yield return flat12;
         }
@@ -265,10 +285,15 @@ namespace SixtyOne.Editor
             yield return corridor;
 
             // Flat 9: hanging cables + fuse box.
-            RoomSpec flat9 = Art(Room(BuildingLevelsGenerator.Flat9, 4, 4, new Color(0.62f, 0.66f, 0.7f, 1f)), RoomArt.Home, gaps: "L0");
+            RoomSpec flat9 = Art(Room(BuildingLevelsGenerator.Flat9, 4, 4, new Color(0.62f, 0.66f, 0.7f, 1f)), RoomArt.Home, gaps: "L0 R0");
             flat9.Props.Add(P(null, "FuseBox", 0.3f, 3.0f, 0.5f, 0.6f, 0.7f, new Color(0.6f, 0.6f, 0.65f, 1f)));
             flat9.Props.Add(P(null, "HangingCables", 3.2f, 2.8f, 0.4f, 0.15f, 1.6f, new Color(0.15f, 0.15f, 0.15f, 1f)));
             flat9.Props.Add(P(null, "Shaft", 3.4f, 3.4f, 0f, 1.0f, 0.3f, new Color(0.1f, 0.1f, 0.12f, 1f)));
+            // Balcony: tie the bedsheet rope here and climb down to Flat 7.
+            flat9.ExtraTiles.Add(new Vector2(4.5f, 0.5f));
+            flat9.ExtraTiles.Add(new Vector2(4.5f, 1.5f));
+            flat9.Props.Add(P(null, "BalconyRail", 4.95f, 0.6f, 0f, 1.0f, 0.5f, new Color(0.5f, 0.5f, 0.55f, 1f)));
+            flat9.Ropes.Add(new RopeSpec { Id = "flat9_balcony_rope", Gx = 4.5f, Gy = 0.6f, TargetNodeId = BuildingLevelsGenerator.F2Aftershock });
             yield return flat9;
 
             // Flat 10: dark (no practical lights), stove leaking gas, collapsed floor.

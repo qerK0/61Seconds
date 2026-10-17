@@ -119,6 +119,7 @@ namespace SixtyOne.Nodes
             Current = node;
             State.CurrentNodeId = node.Id;
             State.Act = node.Act;
+            State.CurrentRoomId = node.RoomId;
             rooms?.ShowRoom(node.RoomId);
 
             if (!fromRewind)

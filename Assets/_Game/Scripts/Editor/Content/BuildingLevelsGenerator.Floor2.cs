@@ -4,6 +4,7 @@ using SixtyOne.Core;
 using SixtyOne.Items;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
+using SixtyOne.QTE;
 
 namespace SixtyOne.Editor
 {
@@ -18,6 +19,7 @@ namespace SixtyOne.Editor
         public const string F2Aftershock = "f2.aftershock";
         public const string F2Flat7 = "f2.flat7";
         public const string F2CorridorNode = "f2.corridor";
+        public const string F2Dog = "f2.dog";
         public const string F2Flat8 = "f2.flat8";
         public const string F2Exit = "f2.exit";
         public const string F2Epilogue = "f2.epilogue";
@@ -68,8 +70,8 @@ namespace SixtyOne.Editor
 
         /// <summary>
         /// Floor 2: strong aftershock on arrival (placement in Flat 7, checkpoint) → Flat 7 (gas leak, poison) →
-        /// corridor with the dog gate (food is consumed, the whistle is kept; walking past = bitten, injured and
-        /// pushed back) → stairs → street epilogue.
+        /// corridor with the dog gate (food is consumed, the whistle is kept; slipping past is a WASD QTE whose
+        /// failures cost building time and re-roll) → stairs → street epilogue.
         /// </summary>
         private static void BuildFloor2()
         {
@@ -77,6 +79,7 @@ namespace SixtyOne.Editor
             var arrival = (PlacementNode)Floor2Arrival();
             SceneNode flat7 = Node<SceneNode>(floor, F2Flat7);
             SceneNode corridor = Node<SceneNode>(floor, F2CorridorNode);
+            QTENode dog = Node<QTENode>(floor, F2Dog);
             SceneNode flat8 = Node<SceneNode>(floor, F2Flat8);
             SceneNode exit = Node<SceneNode>(floor, F2Exit);
             EpilogueNode epilogue = Node<EpilogueNode>(floor, F2Epilogue);
@@ -113,17 +116,19 @@ namespace SixtyOne.Editor
                 .WhenLocked(FailBehaviour.ShowLocked, Locked(F2CorridorNode, "whistle"))
                 .Then(Outcome.SetFlag(DogGone))
                 .Then(Outcome.Message($"{F2CorridorNode}.msg_whistle")));
-            corridor.AddChoice(C(F2CorridorNode, "pass").Costs(3f)
+            corridor.AddChoice(C(F2CorridorNode, "pass")
                 .ShowWhen(Condition.FlagFalse(DogGone))
-                .Then(Outcome.SetMember(MemberType.Player, MemberHealth.Injured))
-                .Then(Outcome.SetFlag(FlagNames.PlayerInjured))
-                .Then(Outcome.Message($"{F2CorridorNode}.msg_bitten"))
-                .Then(Outcome.GoTo(flat7)));
+                .Then(Outcome.GoTo(dog)));
             corridor.AddChoice(C(F2CorridorNode, "stairs").Move(4f)
                 .ShowWhen(Condition.FlagTrue(DogGone))
                 .Then(Outcome.GoTo(exit)));
             corridor.AddChoice(C(F2CorridorNode, "flat8").Move(2f).Then(Outcome.GoTo(flat8)));
             corridor.AddChoice(C(F2CorridorNode, "flat7").Move(2f).Then(Outcome.GoTo(flat7)));
+
+            // Dog evasion: randomized WASD QTE. Each failure costs building time and re-rolls; success = past the dog.
+            Setup(dog, F2Dog, F2CorridorRoom, 3);
+            dog.ConfigureQte(QTEContext.DogEvasion, result.QteDog, new[] { Outcome.SetFlag(DogGone) }, null, corridor);
+            dog.AddChoice(C(F2Dog, "back").Then(Outcome.GoTo(corridor)));
 
             // Flat 8: empty placeholder flat (one hidden item at most).
             Setup(flat8, F2Flat8, Flat8, 3);

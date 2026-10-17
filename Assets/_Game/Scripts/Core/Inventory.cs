@@ -2,15 +2,15 @@ using System.Collections.Generic;
 
 namespace SixtyOne.Core
 {
-    /// <summary>The bag: a fixed number of item id slots (4 by default).</summary>
+    /// <summary>The bag: a number of item id slots (LevelConfig.MaxInventorySlots, 6 by default). Key items are not stored here.</summary>
     public sealed class Inventory
     {
-        public const int DefaultCapacity = 4;
+        public const int DefaultCapacity = 6;
 
         private readonly List<string> items = new List<string>();
 
         /// <summary>Maximum number of items.</summary>
-        public int Capacity { get; }
+        public int Capacity { get; private set; }
 
         /// <summary>Item ids in pickup order.</summary>
         public IReadOnlyList<string> Items => items;
@@ -45,6 +45,20 @@ namespace SixtyOne.Core
         public bool Remove(string itemId)
         {
             return items.Remove(itemId);
+        }
+
+        /// <summary>Changes the slot count (items beyond the new size are kept until removed).</summary>
+        public void Resize(int capacity)
+        {
+            Capacity = capacity < 1 ? 1 : capacity;
+        }
+
+        /// <summary>How many instances of the item the bag holds (stackable items like bedsheets take one slot each).</summary>
+        public int CountOf(string itemId)
+        {
+            int count = 0;
+            foreach (string id in items) if (id == itemId) count++;
+            return count;
         }
 
         public void Clear()

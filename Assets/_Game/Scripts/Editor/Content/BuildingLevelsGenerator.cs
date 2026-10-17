@@ -27,6 +27,9 @@ namespace SixtyOne.Editor
         public Dictionary<string, SceneNode> Nodes = new Dictionary<string, SceneNode>();
         public SixtyOne.Items.TraderProfile Trader;
         public SixtyOne.Items.RecipeBook RecipeBook;
+        public SixtyOne.Placement.TransitionConfig Transition;
+        public SixtyOne.QTE.QTEConfig QteBreaker;
+        public SixtyOne.QTE.QTEConfig QteDog;
         public List<SixtyOne.Items.Recipe> Recipes = new List<SixtyOne.Items.Recipe>();
     }
 
@@ -49,6 +52,7 @@ namespace SixtyOne.Editor
         public const string Flat11Salon = "flat11_salon";
         public const string Flat11Kitchen = "flat11_kitchen";
         public const string Flat11Hall = "flat11_hall";
+        public const string Flat11Bedroom = "flat11_bedroom";
         public const string F4Corridor = "f4_corridor";
         public const string Flat12 = "flat12";
         public const string F3Corridor = "f3_corridor";
@@ -65,10 +69,15 @@ namespace SixtyOne.Editor
         public static readonly string[] ItemIds =
         {
             "food", "water", "cloth", "rope", "tape", "flashlight", "lighter", "first_aid", "gloves", "whistle",
-            "child_harness", "wet_cloth", "insulated_grip", "wrench",
+            "child_harness", "wet_cloth", "insulated_grip", "wrench", "bedsheet", "bedsheet_rope",
             // Trap loot in our own flat: valuables that waste a bag slot and prep seconds.
             "gold", "laptop", "console"
         };
+
+        /// <summary>Key items: no bag slot, not droppable, shown in the corner HUD.</summary>
+        public static readonly string[] KeyItemIds = { "flashlight", "whistle" };
+
+        public const string QteDir = DataRoot + "/QTE";
 
         private static readonly string[] TipIds =
         {
@@ -113,6 +122,12 @@ namespace SixtyOne.Editor
             Cue("cue_fire", 0.9f);
             AudioCue tick = Cue("cue_countdown_tick", 0.8f);
             AudioCue alarm = Cue("cue_building_alarm", 1f);
+            AudioCue door = Cue("cue_door", 0.7f, 0.95f, 1.05f);
+            AudioCue footsteps = Cue("cue_footsteps", 0.6f, 0.95f, 1.05f);
+            AudioCue descend = Cue("cue_descend", 0.8f);
+            AudioCue qteHit = Cue("cue_qte_hit", 0.6f, 0.97f, 1.08f);
+            AudioCue qteMiss = Cue("cue_qte_miss", 0.9f);
+            AudioCue qteSuccess = Cue("cue_qte_success", 0.9f);
             result.AudioMap = Asset<AudioEventMap>(AudioDir + "/AudioEventMap.asset");
             result.AudioMap.Configure(rumble, death, rewind, pickup, alert, denied, click);
 
@@ -133,6 +148,16 @@ namespace SixtyOne.Editor
             result.Level.ConfigureTimer(300f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
             result.Level.ConfigurePoison(GasZones(), Item("wet_cloth"), "death.gas_poison", Tip("tip.gas_poison"));
             result.Level.ConfigurePrep(PrepSeconds, 10);
+            result.Level.ConfigureBag(6, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
+
+            result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
+            result.Transition.Configure(0.35f, 0.6f, 0.6f, 1.2f, door, footsteps, descend);
+
+            // Breaker wiring: 4-6 keys, 1.2s each. Dog evasion: shorter windows, higher penalty (more tension).
+            result.QteBreaker = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.breaker.asset");
+            result.QteBreaker.Configure(4, 6, 1.2f, 8f, 5f, qteHit, qteMiss, qteSuccess);
+            result.QteDog = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.dog.asset");
+            result.QteDog.Configure(5, 6, 1.0f, 7f, 6f, qteHit, qteMiss, qteSuccess);
 
             BuildFloor4();
             BuildFloor3();
@@ -166,6 +191,7 @@ namespace SixtyOne.Editor
             Item("food").ConfigureUse(35f, false, 2f);
             Item("water").ConfigureUse(25f, false, 2f);
             Item("first_aid").ConfigureUse(0f, true, 6f);
+            foreach (string id in KeyItemIds) Item(id).ConfigureKeyItem();
         }
 
         private static void BuildHazards()
@@ -248,7 +274,7 @@ namespace SixtyOne.Editor
         /// <summary>Deletes node/item/tip/hazard assets from earlier designs that this run did not produce.</summary>
         private static void DeleteStaleAssets()
         {
-            string[] folders = { NodesDir, ItemsDir, TipsDir, HazardsDir, DataRoot + "/Traders", DataRoot + "/Recipes" };
+            string[] folders = { NodesDir, ItemsDir, TipsDir, HazardsDir, DataRoot + "/Traders", DataRoot + "/Recipes", QteDir };
             foreach (string folder in folders)
             {
                 if (!AssetDatabase.IsValidFolder(folder)) continue;

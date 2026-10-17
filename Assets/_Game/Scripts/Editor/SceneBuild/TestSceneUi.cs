@@ -3,6 +3,7 @@ using SixtyOne.Nodes;
 using SixtyOne.Cinematic;
 using SixtyOne.Core;
 using SixtyOne.Placement;
+using SixtyOne.QTE;
 using SixtyOne.Building;
 using SixtyOne.Text;
 using SixtyOne.UI;
@@ -21,7 +22,8 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            SurvivalController survival, RecipeBook recipes, SixtyOne.Prep.PrepPhase prep, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
+            SurvivalController survival, RecipeBook recipes, SixtyOne.Prep.PrepPhase prep, int bagSlots, Item[] keyItems,
+            out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -40,15 +42,17 @@ namespace SixtyOne.Editor
             BuildBuildingTimer(root, survival);
             BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
-            BuildBag(root, gameManager, content, art, survival, recipes);
+            BuildBag(root, gameManager, content, art, survival, recipes, bagSlots);
+            BuildKeyItemHud(root, gameManager, keyItems, art);
             BuildStamina(root, survival);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
-            fusePanel = BuildFusePanel(root);
-            // After the fuse panel so "wrong pattern" messages draw on top of it.
+            qteView = BuildQteView(root, art);
+            // After the QTE panel so miss / timeout messages draw on top of it.
             BuildToast(root);
             BuildDeathCard(root, gameManager, content, art);
             BuildPoisonOverlay(root);
+            transitionOverlay = BuildTransitionOverlay(root);
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
             return choicePanel;
@@ -163,38 +167,6 @@ namespace SixtyOne.Editor
             if (survival != null && survival.Config != null) SerializedWire.SetInt(display, "tickFrom", survival.Config.PrepTickFrom);
         }
 
-        private static FusePuzzlePanel BuildFusePanel(Transform root)
-        {
-            Image bg = UiFactory.MakeImage("FusePuzzle", root, new Vector2(0.3f, 0.53f), new Vector2(0.7f, 0.81f), new Color(0.08f, 0.08f, 0.1f, 0.95f), raycast: true);
-            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
-            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.03f, 0.8f), new Vector2(0.97f, 0.97f), 30f, TextAlignmentOptions.Center, Accent, bold: true);
-            LocalizedText titleText = title.gameObject.AddComponent<LocalizedText>();
-            SerializedWire.SetTextKey(titleText, "key", UiKeys.FuseTitle);
-
-            var buttons = new Object[4];
-            var labels = new Object[4];
-            for (int i = 0; i < 4; i++)
-            {
-                float x = 0.06f + i * 0.23f;
-                Button sw = UiFactory.MakeButton("Switch" + (i + 1), bg.transform, new Vector2(x, 0.32f), new Vector2(x + 0.19f, 0.74f), ButtonColor, 44f, out TextMeshProUGUI label);
-                TextMeshProUGUI number = UiFactory.MakeLabel("Number", sw.transform, new Vector2(0f, -0.3f), new Vector2(1f, 0f), 20f, TextAlignmentOptions.Center, Color.white);
-                number.text = (i + 1).ToString();
-                buttons[i] = sw;
-                labels[i] = label;
-            }
-
-            Button tryButton = UiFactory.MakeButton("Try", bg.transform, new Vector2(0.3f, 0.04f), new Vector2(0.7f, 0.18f), new Color(0.8f, 0.4f, 0.1f, 1f), 26f, out TextMeshProUGUI tryLabel);
-            LocalizedText tryText = tryLabel.gameObject.AddComponent<LocalizedText>();
-            SerializedWire.SetTextKey(tryText, "key", UiKeys.FuseTry);
-
-            FusePuzzlePanel panel = bg.gameObject.AddComponent<FusePuzzlePanel>();
-            SerializedWire.Set(panel, "group", group);
-            SerializedWire.SetArray(panel, "switchButtons", buttons);
-            SerializedWire.SetArray(panel, "switchLabels", labels);
-            SerializedWire.Set(panel, "tryButton", tryButton);
-            return panel;
-        }
-
         private static void BuildStamina(Transform root, SurvivalController survival)
         {
             Image bg = UiFactory.MakeImage("Stamina", root, new Vector2(0.865f, 0.375f), new Vector2(0.995f, 0.405f), new Color(0f, 0f, 0f, 0.6f));
@@ -236,21 +208,28 @@ namespace SixtyOne.Editor
             SerializedWire.Set(counter, "label", label);
         }
 
-        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival, RecipeBook recipes)
+        private static void BuildBag(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival, RecipeBook recipes, int slots)
         {
             Image bg = UiFactory.MakeImage("Bag", root, new Vector2(0.865f, 0.42f), new Vector2(0.995f, 0.90f), new Color(0f, 0f, 0f, 0.6f));
             TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.05f, 0.88f), new Vector2(0.95f, 1f), 26f, TextAlignmentOptions.Center, Accent, bold: true);
             LocalizedText localized = title.gameObject.AddComponent<LocalizedText>();
             SerializedWire.SetTextKey(localized, "key", UiKeys.BagTitle);
 
-            var icons = new Object[Inventory.DefaultCapacity];
-            var labels = new Object[Inventory.DefaultCapacity];
-            var backgrounds = new Object[Inventory.DefaultCapacity];
-            var buttons = new Object[Inventory.DefaultCapacity];
-            for (int i = 0; i < Inventory.DefaultCapacity; i++)
+            TextMeshProUGUI count = UiFactory.MakeLabel("Count", bg.transform, new Vector2(0.7f, 0.88f), new Vector2(0.97f, 1f), 20f, TextAlignmentOptions.Right, Color.white);
+
+            // Slots fill the area between the title and the Drop / Rope buttons (any slot count).
+            slots = Mathf.Max(1, slots);
+            const float slotsTop = 0.865f;
+            const float slotsBottom = 0.13f;
+            float pitch = (slotsTop - slotsBottom) / slots;
+            var icons = new Object[slots];
+            var labels = new Object[slots];
+            var backgrounds = new Object[slots];
+            var buttons = new Object[slots];
+            for (int i = 0; i < slots; i++)
             {
-                float top = 0.86f - i * 0.215f;
-                Image slot = UiFactory.MakeImage("Slot" + i, bg.transform, new Vector2(0.05f, top - 0.2f), new Vector2(0.95f, top), new Color(1f, 1f, 1f, 0.12f), raycast: true);
+                float top = slotsTop - i * pitch;
+                Image slot = UiFactory.MakeImage("Slot" + i, bg.transform, new Vector2(0.05f, top - pitch * 0.9f), new Vector2(0.95f, top), new Color(1f, 1f, 1f, 0.12f), raycast: true);
                 Button slotButton = slot.gameObject.AddComponent<Button>();
                 slotButton.targetGraphic = slot;
                 buttons[i] = slotButton;
@@ -274,6 +253,109 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(bag, "slotButtons", buttons);
             SerializedWire.Set(bag, "survival", survival);
             SerializedWire.Set(bag, "recipes", recipes);
+
+            Button drop = UiFactory.MakeButton("Drop", bg.transform, new Vector2(0.05f, 0.015f), new Vector2(0.48f, 0.11f), new Color(0.55f, 0.25f, 0.2f, 1f), 20f, out TextMeshProUGUI dropLabel);
+            SerializedWire.SetTextKey(dropLabel.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.Drop);
+            drop.gameObject.SetActive(false);
+            Button rope = UiFactory.MakeButton("TieRope", bg.transform, new Vector2(0.52f, 0.015f), new Vector2(0.95f, 0.11f), new Color(0.25f, 0.45f, 0.3f, 1f), 20f, out TextMeshProUGUI ropeLabel);
+            SerializedWire.SetTextKey(ropeLabel.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.RopeTie);
+            rope.gameObject.SetActive(false);
+            SerializedWire.Set(bag, "dropButton", drop);
+            SerializedWire.Set(bag, "ropeButton", rope);
+            SerializedWire.Set(bag, "countLabel", count);
+        }
+
+        /// <summary>Top-right corner (left of the Notes button): one icon per key item (no bag slot), dim until owned, with a hover tooltip.</summary>
+        private static void BuildKeyItemHud(Transform root, GameManager gameManager, Item[] keyItems, PlaceholderSprites art)
+        {
+            // Top-right corner, just left of the Notes button.
+            Image bg = UiFactory.MakeImage("KeyItems", root, new Vector2(0.655f, 0.915f), new Vector2(0.78f, 0.99f), new Color(0f, 0f, 0f, 0.6f));
+            TextMeshProUGUI tooltip = UiFactory.MakeLabel("Tooltip", root, new Vector2(0.6f, 0.87f), new Vector2(0.86f, 0.91f), 20f, TextAlignmentOptions.Right, Color.white);
+            int count = keyItems != null ? keyItems.Length : 0;
+            var slots = new System.Collections.Generic.List<System.Collections.Generic.IDictionary<string, Object>>();
+            for (int i = 0; i < count; i++)
+            {
+                float x0 = 0.04f + i * (0.92f / Mathf.Max(1, count));
+                float x1 = x0 + 0.92f / Mathf.Max(1, count) - 0.04f;
+                Image frame = UiFactory.MakeImage("Frame_" + keyItems[i].Id, bg.transform, new Vector2(x0, 0.08f), new Vector2(x1, 0.92f), new Color(1f, 1f, 1f, 0.12f));
+                Image icon = UiFactory.MakeImage("Icon", frame.transform, new Vector2(0.15f, 0.35f), new Vector2(0.85f, 0.95f), Color.white, raycast: true, sprite: art.Dot);
+                TextMeshProUGUI name = UiFactory.MakeLabel("Name", frame.transform, new Vector2(0f, 0f), new Vector2(1f, 0.35f), 14f, TextAlignmentOptions.Center, Color.white);
+                name.enableAutoSizing = true;
+                name.fontSizeMin = 8f;
+                name.fontSizeMax = 14f;
+                SerializedWire.SetTextKey(name.gameObject.AddComponent<LocalizedText>(), "key", keyItems[i].NameKey.Key);
+                slots.Add(new System.Collections.Generic.Dictionary<string, Object> { { "item", keyItems[i] }, { "icon", icon }, { "frame", frame } });
+            }
+
+            KeyItemCornerHUD hud = bg.gameObject.AddComponent<KeyItemCornerHUD>();
+            SerializedWire.Set(hud, "gameManager", gameManager);
+            SerializedWire.Set(hud, "tooltip", tooltip);
+            SerializedWire.SetStructArray(hud, "slots", slots);
+        }
+
+        /// <summary>Center panel for WASD QTEs: title, prompt, big key, pips, countdowns, on-screen W/A/S/D.</summary>
+        private static QTEView BuildQteView(Transform root, PlaceholderSprites art)
+        {
+            Image bg = UiFactory.MakeImage("QTE", root, new Vector2(0.3f, 0.42f), new Vector2(0.7f, 0.83f), new Color(0.06f, 0.06f, 0.08f, 0.95f), raycast: true);
+            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
+            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.03f, 0.88f), new Vector2(0.97f, 0.98f), 30f, TextAlignmentOptions.Center, Accent, bold: true);
+            TextMeshProUGUI prompt = UiFactory.MakeLabel("Prompt", bg.transform, new Vector2(0.03f, 0.79f), new Vector2(0.97f, 0.88f), 22f, TextAlignmentOptions.Center, Color.white);
+            TextMeshProUGUI target = UiFactory.MakeLabel("TargetKey", bg.transform, new Vector2(0.38f, 0.52f), new Vector2(0.62f, 0.79f), 110f, TextAlignmentOptions.Center, Color.white, bold: true);
+
+            const int maxPips = 8;
+            var pips = new Object[maxPips];
+            for (int i = 0; i < maxPips; i++)
+            {
+                float x = 0.14f + i * 0.0925f;
+                pips[i] = UiFactory.MakeImage("Pip" + i, bg.transform, new Vector2(x, 0.465f), new Vector2(x + 0.07f, 0.505f), new Color(1f, 1f, 1f, 0.2f));
+            }
+
+            Image keyBack = UiFactory.MakeImage("KeyCountdownBack", bg.transform, new Vector2(0.1f, 0.42f), new Vector2(0.9f, 0.445f), new Color(1f, 1f, 1f, 0.1f));
+            Image keyFill = UiFactory.MakeImage("Fill", keyBack.transform, Vector2.zero, Vector2.one, Accent, sprite: art.Dot);
+            keyFill.type = Image.Type.Filled;
+            keyFill.fillMethod = Image.FillMethod.Horizontal;
+            Image totalBack = UiFactory.MakeImage("TotalCountdownBack", bg.transform, new Vector2(0.1f, 0.395f), new Vector2(0.9f, 0.408f), new Color(1f, 1f, 1f, 0.1f));
+            Image totalFill = UiFactory.MakeImage("Fill", totalBack.transform, Vector2.zero, Vector2.one, new Color(1f, 0.35f, 0.25f, 1f), sprite: art.Dot);
+            totalFill.type = Image.Type.Filled;
+            totalFill.fillMethod = Image.FillMethod.Horizontal;
+
+            // W on top, A S D below (keyboard layout); also clickable for touch.
+            Vector2[] min = { new Vector2(0.41f, 0.22f), new Vector2(0.27f, 0.05f), new Vector2(0.41f, 0.05f), new Vector2(0.55f, 0.05f) };
+            var keyButtons = new Object[4];
+            for (int i = 0; i < 4; i++)
+            {
+                Button key = UiFactory.MakeButton("Key" + QTESequence.AllKeys[i], bg.transform, min[i], min[i] + new Vector2(0.18f, 0.15f), ButtonColor, 36f, out TextMeshProUGUI label);
+                label.text = QTESequence.AllKeys[i].ToString();
+                keyButtons[i] = key;
+            }
+
+            TextMeshProUGUI hint = UiFactory.MakeLabel("Hint", bg.transform, new Vector2(0.03f, 0.37f), new Vector2(0.97f, 0.395f), 16f, TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.7f));
+            Image flash = UiFactory.MakeImage("Flash", bg.transform, Vector2.zero, Vector2.one, Color.clear);
+
+            QTEView view = bg.gameObject.AddComponent<QTEView>();
+            SerializedWire.Set(view, "group", group);
+            SerializedWire.Set(view, "panel", bg.rectTransform);
+            SerializedWire.Set(view, "title", title);
+            SerializedWire.Set(view, "prompt", prompt);
+            SerializedWire.Set(view, "targetKey", target);
+            SerializedWire.Set(view, "hint", hint);
+            SerializedWire.SetArray(view, "pips", pips);
+            SerializedWire.Set(view, "keyCountdown", keyFill);
+            SerializedWire.Set(view, "totalCountdown", totalFill);
+            SerializedWire.SetArray(view, "keyButtons", keyButtons);
+            SerializedWire.Set(view, "flash", flash);
+            return view;
+        }
+
+        /// <summary>Full-screen fade used by RoomTransitionController (never blocks clicks; input is locked by InputGate).</summary>
+        private static CanvasGroup BuildTransitionOverlay(Transform root)
+        {
+            Image overlay = UiFactory.MakeImage("RoomTransition", root, Vector2.zero, Vector2.one, new Color(0.02f, 0.02f, 0.03f, 1f));
+            CanvasGroup group = overlay.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+            group.interactable = false;
+            return group;
         }
 
         private static void BuildToast(Transform root)

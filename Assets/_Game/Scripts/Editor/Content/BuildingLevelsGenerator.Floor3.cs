@@ -3,7 +3,7 @@ using SixtyOne.Dialogue;
 using SixtyOne.Items;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
-using SixtyOne.Puzzles;
+using SixtyOne.QTE;
 
 namespace SixtyOne.Editor
 {
@@ -25,9 +25,6 @@ namespace SixtyOne.Editor
         public const string TraderDone = "TraderDone";
         public const string TraderLeft = "TraderLeft";
 
-        /// <summary>Correct fuse pattern for Flat 9 (body text gives the hint "1, 3 ve 4").</summary>
-        public static readonly bool[] FuseSolution = { true, false, true, true };
-
         private static SceneNode f3ArrivalNode;
 
         /// <summary>Floor 3 arrival = aftershock placement + checkpoint (created early so Floor 4 can link to it).</summary>
@@ -48,8 +45,8 @@ namespace SixtyOne.Editor
 
         /// <summary>
         /// Floor 3: aftershock on arrival (placement, checkpoint) → corridor (needs-aware trader, stairs below
-        /// collapsed) → Flat 9 (fuse puzzle; insulated gloves/grip + tape or electrocution; cable descent needs the
-        /// child harness) / Flat 10 (dark, gas leak, lighter = explosion, flashlight, collapsed floor = way down).
+        /// collapsed) → Flat 9 (fuse box wiring = WASD QTE; gloves/grip + tape or electrocution; cables need the
+        /// child harness; balcony + bedsheet rope = RopeDescentInteractable) / Flat 10 (dark, gas leak, lighter = explosion, flashlight, collapsed floor = way down).
         /// </summary>
         private static void BuildFloor3()
         {
@@ -58,7 +55,7 @@ namespace SixtyOne.Editor
             SceneNode corridor = Node<SceneNode>(floor, F3CorridorNode);
             DialogueNode trader = Node<DialogueNode>(floor, F3Trader);
             SceneNode flat9 = Node<SceneNode>(floor, F3Flat9);
-            FusePuzzleNode fuse = Node<FusePuzzleNode>(floor, F3Fuse);
+            QTENode fuse = Node<QTENode>(floor, F3Fuse);
             SceneNode flat10 = Node<SceneNode>(floor, F3Flat10);
             SceneNode f2Arrival = Floor2Arrival();
 
@@ -120,7 +117,7 @@ namespace SixtyOne.Editor
             flat9.AddChoice(C(F3Flat9, "back").Move(2f).Then(Outcome.GoTo(corridor)));
 
             Setup(fuse, F3Fuse, Flat9, 2);
-            fuse.ConfigurePuzzle(FuseSolution, 3f, new[] { Outcome.SetFlag(PowerCutF3) }, flat9);
+            fuse.ConfigureQte(QTEContext.BreakerWiring, result.QteBreaker, new[] { Outcome.SetFlag(PowerCutF3) }, null, flat9);
             fuse.AddChoice(C(F3Fuse, "back").Then(Outcome.GoTo(flat9)));
 
             // Flat 10: dark + gas leak. Lighter before the valve = explosion; flashlight is the safe light.

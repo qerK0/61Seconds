@@ -2,12 +2,11 @@ using NUnit.Framework;
 using SixtyOne.Core;
 using SixtyOne.Items;
 using SixtyOne.Nodes;
-using SixtyOne.Puzzles;
 using SixtyOne.Text;
 
 namespace SixtyOne.Tests
 {
-    /// <summary>Needs-aware trader, fuse puzzle, child-harness lock, missing-item deaths.</summary>
+    /// <summary>Needs-aware trader, child-harness lock, missing-item deaths.</summary>
     public class Floor3RulesTests
     {
         private TestData data;
@@ -58,22 +57,6 @@ namespace SixtyOne.Tests
             state.Inventory.TryAdd("flashlight");
             OutcomeExecutor.Execute(new[] { Outcome.GiveFromTrader(Trader()) }, state);
             Assert.IsTrue(state.Inventory.Has("gloves"));
-        }
-
-        [Test]
-        public void FusePuzzleNeedsTheExactPattern()
-        {
-            bool[] solution = { true, false, true, true };
-            var switches = new bool[4];
-            Assert.IsFalse(FusePuzzle.Matches(switches, solution));
-            FusePuzzle.Toggle(switches, 0);
-            FusePuzzle.Toggle(switches, 2);
-            FusePuzzle.Toggle(switches, 3);
-            Assert.IsTrue(FusePuzzle.Matches(switches, solution));
-            FusePuzzle.Toggle(switches, 1);
-            Assert.IsFalse(FusePuzzle.Matches(switches, solution));
-            FusePuzzle.Toggle(switches, 9);
-            Assert.IsFalse(FusePuzzle.Matches(new bool[3], solution), "length must match");
         }
 
         [Test]

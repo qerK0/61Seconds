@@ -68,6 +68,7 @@ namespace SixtyOne.Building
             Timer.Configure(config.BuildingSeconds, config.PulseAtSeconds, config.AlarmAtSeconds);
             SixtyOne.Prep.PrepRules.ResetForPrep(State, config.PrepSeconds, config.BuildingSeconds);
             State.Stamina = config.StaminaMax;
+            State.Inventory.Resize(config.MaxInventorySlots);
             Timer.Sync(State.BuildingTime);
 
             Timer.Pulse += GameEvents.RaiseBuildingPulse;
@@ -130,7 +131,7 @@ namespace SixtyOne.Building
             // No gas build-up during a timed placement: the player cannot reach the valve until it ends.
             bool placing = node is SixtyOne.Placement.PlacementNode;
             bool openGas = zone != null && !placing && !State.Flags.Get(zone.ValveFlag);
-            bool wetCloth = config.WetClothItem != null && State.Inventory.Has(config.WetClothItem.Id);
+            bool wetCloth = config.WetClothItem != null && StateOps.HasItem(State, config.WetClothItem.Id);
             float before = State.Poison;
             State.Poison = SurvivalModel.StepPoison(before, openGas, zone != null ? zone.PoisonPerSecond : 0f, wetCloth,
                 config.WetClothFactor, config.PoisonDecayPerSecond, dt);

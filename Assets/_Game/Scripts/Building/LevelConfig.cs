@@ -38,6 +38,23 @@ namespace SixtyOne.Building
         [SerializeField] private float prepSeconds = 60f;
         [Tooltip("Countdown ticks (and the letterbox/heartbeat tension) for the last N prep seconds.")]
         [SerializeField] private int prepTickFrom = 10;
+        [Header("Bag")]
+        [Tooltip("Bag slots (key items such as the flashlight and whistle never use one).")]
+        [Min(1)]
+        [SerializeField] private int maxInventorySlots = 6;
+        [Tooltip("Bedsheets needed to tie a rope.")]
+        [Min(1)]
+        [SerializeField] private int requiredBedsheetsForRope = 3;
+        [Tooltip("The bedsheet item (stackable: one slot each).")]
+        [SerializeField] private Item bedsheetItem;
+        [Tooltip("Rope made from the bedsheets.")]
+        [SerializeField] private Item bedsheetRopeItem;
+        [Tooltip("Building-timer seconds to tie the rope.")]
+        [Min(0f)]
+        [SerializeField] private float ropeCraftSeconds = 5f;
+        [Tooltip("Stamina spent tying the rope.")]
+        [Min(0f)]
+        [SerializeField] private float ropeCraftStamina = 3f;
 
         [Header("Moves")]
         [Tooltip("Extra fraction of a move's time per injured family member (0.25 = +25% each).")]
@@ -87,6 +104,12 @@ namespace SixtyOne.Building
         public AudioCue AlarmCue => alarmCue;
         public AudioCue TickCue => tickCue;
         public float InjuredMoveExtraPerMember => injuredMoveExtraPerMember;
+        public int MaxInventorySlots => maxInventorySlots;
+        public int RequiredBedsheetsForRope => requiredBedsheetsForRope;
+        public Item BedsheetItem => bedsheetItem;
+        public Item BedsheetRopeItem => bedsheetRopeItem;
+        public float RopeCraftSeconds => ropeCraftSeconds;
+        public float RopeCraftStamina => ropeCraftStamina;
         public float StaminaMax => staminaMax;
         public float StaminaDrainPerSecond => staminaDrainPerSecond;
         public float StaminaZeroTimeMultiplier => staminaZeroTimeMultiplier;
@@ -131,7 +154,6 @@ namespace SixtyOne.Building
             tickCue = tick;
         }
 
-        /// <summary>Authoring helper for generators.</summary>
         /// <summary>Authoring helper: pre-quake prep countdown.</summary>
         public void ConfigurePrep(float seconds, int tickFrom)
         {
@@ -139,6 +161,18 @@ namespace SixtyOne.Building
             prepTickFrom = tickFrom;
         }
 
+        /// <summary>Authoring helper for generators.</summary>
+        public void ConfigureBag(int slots, Item bedsheet, Item rope, int sheetsForRope, float ropeSeconds, float ropeStamina)
+        {
+            maxInventorySlots = slots;
+            bedsheetItem = bedsheet;
+            bedsheetRopeItem = rope;
+            requiredBedsheetsForRope = sheetsForRope;
+            ropeCraftSeconds = ropeSeconds;
+            ropeCraftStamina = ropeStamina;
+        }
+
+        /// <summary>Authoring helper for generators.</summary>
         public void ConfigurePoison(IEnumerable<GasZone> zones, Item wetCloth, TextKey deathText, Tip tip)
         {
             gasZones = new List<GasZone>(zones);
