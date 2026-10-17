@@ -180,7 +180,11 @@ namespace SixtyOne.Editor
 
             ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
                 data.Level.MaxInventorySlots, KeyItems(data), theme, out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
-            SixtyOne.UI.TypewriterText typewriter = choicePanel.GetComponentInChildren<SixtyOne.UI.TypewriterText>(true);
+            // Voice blips follow the subtitle line (dialogue text lives there); the panel's own typewriter is the fallback.
+            SixtyOne.UI.SubtitleView subtitles = choicePanel.transform.parent.GetComponentInChildren<SixtyOne.UI.SubtitleView>(true);
+            SixtyOne.UI.TypewriterText typewriter = subtitles != null && subtitles.Typewriter != null
+                ? subtitles.Typewriter
+                : choicePanel.GetComponentInChildren<SixtyOne.UI.TypewriterText>(true);
             if (typewriter != null)
             {
                 DialogueVoice voice = typewriter.gameObject.AddComponent<DialogueVoice>();
@@ -252,6 +256,8 @@ namespace SixtyOne.Editor
             return items.ToArray();
         }
 
+        private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
+
         private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
             RoomNavigator navigator)
         {
@@ -266,7 +272,7 @@ namespace SixtyOne.Editor
             if (tileSet != null && tileSet.FloorTile != null)
             {
                 RoomTiles.Floor(t, spec, tileSet);
-                if (spec.Walls) RoomTiles.Walls(t, spec, tileSet);
+                if (spec.Walls) RoomTiles.Walls(t, spec, tileSet, WallRows(data));
                 RoomTiles.AmbientFill(t, spec, AmbientFillIntensity);
             }
             else
@@ -328,7 +334,7 @@ namespace SixtyOne.Editor
             }
 
             SceneKit.SetSpawns(room, spec.PlayerSpawn, spec.WifeSpawn, spec.ChildSpawn);
-            SerializedWire.SetRect(room, "viewBounds", RoomTiles.ViewBounds(t, spec));
+            SerializedWire.SetRect(room, "viewBounds", RoomTiles.ViewBounds(t, spec, WallRows(data)));
             return room;
         }
 

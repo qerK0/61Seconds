@@ -79,7 +79,9 @@ namespace SixtyOne.Audio
         }
 
         /// <summary>Plays a cue on a pooled source. Returns the source or null when silent.</summary>
-        public AudioSource Play(AudioCue cue)
+        public AudioSource Play(AudioCue cue) => Play(cue, false);
+
+        private AudioSource Play(AudioCue cue, bool ignorePause)
         {
             if (cue == null) return null;
 
@@ -92,6 +94,7 @@ namespace SixtyOne.Audio
 
             AudioSource source = NextSource();
             Configure(source, cue, clip);
+            source.ignoreListenerPause = ignorePause;
             source.Play();
             playing[source] = cue;
             return source;
@@ -115,9 +118,16 @@ namespace SixtyOne.Audio
         {
             AudioSource source = Play(cue);
             if (source == null) return null;
-            source.volume = Mathf.Clamp01(cue.Volume * volumeScale);
+            source.volume = Mathf.Clamp01(cue.Volume * volumeScale) * SixtyOne.Core.UserSettings.Sfx;
             source.pitch *= pitchScale;
             return source;
+        }
+
+        /// <summary>Plays a menu / UI cue that still sounds while the game is paused (ignoreListenerPause).</summary>
+        public static void PlayUiCue(AudioCue cue)
+        {
+            if (Instance == null || cue == null) return;
+            Instance.Play(cue, true);
         }
 
         /// <summary>True while any pooled source plays the cue.</summary>
@@ -197,9 +207,16 @@ namespace SixtyOne.Audio
             }
 
             Configure(music, cue, clip);
+            music.volume = cue.Volume * SixtyOne.Core.UserSettings.Music;
             music.loop = true;
             music.Play();
             playing[music] = cue;
+        }
+
+        /// <summary>Sets the music layer's volume (live settings changes).</summary>
+        public void SetMusicVolume(float volume)
+        {
+            if (music != null) music.volume = Mathf.Clamp01(volume);
         }
 
         public void StopMusic()
@@ -243,7 +260,8 @@ namespace SixtyOne.Audio
         private static void Configure(AudioSource source, AudioCue cue, AudioClip clip)
         {
             source.clip = clip;
-            source.volume = cue.Volume;
+            source.volume = cue.Volume * SixtyOne.Core.UserSettings.Sfx;
+            source.ignoreListenerPause = false;
             source.pitch = cue.PickPitch();
             source.loop = cue.Loop;
             source.outputAudioMixerGroup = cue.MixerGroup;

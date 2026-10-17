@@ -13,6 +13,8 @@ namespace SixtyOne.UI
     /// when it has something to show and away when cleared. With no buttons (rooms are left through doors) it
     /// sinks to a title-only peek strip after a reading delay; clicking the strip opens it again. Clicking the
     /// panel while text types completes it (also the first click on "Devam").
+    /// With a SubtitleView, dialogue lines and node bodies go to the cinematic subtitle band instead: the panel
+    /// keeps only the title and the choices and opens above the band while it is visible.
     /// </summary>
     public sealed class ChoicePanel : MonoBehaviour, IChoicePresenter, IPointerClickHandler
     {
@@ -77,6 +79,9 @@ namespace SixtyOne.UI
         [Tooltip("The body never grows past this height (px); longer text auto-sizes down.")]
         [SerializeField] private float bodyMaxHeight = 420f;
 
+        [Tooltip("Cinematic subtitle band for dialogue lines and narration. Optional (null = text in this panel).")]
+        [SerializeField] private SubtitleView subtitles;
+
         private void Awake()
         {
             if (buttonTemplate != null) buttonTemplate.gameObject.SetActive(false);
@@ -107,6 +112,19 @@ namespace SixtyOne.UI
         {
             shownNode = null;
             picked = false;
+            if (subtitles != null)
+            {
+                // The line plays in the subtitle band (▼ / click / Space / Enter advance); only choices stay here.
+                if (titleText != null) titleText.text = string.Empty;
+                SetBody(string.Empty, false);
+                ClearButtons();
+                subtitles.ShowLine(title, body, () => Click(() => onContinue?.Invoke()));
+                AddChoices(choices, onChosen);
+                if (spawned.Count > 0) Open();
+                else SetMode(Mode.Hidden, false);
+                return;
+            }
+
             if (titleText != null) titleText.text = title ?? string.Empty;
             SetBody(body, true);
             ClearButtons();
@@ -134,6 +152,7 @@ namespace SixtyOne.UI
         public void Clear()
         {
             ClearButtons();
+            if (subtitles != null) subtitles.Hide();
             shownNode = null;
             SetMode(Mode.Hidden, false);
         }
@@ -171,6 +190,15 @@ namespace SixtyOne.UI
             {
                 bodyMinHeight = rect.sizeDelta.y;
                 containerTop = buttonContainer.offsetMax.y;
+            }
+
+            if (subtitles != null)
+            {
+                // No body here: pull the buttons up under the title.
+                bodyText.gameObject.SetActive(false);
+                float shrink = bodyMinHeight + 30f;
+                buttonContainer.offsetMax = new Vector2(buttonContainer.offsetMax.x, containerTop + shrink);
+                return -shrink;
             }
 
             float width = Mathf.Max(100f, rect.rect.width);
@@ -216,7 +244,7 @@ namespace SixtyOne.UI
             float height = panel != null ? panel.rect.height : 300f;
             switch (m)
             {
-                case Mode.Full: return bottomMargin;
+                case Mode.Full: return bottomMargin + (subtitles != null && subtitles.IsShown ? subtitles.Height : 0f);
                 case Mode.Peek: return -(height - peekHeight);
                 default: return -(height + 40f);
             }
@@ -275,7 +303,15 @@ namespace SixtyOne.UI
         {
             if (shownNode == null) return;
             if (titleText != null) titleText.text = shownNode.TitleKey.IsEmpty ? string.Empty : shownNode.TitleKey.Display;
-            SetBody(shownNode.BodyKey.IsEmpty ? string.Empty : shownNode.BodyKey.Display, false);
+            string body = shownNode.BodyKey.IsEmpty ? string.Empty : shownNode.BodyKey.Display;
+            if (subtitles != null)
+            {
+                SetBody(string.Empty, false);
+                subtitles.ShowNarration(body);
+                return;
+            }
+
+            SetBody(body, false);
         }
 
         private void SetBody(string text, bool reveal)

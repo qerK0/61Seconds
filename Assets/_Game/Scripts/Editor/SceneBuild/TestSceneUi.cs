@@ -64,7 +64,9 @@ namespace SixtyOne.Editor
             BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems);
+            SubtitleView subtitles = BuildSubtitles(root);
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
+            SerializedWire.Set(choicePanel, "subtitles", subtitles);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
             qteView = BuildQteView(root, art);
@@ -75,6 +77,8 @@ namespace SixtyOne.Editor
             transitionOverlay = BuildTransitionOverlay(root);
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
+            // Last: the ESC pause overlay draws over everything.
+            BuildPauseMenu(root);
             EnforceReadableText(canvasGo);
             UiFactory.Theme = null;
             return choicePanel;
@@ -223,12 +227,13 @@ namespace SixtyOne.Editor
             CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
             TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, 0.72f), new Vector2(1f, 1f), TextRole.Label, TextAlignmentOptions.Center);
             SerializedWire.SetTextKey(caption.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.BuildingTimerLabel);
-            TextMeshProUGUI label = UiFactory.MakeLabel("Time", rect, Vector2.zero, new Vector2(1f, 0.74f), TextRole.Timer, TextAlignmentOptions.Center);
-            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(1f, 0.1f), new Vector2(1.5f, 0.7f), 28f, TextAlignmentOptions.Left, Danger, bold: true);
+            LedClock clock = BuildLedFace(rect, out TextMeshProUGUI label);
+            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(0.86f, 0.1f), new Vector2(1.4f, 0.7f), 28f, TextAlignmentOptions.Left, Danger, bold: true);
 
             BuildingTimerDisplay display = rect.gameObject.AddComponent<BuildingTimerDisplay>();
             SerializedWire.Set(display, "survival", survival);
             SerializedWire.Set(display, "label", label);
+            SerializedWire.Set(display, "clock", clock);
             SerializedWire.Set(display, "spentLabel", spent);
             SerializedWire.Set(display, "group", group);
         }
@@ -241,16 +246,192 @@ namespace SixtyOne.Editor
             TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, 0.72f), new Vector2(1f, 1f), TextRole.Label, TextAlignmentOptions.Center);
             caption.color = Accent;
             SerializedWire.SetTextKey(caption.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.PrepTimerLabel);
-            TextMeshProUGUI label = UiFactory.MakeLabel("Time", rect, Vector2.zero, new Vector2(1f, 0.74f), TextRole.Timer, TextAlignmentOptions.Center);
-            label.color = Accent;
-            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(1f, 0.1f), new Vector2(1.5f, 0.7f), 28f, TextAlignmentOptions.Left, Danger, bold: true);
+            LedClock clock = BuildLedFace(rect, out TextMeshProUGUI label);
+            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(0.86f, 0.1f), new Vector2(1.4f, 0.7f), 28f, TextAlignmentOptions.Left, Danger, bold: true);
 
             PrepCountdownDisplay display = rect.gameObject.AddComponent<PrepCountdownDisplay>();
+            SerializedWire.Set(display, "clock", clock);
             SerializedWire.Set(display, "prep", prep);
             SerializedWire.Set(display, "group", group);
             SerializedWire.Set(display, "label", label);
             SerializedWire.Set(display, "spentLabel", spent);
             if (survival != null && survival.Config != null) SerializedWire.SetInt(display, "tickFrom", survival.Config.PrepTickFrom);
+        }
+
+        /// <summary>
+        /// Digital alarm-clock face under a timer caption: a small near-black, green-tinted rounded panel with a thin
+        /// dark border, an unlit "88:88" ghost and the lit LED digits (glow set up at runtime by LedClock).
+        /// </summary>
+        private static LedClock BuildLedFace(RectTransform rect, out TextMeshProUGUI digits)
+        {
+            Image face = UiFactory.MakePanel("LedFace", rect, new Vector2(0.14f, 0f), new Vector2(0.86f, 0.72f), new Color(0.03f, 0.05f, 0.035f, 0.94f));
+            Outline border = face.gameObject.AddComponent<Outline>();
+            border.effectColor = new Color(0f, 0f, 0f, 0.85f);
+            border.effectDistance = new Vector2(2f, -2f);
+
+            TMP_FontAsset led = theme != null ? theme.Led : null;
+            TextMeshProUGUI ghost = UiFactory.MakeLabel("Ghost", face.transform, Vector2.zero, Vector2.one, 58f, TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.12f));
+            digits = UiFactory.MakeLabel("Time", face.transform, Vector2.zero, Vector2.one, 58f, TextAlignmentOptions.Center, Color.white);
+            foreach (TextMeshProUGUI l in new[] { ghost, digits })
+            {
+                if (led != null) l.font = led;
+                l.textWrappingMode = TextWrappingModes.NoWrap;
+                l.overflowMode = TextOverflowModes.Overflow;
+                l.characterSpacing = 4f;
+            }
+
+            ghost.text = "88:88";
+            digits.text = "00:00";
+            LedClock clock = face.gameObject.AddComponent<LedClock>();
+            SerializedWire.Set(clock, "digits", digits);
+            SerializedWire.Set(clock, "ghost", ghost);
+            return clock;
+        }
+
+        private const string SubtitleGradientPath = "Assets/_Game/Art/UI/subtitle_gradient.png";
+        private const string SubtitleShadowPath = "Assets/_Game/Art/Fonts/EBGaramond/EBGaramond-Regular SDF Subtitle.mat";
+
+        /// <summary>
+        /// Cinematic subtitle band: full width, bottom 22%, transparent → 85% black gradient (no box), a text column
+        /// from 24% of the width (max 55%), EB Garamond SemiBold name (34 px, #F2EDE4) over the Regular line (26 px,
+        /// #E8E4DC, 1.15 spacing, 1 px dark shadow, 3 lines) and a ▼ continue mark.
+        /// </summary>
+        private static SubtitleView BuildSubtitles(Transform root)
+        {
+            Image band = UiFactory.MakeImage("Subtitles", root, Vector2.zero, new Vector2(1f, 0.22f), Color.white, raycast: true);
+            band.sprite = SubtitleGradient();
+            band.preserveAspect = false;
+            if (band.sprite == null) band.color = new Color(0f, 0f, 0f, 0.6f);
+            CanvasGroup group = band.gameObject.AddComponent<CanvasGroup>();
+            group.alpha = 0f;
+            group.blocksRaycasts = false;
+
+            TMP_FontAsset serif = theme != null ? theme.SerifRegular : null;
+            TMP_FontAsset serifBold = theme != null ? theme.SerifSemiBold : null;
+            TextMeshProUGUI speaker = UiFactory.MakeLabel("Speaker", band.transform, new Vector2(0.24f, 0.64f), new Vector2(0.79f, 0.9f), 34f, TextAlignmentOptions.BottomLeft, new Color(0.949f, 0.929f, 0.894f, 1f));
+            if (serifBold != null) speaker.font = serifBold;
+            TextMeshProUGUI line = UiFactory.MakeLabel("Line", band.transform, new Vector2(0.24f, 0.06f), new Vector2(0.79f, 0.62f), 26f, TextAlignmentOptions.TopLeft, new Color(0.91f, 0.894f, 0.863f, 1f));
+            if (serif != null)
+            {
+                line.font = serif;
+                Material shadow = SubtitleShadow(serif);
+                if (shadow != null) line.fontSharedMaterial = shadow;
+            }
+
+            line.lineSpacing = 15f;
+            line.enableAutoSizing = true;
+            line.fontSizeMin = 20f;
+            line.fontSizeMax = 26f;
+            line.maxVisibleLines = 3;
+            TypewriterText typewriter = line.gameObject.AddComponent<TypewriterText>();
+            typewriter.Configure(line, theme != null ? theme.TypewriterCharsPerSecond : 90f);
+
+            TextMeshProUGUI mark = UiFactory.MakeLabel("Continue", band.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 18f, TextAlignmentOptions.Center, new Color(0.949f, 0.929f, 0.894f, 0.9f));
+            if (serif != null) mark.font = serif;
+            mark.text = "\u25BC";
+            mark.rectTransform.sizeDelta = new Vector2(30f, 30f);
+
+            SubtitleView view = band.gameObject.AddComponent<SubtitleView>();
+            SerializedWire.Set(view, "group", group);
+            SerializedWire.Set(view, "speaker", speaker);
+            SerializedWire.Set(view, "line", line);
+            SerializedWire.Set(view, "typewriter", typewriter);
+            SerializedWire.Set(view, "continueMark", mark.rectTransform);
+            return view;
+        }
+
+        /// <summary>4x128 vertical gradient (alpha 0 at the top, 0.85 at the bottom), generated once.</summary>
+        private static Sprite SubtitleGradient()
+        {
+            if (!System.IO.File.Exists(SubtitleGradientPath))
+            {
+                AssetUtil.EnsureFolder("Assets/_Game/Art/UI");
+                var tex = new Texture2D(4, 128, TextureFormat.RGBA32, false);
+                for (int y = 0; y < 128; y++)
+                {
+                    float k = 1f - y / 127f; // 1 at the bottom row
+                    float a = 0.85f * Mathf.SmoothStep(0f, 1f, k);
+                    for (int x = 0; x < 4; x++) tex.SetPixel(x, y, new Color(0f, 0f, 0f, a));
+                }
+
+                System.IO.File.WriteAllBytes(SubtitleGradientPath, tex.EncodeToPNG());
+                Object.DestroyImmediate(tex);
+                UnityEditor.AssetDatabase.ImportAsset(SubtitleGradientPath);
+            }
+
+            var importer = UnityEditor.AssetImporter.GetAtPath(SubtitleGradientPath) as UnityEditor.TextureImporter;
+            if (importer != null && (importer.textureType != UnityEditor.TextureImporterType.Sprite || importer.spriteImportMode != UnityEditor.SpriteImportMode.Single))
+            {
+                importer.textureType = UnityEditor.TextureImporterType.Sprite;
+                importer.spriteImportMode = UnityEditor.SpriteImportMode.Single;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.wrapMode = TextureWrapMode.Clamp;
+                importer.textureCompression = UnityEditor.TextureImporterCompression.Uncompressed;
+                importer.SaveAndReimport();
+            }
+
+            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(SubtitleGradientPath);
+        }
+
+        /// <summary>EB Garamond material with a subtle dark underlay (the 1 px shadow), saved as an asset.</summary>
+        private static Material SubtitleShadow(TMP_FontAsset font)
+        {
+            if (font == null || font.material == null) return null;
+            Material m = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SubtitleShadowPath);
+            if (m == null)
+            {
+                m = new Material(font.material);
+                UnityEditor.AssetDatabase.CreateAsset(m, SubtitleShadowPath);
+            }
+            else
+            {
+                m.shader = font.material.shader;
+                m.CopyPropertiesFromMaterial(font.material);
+            }
+
+            m.EnableKeyword(ShaderUtilities.Keyword_Underlay);
+            m.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.75f));
+            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.18f);
+            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.18f);
+            m.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.15f);
+            UnityEditor.EditorUtility.SetDirty(m);
+            return m;
+        }
+
+        /// <summary>ESC pause: dim overlay, centred serif panel (Devam Et / Ayarlar / Ana Menü / Oyundan Çık), settings, confirm.</summary>
+        private static void BuildPauseMenu(Transform root)
+        {
+            var click = UnityEditor.AssetDatabase.LoadAssetAtPath<SixtyOne.Audio.AudioCue>("Assets/_Game/Data/Audio/cue_choice_click.asset");
+            Image dim = UiFactory.MakeImage("PauseMenu", root, Vector2.zero, Vector2.one, new Color(0f, 0f, 0f, 0.8f), raycast: true);
+            CanvasGroup overlay = dim.gameObject.AddComponent<CanvasGroup>();
+
+            Image panel = UiFactory.MakePanel("Panel", dim.transform, new Vector2(0.38f, 0.26f), new Vector2(0.62f, 0.74f), MenuUi.PanelColor, raycast: true);
+            CanvasGroup buttons = panel.gameObject.AddComponent<CanvasGroup>();
+            MenuUi.KeyLabel("Title", panel.transform, new Vector2(0.08f, 0.8f), new Vector2(0.92f, 0.95f), UiKeys.PauseTitle, 44f, TextAlignmentOptions.Center, true, true);
+            Button resume = MenuUi.Button("Resume", panel.transform, new Vector2(0.12f, 0.61f), new Vector2(0.88f, 0.75f), UiKeys.PauseResume);
+            Button settings = MenuUi.Button("Settings", panel.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.57f), UiKeys.PauseSettings);
+            Button mainMenu = MenuUi.Button("MainMenu", panel.transform, new Vector2(0.12f, 0.25f), new Vector2(0.88f, 0.39f), UiKeys.PauseMainMenu);
+            Button quit = MenuUi.Button("Quit", panel.transform, new Vector2(0.12f, 0.07f), new Vector2(0.88f, 0.21f), UiKeys.PauseQuit);
+
+            SettingsPanel settingsPanel = MenuUi.Settings(dim.transform, click);
+            CanvasGroup confirm = MenuUi.Confirm(dim.transform, out Button yes, out Button no);
+
+            PauseMenu menu = dim.gameObject.AddComponent<PauseMenu>();
+            SerializedWire.Set(menu, "overlay", overlay);
+            SerializedWire.Set(menu, "mainButtons", buttons);
+            SerializedWire.Set(menu, "resume", resume);
+            SerializedWire.Set(menu, "settings", settings);
+            SerializedWire.Set(menu, "mainMenu", mainMenu);
+            SerializedWire.Set(menu, "quit", quit);
+            SerializedWire.Set(menu, "settingsPanel", settingsPanel);
+            SerializedWire.Set(menu, "confirm", confirm);
+            SerializedWire.Set(menu, "confirmYes", yes);
+            SerializedWire.Set(menu, "confirmNo", no);
+            SerializedWire.Set(menu, "clickCue", click);
+            overlay.alpha = 0f;
+            overlay.interactable = false;
+            overlay.blocksRaycasts = false;
         }
 
         private static void BuildLoopCounter(Transform root, GameManager gameManager)
@@ -306,29 +487,82 @@ namespace SixtyOne.Editor
             TextMeshProUGUI count = UiFactory.MakeLabel("Count", bagRect, new Vector2(0.6f, 0.93f), new Vector2(0.92f, 1f), TextRole.Small, TextAlignmentOptions.MidlineRight);
             count.color = Muted;
 
-            // Slots fill the area between the title and the Drop / Rope buttons (any slot count).
+            // Pixel-art backpack (Art/uı/examples.png) at an integer x3 scale: a 9-sliced frame holding a 3-column
+            // grid of blue cells. Item icons stay smooth at ~80% of a cell; names show under the bag on hover.
             slots = Mathf.Max(1, slots);
-            const float slotsTop = 0.915f;
-            const float slotsBottom = 0.16f;
-            float pitch = (slotsTop - slotsBottom) / slots;
+            UiSkinArt.Sprites skin = UiSkinArt.Import();
+            const int scale = UiSkinArt.Scale;
+            const int columns = 3;
+            int rows = Mathf.CeilToInt(slots / (float)columns);
+            const float cell = 14f * scale;
+            const float gap = 4f;
+            float frameW = 14f * scale + columns * cell + (columns - 1) * gap;
+            float frameH = 18f * scale + rows * cell + (rows - 1) * gap;
+
+            Image frame = UiFactory.MakeImage("Backpack", bagRect, new Vector2(0.5f, 0.915f), new Vector2(0.5f, 0.915f), Color.white);
+            frame.rectTransform.pivot = new Vector2(0.5f, 1f);
+            frame.rectTransform.sizeDelta = new Vector2(frameW, frameH);
+            if (skin.Frame != null)
+            {
+                frame.sprite = skin.Frame;
+                frame.type = Image.Type.Sliced;
+                frame.pixelsPerUnitMultiplier = 1f / scale;
+            }
+            else
+            {
+                frame.color = new Color(0.7f, 0.35f, 0.27f, 1f);
+            }
+
+            RectTransform names = UiFactory.MakeRect("SlotNames", bagRect, new Vector2(0f, 0.915f), new Vector2(1f, 0.915f));
+            names.pivot = new Vector2(0.5f, 1f);
+            names.anchoredPosition = new Vector2(0f, -frameH - 4f);
+            names.sizeDelta = new Vector2(0f, 48f);
+
             var icons = new Object[slots];
             var labels = new Object[slots];
             var backgrounds = new Object[slots];
             var buttons = new Object[slots];
             for (int i = 0; i < slots; i++)
             {
-                float top = slotsTop - i * pitch;
-                Image slot = UiFactory.MakePanel("Slot" + i, bagRect, new Vector2(0.06f, top - pitch * 0.88f), new Vector2(0.94f, top), new Color(1f, 1f, 1f, 0.08f), raycast: true);
+                int col = i % columns;
+                int row = i / columns;
+                Image slot = UiFactory.MakeImage("Slot" + i, frame.transform, new Vector2(0f, 1f), new Vector2(0f, 1f), skin.Cell != null ? Color.white : new Color(0.25f, 0.32f, 0.45f, 1f), raycast: true);
+                slot.rectTransform.pivot = new Vector2(0f, 1f);
+                slot.rectTransform.sizeDelta = new Vector2(cell, cell);
+                slot.rectTransform.anchoredPosition = new Vector2(7f * scale + col * (cell + gap), -(10f * scale + row * (cell + gap)));
+                if (skin.Cell != null)
+                {
+                    slot.sprite = skin.Cell;
+                    slot.type = Image.Type.Sliced;
+                    slot.pixelsPerUnitMultiplier = 1f / scale;
+                }
+
                 Button slotButton = slot.gameObject.AddComponent<Button>();
                 slotButton.targetGraphic = slot;
+                // Hover = second highlight (the combine target while a slot is selected); BagUI tints the selected one.
+                ColorBlock colors = slotButton.colors;
+                colors.normalColor = Color.white;
+                colors.highlightedColor = new Color(0.62f, 1f, 0.95f, 1f);
+                colors.pressedColor = new Color(1f, 0.85f, 0.45f, 1f);
+                colors.selectedColor = Color.white;
+                colors.fadeDuration = 0.05f;
+                slotButton.colors = colors;
                 buttons[i] = slotButton;
-                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.03f, 0.06f), new Vector2(0.3f, 0.94f), Color.white, sprite: art.Dot);
+
+                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.1f, 0.1f), new Vector2(0.9f, 0.9f), Color.white, sprite: art.Dot);
                 icon.preserveAspect = true;
                 icon.enabled = false;
-                TextMeshProUGUI name = UiFactory.MakeLabel("Name", slot.transform, new Vector2(0.3f, 0f), new Vector2(0.97f, 1f), TextRole.Small, TextAlignmentOptions.MidlineLeft);
+
+                // Name under the backpack, revealed while the slot is hovered (BagUI still writes it).
+                TextMeshProUGUI name = UiFactory.MakeLabel("Name" + i, names, Vector2.zero, Vector2.one, TextRole.Small, TextAlignmentOptions.Top);
                 name.enableAutoSizing = true;
                 name.fontSizeMin = 16f;
                 name.fontSizeMax = 18f;
+                CanvasGroup nameGroup = name.gameObject.AddComponent<CanvasGroup>();
+                nameGroup.alpha = 0f;
+                nameGroup.blocksRaycasts = false;
+                SerializedWire.Set(slot.gameObject.AddComponent<HoverReveal>(), "target", nameGroup);
+
                 icons[i] = icon;
                 backgrounds[i] = slot;
                 labels[i] = name;
@@ -343,6 +577,7 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(bag, "slotButtons", buttons);
             SerializedWire.Set(bag, "survival", survival);
             SerializedWire.Set(bag, "recipes", recipes);
+            SerializedWire.SetColor(bag, "selectedColor", new Color(1f, 0.84f, 0.3f, 1f));
 
             Button drop = UiFactory.MakeButton("Drop", bagRect, new Vector2(0.06f, 0.01f), new Vector2(0.94f, 0.07f), new Color(0.5f, 0.22f, 0.2f, 0.95f), 18f, out TextMeshProUGUI dropLabel);
             SerializedWire.SetTextKey(dropLabel.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.Drop);
@@ -363,12 +598,21 @@ namespace SixtyOne.Editor
             SerializedWire.SetTextKey(header.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.KeyItemsTitle);
             TextMeshProUGUI tooltip = UiFactory.MakeLabel("Tooltip", root, new Vector2(0.6f, 0.86f), new Vector2(ColumnLeft - 0.03f, 0.91f), TextRole.Small, TextAlignmentOptions.MidlineRight);
             int count = keyItems != null ? keyItems.Length : 0;
+            UiSkinArt.Sprites keySkin = UiSkinArt.Import();
             var slots = new System.Collections.Generic.List<System.Collections.Generic.IDictionary<string, Object>>();
             for (int i = 0; i < count; i++)
             {
                 float x0 = 0.06f + i * (0.88f / Mathf.Max(1, count));
                 float x1 = x0 + 0.88f / Mathf.Max(1, count) - 0.04f;
                 Image frame = UiFactory.MakePanel("Frame_" + keyItems[i].Id, rect, new Vector2(x0, 0.04f), new Vector2(x1, 0.7f), new Color(1f, 1f, 1f, 0.12f));
+                if (keySkin.KeyPanel != null)
+                {
+                    // Small green-framed pixel panel from the inventory sheet (x3, crisp).
+                    frame.sprite = keySkin.KeyPanel;
+                    frame.type = Image.Type.Sliced;
+                    frame.pixelsPerUnitMultiplier = 1f / UiSkinArt.Scale;
+                }
+
                 Image icon = UiFactory.MakeImage("Icon", frame.transform, new Vector2(0.15f, 0.38f), new Vector2(0.85f, 0.96f), Color.white, raycast: true, sprite: art.Dot);
                 icon.preserveAspect = true;
                 TextMeshProUGUI name = UiFactory.MakeLabel("Name", frame.transform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.4f), TextRole.Small, TextAlignmentOptions.Center);
@@ -383,6 +627,12 @@ namespace SixtyOne.Editor
             SerializedWire.Set(hud, "gameManager", gameManager);
             SerializedWire.Set(hud, "tooltip", tooltip);
             SerializedWire.SetStructArray(hud, "slots", slots);
+            if (keySkin.KeyPanel != null)
+            {
+                // The pixel frame multiplies the tint: white when owned, dimmed when missing.
+                SerializedWire.SetColor(hud, "ownedFrameColor", Color.white);
+                SerializedWire.SetColor(hud, "missingFrameColor", new Color(0.5f, 0.5f, 0.55f, 0.85f));
+            }
         }
 
         private static void BuildPoisonOverlay(Transform root)

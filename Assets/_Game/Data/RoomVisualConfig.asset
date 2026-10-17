@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: RoomVisualConfig
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.RoomVisualConfig
   worldScale: 1.5
+  wallRows: 2

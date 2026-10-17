@@ -18,12 +18,18 @@ namespace SixtyOne.Placement
         [Range(0.5f, 3f)]
         [SerializeField] private float worldScale = 1.5f;
 
+        [Tooltip("How many wall-face rows the scene builder stacks on each back-wall segment (the upper row carries the windows).")]
+        [Range(1, 3)]
+        [SerializeField] private int wallRows = 2;
+
         public float WorldScale => worldScale;
+        public int WallRows => wallRows;
 
         /// <summary>Authoring helper for generators.</summary>
-        public void Configure(float scale)
+        public void Configure(float scale, int rows = 2)
         {
             worldScale = Mathf.Clamp(scale, 0.5f, 3f);
+            wallRows = Mathf.Clamp(rows, 1, 3);
         }
     }
 }

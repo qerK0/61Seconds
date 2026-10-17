@@ -15,6 +15,9 @@ MonoBehaviour:
   regular: {fileID: 11400000, guid: 5c72f9ae551d72542b69a30a2eb8b931, type: 2}
   semiBold: {fileID: 11400000, guid: 01d2f9edaf2276c4d99321ade677bddb, type: 2}
   bold: {fileID: 11400000, guid: c67112fc83ac84844a7a2b0f0a1ff2a6, type: 2}
+  led: {fileID: 11400000, guid: 565c5f555ff2bfa4abaf88b90deff28e, type: 2}
+  serifRegular: {fileID: 11400000, guid: 14d172887e679e045a0fd48a77eefe9b, type: 2}
+  serifSemiBold: {fileID: 11400000, guid: b86ae13f58f72864888510c0c34fef85, type: 2}
   timerSize: 64
   titleSize: 30
   speakerSize: 26

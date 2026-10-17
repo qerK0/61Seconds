@@ -4,6 +4,99 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 19:54] LOCAL — Two-row walls + door/elevator art, LED building timer, main menu + ESC pause, backpack bag skin, cinematic subtitles
+### Done
+- **Walls and scale (task 1):**
+  - `RoomVisualConfig.wallRows` (default 2). `RoomTiles.Walls` stacks the rows; windows go only in the top row, and gaps stay open for the full height.
+  - The step between rows is **128 px, not 160**. In the 128x192 wall art the face is 128 px tall in any pixel column; the other 32 px is the 2:1 slant. Stepping by 160 left a 32 px dark seam. Rows overlap by 1 px, and no seam line remains.
+  - Upper rows offset the variant index (+3), so cracks don't stack straight above each other.
+  - `ViewBounds` (camera framing) uses the stacked height (`WallTopAboveEdge(rows)`). The tile transition already lifts every wall child, so both rows rise and drop.
+  - `CharacterArt.PlayerHeight` 0.9 → **0.8**. Next to a back wall the player is about 60–65% of the wall height.
+  - I kept **two full rows**: in the salon, F4 corridor and Flat 7 shots it reads right, so the 1.5-row option wasn't needed.
+- **Door and elevator art:** `DoorArt` imports both PNGs as single sprites.
+  - The pivot is measured from the alpha: the centre of the door's slanted base. The PPU makes the door 1.15× the player's height.
+  - Every wall-gap `Door` gets an `Art` child, sorted at `WallOrder + 1` and flipped X on R gaps. Colliders and approach points are unchanged.
+  - The elevator hotspots (F4 corridor, F2 stairs) and the F2 corridor elevator prop use `asansorkapı.png`, flipped (all three are on back-right walls).
+- **LED building timer (task 2):**
+  - `E1234 LED SDF` (digits, colon and space, padding 20) is baked by Generate Fonts + Theme. `UITheme.Led` was added.
+  - New `LedClock`: a near-black green-tinted rounded panel with a dark outline, a ghost `88:88` at 12% alpha, and a glow on a material instance. The colon blinks once per second while the timer runs and stays solid during transitions and pause.
+  - `BuildingTimerDisplay`: green `#4CFF6A`; amber `#FFB020` pulsing at ≤60s; red `#FF3B30` with flicker at ≤30s. Reduce Effects turns off the flicker, not the colour.
+  - `PrepCountdownDisplay` uses the same face in amber, red in the last ticks.
+  - The `-Ns` labels stay in Inter and match the clock colour.
+- **Main menu + ESC pause (task 3):**
+  - `SixtyOne > Build Main Menu` builds `Scenes/MainMenu.unity`:
+    - background: a low-res blurred, darkened salon shot (`SixtyOne > Capture Menu Background`, run in Play Mode) with a slow `MenuDrift`;
+    - the EB Garamond "61 SECONDS" title with a thin rule;
+    - Başla / Ayarlar / Çıkış;
+    - prep music and click cue.
+  - Build Settings: MainMenu 0, Test_Building 1 (the old SampleScene stays third).
+  - `UserSettings` (PlayerPrefs): Master → `AudioListener.volume`; Müzik / Efekt scale the cue volumes in AudioService, MusicService, AudioLoopLayer and DialogueVoice; Efektleri Azalt is copied onto GameSettings.
+  - The shared `SettingsPanel` is built by `MenuUi`.
+  - `PauseMenu` (Esc, Input System) shows a dim overlay with Devam Et / Ayarlar / Ana Menü / Oyundan Çık. Ana Menü and Oyundan Çık ask "Emin misin? İlerleme kaybolacak." first. Esc steps back out of the confirmation or settings before it resumes.
+  - **`Core/PauseState` is the only place that touches `Time.timeScale`** (CLAUDE.md updated). It also sets `AudioListener.pause` and blocks input through `InputGate`.
+  - UI clicks use `AudioService.PlayUiCue` (`ignoreListenerPause`).
+  - `SceneFlow` clears the pause, InputGate and transition state on scene changes.
+  - Verified in Play:
+    - prep time and stamina stay frozen while paused;
+    - a running dog QTE stays frozen for 10s while paused (QTEController and the hidden-item timer check `PauseState.IsPaused`) and continues the same run after resume;
+    - dialogue line costs are paid only on advance, which is blocked while paused;
+    - menu → Başla → pause → Ana Menü → Evet returns to the menu with timeScale 1 and no input block.
+- **Bag skin (task 4):** `UiSkinArt` imports `Art/uı/examples.png` (Point filter, uncompressed, no mips) and slices it into backpack, backpack_body, slot_cell and key_panel (rects measured from the sheet).
+  - The backpack has a drawn 2×4 cell grid that can't be 9-sliced, so `bag_frame.png` is generated: the body with its interior filled flat, borders L7 B8 R7 T10.
+  - BagUI is a 3×2 grid of blue cells inside the frame at an **integer ×3** scale (`pixelsPerUnitMultiplier = 1/3`). Icons sit centred at 80% of a cell.
+  - Highlights: selected = gold tint (BagUI `selectedColor`); hover = cyan, which serves as the combine-target highlight. Names show under the backpack on hover (`HoverReveal`).
+  - `KeyItemCornerHUD` frames use the green pixel panel (white when owned, dimmed when missing).
+  - No bag logic changed.
+- **Subtitles (task 5):** new `SubtitleView`.
+  - Layout: a full-width band over the bottom 22%, with a generated transparent → 85% black gradient. The text column runs from 24% of the screen width, max 55%.
+  - Fonts: EB Garamond SemiBold name (34 px, `#F2EDE4`); Regular line (26 px, `#E8E4DC`, +15 line spacing, a saved underlay material for the 1 px shadow, max 3 lines). Both fonts are baked with full Turkish coverage and added to UITheme.
+  - Behaviour:
+    - the line typewrites and the voice blips are rewired to the subtitle typewriter;
+    - a bobbing ▼ sits after the last word (4 px at 1.2 Hz; static with Reduce Effects);
+    - a click on the band, Space or Enter first completes the line, then advances;
+    - fades over 0.2s and hides during room transitions.
+  - Node body text plays as narration (no name, no ▼, fades after a reading delay).
+  - ChoicePanel no longer shows dialogue or body text: only the title and choices, opening above the band while it's visible. Line costs are unchanged; Sevim's line advance paid exactly 4s once.
+- **Verify:** 0 compile errors; EditMode **143/143** passed; Validate Content: 25 nodes, 0 problems; Text > Validate: 356 referenced, 0 missing / empty / unused. Interaction Mode was set to No Throttling for Play and restored to its previous value (0).
+- **Screenshots** (`Screenshots/`, local only): `t07_before_walls`, `t07_salon_family_wall-1`, `t07_corridor_family_wall-1`, `t07_flat7_family_wall`, `t07_led_prep_amber-2`, `t07_led_green` / `t07_led_amber` / `t07_led_red`, `t07_main_menu_final-1`, `t07_settings_final`, `t07_pause_menu`, `t07_pause_confirm`, `t07_bag_skin`, `t07_subtitle_line`.
+
+### Files created / changed
+- `Scripts/Editor/SceneBuild/RoomTiles.cs`: stacked wall rows, row-aware view bounds.
+- `Scripts/Placement/RoomVisualConfig.cs`, `Scripts/Editor/Content/BuildingLevelsGenerator.cs`: `wallRows` (2).
+- `Scripts/Editor/Art/CharacterArt.cs`: PlayerHeight 0.8.
+- `Scripts/Editor/Art/DoorArt.cs` (new); `Scripts/Editor/SceneBuild/SceneKit.cs`: door art on wall gaps, elevator art on hotspots and prop.
+- `Scripts/Editor/SceneBuild/TestSceneBuilder.cs`: wall rows, voice blips on the subtitle typewriter.
+- `Scripts/Editor/Text/FontAssetsGenerator.cs`, `Scripts/UI/UITheme.cs`: LED + EB Garamond SDF assets, theme fields.
+- `Scripts/UI/LedClock.cs` (new), `BuildingTimerDisplay.cs`, `PrepCountdownDisplay.cs`: LED face.
+- `Scripts/Core/PauseState.cs`, `UserSettings.cs`, `SceneFlow.cs` (new): pause, saved settings, scene changes.
+- `Scripts/UI/PauseMenu.cs`, `SettingsPanel.cs`, `MainMenu.cs`, `MenuDrift.cs` (new).
+- `Scripts/Editor/SceneBuild/MenuUi.cs`, `MainMenuBuilder.cs` (new): menu builders. Build Main Menu saves the generated Test_Building silently instead of prompting, because a modal dialog blocks MCP.
+- `Scripts/Audio/AudioService.cs`, `MusicService.cs`, `AudioLoopLayer.cs`, `DialogueVoice.cs`: volume settings, `PlayUiCue`, `SetMusicVolume`.
+- `Scripts/Core/GameManager.cs`: applies UserSettings on Awake.
+- `Scripts/QTE/QTEController.cs`, `Scripts/World/HiddenItemHotspot.cs`: stop on pause.
+- `Scripts/Editor/Art/UiSkinArt.cs`, `Scripts/UI/HoverReveal.cs` (new); `Scripts/Editor/SceneBuild/TestSceneUi.cs`: backpack bag, key-item frames, LED faces, subtitle band, pause menu.
+- `Scripts/UI/SubtitleView.cs` (new), `Scripts/UI/ChoicePanel.cs`: subtitles.
+- `Scripts/Text/UiKeys.cs`, `Content/Text/strings_tr.csv`: 18 keys (`ui.menu.*`, `ui.settings.*`, `ui.pause.*`), final Turkish.
+- Art (generated or imported): `Art/UI/MenuBackground.png`, `Art/UI/subtitle_gradient.png`, `Art/uı/bag_frame.png`, `Art/Fonts/E1234 LED SDF.asset`, `Art/Fonts/EBGaramond/*SDF.asset`, `EBGaramond-Regular SDF Subtitle.mat`, door / elevator / sheet import settings.
+- `Scenes/MainMenu.unity` (new), `Scenes/Test_Building.unity` (rebuilt), `ProjectSettings/EditorBuildSettings.asset`.
+- `CLAUDE.md`: timeScale rule (PauseState only), Menus and Subtitles notes.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Nothing required. To re-shoot the menu background: Play Test_Building → SixtyOne > Capture Menu Background → stop → SixtyOne > Build Main Menu.
+- [ ] Press Esc and Space/Enter by hand once. MCP can't send key presses, so I drove the pause and the subtitle advance through their methods; the key bindings themselves are unverified.
+
+### Not verified / risks
+- Real keyboard input (Esc / Space / Enter) wasn't tested from MCP (see above).
+- There is no AudioMixer asset, and one can't be created from code. Music and effect volumes scale cue volumes in code: new sounds and music/ambience loops follow a slider change at once, but one-shots and alarm/quake loops already playing keep their old volume.
+- The pixel-art bag next to the cartoon world is a style clash, though a mild one; I kept the item icons smooth (the softer option). The ×3 scale is crisp at 1080p only; other resolutions scale non-integer.
+- The menu background is a 192×108 capture upscaled, so it reads as a blurred, slightly blocky shot.
+- The pause overlay is 80% black: at 62% it barely showed on the dark rooms.
+- The ▼ is a glyph in code, not a CSV key (it isn't text).
+- Leftover user files not committed: ComfyUI concept PNGs, `61s_local.bat`, the E1234 OTF/WOFF variants, the LiberationSans fallback and VersionControlSettings changes.
+
+### Next suggested step
+- Play the full loop by hand with a keyboard (Esc mid-QTE, Space through Sevim). If the backpack clashes too much, swap the bag skin for a softer frame.
+
 ## [2026-10-17 16:39] LOCAL — Exhaustion death + darkening, team audio wired (music/ambience/voice blips), item icons, Sevim idle, window/cracked walls
 ### Done
 - **Exhaustion (task 1):**

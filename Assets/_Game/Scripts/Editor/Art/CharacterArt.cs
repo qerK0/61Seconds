@@ -27,7 +27,7 @@ namespace SixtyOne.Editor
         public const float PixelsPerUnit = 1690f;
 
         /// <summary>Visible heights the game aims for, in world units (a floor tile is 1 wide, 0.5 deep).</summary>
-        public const float PlayerHeight = 0.9f;
+        public const float PlayerHeight = 0.8f;
 
         /// <summary>Per-character art prefix.</summary>
         public static string Prefix(MemberType member)

@@ -104,6 +104,8 @@ namespace SixtyOne.QTE
         private void Update()
         {
             if (session == null || session.Done) return;
+            // Unscaled time: the ESC pause (timeScale 0) does not stop it, so freeze explicitly.
+            if (PauseState.IsPaused) return;
             if (gameManager != null && gameManager.IsDead)
             {
                 Cancel();
@@ -123,7 +125,7 @@ namespace SixtyOne.QTE
         /// <summary>Key input (keyboard action or on-screen button).</summary>
         public void OnKey(QTEKey key)
         {
-            if (session == null || session.Done || hitStopLeft > 0f) return;
+            if (session == null || session.Done || hitStopLeft > 0f || PauseState.IsPaused) return;
             if (gameManager != null && gameManager.IsDead) return;
             session.Press(key);
             if (session != null) View?.Refresh(session.Current);

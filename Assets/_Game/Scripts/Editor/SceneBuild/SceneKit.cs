@@ -100,6 +100,12 @@ namespace SixtyOne.Editor
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
             r.sprite = Art.Block;
             r.color = color;
+            // Elevator props (F2 corridor) use the elevator door art on their back-right wall.
+            if (objectName == "Elevator" && DoorArt.Apply(r, DoorArt.Elevator, true))
+            {
+                Material lit = RoomTiles.LitMaterial;
+                if (lit != null) r.sharedMaterial = lit;
+            }
 
             IsoSorter sorter = go.AddComponent<IsoSorter>();
             sorter.Mode = IsoSortMode.Static;
@@ -235,7 +241,22 @@ namespace SixtyOne.Editor
 
             if (wall)
             {
-                // The wall gap itself reads as the opening; the collider covers it from floor to lintel.
+                // Door art flush in the gap (sorted with the wall, below props and characters); the art faces the
+                // back-left wall, so right-wall gaps flip it. The collider covers it from floor to lintel.
+                var art = new GameObject("Art");
+                art.transform.SetParent(go.transform, false);
+                SpriteRenderer artRenderer = art.AddComponent<SpriteRenderer>();
+                if (DoorArt.Apply(artRenderer, DoorArt.Door, door.Edge.StartsWith("R")))
+                {
+                    artRenderer.sortingOrder = RoomTiles.WallOrder + 1;
+                    Material litDoor = RoomTiles.LitMaterial;
+                    if (litDoor != null) artRenderer.sharedMaterial = litDoor;
+                }
+                else
+                {
+                    UnityEngine.Object.DestroyImmediate(art);
+                }
+
                 BoxCollider2D box = go.AddComponent<BoxCollider2D>();
                 box.size = new Vector2(0.62f, 1.15f);
                 box.offset = new Vector2(0f, 0.5f);
@@ -310,6 +331,11 @@ namespace SixtyOne.Editor
                 s.sprite = Art.Shadow;
                 s.color = new Color(1f, 1f, 1f, 0.5f);
                 s.sortingOrder = DecalOrder;
+            }
+            else if (spec.Name == "Elevator" && DoorArt.Apply(r, DoorArt.Elevator, true))
+            {
+                // Every elevator stands against a back-right wall: flipped elevator door art.
+                height = DoorArt.Height;
             }
             else
             {

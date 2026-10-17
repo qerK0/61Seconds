@@ -68,7 +68,7 @@ namespace SixtyOne.Audio
             float length = Random.Range(profile.BlipSeconds.x, profile.BlipSeconds.y);
             AudioClip clip = voice.clip;
             source.clip = clip;
-            source.volume = profile.Volume;
+            source.volume = profile.Volume * SixtyOne.Core.UserSettings.Sfx;
             source.pitch = (voice.pitch > 0f ? voice.pitch : 1f) + Random.Range(-profile.PitchJitter, profile.PitchJitter);
             source.time = Random.Range(0f, Mathf.Max(0f, clip.length - length - 0.01f));
             source.Play();

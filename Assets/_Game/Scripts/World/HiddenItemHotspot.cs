@@ -65,7 +65,7 @@ namespace SixtyOne.World
         protected override void Update()
         {
             base.Update();
-            secondsInRoom += Time.unscaledDeltaTime;
+            if (!PauseState.IsPaused) secondsInRoom += Time.unscaledDeltaTime;
             if (sparkle == null) return;
 
             bool show = !IsUsed && !IsGone && ShouldSparkle();

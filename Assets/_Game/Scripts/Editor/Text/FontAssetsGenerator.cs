@@ -25,6 +25,12 @@ namespace SixtyOne.Editor
         private const int Padding = 9;
         private const int AtlasSize = 1024;
 
+        // LED digits: few glyphs, so a big padding leaves room for the glow / underlay.
+        private const string LedCharacters = "0123456789: ";
+        private const int LedPadding = 20;
+        public const string LedFontPath = FontFolder + "/TrueType (.ttf)/E1234-Regular.ttf";
+        public const string SerifFolder = FontFolder + "/EBGaramond";
+
         [MenuItem("SixtyOne/Text/Generate Fonts + Theme", priority = 40)]
         public static void GenerateMenu()
         {
@@ -48,6 +54,10 @@ namespace SixtyOne.Editor
             }
 
             theme.ConfigureFonts(regular, semiBold, bold);
+            TMP_FontAsset led = Bake(LedFontPath, $"{FontFolder}/E1234 LED SDF.asset", LedCharacters, LedPadding, null);
+            TMP_FontAsset serifRegular = Bake($"{SerifFolder}/EBGaramond-Regular.ttf", $"{SerifFolder}/EBGaramond-Regular SDF.asset", Characters, Padding, dynamicFallback);
+            TMP_FontAsset serifSemiBold = Bake($"{SerifFolder}/EBGaramond-SemiBold.ttf", $"{SerifFolder}/EBGaramond-SemiBold SDF.asset", Characters, Padding, dynamicFallback);
+            theme.ConfigureExtraFonts(led, serifRegular, serifSemiBold);
             EditorUtility.SetDirty(theme);
             if (regular != null) SetTmpDefault(regular);
             AssetDatabase.SaveAssets();
@@ -59,14 +69,21 @@ namespace SixtyOne.Editor
 
         private static TMP_FontAsset Bake(string ttfName, string assetName, bool staticAtlas, TMP_FontAsset fallback)
         {
-            var font = AssetDatabase.LoadAssetAtPath<Font>($"{FontFolder}/{ttfName}.ttf");
+            return Bake($"{FontFolder}/{ttfName}.ttf", $"{FontFolder}/{assetName}.asset", staticAtlas ? Characters : null, Padding, fallback);
+        }
+
+        /// <summary>Bakes a font at any path; characters null = dynamic atlas (multi-atlas), else a static atlas.</summary>
+        private static TMP_FontAsset Bake(string ttfPath, string path, string characters, int padding, TMP_FontAsset fallback)
+        {
+            bool staticAtlas = characters != null;
+            string assetName = System.IO.Path.GetFileNameWithoutExtension(path);
+            var font = AssetDatabase.LoadAssetAtPath<Font>(ttfPath);
             if (font == null) return null;
 
-            string path = $"{FontFolder}/{assetName}.asset";
             TMP_FontAsset asset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>(path);
             if (asset == null)
             {
-                asset = TMP_FontAsset.CreateFontAsset(font, SamplingSize, Padding, GlyphRenderMode.SDFAA, AtlasSize, AtlasSize, AtlasPopulationMode.Dynamic, !staticAtlas);
+                asset = TMP_FontAsset.CreateFontAsset(font, SamplingSize, padding, GlyphRenderMode.SDFAA, AtlasSize, AtlasSize, AtlasPopulationMode.Dynamic, !staticAtlas);
                 asset.name = assetName;
                 AssetDatabase.CreateAsset(asset, path);
                 asset.atlasTextures[0].name = assetName + " Atlas";
@@ -83,7 +100,7 @@ namespace SixtyOne.Editor
 
             if (staticAtlas)
             {
-                if (!asset.TryAddCharacters(Characters, out string missing) && !string.IsNullOrEmpty(missing))
+                if (!asset.TryAddCharacters(characters, out string missing) && !string.IsNullOrEmpty(missing))
                 {
                     Debug.LogWarning($"[Fonts] {assetName} lacks: {missing}");
                 }

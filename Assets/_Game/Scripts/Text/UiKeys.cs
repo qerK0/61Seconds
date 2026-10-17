@@ -67,6 +67,25 @@ namespace SixtyOne.Text
         public const string BagCollapse = "ui.bag.collapse";
         public const string BagExpand = "ui.bag.expand";
 
+        public const string MenuTitle = "ui.menu.title";
+        public const string MenuStart = "ui.menu.start";
+        public const string MenuSettings = "ui.menu.settings";
+        public const string MenuQuit = "ui.menu.quit";
+        public const string SettingsTitle = "ui.settings.title";
+        public const string SettingsMaster = "ui.settings.master";
+        public const string SettingsMusic = "ui.settings.music";
+        public const string SettingsSfx = "ui.settings.sfx";
+        public const string SettingsReduce = "ui.settings.reduce";
+        public const string SettingsBack = "ui.settings.back";
+        public const string PauseTitle = "ui.pause.title";
+        public const string PauseResume = "ui.pause.resume";
+        public const string PauseSettings = "ui.pause.settings";
+        public const string PauseMainMenu = "ui.pause.main_menu";
+        public const string PauseQuit = "ui.pause.quit";
+        public const string PauseConfirm = "ui.pause.confirm";
+        public const string PauseYes = "ui.pause.yes";
+        public const string PauseNo = "ui.pause.no";
+
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;
     }

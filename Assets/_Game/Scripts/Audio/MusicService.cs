@@ -122,7 +122,7 @@ namespace SixtyOne.Audio
             for (int i = 0; i < sources.Length; i++)
             {
                 AudioSource source = sources[i];
-                float goal = i == activeIndex && sourceCue[i] != null ? sourceCue[i].Volume : 0f;
+                float goal = i == activeIndex && sourceCue[i] != null ? sourceCue[i].Volume * SixtyOne.Core.UserSettings.Music : 0f;
                 source.volume = Mathf.MoveTowards(source.volume, goal, step);
                 if (goal <= 0f && source.volume <= 0.001f && source.isPlaying) source.Stop();
             }

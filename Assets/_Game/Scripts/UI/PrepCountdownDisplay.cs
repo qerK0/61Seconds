@@ -8,8 +8,9 @@ using UnityEngine;
 namespace SixtyOne.UI
 {
     /// <summary>
-    /// The pre-quake prep countdown ("Depreme kalan 0:42"), shown only while the building timer has not started.
-    /// Red and punching on every second of the last ticks; flashes "-Ns" when a prep action costs time.
+    /// The pre-quake prep countdown ("Depreme kalan 00:42") as an amber LED clock (same LedClock face as the
+    /// building timer), shown only while the building timer has not started. Red and punching on every second of
+    /// the last ticks; flashes "-Ns" (coloured to match) when a prep action costs time.
     /// </summary>
     public sealed class PrepCountdownDisplay : MonoBehaviour
     {
@@ -25,11 +26,14 @@ namespace SixtyOne.UI
         [Tooltip("'-Ns' label next to the countdown.")]
         [SerializeField] private TMP_Text spentLabel;
 
-        [Tooltip("Normal color.")]
-        [SerializeField] private Color normalColor = new Color(1f, 0.85f, 0.35f, 1f);
+        [Tooltip("LED face that renders the digits, ghost, colon blink and glow.")]
+        [SerializeField] private LedClock clock;
 
-        [Tooltip("Color in the last ticking seconds.")]
-        [SerializeField] private Color tickColor = new Color(1f, 0.25f, 0.2f, 1f);
+        [Tooltip("Normal LED colour (amber #FFB020).")]
+        [SerializeField] private Color normalColor = new Color(1f, 0.69f, 0.125f, 1f);
+
+        [Tooltip("LED colour in the last ticking seconds (#FF3B30).")]
+        [SerializeField] private Color tickColor = new Color(1f, 0.231f, 0.188f, 1f);
 
         [Tooltip("Ticking starts at this many seconds (matches LevelConfig.prepTickFrom).")]
         [SerializeField] private int tickFrom = 10;
@@ -58,9 +62,19 @@ namespace SixtyOne.UI
             if (!show || label == null || prep == null) return;
 
             float remaining = prep.Remaining;
-            int total = Mathf.CeilToInt(remaining);
-            label.text = $"<mspace=0.62em>{total / 60}</mspace>:<mspace=0.62em>{total % 60:00}</mspace>";
-            label.color = remaining <= tickFrom ? tickColor : normalColor;
+            Color color = remaining <= tickFrom ? tickColor : normalColor;
+            if (clock != null)
+            {
+                clock.Show(remaining, color, LedClock.TimersRunning, false);
+            }
+            else
+            {
+                int total = Mathf.CeilToInt(remaining);
+                label.text = $"{total / 60:00}:{total % 60:00}";
+                label.color = color;
+            }
+
+            if (spentLabel != null) spentLabel.color = new Color(color.r, color.g, color.b, spentLabel.alpha);
         }
 
         private void OnTick(int secondsLeft)

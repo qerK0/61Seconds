@@ -21,6 +21,15 @@ namespace SixtyOne.UI
         [Tooltip("Timer, big numbers, emphasis.")]
         [SerializeField] private TMP_FontAsset bold;
 
+        [Tooltip("7-segment LED digits (E1234) for the building timer and prep countdown.")]
+        [SerializeField] private TMP_FontAsset led;
+
+        [Tooltip("EB Garamond Regular: cinematic subtitle lines and menu text.")]
+        [SerializeField] private TMP_FontAsset serifRegular;
+
+        [Tooltip("EB Garamond SemiBold: subtitle speaker names and the menu title.")]
+        [SerializeField] private TMP_FontAsset serifSemiBold;
+
         [Header("Sizes (px at 1080p; nothing below 16)")]
         [SerializeField] private float timerSize = 64f;
         [SerializeField] private float titleSize = 30f;
@@ -64,6 +73,9 @@ namespace SixtyOne.UI
         public TMP_FontAsset Regular => regular;
         public TMP_FontAsset SemiBold => semiBold != null ? semiBold : regular;
         public TMP_FontAsset Bold => bold != null ? bold : SemiBold;
+        public TMP_FontAsset Led => led != null ? led : Bold;
+        public TMP_FontAsset SerifRegular => serifRegular != null ? serifRegular : Regular;
+        public TMP_FontAsset SerifSemiBold => serifSemiBold != null ? serifSemiBold : SerifRegular;
         public float TimerSize => timerSize;
         public float TitleSize => titleSize;
         public float SpeakerSize => speakerSize;
@@ -96,6 +108,14 @@ namespace SixtyOne.UI
             regular = regularFont;
             semiBold = semiBoldFont;
             bold = boldFont;
+        }
+
+        /// <summary>Authoring helper for the font generator (LED digits + EB Garamond).</summary>
+        public void ConfigureExtraFonts(TMP_FontAsset ledFont, TMP_FontAsset serifRegularFont, TMP_FontAsset serifSemiBoldFont)
+        {
+            led = ledFont;
+            serifRegular = serifRegularFont;
+            serifSemiBold = serifSemiBoldFont;
         }
 
         /// <summary>Applies a text role (font, size, colour, spacing) to a label.</summary>

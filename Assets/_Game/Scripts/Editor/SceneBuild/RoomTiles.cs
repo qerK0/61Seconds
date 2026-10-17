@@ -18,7 +18,17 @@ namespace SixtyOne.Editor
 
         // A wall segment's bottom edge midpoint sits 32 px above the sprite bottom (128x192 art).
         private const float WallBaseInset = 32f / TileArt.PixelsPerUnit;
-        private const float WallTopAboveEdge = (192f - 32f) / TileArt.PixelsPerUnit;
+        // Sprite top above the edge (includes the 32 px slant of a 2:1 face).
+        private const float WallSpriteTop = (192f - 32f) / TileArt.PixelsPerUnit;
+
+        // Vertical face height in any one pixel column (192 px cell - 64 px slant): the step between stacked rows.
+        private const float WallFaceHeight = (192f - 64f) / TileArt.PixelsPerUnit;
+
+        // Rows overlap by 1 px so no seam line shows between stacked faces.
+        private const float RowOverlap = 1f / TileArt.PixelsPerUnit;
+
+        /// <summary>Wall top above the floor edge for a wall stacked <paramref name="rows"/> faces high.</summary>
+        public static float WallTopAboveEdge(int rows) => WallSpriteTop + (Mathf.Max(1, rows) - 1) * (WallFaceHeight - RowOverlap);
 
         private const string LitMaterialPath = "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Lit-Default.mat";
 
@@ -61,7 +71,11 @@ namespace SixtyOne.Editor
             if (lit != null) renderer.sharedMaterial = lit;
         }
 
-        public static void Walls(Transform room, BuildingLayout.RoomSpec spec, RoomTileSet set)
+        /// <summary>
+        /// Stacks <paramref name="rows"/> wall faces per segment (each row exactly one face height above the last,
+        /// minus a 1 px overlap). Windows go only in the top row; gaps stay open for the full height.
+        /// </summary>
+        public static void Walls(Transform room, BuildingLayout.RoomSpec spec, RoomTileSet set, int rows = 2)
         {
             if (!set.HasWalls) return;
             var root = new GameObject("Walls").transform;
@@ -69,20 +83,28 @@ namespace SixtyOne.Editor
             root.gameObject.AddComponent<TransitionLayerTag>().Configure(TransitionLayer.Walls);
 
             // Back-left edge: grid y = Height, one segment per x. Back-right edge: grid x = Width, one per y.
-            for (int x = 0; x < spec.Width; x++) Segment(root, spec, set, false, x, IsoMath.GridToWorld(x + 0.5f, spec.Height));
-            for (int y = 0; y < spec.Height; y++) Segment(root, spec, set, true, y, IsoMath.GridToWorld(spec.Width, y + 0.5f));
+            rows = Mathf.Max(1, rows);
+            for (int row = 0; row < rows; row++)
+            {
+                bool top = row == rows - 1;
+                var lift = new Vector3(0f, row * (WallFaceHeight - RowOverlap), 0f);
+                for (int x = 0; x < spec.Width; x++) Segment(root, spec, set, false, x, IsoMath.GridToWorld(x + 0.5f, spec.Height) + lift, row, top);
+                for (int y = 0; y < spec.Height; y++) Segment(root, spec, set, true, y, IsoMath.GridToWorld(spec.Width, y + 0.5f) + lift, row, top);
+            }
         }
 
-        private static void Segment(Transform parent, BuildingLayout.RoomSpec spec, RoomTileSet set, bool rightEdge, int index, Vector3 edgeMid)
+        private static void Segment(Transform parent, BuildingLayout.RoomSpec spec, RoomTileSet set, bool rightEdge, int index, Vector3 edgeMid,
+            int row, bool topRow)
         {
             string code = (rightEdge ? "R" : "L") + index;
             if (spec.Gaps.Contains(code)) return;
 
-            bool window = spec.Windows.Contains(code);
-            Sprite sprite = set.WallSprite(rightEdge, index, window, out bool flipX);
+            bool window = topRow && spec.Windows.Contains(code);
+            // Upper rows shift the variant index so cracks do not stack straight above each other.
+            Sprite sprite = set.WallSprite(rightEdge, index + row * 3, window, out bool flipX);
             if (sprite == null) return;
 
-            var go = new GameObject("Wall_" + code);
+            var go = new GameObject(row == 0 ? "Wall_" + code : "Wall_" + code + "_r" + row);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = edgeMid - new Vector3(0f, WallBaseInset, 0f);
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
@@ -93,7 +115,7 @@ namespace SixtyOne.Editor
             if (lit != null) r.sharedMaterial = lit;
 
             // Deterministic light/dark variation so a long wall does not read as one stamp.
-            float shade = 1f - 0.04f * ((index * 7 + (rightEdge ? 3 : 0)) % 3);
+            float shade = 1f - 0.04f * ((index * 7 + row * 5 + (rightEdge ? 3 : 0)) % 3);
             Color c = set.WallTint * shade;
             c.a = 1f;
             r.color = c;
@@ -119,12 +141,12 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Floor diamond (+ extra tiles) and wall height, united with every sprite in the room.</summary>
-        public static Rect ViewBounds(Transform room, BuildingLayout.RoomSpec spec)
+        public static Rect ViewBounds(Transform room, BuildingLayout.RoomSpec spec, int wallRows = 2)
         {
             float minX = -spec.Height * 0.5f;
             float maxX = spec.Width * 0.5f;
             float minY = 0f;
-            float maxY = (spec.Width + spec.Height) * 0.25f + (spec.Walls ? WallTopAboveEdge : 0f);
+            float maxY = (spec.Width + spec.Height) * 0.25f + (spec.Walls ? WallTopAboveEdge(wallRows) : 0f);
             foreach (Vector2 extra in spec.ExtraTiles)
             {
                 Vector3 c = IsoMath.GridToWorld(extra.x, extra.y);

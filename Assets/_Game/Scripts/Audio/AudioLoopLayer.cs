@@ -35,7 +35,7 @@ namespace SixtyOne.Audio
                 cue = target;
             }
 
-            float goal = cue != null ? cue.Volume * Mathf.Clamp01(level) : 0f;
+            float goal = cue != null ? cue.Volume * Mathf.Clamp01(level) * SixtyOne.Core.UserSettings.Sfx : 0f;
             if (goal > 0.001f && !source.isPlaying)
             {
                 AudioClip clip = cue.PickClip();

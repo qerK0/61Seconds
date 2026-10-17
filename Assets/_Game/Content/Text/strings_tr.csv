@@ -337,3 +337,21 @@ ui.door.unavailable,Şu an oradan geçemezsin.,door whose move is not available 
 ui.not_now,Şimdi olmaz.,hotspot with no matching choice
 ui.bag.collapse,›,bag column toggle (open)
 ui.bag.expand,‹,bag column toggle (collapsed)
+ui.menu.title,61 SECONDS,main menu title (game name; kept in English)
+ui.menu.start,Başla,main menu button
+ui.menu.settings,Ayarlar,main menu button
+ui.menu.quit,Çıkış,main menu button
+ui.settings.title,Ayarlar,settings panel title
+ui.settings.master,Ana Ses,master volume slider
+ui.settings.music,Müzik,music volume slider
+ui.settings.sfx,Efekt,effects volume slider
+ui.settings.reduce,Efektleri Azalt,Reduce Effects toggle
+ui.settings.back,Geri,settings panel close button
+ui.pause.title,Duraklatıldı,pause menu title
+ui.pause.resume,Devam Et,pause menu button
+ui.pause.settings,Ayarlar,pause menu button
+ui.pause.main_menu,Ana Menü,pause menu button (asks for confirmation)
+ui.pause.quit,Oyundan Çık,pause menu button (asks for confirmation)
+ui.pause.confirm,Emin misin? İlerleme kaybolacak.,confirmation for Ana Menü / Oyundan Çık
+ui.pause.yes,Evet,confirmation yes
+ui.pause.no,Hayır,confirmation no

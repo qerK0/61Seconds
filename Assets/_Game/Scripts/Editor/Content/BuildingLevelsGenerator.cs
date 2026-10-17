@@ -188,7 +188,7 @@ namespace SixtyOne.Editor
 
             // Bigger rooms: one uniform scale for tiles, walls, props, anchors, hotspots, spawns and characters.
             result.Visual = Asset<SixtyOne.Placement.RoomVisualConfig>(DataRoot + "/RoomVisualConfig.asset");
-            result.Visual.Configure(1.5f);
+            result.Visual.Configure(1.5f, 2);
 
             // Tuned for ~60-70% first-try success (Monte Carlo: ~0.62s median 4-choice reaction, +0.35s to orient on
             // the first key, 2.5% wrong keys). Breaker ~65%; dog ~64% with longer sequences and a higher penalty.

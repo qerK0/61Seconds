@@ -30,6 +30,7 @@ namespace SixtyOne.Core
             }
 
             Instance = this;
+            UserSettings.Apply(settings);
         }
 
         private void OnDestroy()
