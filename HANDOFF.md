@@ -4,6 +4,134 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 19:56] CLOUD — Task 02: running members, grid paths, debris/cracks, loot containers, prop art, robber + street finale
+### Done
+One commit per part (A–F), so a partial pick-up works.
+- **A. Running instead of teleporting.**
+  - Placement reserves the anchor at once (`PlacementRuns`), then the member runs there at the follower speed × `Room.Scale` (injured is slower). You can queue the next member while the first is still running; the player runs too.
+  - When the timer ends, anyone still running snaps onto their reserved anchor before the quake resolves.
+  - After a room transition the player pops in at the arrival point. The wife and child stay hidden until input unlocks, then appear at the arrival door (or the spawn for rope / cable / stairs nodes) and run to their follow spots (`FamilyFollower.ArriveFrom`). This works during dialogue and placement too.
+  - Rewinds still snap (`RoomSwitcher.LastShowInstant`); Reduce Effects still runs.
+  - `CharacterMotor` now takes waypoints and remembers an owner, so the mover, followers and placement never stop each other's runs.
+- **B. `GridNav` (pure A*).** 8 neighbours, no corner cutting, a blocked-cell set, and string-pulled smoothing with a body-radius line check.
+  - A blocked or unreachable target goes to the nearest reachable free cell; an approach cell under debris uses the nearest free neighbour.
+  - Used by `PlayerMover`, `FamilyFollower` (re-plans every 0.2 s) and the placement runs. Each `Room` owns its nav (floor + extra cells + static blocks + debris).
+- **C. Debris and cracks.**
+  - New state, restored by snapshots: `GameState.QuakeCount` (opening 1, F3 2, F2 3, street 4, via `PlacementNode.quakeNumber`), `DebrisSeed` (checkpoint seed, default 61) and `Containers`.
+  - `DebrisPlanner` (pure): seeded per room / quake / seed, density from `LevelConfig` (0 / 6 / 10 / 15 / 20 % plus 3 % per lower floor), only grows. It never cuts a path between required cells (door approaches and arrivals, spawns, anchors, pickup / container / NPC / rope cells); required cells are never debris.
+  - `DebrisPresenter`: applies debris instantly on room enter and on rewinds. After a quake the new pieces drop in from above with a dust puff and a quiet `cue_furniture_crash`.
+  - `WallCracks` + `CrackRules`: per-segment seeded rolls against a monotonic chance (0 / 15 / 35 / 55 / 70 % plus 5 % per lower floor), using the WhatsApp cracked faces from every tile set.
+- **D. Loot containers.**
+  - `LootContainer` flow: the player runs up, a radial ring and "Aranıyor…" fill over 1.5 s with `cue_search`, input is locked except Esc, and any click cancels with no refund. The building cost (3 s, prep seconds before the quake) is paid once.
+  - Then `LootWindow` opens next to the bag:
+    - click an item to take it (bag full → the bag flashes and `cue_denied` plays);
+    - "Hepsini al" takes everything that fits; "Kapat" closes;
+    - a bag click puts an item back;
+    - in neighbours' flats the title is "Ödünç al" and items taken are borrowed.
+  - A second visit is free and instant. Key items go to the pockets.
+  - Hidden extras: only inside once the container was searched in an earlier loop (KnowledgeSet).
+  - Converted every closed-surface pickup, keeping ids and contents: `salon_cabinet` (ecza dolabı), `kitchen_drawer`, `hall_nightstand`, `hall_toolbox`, `hall_jewelry_box`, `bedroom_wardrobe_sheet`, `flat12_closet_flashlight`, `flat12_cabinet`, `flat12_wardrobe_sheet`.
+  - Added bookshelf containers:
+    - salon: empty (a prep-time trap);
+    - Flat 12: water;
+    - Flat 9: food;
+    - Flat 10: cloth;
+    - Flat 8: food.
+  - Generated `sfx_search.wav` and `sfx_car_alarm_loop.wav` with `tools/gen_sfx.py` (`cue_search`, `cue_car_alarm`).
+- **E. Prop art.** New menu `SixtyOne > Art > Import Prop Art` (`PropArt` → `Data/Art/PropArtSet.asset`) imports the sprites with a bottom-centre pivot on the opaque pixels and a PPU set to the target size. The scene builder uses a mapped sprite, else the coloured block.
+  - Mapped props:
+    - table / desk (`masA`), chairs (`masaa`; 2 in the salon, 1 at the F7 desk);
+    - wardrobe (`dolap`); the neighbours' wardrobe and the cabinet (`ComfyUI_00021_`);
+    - bookshelf (`bokkshelf`), stove (`ocak`), fuse box (`sigorta`);
+    - wall lamps (`lamba`), each with a Light2D practical: F11 hall, F4 / F3 / F2 corridors, F12 hall;
+    - debris (`enkaz 1 ` / `enkaz 2`).
+  - **Gas valve:** a new visible prop (`vana`) next to every stove is a ChoiceHotspot. It plays the valve choice; the prep and post-quake choices share it via `alsoKeys`.
+  - **Chandelier:** `PropFrames` plays frames 0–4 as a swing during a quake; the Drop hazard ends on frame 5 (fallen).
+  - **Doors:** now use `kapi.png` (falls back to `door.png`).
+  - `ComfyUI_00045_` / `_00053_` are not used in the world.
+- **F. Robber, then the street.**
+  - **The robbery:** clicking the stairs (hotspot, `f2.exit.c_out`) starts `f2.robber`. "Telaşlı Adam" has 4 lines, one about his 5-year-old son waiting at the assembly area. Choices: Yalvar / Kısa kes / Ona bağır, each with its own reply node (`RobberNode`).
+  - Every reply takes the items with the new outcome `TakeItems` (pure `RobberLogic`: all the food, else one water, never key items, borrow ledger untouched), sets `RobbedAtExit`, queues one toast per item ("{0} elinden alındı."), says a closing line (or the bitter line if he found nothing), runs down the stairs and fades. The game then continues to `f2.street` automatically. No QTE, death, fight or weapons.
+  - **The street:** 20×6 cells, a checkpoint. Rocky floor (Rocky 17 with ~15 % seeded Rocky 3 patches), kerb and façade silhouettes, 3 cars, a fallen pole, the downed power line (blocked, one gap) with sparking cells (walk in or click the line = electrocution, `tip.electric`), and the "Acil Toplanma Alanı" sign far left.
+  - **Camera:** follow mode (fixed size ≈ 7 cells, at least the street's depth band; smooth-damped; clamped to the street ends).
+  - **`StreetQuakeDirector` (the 4th quake):** it starts 6 s after entering, or when the player gets within 2 cells of the line.
+    - QuakeCount becomes 4.
+    - Act-3 shake ×1.6 (Reduce Effects still scales it) and the tilt.
+    - A louder `cue_quake_f4` (`QuakeInfo.SoundAct` / `Loudness`), car alarms and glass rain.
+    - 3–4 façade drops: a red shadow on 2×2 cells for 1.2 s, then rubble. A member under it gets `hz.street_facade`: player death, wife cut to black, child trapped. The rubble blocks paths only where it can't cut one.
+    - The hint "Açık alana çök!". At the 3.6 s peak the player must be in the open middle (not within 1 cell of the façades or the line), otherwise `death.street_glass` / `tip.street`.
+  - The sign is locked until the quake has passed (`StreetQuakeDone`).
+  - **Timer at 0 on the street:** death only within 5 cells of the building door (`SurvivalController.CollapseSpares`). Otherwise there is a dust-cloud + shake beat, "Arkanızda bina çöktü!" and the `CollapsedBehind` flag.
+  - **Epilogue:** new lines for "it collapsed behind you" or "the building had {0} s left", plus the robbery line.
+  - Every street death is a macro rewind to the street checkpoint.
+- **Strings:** all new keys are in `strings_tr.csv` with finished Turkish (loot UI, container names, robber, street, deaths, `tip.street` (+ `.title`, exactly as specified), epilogue lines). No TODO; "ödünç al" only.
+- **Tests:** new suites, 43 tests: `PlacementRunTests`, `GridNavTests`, `DebrisTests` (200-seed fuzz on every `BuildingLayout` room, monotonic density / debris / cracks, same seed = same layout, QuakeCount rewinds), `LootTests`, `RobberTests`, `StreetTests` (200 seeds door→sign, façade drops never on a chokepoint). The test asmdef now references `SixtyOne.Editor`, for `BuildingLayout`.
+
+### Files created / changed
+- Core: `GameState.cs`, `Snapshot.cs` (QuakeCount / DebrisSeed / Containers), `ContainerLedger.cs` (new), `LootEvents.cs` (new), `BorrowLedger.cs` (Remove), `GameEvents.cs` (QueuedMessage, BuildingCollapsedBehind), `QuakeInfo.cs` (SoundAct / Loudness), `FlagNames.cs` (RobbedAtExit, StreetQuakeDone, CollapsedBehind).
+- Placement:
+  - new: `GridNav.cs`, `PlacementRuns.cs` (also MemberMoveRules, QuakeRules), `PropFrames.cs`;
+  - changed: `CharacterMotor.cs`, `FamilyMember.cs`, `FamilyFollower.cs`, `PlayerMover.cs`, `PlacementController.cs`, `PlacementNode.cs`, `Room.cs` (nav, debris, depth, follow camera, RequiredCells), `RoomSwitcher.cs`, `RoomTransitionController.cs`, `ChoiceHotspot.cs` (alsoKeys), `RoomNavigator.cs`, `HazardProp.cs`.
+- World:
+  - new: `DebrisPlanner.cs` (+ CrackRules), `DebrisPresenter.cs`, `WallCracks.cs`, `LootContainer.cs`, `PropArtSet.cs`, `StreetLayout.cs`, `StreetQuakeDirector.cs`, `StreetPowerLine.cs`;
+  - changed: `RoomTileSet.cs` (cracked + patch tiles).
+- Items: `LootLogic.cs`, `RobberLogic.cs` (new).
+- Dialogue: `RobberNode.cs`, `RobberController.cs`, `RobberSetup.cs` (new); `DialogueNode.cs` (unsealed); `DialogueController.cs`.
+- Nodes: `Outcome.cs` / `OutcomeExecutor.cs` (TakeItems, OutcomeResult.Taken).
+- Building: `LevelConfig.cs` (damage tables), `SurvivalController.cs` (CollapseSpares), `EpilogueNode.cs`, `EpilogueText.cs`.
+- UI: `LootWindow.cs`, `LootSearchRing.cs` (new); `BagUI.cs` (put back); `MessageToast.cs` (queue).
+- Other runtime: `Iso/RoomCameraFraming.cs` (follow mode), `Audio/AudioEventHooks.cs`, `Text/UiKeys.cs`.
+- Editor:
+  - new: `Art/PropArt.cs`;
+  - changed: `Art/TileArt.cs` (Rocky street set, cracks on all sets), `Art/DoorArt.cs` (kapi.png), `SceneBuild/BuildingLayout.cs` (containers, valves, chairs, wall lamps, the street, stairs, nav helpers), `SceneBuild/SceneKit.cs` (art props, containers, street extras, hotspot art), `SceneBuild/RoomTiles.cs` (WallCracks, patches), `SceneBuild/TestSceneBuilder.cs`, `SceneBuild/TestSceneUi.cs` (loot window, search ring), `Content/BuildingLevelsGenerator*.cs` (quake numbers, damage, cues, robber, street, `hz.street_facade`, `tip.street`), `Content/ContentValidator.cs`, `Content/TeamAudioImporter.cs`.
+- Tests: the 6 new suites above; `SixtyOne.Tests.EditMode.asmdef`.
+- Audio: `Audio/Generated/sfx_search.wav`, `Audio/Generated/sfx_car_alarm_loop.wav` (new, no .meta), `tools/gen_sfx.py`.
+- `Content/Text/strings_tr.csv`, `CLAUDE.md`.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Let Unity import, then fix any compile errors (see risks).
+- [ ] Run menu: **SixtyOne > Audio > Import Team Audio** (wires `cue_search`, `cue_car_alarm`).
+- [ ] Run menu: **SixtyOne > Art > Import Prop Art**, then check `Data/Art/PropArtSet.asset` (13 names, 6 chandelier frames, 2 debris sprites).
+- [ ] Run menu: **SixtyOne > Art > Generate Tile Sets** (Rocky sheet slicing → `StreetTileSet` with Rocky 17 / Rocky 3 patches; cracked faces on every set).
+- [ ] Run menu: **SixtyOne > Generate Building Levels**, then **SixtyOne > Build Test Scene**, then **SixtyOne > Validate Content** and **Text > Validate**.
+- [ ] Run all EditMode tests.
+- [ ] Tune the prop target heights by eye in `PropArt.Entries`:
+  - table 0.45, chair 0.55, wardrobe / bookshelf 1.1, stove 0.5, valve / fuse box 0.25, wall lamp 0.2 (room-local units);
+  - chandelier canvas 1.35 (the hanging height and fallen frame);
+  - debris 0.35 wide;
+  - the bookshelf on the F8 right wall may need `flipX`.
+- [ ] **Running placement under the timer:** queue all three members fast on F4; let the timer end mid-run (they must snap and resolve at the targets); micro-rewind (snap to the last anchors); macro-rewind (spawns).
+- [ ] **Room changes:** the wife and child appear at the arrival door and run in (doors, F4→F3 stairs, rope, cables, collapsed floor); with Reduce Effects on.
+- [ ] **Paths:** click on debris (nearest free cell), go around debris to doors and pickups, no squeezing between diagonal debris.
+- [ ] **Debris layouts on F3 / F2:** density, the drop-in after each aftershock, that nothing blocks a door / anchor / container. Cracks after each quake.
+- [ ] **Every new interaction:**
+  - each container: first search costs 3 s, the ring, a click cancels, the second visit is free, take / take all / put back, bag full;
+  - borrowed title in F12 / F9 / F10 / F8;
+  - gas valves in the F11 / F10 / F7 kitchens (prep and post-quake);
+  - the chandelier swing and fall;
+  - doors with `kapi.png`;
+  - the robber via all three choices, with food / water only / nothing in the bag;
+  - the street sign before and after the quake.
+- [ ] **Street camera follow:** the size (`Room.followCells` 7, `RoomCameraFraming.followHeadroom`), the smoothing and the clamp at both ends.
+- [ ] **Street quake feel:**
+  - the timing (`StreetQuakeDirector` delay 6 s / peak 3.6 s / 7 s), the shake and tilt strength, the `cue_quake_f4` loudness 1.35;
+  - the car alarm, glass rain, façade drop shadows and rubble, the "Açık alana çök!" check, the sparks;
+  - the collapse-behind beat (set `BuildingTime` low on the street).
+- [ ] Façades, cars, the pole and the kerb are tinted blocks; swap in art when it's delivered.
+
+### Not verified / risks
+- **Not compiled in Unity.** All runtime, editor and test code was type-checked with Roslyn (csc 4.8 on Mono) against the Unity **2021.3** reference DLLs plus hand-written stubs for TMP / uGUI / Input System / URP. The only errors left are in pre-existing lines: stub gaps or Unity 6-only APIs (`ContactFilter2D.noFilter`, `FindObjectsByType(FindObjectsInactive)`), not in the new code. Unity 6-specific API differences in new code can't be fully ruled out.
+- **Tests ran on Mono, not in Unity.** The 6 new suites (43 tests) plus 7 existing suites (Snapshot, Outcome, PlacementResolver, DelayedBomb, RewindTarget, Condition, Dialogue) ran with NUnitLite against a small managed UnityEngine shim: **83 / 83 passed**. The other existing suites need MonoBehaviour / UI types and were not run here.
+- No new `.meta` files were written (Unity generates them): new scripts, the two wavs, and `PropArtSet` / `StreetTileSet` assets (created by the menus).
+- `DialogueNode` is no longer sealed (`RobberNode` derives from it); `DialogueController` skips RobberNodes and the robber handler runs first.
+- The old stairs → street door (L1) is gone: the street is entered by the robbery node, so the family appears at the street spawn (the building door).
+- Façade rubble blocks paths only where it can't cut one (`DebrisPlanner.SafeExtras`); elsewhere it is visual only.
+- Placement no longer snaps members to spawns on a normal entry (only on rewinds), so the opening quake starts with the family where they stood during the prep.
+- The uncommitted local changes to two TMP font `.asset` files and `ProjectSettings/VersionControlSettings.asset` were already in the checkout; this session left them alone.
+
+### Next suggested step
+- Run the local checklist above (generate → build → validate → test), then play the full F4 → street run once and tune the street quake and the prop sizes. After that: real art for the street (façades, cars, the pole, the sign) and the robber sprite.
+
 ## [2026-10-17 20:42] LOCAL — Task 07 follow-ups: wall-fitted doors/elevators, 8-slot backpack with key-item pockets
 ### Done
 - **Doors and elevators fitted to the two-row wall:** `DoorArt` now generates `Art/Concept/Generated/door_wall.png` and `elevator_wall.png` from the originals.
