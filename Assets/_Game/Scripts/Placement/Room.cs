@@ -18,7 +18,21 @@ namespace SixtyOne.Placement
         [Tooltip("Where the child stands when entering the room unplaced.")]
         [SerializeField] private Transform childSpawn;
 
+        [Tooltip("World-space rect the camera must show for this room (floor + walls + tall props).")]
+        [SerializeField] private Rect viewBounds = new Rect(-2f, 0f, 4f, 3f);
+
         private Anchor[] anchors;
+
+        /// <summary>World rect to frame (relative to the room's position).</summary>
+        public Rect ViewBounds
+        {
+            get
+            {
+                Rect r = viewBounds;
+                r.position += (Vector2)transform.position;
+                return r;
+            }
+        }
         private HazardProp[] props;
 
         public string RoomId => string.IsNullOrEmpty(roomId) ? name : roomId;

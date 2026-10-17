@@ -266,7 +266,8 @@ namespace SixtyOne.Editor
 
         private static void BuildAfadPopup(Transform root)
         {
-            Image bg = UiFactory.MakeImage("AfadAlert", root, new Vector2(0.2f, 0.55f), new Vector2(0.8f, 0.84f), new Color(0.85f, 0.05f, 0.05f, 0.95f), raycast: true);
+            // Bottom strip (where choice buttons go; placement nodes have none) so it never covers the room or its anchors.
+            Image bg = UiFactory.MakeImage("AfadAlert", root, new Vector2(0.14f, 0.03f), new Vector2(0.74f, 0.23f), new Color(0.85f, 0.05f, 0.05f, 0.95f), raycast: true);
             CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
             Button dismiss = bg.gameObject.AddComponent<Button>();
             dismiss.targetGraphic = bg;

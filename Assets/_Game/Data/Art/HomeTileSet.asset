@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a46812920e544e3408744b045d52bd3d, type: 3}
+  m_Name: HomeTileSet
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.World.RoomTileSet
+  floorSprite: {fileID: -1741727756, guid: 84a3d79a50d2b5d49bfffdb78d9540dc, type: 3}
+  floorTile: {fileID: 11400000, guid: 23508ddc25fea1e418b3a17bebed6273, type: 2}
+  leftWallSprites:
+  - {fileID: -9044549264028159849, guid: a127f190c401b2a45af60d3b7182db1f, type: 3}
+  rightWallSprites:
+  - {fileID: -677654047843125890, guid: a127f190c401b2a45af60d3b7182db1f, type: 3}
+  leftWindowSprite: {fileID: -5585442693113832241, guid: 51bba831ec1bc9b40ae09c0d4802159b, type: 3}
+  rightWindowSprite: {fileID: 4712799232623252367, guid: 51bba831ec1bc9b40ae09c0d4802159b, type: 3}
+  floorTint: {r: 1, g: 1, b: 1, a: 1}
+  wallTint: {r: 1, g: 1, b: 1, a: 1}

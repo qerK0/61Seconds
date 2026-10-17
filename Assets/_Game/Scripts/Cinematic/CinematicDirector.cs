@@ -290,6 +290,13 @@ namespace SixtyOne.Cinematic
             lensDistortion.intensity.Override(f.LensDistortion);
         }
 
+        /// <summary>Un-zoomed orthographic size (set by room framing); the cinematic zoom scales from it.</summary>
+        public float BaseOrthoSize
+        {
+            get => baseOrthoSize;
+            set => baseOrthoSize = Mathf.Max(0.1f, value);
+        }
+
         private void UpdateCamera(CinematicProfile p, CinematicFrame frame, bool reduce, float dt)
         {
             if (targetCamera == null) return;

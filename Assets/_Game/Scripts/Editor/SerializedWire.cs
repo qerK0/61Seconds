@@ -50,6 +50,11 @@ namespace SixtyOne.Editor
             Apply(target, field, p => p.colorValue = value);
         }
 
+        public static void SetRect(Object target, string field, Rect value)
+        {
+            Apply(target, field, p => p.rectValue = value);
+        }
+
         /// <summary>Replaces an array/List of object references.</summary>
         public static void SetArray(Object target, string field, Object[] values)
         {

@@ -4,6 +4,92 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 04:27] LOCAL — Real isometric tiles: Tilemap floors, back walls, tile sets, per-room camera framing
+### Done
+- **Missing files:** `Assets/_Game/Art/Tiles/` does not exist and none of the named files exist anywhere ("Wood Floor 13", "Floor Stone 0", "Flat Stone 0/1/12/13"). That includes the artist pack in `Downloads\Assets`, which uses other names (Floor_Stone_01, Floor_Wood_02, Flat_Wood_01…).
+  - The Concept/ files are 768×768 **sprite sheets**, already grid-sliced in Unity as `<sheet>_<n>`: floors 3×6 at 256×128, walls 6×4 at 128×192.
+  - So "Wood Floor 13" reads as sprite **13** of the wood sheet, and "Flat Stone 12" as sprite 12 of the wall sheet. The fallback uses exactly those indices.
+- **Tile-set mapping:**
+
+  | Set | Floor | Back-left wall "/" | Back-right wall "\" | Window walls |
+  |---|---|---|---|---|
+  | **HomeTileSet** | `Floor_Wood_01-256x128_13` | `Flat_Stone_01-SW-128x192_0` | `_1` | `Flat_Stone_01_WindowA-SW-128x192_0` / `_1` |
+  | **CorridorTileSet** | `Floor_Stone_02-256x128-Photoroom_0` (tint 0.92) | `Flat_Stone_01-SW-128x192_12` | `_13` (tint 0.86) | WindowA `_12` / `_13` |
+
+  - The wall sheet stores each material as a **pair of faces**: even index = "/" face, odd = "\" face. 0/1 and 12/13 are therefore the left/right faces of one material, not variants to alternate; alternating them on one edge zig-zags. Variation along a wall comes from a deterministic 3-step shade instead.
+  - `RoomTileSet` still supports your spec: left-wall variants alternate by index, and flipX is used when no right sprites are set.
+- **Rooms → sets:**
+  - Home: Flat 11 (salon, kitchen, hall), 12, 9, 10, 7, 8.
+  - Corridor: F4/F3/F2 corridors and the F2 stairwell.
+  - The street uses the corridor floor with no walls.
+- **1. Import settings** (`SixtyOne > Art > Apply Tile Import Settings`, re-runnable, also run by Generate Tile Sets and Build Test Scene):
+  - Sprite, Bilinear, Uncompressed, no mips; floor pivot centre, wall pivot bottom-centre, set per slice through the 2D Sprite data provider.
+  - Existing slices and sprite IDs are kept; unsliced sheets are grid-sliced from the `WxH` in the file name.
+  - **PPU = 254 for all tiles, not 256.** Every diamond has an anti-aliased, darker edge pixel, and the transparent pixels are stored as magenta. At 256 that showed thin lines between tiles; 254 gives about 1px of overlap and fixes it through PPU, not scaling. Floor and walls share the PPU, so they still line up.
+  - These are sheets, so they import as **Multiple**, not Single.
+- **2. `RoomTileSet` ScriptableObject** (`Scripts/World/RoomTileSet.cs`): floor sprite + Tile, left/right wall variants, optional window sprites, floor/wall tint. `SixtyOne > Art > Generate Tile Sets` creates `Data/Art/HomeTileSet.asset`, `CorridorTileSet.asset`, `HomeFloorTile.asset` and `CorridorFloorTile.asset`, and logs every missing name with its fallback.
+- **3. Room building** (`RoomTiles.cs`, used by `TestSceneBuilder`; `BuildingLayout` has the data):
+  - **Floor:** a `Grid` (Isometric, cell size 1×0.5×1) plus a Tilemap per room covering the existing footprint and extra tiles. Tilemap cell centres match `IsoMath.GridToWorld` exactly (checked: cell (2,1) = (0.5, 1.0)), so every prop, anchor, spawn and hidden hotspot already sits on the new floor. The TilemapRenderer (Chunk) uses order −30000, under everything.
+  - **Walls:** one 128×192 segment per tile edge on both back edges, at the edge midpoint minus the art's 32px base inset, order −29500. That's above the floor, below all IsoSorter props, decals and characters. No colliders, so clicks are unaffected.
+  - **Door gaps and windows** (codes `L<x>` / `R<y>` in `BuildingLayout`):
+    - salon door L3, balcony R0, window R1
+    - kitchen window R1
+    - hall door R3
+    - F4/F2 corridors flat doors L1 + L4
+    - F3 corridor doors L1, L3, stair R1, window L5
+    - Flat 7 window R1
+    - Flat 12 and Flat 8 window R2
+    - stairwell stairs-down L1
+    - every flat has a doorway (L0 or L1)
+  - Re-anchored to segment centres so they meet the gaps/windows: salon doorway anchor + lintel x 4.0 → 3.5; salon window anchor/prop/light y 1.6 → 1.5; Flat 7 window y 1.6 → 1.5; F3 window anchor + prop x 5.3 → 5.5; hall door 3.6 → 3.5. All colliders unchanged.
+- **Camera framing** (folded in because rooms were clipped by the HUD; the previous framing task was not in HANDOFF):
+  - `CameraRig` → Main Camera. New `RoomCameraFraming` on the rig fits each room's `Room.ViewBounds` into the HUD-free viewport (x 0.02–0.85, y 0.41–0.83). The bounds are floor + walls + all room sprites, computed by the builder.
+  - It sets `CinematicDirector.BaseOrthoSize` (new property), so the cinematic zoom, tilt and CameraShake still work on the camera itself.
+- **4. Lighting:** the TilemapRenderer and wall sprites use URP `Sprite-Lit-Default`. The real wood floor is much darker than the old placeholders, and after the quake it went fully black. Each room now gets a dim cool `Light_AmbientFill` Point Light2D (intensity 0.6). It is not a practical, so the director never kills it, and the floor pattern stays faintly visible after the quake on all three floors.
+- **Layout fix found in the screenshots:** the AFAD alert covered the room and blocked anchor taps for 3.5s of each 9–10s placement. It moved to the bottom strip (where choice buttons go; placement has none). A UI raycast check confirms no member/anchor tap hits UI during the alert.
+- Validate Content 0, Text > Validate 0, **EditMode 95/95**, console clean (only the "no audio clip" warnings).
+
+### Screenshots (`Captures/`, git-ignored)
+- Before: `t0_before_*` (edit-mode placeholder rooms) and the earlier `b*`/`c*`/`d*` play shots.
+- After, all at play-time framing with HUD:
+  - F4: `u01_f4_placement`, `u02_f4_salon_postquake`, `u03_f4_kitchen` (window wall), `u04_f4_hall` (door gap), `u05_f4_corridor` (2 door gaps), `u06_f4_flat12`
+  - F3: `u07_f3_placement`, `u08_f3_corridor` (window + 3 gaps), `u09_f3_flat9`, `u10_f3_flat10`
+  - F2: `u11_f2_placement`, `u12_f2_flat7`, `u13_f2_corridor`, `u14_f2_flat8`, `u15_f2_stairs`, `u16_street`
+  - `v01`/`v07`/`v11`: the three placement moments after the AFAD move (room fully visible, alert below the instructions).
+  - `u20_zoom_corridor`, `w03_zoom_wood_lit`: close-ups. No gaps; the remaining fine lines are the stone texture's grooves and the wood tiles' own bevel edge.
+- No room is clipped by the HUD or dialogue. Rooms are smaller on screen than before (ortho 3.2–5.4) because they must fit into the 42%-high free band.
+
+### Files created / changed
+- Scripts/World/RoomTileSet.cs (new) — tile-set ScriptableObject
+- Scripts/Iso/RoomCameraFraming.cs (new) — per-room framing on the camera rig
+- Scripts/Placement/Room.cs — `viewBounds` / `ViewBounds`
+- Scripts/Cinematic/CinematicDirector.cs — `BaseOrthoSize` property
+- Scripts/Editor/Art/TileArt.cs (new) — import settings, name lookup + Concept fallback, Generate Tile Sets
+- Scripts/Editor/SceneBuild/RoomTiles.cs (new) — Tilemap floor, wall segments, ambient fill, view bounds
+- Scripts/Editor/SceneBuild/BuildingLayout.cs — RoomArt / Walls / Gaps / Windows per room, re-anchored doors and windows
+- Scripts/Editor/SceneBuild/TestSceneBuilder.cs — tile rooms, camera rig + framing
+- Scripts/Editor/SceneBuild/TestSceneUi.cs — AFAD alert moved to the bottom strip
+- Scripts/Editor/SerializedWire.cs — `SetRect`
+- Scripts/Editor/SixtyOne.Editor.asmdef — + `Unity.2D.Sprite.Editor` (sprite data provider)
+- Data/Art/* (new) — HomeTileSet, CorridorTileSet, HomeFloorTile, CorridorFloorTile
+- Art/Concept: the 4 used sheets + `.meta` (PPU/pivot/filter settings). The ComfyUI concept images stay untracked.
+- Scenes/Test_Building.unity — rebuilt
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] When the artist delivers `Art/Tiles/` with the real names, run `SixtyOne > Art > Generate Tile Sets` and then `Build Test Scene`. Name matches take priority over the Concept fallback automatically.
+- [ ] Decide whether wall "variants" should be different materials: e.g. add `Flat Stone 2/3` as a second left/right pair in `TileArt.Generate`.
+- [ ] Hand-check the room size on a 16:10 or ultra-wide window: framing adapts to the aspect, but only 16:9 was tested.
+
+### Not verified / risks
+- The fallback reading of "Wood Floor 13" etc. as sheet indices is an inference from Unity's slice names. If the artist meant different files, the tile sets will change once `Art/Tiles` exists.
+- The ambient fill (0.6) brightens the pre-quake look a little too. Tune `AmbientFillIntensity` in `TestSceneBuilder` if Act 1 looks too flat.
+- The bag-full and other HUD toasts still appear mid-screen over the room (transient).
+
+### Next suggested step
+- Artist: deliver `Art/Tiles` with the expected names, or confirm the sheet indices. Then add prop sprites (table, wardrobe, doors) in place of the placeholder blocks.
+
+---
+
 ## [2026-10-17 03:39] LOCAL — Building design verified in Unity: full route played twice with real timing, 5 bugs fixed, timers tuned
 ### Done
 - **Compile:** the cloud code compiled first time with 0 errors and 0 warnings. Unity generated the `.meta` files. The APIs flagged as first-time all work: `GetComponentInParent<T>(bool)`, `Image.fillMethod`/`fillAmount` (click ring), `ContactFilter2D.noFilter`. No asmdef changes were needed.

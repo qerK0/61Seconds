@@ -55,12 +55,21 @@ namespace SixtyOne.Editor
             public float Radius;
         }
 
+        /// <summary>Which RoomTileSet a room uses.</summary>
+        public enum RoomArt { Home, Corridor }
+
         public sealed class RoomSpec
         {
             public string Id;
             public int Width = 4;
             public int Height = 4;
             public Color Floor;
+            public RoomArt Art = RoomArt.Home;
+            public bool Walls = true;
+            /// <summary>Back-wall segments left open (exits): "L3" = back-left edge, segment x=3; "R1" = back-right edge, segment y=1.</summary>
+            public List<string> Gaps = new List<string>();
+            /// <summary>Back-wall segments using the window variant (same codes as Gaps).</summary>
+            public List<string> Windows = new List<string>();
             public Vector2 PlayerSpawn;
             public Vector2 WifeSpawn;
             public Vector2 ChildSpawn;
@@ -83,6 +92,15 @@ namespace SixtyOne.Editor
                 Id = id, Width = w, Height = h, Floor = floor,
                 PlayerSpawn = new Vector2(cx - 0.6f, cy - 0.6f), WifeSpawn = new Vector2(cx, cy - 0.9f), ChildSpawn = new Vector2(cx - 0.9f, cy)
             };
+        }
+
+        private static RoomSpec Art(RoomSpec room, RoomArt art, string gaps = "", string windows = "", bool walls = true)
+        {
+            room.Art = art;
+            room.Walls = walls;
+            room.Gaps.AddRange(gaps.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries));
+            room.Windows.AddRange(windows.Split(new[] { ' ' }, System.StringSplitOptions.RemoveEmptyEntries));
+            return room;
         }
 
         private static AnchorSpec A(string id, float gx, float gy, AnchorTag tag, int cap, string hazard, string label, params string[] adjacent)
@@ -118,7 +136,7 @@ namespace SixtyOne.Editor
         private static IEnumerable<RoomSpec> Floor4()
         {
             // Flat 11 salon: the opening-quake placement room.
-            RoomSpec salon = Room(BuildingLevelsGenerator.Flat11Salon, 6, 6, new Color(0.78f, 0.74f, 0.66f, 1f));
+            RoomSpec salon = Art(Room(BuildingLevelsGenerator.Flat11Salon, 6, 6, new Color(0.78f, 0.74f, 0.66f, 1f)), RoomArt.Home, gaps: "L3 R0", windows: "R1");
             salon.ExtraTiles.Add(new Vector2(6.5f, 0.5f));
             salon.ExtraTiles.Add(new Vector2(6.5f, 1.5f));
             salon.PlayerSpawn = new Vector2(0.9f, 0.9f);
@@ -126,41 +144,41 @@ namespace SixtyOne.Editor
             salon.ChildSpawn = new Vector2(0.5f, 1.5f);
             salon.Anchors.Add(A("lr_table", 2.5f, 2.5f, AnchorTag.Safe, 2, null, "anchor.table", "lr_inner_wall", "lr_doorway", "lr_wardrobe", "lr_window"));
             salon.Anchors.Add(A("lr_inner_wall", 1.0f, 5.3f, AnchorTag.Safe, 1, null, "anchor.inner_wall", "lr_table", "lr_doorway"));
-            salon.Anchors.Add(A("lr_doorway", 4.0f, 5.4f, AnchorTag.Trap, 1, "hz.doorway", "anchor.doorway", "lr_inner_wall", "lr_table"));
+            salon.Anchors.Add(A("lr_doorway", 3.5f, 5.4f, AnchorTag.Trap, 1, "hz.doorway", "anchor.doorway", "lr_inner_wall", "lr_table"));
             salon.Anchors.Add(A("lr_wardrobe", 5.3f, 4.0f, AnchorTag.Trap, 1, "hz.wardrobe", "anchor.wardrobe", "lr_table", "lr_window"));
-            salon.Anchors.Add(A("lr_window", 5.3f, 1.6f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_balcony", "lr_table"));
+            salon.Anchors.Add(A("lr_window", 5.3f, 1.5f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_balcony", "lr_table"));
             salon.Anchors.Add(A("lr_balcony", 6.5f, 1.0f, AnchorTag.Trap, 1, "hz.balcony", "anchor.balcony", "lr_window"));
             salon.Props.Add(P(null, "Table", 2.5f, 2.5f, -0.12f, 1.5f, 0.45f, Wood));
             salon.Props.Add(P("wardrobe", "Wardrobe", 5.85f, 4.0f, 0f, 1.3f, 1.9f, new Color(0.4f, 0.25f, 0.15f, 1f), topple: 80f));
-            salon.Props.Add(P("window", "Window", 5.95f, 1.6f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
-            salon.Props.Add(P("door_frame", "DoorLintel", 4.0f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
+            salon.Props.Add(P("window", "Window", 5.95f, 1.5f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
+            salon.Props.Add(P("door_frame", "DoorLintel", 3.5f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
             salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, new Color(0.5f, 0.5f, 0.55f, 1f), drop: 0.6f));
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
             salon.Items.Add(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food"));
             salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
-            salon.Lights.Add(L("Window", 5.95f, 1.6f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
+            salon.Lights.Add(L("Window", 5.95f, 1.5f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
             yield return salon;
 
-            RoomSpec kitchen = Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f));
+            RoomSpec kitchen = Art(Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f)), RoomArt.Home, gaps: "L0", windows: "R1");
             kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
             kitchen.Items.Add(I("gloves", 1.2f, 3.3f, Wood, cost: 3f, surface: false, id: "kitchen_drawer"));
             kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
             yield return kitchen;
 
-            RoomSpec hall = Room(BuildingLevelsGenerator.Flat11Hall, 3, 4, new Color(0.72f, 0.68f, 0.6f, 1f));
+            RoomSpec hall = Art(Room(BuildingLevelsGenerator.Flat11Hall, 3, 4, new Color(0.72f, 0.68f, 0.6f, 1f)), RoomArt.Home, gaps: "R3 L0");
             hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
-            hall.Props.Add(P(null, "FlatDoor", 2.8f, 3.6f, 0f, 0.9f, 1.5f, Wood));
+            hall.Props.Add(P(null, "FlatDoor", 2.85f, 3.5f, 0f, 0.9f, 1.5f, Wood));
             // Old emergency bag behind the coats: a second chance at a whistle for players who cut the intro short.
             hall.Items.Add(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle"));
             yield return hall;
 
-            RoomSpec corridor = Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f));
+            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor, gaps: "L1 L4");
             corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
             corridor.Props.Add(P(null, "StairsDown", 0.4f, 1.0f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             yield return corridor;
 
             // Flat 12: the neighbours' open flat. Everything here is borrowed ("ödünç al").
-            RoomSpec flat12 = Room(BuildingLevelsGenerator.Flat12, 4, 4, new Color(0.74f, 0.7f, 0.78f, 1f));
+            RoomSpec flat12 = Art(Room(BuildingLevelsGenerator.Flat12, 4, 4, new Color(0.74f, 0.7f, 0.78f, 1f)), RoomArt.Home, gaps: "L0", windows: "R2");
             flat12.Items.Add(I("cloth", 0.8f, 1.0f, new Color(0.85f, 0.85f, 0.9f, 1f), borrowed: true));
             flat12.Items.Add(I("rope", 1.6f, 0.6f, new Color(0.8f, 0.65f, 0.4f, 1f), borrowed: true));
             flat12.Items.Add(I("tape", 2.6f, 0.8f, new Color(0.6f, 0.6f, 0.65f, 1f), borrowed: true));
@@ -173,40 +191,40 @@ namespace SixtyOne.Editor
         private static IEnumerable<RoomSpec> Floor2()
         {
             // Flat 7: arrival from the cables / collapsed floor; strong aftershock placement; gas leak.
-            RoomSpec flat7 = Room(BuildingLevelsGenerator.Flat7, 5, 5, new Color(0.66f, 0.62f, 0.58f, 1f));
+            RoomSpec flat7 = Art(Room(BuildingLevelsGenerator.Flat7, 5, 5, new Color(0.66f, 0.62f, 0.58f, 1f)), RoomArt.Home, gaps: "L1", windows: "R1");
             flat7.PlayerSpawn = new Vector2(0.7f, 0.7f);
             flat7.WifeSpawn = new Vector2(1.3f, 0.5f);
             flat7.ChildSpawn = new Vector2(0.5f, 1.3f);
             flat7.Anchors.Add(A("f7_desk", 2.0f, 2.0f, AnchorTag.Safe, 2, null, "anchor.table", "f7_inner_wall", "f7_bookshelf", "f7_window"));
             flat7.Anchors.Add(A("f7_inner_wall", 0.8f, 4.3f, AnchorTag.Safe, 1, null, "anchor.inner_wall", "f7_desk", "f7_bookshelf"));
             flat7.Anchors.Add(A("f7_bookshelf", 3.2f, 4.4f, AnchorTag.Trap, 1, "hz.f7_bookshelf", "anchor.bookshelf", "f7_inner_wall", "f7_desk"));
-            flat7.Anchors.Add(A("f7_window", 4.4f, 1.6f, AnchorTag.Trap, 1, "hz.f7_window", "anchor.window", "f7_desk"));
+            flat7.Anchors.Add(A("f7_window", 4.4f, 1.5f, AnchorTag.Trap, 1, "hz.f7_window", "anchor.window", "f7_desk"));
             flat7.Props.Add(P(null, "Desk", 2.0f, 2.0f, -0.12f, 1.3f, 0.45f, Wood));
             flat7.Props.Add(P("bookshelf", "Bookshelf", 3.2f, 4.85f, 0f, 1.2f, 1.8f, new Color(0.45f, 0.3f, 0.18f, 1f), topple: 80f));
-            flat7.Props.Add(P("f7_window", "Window", 4.95f, 1.6f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
+            flat7.Props.Add(P("f7_window", "Window", 4.95f, 1.5f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             flat7.Props.Add(P("f7_ceiling", "CeilingPlaster", 2.6f, 3.0f, 1.8f, 0.7f, 0.25f, new Color(0.7f, 0.68f, 0.64f, 1f), drop: 1.6f));
             flat7.Props.Add(P(null, "Stove", 4.5f, 3.6f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             flat7.Props.Add(P(null, "Cables", 0.4f, 0.4f, 0.6f, 0.15f, 1.4f, new Color(0.15f, 0.15f, 0.15f, 1f)));
             yield return flat7;
 
             // Corridor: the frightened dog blocks the stairs.
-            RoomSpec corridor = Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f));
+            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.Corridor, gaps: "L1 L4");
             corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
             corridor.Props.Add(P(null, "StairsDown", 0.4f, 1.0f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
             yield return corridor;
 
             // Flat 8: empty placeholder flat (at most one hidden item).
-            RoomSpec flat8 = Room(BuildingLevelsGenerator.Flat8, 4, 4, new Color(0.7f, 0.66f, 0.62f, 1f));
+            RoomSpec flat8 = Art(Room(BuildingLevelsGenerator.Flat8, 4, 4, new Color(0.7f, 0.66f, 0.62f, 1f)), RoomArt.Home, gaps: "L0", windows: "R2");
             flat8.Items.Add(I("water", 3.3f, 3.2f, new Color(0.45f, 0.7f, 1f, 1f), cost: 2f, surface: false, hidden: true, id: "flat8_hidden_water"));
             yield return flat8;
 
-            RoomSpec stairs = Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f));
+            RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.Corridor, gaps: "L1");
             stairs.Props.Add(P(null, "StairsDown", 1.5f, 4.3f, 0f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             stairs.Props.Add(P(null, "Elevator", 2.7f, 1.5f, 0f, 0.6f, 1.6f, new Color(0.5f, 0.5f, 0.55f, 1f)));
             yield return stairs;
 
-            RoomSpec street = Room(BuildingLevelsGenerator.Street, 6, 4, new Color(0.4f, 0.42f, 0.45f, 1f));
+            RoomSpec street = Art(Room(BuildingLevelsGenerator.Street, 6, 4, new Color(0.4f, 0.42f, 0.45f, 1f)), RoomArt.Corridor, walls: false);
             street.Lights.Add(L("StreetLamp", 5.0f, 3.0f, 2.0f, 3.5f, new Color(0.8f, 0.85f, 1f, 1f)));
             yield return street;
         }
@@ -214,30 +232,30 @@ namespace SixtyOne.Editor
         private static IEnumerable<RoomSpec> Floor3()
         {
             // Floor 3 corridor: aftershock placement on arrival.
-            RoomSpec corridor = Room(BuildingLevelsGenerator.F3Corridor, 7, 3, new Color(0.55f, 0.55f, 0.6f, 1f));
+            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F3Corridor, 7, 3, new Color(0.55f, 0.55f, 0.6f, 1f)), RoomArt.Corridor, gaps: "L1 L3 R1", windows: "L5");
             corridor.PlayerSpawn = new Vector2(0.6f, 0.6f);
             corridor.WifeSpawn = new Vector2(1.2f, 0.4f);
             corridor.ChildSpawn = new Vector2(0.4f, 1.2f);
             corridor.Anchors.Add(A("f3_inner_wall", 1.0f, 2.5f, AnchorTag.Safe, 2, null, "anchor.inner_wall", "f3_pillar"));
             corridor.Anchors.Add(A("f3_pillar", 2.4f, 2.5f, AnchorTag.Safe, 1, null, "anchor.pillar", "f3_inner_wall", "f3_lamp"));
             corridor.Anchors.Add(A("f3_lamp", 3.6f, 1.4f, AnchorTag.Trap, 1, "hz.f3_lamp", "anchor.lamp", "f3_pillar", "f3_window"));
-            corridor.Anchors.Add(A("f3_window", 5.3f, 2.5f, AnchorTag.Trap, 1, "hz.f3_window", "anchor.window", "f3_lamp", "f3_stair_edge"));
+            corridor.Anchors.Add(A("f3_window", 5.5f, 2.5f, AnchorTag.Trap, 1, "hz.f3_window", "anchor.window", "f3_lamp", "f3_stair_edge"));
             corridor.Anchors.Add(A("f3_stair_edge", 6.4f, 1.0f, AnchorTag.Trap, 1, "hz.f3_stair_edge", "anchor.stair_edge", "f3_window"));
             corridor.Props.Add(P("corridor_lamp", "CorridorLamp", 3.6f, 1.4f, 1.6f, 0.45f, 0.3f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
-            corridor.Props.Add(P("corridor_window", "CorridorWindow", 5.3f, 2.95f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
+            corridor.Props.Add(P("corridor_window", "CorridorWindow", 5.5f, 2.95f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             corridor.Props.Add(P("stair_edge", "StairEdge", 6.8f, 1.0f, 0f, 0.9f, 0.35f, new Color(0.45f, 0.45f, 0.5f, 1f), drop: 0.7f));
             corridor.Props.Add(P("ceiling_debris", "CeilingDebris", 3.0f, 0.8f, 1.8f, 0.6f, 0.25f, new Color(0.6f, 0.58f, 0.55f, 1f), drop: 1.6f));
             yield return corridor;
 
             // Flat 9: hanging cables + fuse box.
-            RoomSpec flat9 = Room(BuildingLevelsGenerator.Flat9, 4, 4, new Color(0.62f, 0.66f, 0.7f, 1f));
+            RoomSpec flat9 = Art(Room(BuildingLevelsGenerator.Flat9, 4, 4, new Color(0.62f, 0.66f, 0.7f, 1f)), RoomArt.Home, gaps: "L0");
             flat9.Props.Add(P(null, "FuseBox", 0.3f, 3.0f, 0.5f, 0.6f, 0.7f, new Color(0.6f, 0.6f, 0.65f, 1f)));
             flat9.Props.Add(P(null, "HangingCables", 3.2f, 2.8f, 0.4f, 0.15f, 1.6f, new Color(0.15f, 0.15f, 0.15f, 1f)));
             flat9.Props.Add(P(null, "Shaft", 3.4f, 3.4f, 0f, 1.0f, 0.3f, new Color(0.1f, 0.1f, 0.12f, 1f)));
             yield return flat9;
 
             // Flat 10: dark (no practical lights), stove leaking gas, collapsed floor.
-            RoomSpec flat10 = Room(BuildingLevelsGenerator.Flat10, 4, 4, new Color(0.42f, 0.42f, 0.46f, 1f));
+            RoomSpec flat10 = Art(Room(BuildingLevelsGenerator.Flat10, 4, 4, new Color(0.42f, 0.42f, 0.46f, 1f)), RoomArt.Home, gaps: "L0");
             flat10.Props.Add(P(null, "Stove", 3.5f, 1.2f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             flat10.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
             flat10.Props.Add(P(null, "CollapsedFloor", 1.6f, 2.6f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
