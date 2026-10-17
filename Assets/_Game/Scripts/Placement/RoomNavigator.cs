@@ -46,7 +46,14 @@ namespace SixtyOne.Placement
                 case Door door:
                     return RoomLinkRules.DecideDoor(nodePlayer.Current, gm.State, rooms.Current.RoomId, door.TargetRoomId, rooms.ZoneOf);
                 case ChoiceHotspot hotspot:
-                    return RoomLinkRules.DecideHotspot(nodePlayer.Current, gm.State, hotspot.ChoiceKey);
+                    // The first of its keys the current node offers (a valve plays the prep or the post-quake choice).
+                    foreach (string key in hotspot.ChoiceKeys)
+                    {
+                        LinkDecision decision = RoomLinkRules.DecideHotspot(nodePlayer.Current, gm.State, key);
+                        if (decision.Action != LinkAction.Unavailable) return decision;
+                    }
+
+                    return new LinkDecision(LinkAction.Unavailable);
                 default:
                     return new LinkDecision(LinkAction.Unavailable);
             }
@@ -91,7 +98,13 @@ namespace SixtyOne.Placement
                 foreach (RoomLink link in room.Links)
                 {
                     if (link is Door door && RoomLinkRules.Handles(choice, zone, rooms.ZoneOf(door.TargetRoomId), null, rooms.ZoneOf)) return true;
-                    if (link is ChoiceHotspot hotspot && RoomLinkRules.Handles(choice, zone, null, hotspot.ChoiceKey, rooms.ZoneOf)) return true;
+                    if (link is ChoiceHotspot hotspot)
+                    {
+                        foreach (string key in hotspot.ChoiceKeys)
+                        {
+                            if (RoomLinkRules.Handles(choice, zone, null, key, rooms.ZoneOf)) return true;
+                        }
+                    }
                 }
             }
 

@@ -90,17 +90,35 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(anchor, "adjacent", new List<Anchor>(neighbours).ToArray());
         }
 
+        /// <summary>Prop art (SixtyOne > Art > Import Prop Art) used by Prop and the containers; null = coloured blocks.</summary>
+        public static PropArtSet Props { get; set; }
+
+        /// <summary>Fixtures that hang on a wall and keep their authored lift when they get real art.</summary>
+        private static bool WallMounted(string objectName) => objectName == "FuseBox" || objectName == "WallLamp" || objectName == "Valve";
+
         public static GameObject Prop(Transform parent, string propId, string objectName, float gx, float gy, float lift, Vector2 scale, Color color,
             float toppleAngle = -80f, float dropDistance = 0.8f)
         {
+            // Mapped art (bottom-centre pivot, sized by its import) replaces the block; the chandelier gets its frames.
+            Sprite mapped = Props != null ? Props.Find(objectName) : null;
+            bool chandelier = objectName == "CeilingLamp" && Props != null && Props.ChandelierFrames.Length > 0;
+            if (chandelier) mapped = Props.ChandelierFrames[0];
+            if (mapped != null)
+            {
+                if (!WallMounted(objectName)) lift = 0f;
+                scale = Vector2.one;
+            }
+
             var go = new GameObject(objectName);
             go.transform.SetParent(parent, false);
             go.transform.localPosition = IsoMath.GridToWorld(gx, gy) + new Vector3(0f, lift, 0f);
             go.transform.localScale = new Vector3(scale.x, scale.y, 1f);
 
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
-            r.sprite = Art.Block;
-            r.color = color;
+            r.sprite = mapped != null ? mapped : Art.Block;
+            r.color = mapped != null ? Color.white : color;
+            if (mapped != null && RoomTiles.LitMaterial != null) r.sharedMaterial = RoomTiles.LitMaterial;
+            if (chandelier) go.AddComponent<PropFrames>().Configure(r, Props.ChandelierFrames, 10f);
             // Elevator props (F2 corridor) use the elevator door art on their back-right wall.
             if (objectName == "Elevator" && DoorArt.Apply(r, DoorArt.Elevator, true))
             {
@@ -392,6 +410,13 @@ namespace SixtyOne.Editor
                 s.color = new Color(1f, 1f, 1f, 0.5f);
                 s.sortingOrder = DecalOrder;
             }
+            else if (spec.Art != null && Props != null && Props.Find(spec.Art) != null)
+            {
+                // Real prop art (the gas valve): bottom-centre pivot, sized by its import.
+                r.sprite = Props.Find(spec.Art);
+                r.color = Color.white;
+                height = Mathf.Max(0.3f, r.sprite.bounds.size.y);
+            }
             else if (spec.Name == "Elevator" && DoorArt.Apply(r, DoorArt.Elevator, true))
             {
                 // Every elevator stands flush in a back-right wall segment (layout puts it on the wall line):
@@ -415,7 +440,8 @@ namespace SixtyOne.Editor
             }
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-            box.size = new Vector2(spec.Person ? 0.45f : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Scale.x * 0.5f, height);
+            float boxWidth = spec.Person ? 0.45f : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Art != null && r.sprite != Art.Block ? Mathf.Max(0.3f, r.sprite.bounds.size.x) : spec.Scale.x * 0.5f;
+            box.size = new Vector2(boxWidth, height);
             box.offset = new Vector2(0f, height * 0.5f);
 
             GameObject hover = HoverMarker(go.transform, new Vector3(0f, height + 0.3f, 0f), spec.ChoiceKey, out TextMeshPro label);
@@ -433,7 +459,7 @@ namespace SixtyOne.Editor
 
             ChoiceHotspot hotspot = go.AddComponent<ChoiceHotspot>();
             hotspot.ConfigureLink(navigator, approach, r, hover, label);
-            hotspot.ConfigureHotspot(spec.ChoiceKey, spec.HideWhenGone);
+            hotspot.ConfigureHotspot(spec.ChoiceKey, spec.HideWhenGone, spec.AlsoKeys);
             EditorUtility.SetDirty(hotspot);
             return hotspot;
         }

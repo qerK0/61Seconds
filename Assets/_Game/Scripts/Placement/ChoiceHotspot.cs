@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SixtyOne.Text;
 using UnityEngine;
 
@@ -18,12 +19,26 @@ namespace SixtyOne.Placement
         [Tooltip("Hide renderers and collider while the current node has no such choice (people who left).")]
         [SerializeField] private bool hideWhenUnavailable;
 
+        [Tooltip("More choice label keys this hotspot plays in other nodes (the same gas valve before and after the quake).")]
+        [SerializeField] private string[] alsoKeys = new string[0];
+
         private Renderer[] renderers;
         private Collider2D[] colliders;
         private float nextRefresh;
         private bool shown = true;
 
         public string ChoiceKey => choiceKey.Key;
+
+        /// <summary>Every choice label key this hotspot can play (main key first).</summary>
+        public IEnumerable<string> ChoiceKeys
+        {
+            get
+            {
+                yield return choiceKey.Key;
+                if (alsoKeys == null) yield break;
+                foreach (string key in alsoKeys) if (!string.IsNullOrEmpty(key)) yield return key;
+            }
+        }
 
         protected override void Awake()
         {
@@ -46,10 +61,11 @@ namespace SixtyOne.Placement
         }
 
         /// <summary>Authoring helper for the scene builder.</summary>
-        public void ConfigureHotspot(TextKey key, bool hideWhenGone)
+        public void ConfigureHotspot(TextKey key, bool hideWhenGone, string[] extraKeys = null)
         {
             choiceKey = key;
             hideWhenUnavailable = hideWhenGone;
+            alsoKeys = extraKeys ?? new string[0];
         }
     }
 }

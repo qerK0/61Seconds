@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SixtyOne.Editor
 {
     /// <summary>
-    /// Door and elevator art (Art/Concept/door.png, asansorkapı.png) fitted to a back-wall gap. A uniform scale cannot
+    /// Door and elevator art (Art/Concept/kapi.png, else door.png; asansorkapı.png) fitted to a back-wall gap. A uniform scale cannot
     /// fill the gap width, reach the wanted height and keep the wall slant at once, so a wall-fitted copy is generated
     /// (Art/Concept/Generated/*_wall.png): each source column is remapped between the door's fitted bottom and top
     /// lines so that, at one shared PPU, the bottom edge lies exactly on the gap's floor edge (2:1 slant), the width
@@ -14,7 +14,10 @@ namespace SixtyOne.Editor
     /// </summary>
     public static class DoorArt
     {
-        public const string DoorPath = "Assets/_Game/Art/Concept/door.png";
+        /// <summary>The door art: kapi.png (new), else the older door.png.</summary>
+        public const string NewDoorPath = "Assets/_Game/Art/Concept/kapi.png";
+        public const string OldDoorPath = "Assets/_Game/Art/Concept/door.png";
+        public static string DoorPath => File.Exists(NewDoorPath) ? NewDoorPath : OldDoorPath;
         public const string ElevatorPath = "Assets/_Game/Art/Concept/asansorkapı.png";
         private const string OutFolder = "Assets/_Game/Art/Concept/Generated";
 

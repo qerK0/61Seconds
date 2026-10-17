@@ -117,6 +117,10 @@ namespace SixtyOne.Editor
             public bool HideWhenGone;
             /// <summary>Idle frame set ("sevim") looped on the body instead of the placeholder; null = placeholder.</summary>
             public string Idle;
+            /// <summary>Prop art name (PropArtSet) for objects, e.g. "Valve"; null = tinted block.</summary>
+            public string Art;
+            /// <summary>More choice keys the same object plays in other nodes (prep / post-quake valve).</summary>
+            public string[] AlsoKeys = new string[0];
         }
 
         public sealed class RoomSpec
@@ -290,6 +294,22 @@ namespace SixtyOne.Editor
             return spec;
         }
 
+        /// <summary>
+        /// The visible gas valve next to a stove: clicking it plays the node's valve choice (ChoiceHotspot), so the
+        /// panel no longer shows a valve button.
+        /// </summary>
+        private static HotspotSpec Valve(float gx, float gy, string choiceKey, params string[] alsoKeys)
+        {
+            return new HotspotSpec { Name = "Valve", ChoiceKey = choiceKey, Gx = gx, Gy = gy, Scale = new Vector2(0.3f, 0.3f), Color = new Color(0.85f, 0.75f, 0.2f, 1f), Art = "Valve", AlsoKeys = alsoKeys };
+        }
+
+        /// <summary>A wall lamp on the back-left wall at segment x (a Light2D practical sits on it).</summary>
+        private static void WallLamp(RoomSpec room, float x, string lightName)
+        {
+            room.Props.Add(P(null, "WallLamp", x, room.Height, 0.72f, 0.25f, 0.25f, new Color(1f, 0.9f, 0.6f, 1f)));
+            room.Lights.Add(L(lightName, x, room.Height - 0.2f, 0.8f, 2.4f));
+        }
+
         private static LightSpec L(string name, float gx, float gy, float lift, float radius, Color? color = null)
         {
             return new LightSpec { Name = name, Gx = gx, Gy = gy, Lift = lift, Radius = radius, Color = color ?? Warm };
@@ -364,6 +384,8 @@ namespace SixtyOne.Editor
             salon.Anchors.Add(A("lr_window", 5.3f, 1.5f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_balcony", "lr_table"));
             salon.Anchors.Add(A("lr_balcony", 6.5f, 1.0f, AnchorTag.Trap, 1, "hz.balcony", "anchor.balcony", "lr_window"));
             salon.Props.Add(P(null, "Table", 2.5f, 2.5f, -0.12f, 1.5f, 0.45f, Wood));
+            salon.Props.Add(P(null, "Chair", 1.7f, 2.9f, 0f, 0.45f, 0.55f, Wood));
+            salon.Props.Add(P(null, "Chair", 3.3f, 2.1f, 0f, 0.45f, 0.55f, Wood));
             salon.Props.Add(P("wardrobe", "Wardrobe", 5.85f, 4.0f, 0f, 1.3f, 1.9f, new Color(0.4f, 0.25f, 0.15f, 1f), topple: 80f));
             salon.Props.Add(P("window", "Window", 5.95f, 1.5f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             salon.Props.Add(P("door_frame", "DoorLintel", 3.5f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
@@ -381,12 +403,14 @@ namespace SixtyOne.Editor
 
             RoomSpec kitchen = Art(Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f)), RoomArt.Home, windows: "R1");
             kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
+            kitchen.Hotspots.Add(Valve(3.7f, 1.6f, BuildingLevelsGenerator.F4PrepKitchen + ".c_valve", BuildingLevelsGenerator.F4Kitchen + ".c_valve"));
             kitchen.Containers.Add(Own(Box("kitchen_drawer", "drawer", 1.2f, 3.3f, Wood, "gloves")));
             kitchen.Items.Add(Own(I("water", 2.6f, 3.4f, new Color(0.45f, 0.7f, 1f, 1f))));
             kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
 
             RoomSpec hall = Art(Room(BuildingLevelsGenerator.Flat11Hall, 3, 4, new Color(0.72f, 0.68f, 0.6f, 1f)), RoomArt.Home);
             hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
+            WallLamp(hall, 1.5f, "HallWallLamp");
             // Old emergency bag behind the coats: a second chance at a whistle for players who cut the intro short.
             hall.Items.Add(Own(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle")));
             hall.Containers.Add(Own(Box("hall_nightstand", "nightstand", 1.6f, 3.4f, Wood, "flashlight")));
@@ -405,6 +429,8 @@ namespace SixtyOne.Editor
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor);
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 7.0f, 1.5f, 1.0f, 1.6f, Metal));
+            WallLamp(corridor, 2.5f, "CorridorWallLampA");
+            WallLamp(corridor, 5.5f, "CorridorWallLampB");
             corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f)));
             // Sevim Teyze: decorative (her dialogue starts on the way out of Flat 11), idle-animated.
             corridor.Hotspots.Add(new HotspotSpec { Name = "Sevim", Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim" });
@@ -414,6 +440,7 @@ namespace SixtyOne.Editor
             f12Hall.Items.Add(I("rope", 0.8f, 0.7f, new Color(0.8f, 0.65f, 0.4f, 1f), borrowed: true));
             f12Hall.Items.Add(I("tape", 1.6f, 2.5f, new Color(0.6f, 0.6f, 0.65f, 1f), borrowed: true));
             f12Hall.Containers.Add(Lent(Box("flat12_closet_flashlight", "wardrobe", 2.4f, 2.4f, Wood, "flashlight")));
+            WallLamp(f12Hall, 0.5f, "Flat12WallLamp");
             RoomSpec f12Living = Art(Room(BuildingLevelsGenerator.Flat12Living, 4, 4, new Color(0.74f, 0.7f, 0.78f, 1f), BuildingLevelsGenerator.Flat12), RoomArt.Home, windows: "R3");
             f12Living.Props.Add(P(null, "Sofa", 1.6f, 3.3f, -0.05f, 1.5f, 0.5f, new Color(0.45f, 0.35f, 0.5f, 1f)));
             f12Living.Items.Add(I("cloth", 0.9f, 1.0f, new Color(0.85f, 0.85f, 0.9f, 1f), borrowed: true));
@@ -454,6 +481,7 @@ namespace SixtyOne.Editor
             corridor.Props.Add(P("stair_edge", "StairEdge", 6.8f, 1.0f, 0f, 0.9f, 0.35f, new Color(0.45f, 0.45f, 0.5f, 1f), drop: 0.7f));
             corridor.Props.Add(P("ceiling_debris", "CeilingDebris", 3.0f, 0.8f, 1.8f, 0.6f, 0.25f, new Color(0.6f, 0.58f, 0.55f, 1f), drop: 1.6f));
             corridor.Hotspots.Add(Person("Cemil", "f3.corridor.c_trader", 4.7f, 0.7f, new Color(0.75f, 0.6f, 0.35f, 1f)));
+            WallLamp(corridor, 0.5f, "F3WallLamp");
 
             // Flat 9: fuse box in the hall, balcony (bedsheet rope) off the living room, hanging cables in the kitchen.
             RoomSpec f9Hall = Art(Room(BuildingLevelsGenerator.Flat9, 3, 3, new Color(0.6f, 0.64f, 0.68f, 1f)), RoomArt.Home);
@@ -473,6 +501,7 @@ namespace SixtyOne.Editor
             RoomSpec f10Hall = Art(Room(BuildingLevelsGenerator.Flat10, 3, 3, new Color(0.42f, 0.42f, 0.46f, 1f)), RoomArt.Home);
             RoomSpec f10Kitchen = Art(Room(BuildingLevelsGenerator.Flat10Kitchen, 3, 4, new Color(0.42f, 0.44f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
             f10Kitchen.Props.Add(P(null, "Stove", 2.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
+            f10Kitchen.Hotspots.Add(Valve(1.7f, 3.6f, BuildingLevelsGenerator.F3Flat10 + ".c_valve"));
             RoomSpec f10Living = Art(Room(BuildingLevelsGenerator.Flat10Living, 4, 4, new Color(0.4f, 0.4f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
             f10Living.Props.Add(P(null, "CollapsedFloor", 2.0f, 2.2f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
             f10Living.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
@@ -500,6 +529,7 @@ namespace SixtyOne.Editor
             flat7.Anchors.Add(A("f7_bookshelf", 3.2f, 4.4f, AnchorTag.Trap, 1, "hz.f7_bookshelf", "anchor.bookshelf", "f7_inner_wall", "f7_desk"));
             flat7.Anchors.Add(A("f7_window", 4.4f, 1.5f, AnchorTag.Trap, 1, "hz.f7_window", "anchor.window", "f7_desk"));
             flat7.Props.Add(P(null, "Desk", 2.0f, 2.0f, -0.12f, 1.3f, 0.45f, Wood));
+            flat7.Props.Add(P(null, "Chair", 2.8f, 1.5f, 0f, 0.45f, 0.55f, Wood));
             flat7.Props.Add(P("bookshelf", "Bookshelf", 3.2f, 4.85f, 0f, 1.2f, 1.8f, new Color(0.45f, 0.3f, 0.18f, 1f), topple: 80f));
             flat7.Props.Add(P("f7_window", "Window", 4.95f, 1.5f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             flat7.Props.Add(P("f7_ceiling", "CeilingPlaster", 2.6f, 3.0f, 1.8f, 0.7f, 0.25f, new Color(0.7f, 0.68f, 0.64f, 1f), drop: 1.6f));
@@ -507,10 +537,12 @@ namespace SixtyOne.Editor
             RoomSpec f7Hall = Art(Room(BuildingLevelsGenerator.Flat7Hall, 3, 3, new Color(0.64f, 0.6f, 0.56f, 1f), BuildingLevelsGenerator.Flat7), RoomArt.Home);
             RoomSpec f7Kitchen = Art(Room(BuildingLevelsGenerator.Flat7Kitchen, 3, 4, new Color(0.62f, 0.66f, 0.64f, 1f), BuildingLevelsGenerator.Flat7), RoomArt.Home, windows: "R1");
             f7Kitchen.Props.Add(P(null, "Stove", 1.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
+            f7Kitchen.Hotspots.Add(Valve(2.3f, 3.6f, BuildingLevelsGenerator.F2Flat7 + ".c_valve"));
 
             // Corridor: the frightened dog blocks the stairs (front-left exit).
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
             corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
+            WallLamp(corridor, 2.5f, "F2WallLamp");
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             // Elevators sit flush on the back-right wall line, centred on a wall segment (DoorArt fits them to it).
             corridor.Props.Add(P(null, "Elevator", 7.0f, 1.5f, 0f, 1.0f, 1.6f, Metal));

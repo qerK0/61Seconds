@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace SixtyOne.Placement
 {
-    /// <summary>A prop animated by code tweens when its hazard goes off (no Animator needed).</summary>
+    /// <summary>A prop animated by code tweens when its hazard goes off (no Animator needed); frame props (PropFrames) drop onto their fallen frame.</summary>
     public sealed class HazardProp : MonoBehaviour
     {
         [Tooltip("Matches Hazard.TargetPropId.")]
@@ -57,6 +57,9 @@ namespace SixtyOne.Placement
             {
                 if (renderers[i] != null) renderers[i].color = startColors[i];
             }
+
+            PropFrames frames = GetComponent<PropFrames>();
+            if (frames != null) frames.ResetFrames();
         }
 
         /// <summary>Starts the motion on this prop's own coroutine runner.</summary>
@@ -76,6 +79,14 @@ namespace SixtyOne.Placement
                     break;
                 case HazardMotion.Drop:
                     yield return Tween.Shake(transform, duration * 0.4f, 0.04f, grow: true);
+                    // Frame-animated props (the chandelier) end on their fallen frame instead of moving.
+                    PropFrames frames = GetComponent<PropFrames>();
+                    if (frames != null && frames.HasFallenFrame)
+                    {
+                        frames.Fall();
+                        break;
+                    }
+
                     yield return Tween.MoveLocal(transform, transform.localPosition + Vector3.down * dropDistance, duration, Ease.OutBounce);
                     break;
                 case HazardMotion.Shatter:

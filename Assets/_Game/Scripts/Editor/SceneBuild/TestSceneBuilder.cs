@@ -60,6 +60,8 @@ namespace SixtyOne.Editor
 
             BuildingAssets data = BuildingLevelsGenerator.Generate();
             SceneKit.Art = PlaceholderArt.Generate();
+            // Furniture / fixture art (coloured blocks stay for anything unmapped).
+            SceneKit.Props = PropArt.Generate();
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
@@ -266,10 +268,10 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Furniture art for a container (PropArtSet); null = tinted block.</summary>
-        private static Sprite ContainerArt(string artName) => null;
+        private static Sprite ContainerArt(string artName) => SceneKit.Props != null ? SceneKit.Props.Find(artName) : null;
 
         /// <summary>Debris sprites (enkaz 1 / 2) from the prop art set; empty = tinted blocks.</summary>
-        private static Sprite[] DebrisSprites() => new Sprite[0];
+        private static Sprite[] DebrisSprites() => SceneKit.Props != null ? SceneKit.Props.Debris : new Sprite[0];
 
         private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
 
