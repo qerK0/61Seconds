@@ -34,6 +34,7 @@ MonoBehaviour:
       flag: PowerOff
       member: 0
       health: 0
+      room: 
     conditions: []
     failBehaviour: 0
     lockedReasonKey:

@@ -156,14 +156,14 @@ f4.neighbor.title,Hasan Amca,
 f4.prep.hall.body,Sigorta kutusu kapının yanında. Komodin ve alet kutusu burada.,
 f4.prep.hall.c_back,Salona dön,
 f4.prep.hall.c_breaker,Ana sigortayı indir,4 s
-f4.prep.hall.title,Antre ve yatak odası,
+f4.prep.hall.title,Antre,
 f4.prep.kitchen.body,"Ocak, dolaplar, çekmeceler. Gazı şimdi kapatırsan sonra uğraşmazsın.",
 f4.prep.kitchen.c_back,Salona dön,
 f4.prep.kitchen.c_valve,Gaz vanasını kapat,"5 s, needs the wrench"
 f4.prep.kitchen.c_valve.locked,Vana sıkışmış: İngiliz anahtarı lazım.,
 f4.prep.kitchen.title,Mutfak,
 f4.prep.salon.body,"Telefonlar aynı anda öttü: deprem geliyor! Bir dakikan var, işine yarayacakları topla.",prep start (checkpoint)
-f4.prep.salon.c_hall,Antreye / yatak odasına koş,1 s prep
+f4.prep.salon.c_hall,Antreye koş,1 s prep
 f4.prep.salon.c_kitchen,Mutfağa koş,1 s prep
 f4.prep.salon.title,Salon,prep: 60 s before the quake
 f4.quake.body,"Bina sallanıyor! Önce eşini ve çocuğunu, sonra kendini güvenli yere yerleştir.",
@@ -306,3 +306,31 @@ ui.stamina.exhausted,Çok yorgunsun. Bir şey ye ya da iç.,heavy action locked 
 ui.stamina.label,Güç,stamina bar label
 ui.time_spent,-{0} sn,{0} = seconds spent
 ui.tip_header,Deprem Notu,header above the safety tip on the death card
+room.flat11_salon,Salon,door hover label (target room name)
+room.flat11_kitchen,Mutfak,
+room.flat11_hall,Antre,
+room.flat11_bedroom,Yatak odası,
+room.f4_corridor,Koridor,
+room.flat12,Daire 12,
+room.flat12_living,Oturma odası,
+room.flat12_bedroom,Yatak odası,
+room.f3_corridor,Merdivenden 3. kata in,stairs door on floor 4
+room.flat9,Daire 9,
+room.flat9_living,Oturma odası,
+room.flat9_kitchen,Mutfak,
+room.flat10,Daire 10,
+room.flat10_kitchen,Mutfak,
+room.flat10_living,Oturma odası,
+room.flat7,Salon,
+room.flat7_hall,Daire 7,
+room.flat7_kitchen,Mutfak,
+room.f2_corridor,Koridor,
+room.flat8,Daire 8,
+room.flat8_living,Oturma odası,
+room.flat8_bedroom,Yatak odası,
+room.f2_stairs,Merdiven,
+room.street,Sokağa çık,
+ui.door.unavailable,Şu an oradan geçemezsin.,door whose move is not available in this node
+ui.not_now,Şimdi olmaz.,hotspot with no matching choice
+ui.bag.collapse,›,bag column toggle (open)
+ui.bag.expand,‹,bag column toggle (collapsed)

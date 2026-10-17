@@ -64,6 +64,8 @@ namespace SixtyOne.Placement
         /// <summary>Snaps to a world point (instant, no walk).</summary>
         public void PlaceAt(Vector3 point)
         {
+            CharacterMotor motor = GetComponent<CharacterMotor>();
+            if (motor != null) motor.Stop();
             transform.position = new Vector3(point.x, point.y, transform.position.z);
         }
 

@@ -30,8 +30,12 @@ namespace SixtyOne.Nodes
         [Tooltip("Enter the start node on Start.")]
         [SerializeField] private bool autoStart = true;
 
-            private IChoicePresenter choicePresenter;
+        [Tooltip("Component implementing IChoiceFilter (RoomNavigator): hides choices doors and hotspots offer. Optional.")]
+        [SerializeField] private MonoBehaviour choiceFilter;
+
+        private IChoicePresenter choicePresenter;
         private IRoomPresenter rooms;
+        private IChoiceFilter filter;
         private INodeHandler activeHandler;
 
         /// <summary>Timer of the current node (TimerBar reads it).</summary>
@@ -47,6 +51,7 @@ namespace SixtyOne.Nodes
             if (gameManager == null) gameManager = GameManager.Instance;
             choicePresenter = presenter as IChoicePresenter;
             rooms = roomPresenter as IRoomPresenter;
+            filter = choiceFilter as IChoiceFilter;
             if (choicePresenter == null)
             {
                 Debug.LogWarning("[NodePlayer] No IChoicePresenter assigned; choices will not show.", this);
@@ -116,11 +121,13 @@ namespace SixtyOne.Nodes
             }
 
             StopActive();
+            // A rewind restored the room the player stood in at this node's snapshot (a sub-room of a flat).
+            string restoredRoom = fromRewind ? State.CurrentRoomId : null;
             Current = node;
             State.CurrentNodeId = node.Id;
             State.Act = node.Act;
             State.CurrentRoomId = node.RoomId;
-            rooms?.ShowRoom(node.RoomId);
+            rooms?.ShowRoom(node.RoomId, restoredRoom);
 
             if (!fromRewind)
             {
@@ -233,7 +240,9 @@ namespace SixtyOne.Nodes
 
         private void PresentChoices()
         {
-            choicePresenter?.Present(Current, ChoiceView.Build(Current, State), Choose);
+            List<ChoiceView> views = ChoiceView.Build(Current, State);
+            if (filter != null) views.RemoveAll(v => filter.Hides(Current, v.Choice));
+            choicePresenter?.Present(Current, views, Choose);
         }
 
         private void OnHandlerFinished(SceneNode next)

@@ -33,6 +33,7 @@ MonoBehaviour:
       flag: GasOff
       member: 0
       health: 0
+      room: 
     outcomes:
     - type: 1
       targetNode: {fileID: 0}

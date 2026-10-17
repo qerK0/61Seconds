@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b5da0c9c50167fa439addc6eeabc4f45, type: 3}
+  m_Name: MovementConfig
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.MovementConfig
+  runSpeed: 2.4
+  followerSpeedFactor: 1.1
+  injuredSpeedFactor: 0.75
+  floorMargin: 0.25
+  wifeDelay: 0.2
+  childDelay: 0.35
+  wifeOffset: {x: 0.38, y: 0.1}
+  childOffset: {x: -0.32, y: 0.12}
+  followStartDistance: 0.35
+  doorSeconds: 1
+  runFps: 12
+  breathPeriod: 1.6
+  breathScale: 0.02
+  breathBob: 0.008
+  panicBreathSpeed: 2.2

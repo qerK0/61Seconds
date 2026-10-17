@@ -61,6 +61,7 @@ namespace SixtyOne.Editor
             problems += CheckBagConfig();
             problems += CheckQteConfigs();
             problems += CheckRopeDescents();
+            problems += CheckDoors(nodes);
             problems += CheckNoTodoStrings();
             problems += CheckReachability(nodes);
             problems += CheckPrep(nodes);
@@ -644,6 +645,66 @@ namespace SixtyOne.Editor
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Doors lead to existing rooms with an arrival point; hotspots name a real choice; every move choice of an
+        /// exploration node that leaves its zone has a door in that zone (the old room buttons are gone).
+        /// </summary>
+        private static int CheckDoors(List<SceneNode> nodes)
+        {
+            int problems = 0;
+            Room[] rooms = Object.FindObjectsByType<Room>(FindObjectsInactive.Include);
+            if (rooms.Length == 0) return 0;
+            var zoneOf = new Dictionary<string, string>();
+            foreach (Room room in rooms) zoneOf[room.RoomId] = room.ZoneId;
+            System.Func<string, string> zone = id => id != null && zoneOf.TryGetValue(id, out string z) ? z : id;
+
+            var choiceKeys = new HashSet<string>();
+            foreach (SceneNode node in nodes) foreach (Choice c in node.Choices) if (c != null) choiceKeys.Add(c.LabelKey.Key);
+
+            foreach (Room room in rooms)
+            {
+                foreach (RoomLink link in room.Links)
+                {
+                    if (link is Door door)
+                    {
+                        if (!zoneOf.ContainsKey(door.TargetRoomId)) problems += Report($"door in '{room.RoomId}' leads to unknown room '{door.TargetRoomId}'.", door);
+                        if (door.ArrivalPoint == null) problems += Report($"door in '{room.RoomId}' to '{door.TargetRoomId}' has no arrival point.", door);
+                    }
+                    else if (link is ChoiceHotspot hotspot && !choiceKeys.Contains(hotspot.ChoiceKey))
+                    {
+                        problems += Report($"hotspot '{hotspot.name}' in '{room.RoomId}' plays unknown choice '{hotspot.ChoiceKey}'.", hotspot);
+                    }
+                }
+            }
+
+            foreach (SceneNode node in nodes)
+            {
+                if (node is DialogueNode || node is PlacementNode || node is QTENode || node is EpilogueNode) continue;
+                string here = zone(node.RoomId);
+                foreach (Choice c in node.Choices)
+                {
+                    if (c == null || !c.IsMove) continue;
+                    foreach (Outcome o in c.Outcomes)
+                    {
+                        if (o == null || o.Type != OutcomeType.GoToNode || o.TargetNode == null) continue;
+                        string there = zone(o.TargetNode.RoomId);
+                        if (there == here) continue;
+                        bool hasDoor = false;
+                        foreach (Room room in rooms)
+                        {
+                            if (room.ZoneId != here) continue;
+                            foreach (RoomLink link in room.Links) if (link is Door d && zone(d.TargetRoomId) == there) hasDoor = true;
+                        }
+
+                        // Heavy descents (cables, collapsed floor) stay panel choices on purpose.
+                        if (!hasDoor && !c.Heavy) problems += Report($"node '{node.Id}' move '{c.LabelKey.Key}' to zone '{there}' has no door in zone '{here}' (it stays a panel button).", node);
+                    }
+                }
+            }
+
+            return problems;
         }
 
         private static int Report(string message, Object context)

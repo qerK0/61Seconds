@@ -57,7 +57,8 @@ namespace SixtyOne.UI
             if (!started) return;
             float remaining = survival.Remaining;
             int total = Mathf.CeilToInt(remaining);
-            label.text = $"{total / 60:00}:{total % 60:00}";
+            // Tabular digits (monospaced) so the timer never jitters as it counts.
+            label.text = $"<mspace=0.62em>{total / 60:00}</mspace>:<mspace=0.62em>{total % 60:00}</mspace>";
 
             float pulseAt = survival.Config != null ? survival.Config.PulseAtSeconds : 60f;
             float alarmAt = survival.Config != null ? survival.Config.AlarmAtSeconds : 30f;

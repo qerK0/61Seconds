@@ -34,6 +34,7 @@ MonoBehaviour:
       flag: GasOff_F3_10
       member: 0
       health: 0
+      room: 
     conditions:
     - type: 0
       item: {fileID: 11400000, guid: dc9b9c3554d23bf41bf971e122667ed2, type: 2}
@@ -41,6 +42,7 @@ MonoBehaviour:
       flag: 
       member: 0
       health: 0
+      room: 
     failBehaviour: 0
     lockedReasonKey:
       key: 
@@ -84,6 +86,7 @@ MonoBehaviour:
       flag: Flat10Lit
       member: 0
       health: 0
+      room: 
     conditions:
     - type: 0
       item: {fileID: 11400000, guid: 0eb29b0e752b79f4e96399d14d638dfb, type: 2}
@@ -91,6 +94,7 @@ MonoBehaviour:
       flag: 
       member: 0
       health: 0
+      room: 
     failBehaviour: 1
     lockedReasonKey:
       key: f3.flat10.c_flashlight.locked
@@ -134,12 +138,21 @@ MonoBehaviour:
       flag: Flat10Lit
       member: 0
       health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat10_kitchen
     - type: 3
       item: {fileID: 0}
       anyItems: []
       flag: GasOff_F3_10
       member: 0
       health: 0
+      room: 
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
@@ -184,6 +197,14 @@ MonoBehaviour:
       flag: Flat10Lit
       member: 0
       health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat10_living
     conditions: []
     failBehaviour: 0
     lockedReasonKey:

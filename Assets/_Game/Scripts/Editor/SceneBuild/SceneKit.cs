@@ -204,6 +204,194 @@ namespace SixtyOne.Editor
             return descent;
         }
 
+        /// <summary>A door on a wall gap or a floor exit: floor mat (hover highlight), collider, hover arrow + room name.</summary>
+        public static Door Door(Transform room, BuildingLayout.RoomSpec spec, BuildingLayout.DoorSpec door, Transform arrival, RoomNavigator navigator)
+        {
+            bool wall = BuildingLayout.IsWallEdge(door.Edge);
+            Vector2 center = BuildingLayout.EdgeCenter(spec, door.Edge);
+            Vector2 inside = BuildingLayout.EdgeInside(spec, door.Edge);
+
+            var go = new GameObject($"Door_{door.Edge}_to_{door.TargetRoom}");
+            go.transform.SetParent(room, false);
+            go.transform.localPosition = IsoMath.GridToWorld(center.x, center.y);
+
+            // Threshold mat just inside the door: the hover highlight.
+            var mat = new GameObject("Mat");
+            mat.transform.SetParent(room, false);
+            mat.transform.localPosition = IsoMath.GridToWorld(inside.x, inside.y);
+            mat.transform.localScale = new Vector3(0.7f, 0.7f, 1f);
+            mat.transform.SetParent(go.transform, true);
+            SpriteRenderer matRenderer = mat.AddComponent<SpriteRenderer>();
+            matRenderer.sprite = Art.Tile;
+            matRenderer.color = new Color(1f, 0.82f, 0.45f, 0.32f);
+            matRenderer.sortingOrder = DecalOrder;
+
+            if (wall)
+            {
+                // The wall gap itself reads as the opening; the collider covers it from floor to lintel.
+                BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+                box.size = new Vector2(0.62f, 1.15f);
+                box.offset = new Vector2(0f, 0.5f);
+            }
+            else
+            {
+                PolygonCollider2D poly = go.AddComponent<PolygonCollider2D>();
+                Vector3 d = IsoMath.GridToWorld(inside.x, inside.y) - IsoMath.GridToWorld(center.x, center.y);
+                poly.points = new[]
+                {
+                    new Vector2(-0.45f, 0f) + (Vector2)d * 0.5f, new Vector2(0f, 0.25f) + (Vector2)d * 0.5f,
+                    new Vector2(0.45f, 0f) + (Vector2)d * 0.5f, new Vector2(0f, -0.25f) + (Vector2)d * 0.5f
+                };
+            }
+
+            GameObject hover = HoverMarker(go.transform, new Vector3(0f, wall ? 1.35f : 0.6f, 0f), UiKeys.RoomName(door.TargetRoom), out TextMeshPro label);
+
+            var approach = new GameObject("Approach").transform;
+            approach.SetParent(room, false);
+            approach.localPosition = IsoMath.GridToWorld(inside.x, inside.y);
+            approach.SetParent(go.transform, true);
+
+            IsoSorter sorter = go.AddComponent<IsoSorter>();
+            sorter.Mode = IsoSortMode.Static;
+            sorter.Apply();
+
+            Door component = go.AddComponent<Door>();
+            component.ConfigureLink(navigator, approach, matRenderer, hover, label);
+            component.ConfigureDoor(door.TargetRoom, arrival);
+            EditorUtility.SetDirty(component);
+            return component;
+        }
+
+        /// <summary>A person (capsule) or object (block) that plays a node choice; hover shows the choice label.</summary>
+        public static ChoiceHotspot Hotspot(Transform room, BuildingLayout.HotspotSpec spec, RoomNavigator navigator)
+        {
+            var go = new GameObject("Hotspot_" + spec.Name);
+            go.transform.SetParent(room, false);
+            go.transform.localPosition = IsoMath.GridToWorld(spec.Gx, spec.Gy);
+
+            var body = new GameObject("Body");
+            body.transform.SetParent(go.transform, false);
+            SpriteRenderer r = body.AddComponent<SpriteRenderer>();
+            r.sprite = spec.Person ? Art.Character : Art.Block;
+            r.color = spec.Color;
+            Material lit = RoomTiles.LitMaterial;
+            if (lit != null) r.sharedMaterial = lit;
+            float height;
+            if (spec.Person)
+            {
+                body.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
+                height = 0.8f;
+                var shadow = new GameObject("Shadow");
+                shadow.transform.SetParent(go.transform, false);
+                shadow.transform.localScale = new Vector3(0.45f, 0.45f, 1f);
+                SpriteRenderer s = shadow.AddComponent<SpriteRenderer>();
+                s.sprite = Art.Shadow;
+                s.color = new Color(1f, 1f, 1f, 0.5f);
+                s.sortingOrder = DecalOrder;
+            }
+            else
+            {
+                body.transform.localScale = new Vector3(spec.Scale.x, spec.Scale.y, 1f);
+                height = spec.Scale.y;
+            }
+
+            BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(spec.Person ? 0.45f : spec.Scale.x * 0.5f, height);
+            box.offset = new Vector2(0f, height * 0.5f);
+
+            GameObject hover = HoverMarker(go.transform, new Vector3(0f, height + 0.3f, 0f), spec.ChoiceKey, out TextMeshPro label);
+
+            IsoSorter sorter = go.AddComponent<IsoSorter>();
+            sorter.Mode = IsoSortMode.Static;
+            SerializedWire.SetBool(sorter, "includeChildren", true);
+            sorter.Apply();
+
+            // Stand in front of (camera side of) the person or object, not inside it.
+            var approach = new GameObject("Approach").transform;
+            approach.SetParent(room, false);
+            approach.localPosition = IsoMath.GridToWorld(spec.Gx - 0.5f, spec.Gy - 0.5f);
+            approach.SetParent(go.transform, true);
+
+            ChoiceHotspot hotspot = go.AddComponent<ChoiceHotspot>();
+            hotspot.ConfigureLink(navigator, approach, r, hover, label);
+            hotspot.ConfigureHotspot(spec.ChoiceKey, spec.HideWhenGone);
+            EditorUtility.SetDirty(hotspot);
+            return hotspot;
+        }
+
+        /// <summary>Hidden-until-hover arrow + localized label above a link.</summary>
+        private static GameObject HoverMarker(Transform parent, Vector3 localPosition, string labelKey, out TextMeshPro label)
+        {
+            var hover = new GameObject("Hover");
+            hover.transform.SetParent(parent, false);
+            hover.transform.localPosition = localPosition;
+            var arrow = new GameObject("Arrow");
+            arrow.transform.SetParent(hover.transform, false);
+            arrow.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+            SpriteRenderer a = arrow.AddComponent<SpriteRenderer>();
+            a.sprite = Art.Arrow;
+            a.color = new Color(1f, 0.82f, 0.4f, 1f);
+            a.sortingOrder = LabelOrder;
+            label = WorldLabel(hover.transform, new Vector3(0f, 0.28f, 0f), 1.6f, Color.white, bold: true);
+            label.rectTransform.sizeDelta = new Vector2(3f, 0.4f);
+            LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(localized, "key", labelKey);
+            hover.SetActive(false);
+            return hover;
+        }
+
+        /// <summary>An animated family member: shadow + body (run frames, idle breathing), motor, optional follower.</summary>
+        public static FamilyMember AnimatedMember(Transform parent, MemberType type, CharacterArt.Frames frames, MovementConfig movement, SixtyOne.Building.SurvivalController survival)
+        {
+            var go = new GameObject(type.ToString());
+            go.transform.SetParent(parent, false);
+            go.AddComponent<UnityEngine.Rendering.SortingGroup>();
+
+            float height = CharacterArt.PlayerHeight * CharacterArt.TargetHeightRatio(type);
+            var shadow = new GameObject("Shadow");
+            shadow.transform.SetParent(go.transform, false);
+            shadow.transform.localScale = new Vector3(0.55f, 0.55f, 1f) * Mathf.Lerp(0.7f, 1f, height / CharacterArt.PlayerHeight);
+            SpriteRenderer shadowRenderer = shadow.AddComponent<SpriteRenderer>();
+            shadowRenderer.sprite = Art.Shadow;
+            shadowRenderer.color = new Color(1f, 1f, 1f, 0.55f);
+            shadowRenderer.sortingOrder = -1;
+
+            var bodyGo = new GameObject("Body");
+            bodyGo.transform.SetParent(go.transform, false);
+            bodyGo.transform.localScale = Vector3.one * frames.BodyScale;
+            SpriteRenderer body = bodyGo.AddComponent<SpriteRenderer>();
+            body.sprite = frames.Sprites.Length > 0 ? frames.Sprites[Mathf.Clamp(CharacterArt.IdleFrame(type), 0, frames.Sprites.Length - 1)] : Art.Character;
+            Material lit = RoomTiles.LitMaterial;
+            if (lit != null) body.sharedMaterial = lit;
+
+            BoxCollider2D collider = go.AddComponent<BoxCollider2D>();
+            collider.size = new Vector2(height * 0.42f, height);
+            collider.offset = new Vector2(0f, height * 0.5f);
+
+            var marker = new GameObject("Selection");
+            marker.transform.SetParent(go.transform, false);
+            SpriteRenderer ring = marker.AddComponent<SpriteRenderer>();
+            ring.sprite = Art.Ring;
+            ring.color = new Color(1f, 0.9f, 0.2f, 1f);
+            ring.sortingOrder = -2;
+            marker.transform.localScale = new Vector3(0.6f, 0.6f, 1f);
+            marker.SetActive(false);
+
+            IsoSorter sorter = go.AddComponent<IsoSorter>();
+            sorter.Mode = IsoSortMode.Dynamic;
+
+            CharacterMotor motor = go.AddComponent<CharacterMotor>();
+            CharacterAnimator animator = go.AddComponent<CharacterAnimator>();
+            animator.Configure(body, frames.Sprites, CharacterArt.IdleFrame(type), CharacterArt.FacesRight(type), motor, movement, survival);
+
+            FamilyMember member = go.AddComponent<FamilyMember>();
+            SerializedWire.SetInt(member, "type", (int)type);
+            SerializedWire.Set(member, "body", body);
+            SerializedWire.Set(member, "selectionMarker", marker);
+            EditorUtility.SetDirty(animator);
+            return member;
+        }
+
         public static FamilyMember Member(Transform parent, MemberType type, Color color, float scale)
         {
             var go = new GameObject(type.ToString());

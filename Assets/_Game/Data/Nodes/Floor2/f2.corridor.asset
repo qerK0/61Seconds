@@ -34,6 +34,7 @@ MonoBehaviour:
       flag: DogGone
       member: 0
       health: 0
+      room: 
     conditions:
     - type: 0
       item: {fileID: 11400000, guid: 30ad8379863728843b6e8421fc7e8943, type: 2}
@@ -41,6 +42,7 @@ MonoBehaviour:
       flag: 
       member: 0
       health: 0
+      room: 
     failBehaviour: 1
     lockedReasonKey:
       key: f2.corridor.c_food.locked
@@ -104,6 +106,7 @@ MonoBehaviour:
       flag: DogGone
       member: 0
       health: 0
+      room: 
     conditions:
     - type: 0
       item: {fileID: 11400000, guid: 5d95bc2995c84124189eee0d7134ee67, type: 2}
@@ -111,6 +114,7 @@ MonoBehaviour:
       flag: 
       member: 0
       health: 0
+      room: 
     failBehaviour: 1
     lockedReasonKey:
       key: f2.corridor.c_whistle.locked
@@ -164,6 +168,7 @@ MonoBehaviour:
       flag: DogGone
       member: 0
       health: 0
+      room: 
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
@@ -208,6 +213,7 @@ MonoBehaviour:
       flag: DogGone
       member: 0
       health: 0
+      room: 
     conditions: []
     failBehaviour: 0
     lockedReasonKey:

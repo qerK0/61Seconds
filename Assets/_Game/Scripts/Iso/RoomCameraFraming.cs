@@ -5,8 +5,8 @@ using UnityEngine;
 namespace SixtyOne.Iso
 {
     /// <summary>
-    /// Frames the active room inside the screen area the HUD leaves free (choice panel below, bag on the right,
-    /// timer on top). Moves this rig (the camera is its child, so CameraShake and the cinematic tilt still work
+    /// Frames the active room so it fills ~90% (fill) of the playfield: the whole screen minus the slim bag column
+    /// on the right and the timer strip on top (the choice panel is a sliding overlay, not reserved space). Moves this rig (the camera is its child, so CameraShake and the cinematic tilt still work
     /// on the camera's local transform) and sets the un-zoomed orthographic size.
     /// </summary>
     public sealed class RoomCameraFraming : MonoBehaviour
@@ -21,13 +21,17 @@ namespace SixtyOne.Iso
         [SerializeField] private CinematicDirector director;
 
         [Tooltip("Free screen area in viewport coordinates (0..1) the room must fit into.")]
-        [SerializeField] private Rect freeViewport = new Rect(0.02f, 0.41f, 0.83f, 0.42f);
+        [SerializeField] private Rect freeViewport = new Rect(0f, 0f, 0.915f, 0.93f);
 
         [Tooltip("World-unit margin around the room bounds.")]
-        [SerializeField] private float padding = 0.08f;
+        [SerializeField] private float padding = 0f;
 
         [Tooltip("Never zoom in closer than this orthographic size.")]
-        [SerializeField] private float minOrthoSize = 2.2f;
+        [SerializeField] private float minOrthoSize = 1.2f;
+
+        [Tooltip("Share of the free area the room bounds fill (0.9 = 90%).")]
+        [Range(0.5f, 1f)]
+        [SerializeField] private float fill = 0.9f;
 
         private Room framed;
         private float framedAspect;
@@ -51,8 +55,8 @@ namespace SixtyOne.Iso
             float aspect = Mathf.Max(0.1f, targetCamera.aspect);
 
             // Ortho size = half screen height; the free area covers freeViewport of the screen.
-            float sizeForHeight = h / (2f * freeViewport.height);
-            float sizeForWidth = w / (2f * freeViewport.width * aspect);
+            float sizeForHeight = h / (2f * freeViewport.height * fill);
+            float sizeForWidth = w / (2f * freeViewport.width * fill * aspect);
             float size = Mathf.Max(minOrthoSize, sizeForHeight, sizeForWidth);
 
             // Put the bounds centre at the centre of the free area.

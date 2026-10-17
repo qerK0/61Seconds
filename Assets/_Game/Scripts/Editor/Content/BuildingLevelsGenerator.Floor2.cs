@@ -12,6 +12,10 @@ namespace SixtyOne.Editor
     {
         public const string Flat7 = "flat7";
         public const string Flat8 = "flat8";
+        public const string Flat7Hall = "flat7_hall";
+        public const string Flat7Kitchen = "flat7_kitchen";
+        public const string Flat8Living = "flat8_living";
+        public const string Flat8Bedroom = "flat8_bedroom";
         public const string F2CorridorRoom = "f2_corridor";
         public const string F2Stairs = "f2_stairs";
         public const string Street = "street";
@@ -94,6 +98,7 @@ namespace SixtyOne.Editor
             Setup(flat7, F2Flat7, Flat7, 3);
             flat7.AddChoice(C(F2Flat7, "valve").Costs(4f)
                 .ShowWhen(Condition.FlagFalse(GasOffF2))
+                .ShowWhen(Condition.InRoom(Flat7Kitchen))
                 .Then(Outcome.SetFlag(GasOffF2)));
             flat7.AddChoice(C(F2Flat7, "lighter", ChoiceType.Trap)
                 .ShowWhen(Condition.FlagFalse(GasOffF2))

@@ -13,7 +13,7 @@ namespace SixtyOne.World
     /// costs time and stamina; the rope stays tied (removed from the bag); then the target node is entered
     /// (a "descend" room transition plays).
     /// </summary>
-    public sealed class RopeDescentInteractable : MonoBehaviour, IClickable
+    public sealed class RopeDescentInteractable : MonoBehaviour, IClickable, IApproachable
     {
         [Tooltip("Unique id.")]
         [SerializeField] private string id = "rope_descent";
@@ -61,6 +61,9 @@ namespace SixtyOne.World
         public TextKey LockedKey => lockedKey;
 
         private Color unlockedColor = Color.white;
+
+        /// <summary>The player runs here before using it.</summary>
+        public Vector3 ApproachPoint => transform.position;
 
         public bool IsClickable
         {

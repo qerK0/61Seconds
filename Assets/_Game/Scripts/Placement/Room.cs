@@ -21,7 +21,14 @@ namespace SixtyOne.Placement
         [Tooltip("World-space rect the camera must show for this room (floor + walls + tall props).")]
         [SerializeField] private Rect viewBounds = new Rect(-2f, 0f, 4f, 3f);
 
+        [Tooltip("Rooms of one flat that share a node (entry room id). Empty = this room's own id.")]
+        [SerializeField] private string zoneId;
+
+        [Tooltip("Walkable floor in grid cells (click-and-run is clamped to it).")]
+        [SerializeField] private FloorArea floor = new FloorArea(4, 4);
+
         private Anchor[] anchors;
+        private RoomLink[] links;
 
         /// <summary>World rect to frame (relative to the room's position).</summary>
         public Rect ViewBounds
@@ -36,6 +43,25 @@ namespace SixtyOne.Placement
         private HazardProp[] props;
 
         public string RoomId => string.IsNullOrEmpty(roomId) ? name : roomId;
+        public string ZoneId => string.IsNullOrEmpty(zoneId) ? RoomId : zoneId;
+        public FloorArea Floor => floor;
+
+        /// <summary>Doors and choice hotspots in this room.</summary>
+        public RoomLink[] Links
+        {
+            get
+            {
+                if (links == null) links = GetComponentsInChildren<RoomLink>(true);
+                return links;
+            }
+        }
+
+        /// <summary>Nearest walkable world point (margin in grid cells from the walls).</summary>
+        public Vector3 ClampToFloor(Vector3 world, float margin = 0.2f)
+        {
+            Vector3 local = floor.ClampLocal(world - transform.position, margin);
+            return new Vector3(local.x + transform.position.x, local.y + transform.position.y, world.z);
+        }
 
         public Anchor[] Anchors
         {
@@ -82,6 +108,13 @@ namespace SixtyOne.Placement
         {
             Transform t = member == MemberType.Player ? playerSpawn : member == MemberType.Wife ? wifeSpawn : childSpawn;
             return t != null ? t.position : transform.position;
+        }
+
+        /// <summary>Authoring helper for the scene builder.</summary>
+        public void ConfigureLayout(string zone, FloorArea area)
+        {
+            zoneId = zone;
+            floor = area;
         }
 
         public void ResetProps()

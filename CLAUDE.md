@@ -31,7 +31,7 @@ Root folder: `Assets/_Game/`
 Scripts/Core/        GameState, Flags, Inventory, Snapshot, BorrowLedger, KnowledgeSet, GameEvents, routers (ActionCost, InputDelay, ExplorationGate)
 Scripts/Text/        CSV parser, TextDB, TextKey (lore/dialogue/UI strings)
 Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer, ChoiceView
-Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver, Room/RoomSwitcher, RoomTransitionController + TransitionConfig
+Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver, Room/RoomSwitcher, RoomTransitionController + TransitionConfig, Door/ChoiceHotspot (RoomLink) + RoomLinkRules + RoomNavigator, FloorArea, CharacterMotor/PlayerMover/FamilyFollower, CharacterAnimator, MovementConfig
 Scripts/Building/    LevelConfig, BuildingTimer + SurvivalModel (pure), SurvivalController, GasZone, Epilogue*
 Scripts/Prep/        PrepTimer + PrepRules (pure), PrepPhaseNode, PrepPhase (60s pre-quake loot countdown)
 Scripts/Dialogue/    DialogueLine, DialogueNode, DialogueController
@@ -41,7 +41,7 @@ Scripts/World/       WorldInteractable, PickupItem, HiddenItemHotspot
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
 Scripts/Cinematic/   CinematicProfile, CinematicMixer (pure), CinematicDirector, LetterboxBars
 Scripts/Audio/       AudioCue (SO), AudioService
-Scripts/UI/          ChoicePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, QTEView, KeyItemCornerHUD, LoopCounterUI, DeathCard, TipJournal, RewindFX
+Scripts/UI/          ChoicePanel, UITheme, TypewriterText, CollapsiblePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, QTEView, KeyItemCornerHUD, LoopCounterUI, DeathCard, TipJournal, RewindFX
 Scripts/Editor/      Validators, BuildingLevelsGenerator (one partial per floor), test-scene builder (BuildingLayout tables)
 Content/Text/        strings_tr.csv  ← the lore writer edits this
 Data/                Nodes/Floor4..2 Hazards/ Items/ Tips/ Traders/ Recipes/ Audio/ LevelConfig (ScriptableObject assets)
@@ -69,6 +69,15 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 - **Bag state:** `Inventory` (slots), `KeyItemState` (key items), `RoomDropLedger` (dropped items per room), all restored by snapshots. Always add items through `StateOps.TryAddItem(state, id, item.IsKeyItem)` and check ownership with `StateOps.HasItem` (bag or key items). UI and world listen to `InventoryEvents`, never to each other.
 - **QTENode**: context (BreakerWiring / DogEvasion), `QTEConfig` (length 4–6, time per key, total timeout, building-timer penalty), success/fail outcomes, next node. HitStop freezes only the QTE; `Time.timeScale` is never touched.
 - **TraderProfile**: ordered needs + fallback food/water; the trader gives the first need the player lacks.
+- **Rooms, zones and doors:** a flat is several rooms (hall + living + kitchen/bedroom) that share one **zone** (`Room.ZoneId` = the entry room = the node's room). Corridors are single rooms. Rooms change only through world `Door`s (there are no room buttons):
+  - a door inside the zone switches rooms directly and costs `MovementConfig.DoorSeconds`;
+  - a door into another zone plays the current node's move choice that leads there (`RoomLinkRules`), so costs, locks and fatal locks are unchanged;
+  - `ChoiceHotspot`s (NPCs, elevators) play a choice by its label key;
+  - `RoomNavigator` hides the choices that doors and hotspots offer from the panel.
+  - `GameState.CurrentRoomId` is the room actually shown; `Condition.InRoom` puts a choice in a sub-room (Flat 9 fuse box in the hall, Flat 10/7 valves in the kitchen).
+  - New door = one `Link(a, "L3", b, "R1")` line in `BuildingLayout` (edge codes: L/R back-wall gaps, F/G front floor exits).
+- **Click-and-run:** `IsoPicker` routes clicks (after the panic delay) to `PlayerMover`. A floor click runs the player there (straight line, clamped to the room's `FloorArea`); a click on a door, pickup or NPC runs to its approach point, then uses it. Walking costs only real time. Wife and child (`FamilyFollower`) follow with a delay and offset, and snap to the arrival point on a room change. `CharacterAnimator` loops the run frames (`SixtyOne > Art > Import Character Frames`, sorted numerically) and makes the idle breathing in code.
+- **UI theme:** `Data/UI/UITheme.asset` (Inter Regular/SemiBold/Bold SDF from `SixtyOne > Text > Generate Fonts + Theme`) styles everything the scene builder makes; nothing is below 16 px at 1080p. The choice panel is a bottom overlay that sizes to its content. It sinks to a peek strip when it has no buttons or while the player runs, and typewrites dialogue (visual only: DialogueController still pays the line costs).
 - **LevelConfig**: building timer thresholds and texts, prep seconds, bag slots + bedsheet rope, stamina, poison (`GasZone` per room with its valve flag), panic and input delay curves.
 - **PlacementNode** is a SceneNode subtype with a timed phase (opening quake and each aftershock; magnitude + shake per node):
   - the player taps a family member and the valid anchors highlight

@@ -6,7 +6,7 @@ using UnityEngine;
 namespace SixtyOne.World
 {
     /// <summary>An item the player dropped in a room. Clicking it puts it back in the bag (if a slot is free).</summary>
-    public sealed class WorldDroppedItem : MonoBehaviour, IClickable
+    public sealed class WorldDroppedItem : MonoBehaviour, IClickable, IApproachable
     {
         [Tooltip("Dropped item id.")]
         [SerializeField] private string itemId;
@@ -20,6 +20,9 @@ namespace SixtyOne.World
 
         public string ItemId => itemId;
         public string RoomId => roomId;
+
+        /// <summary>The player runs here before using it.</summary>
+        public Vector3 ApproachPoint => transform.position;
 
         public bool IsClickable
         {

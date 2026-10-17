@@ -9,6 +9,8 @@ namespace SixtyOne.Iso
     /// <summary>
     /// Pointer (mouse + touch) -> world clickables via Physics2D.OverlapPoint.
     /// Overlaps resolve to the highest sortingOrder. Ignored when the pointer is over UI.
+    /// Hover goes to IHoverable; clicks (also on empty floor) go through the optional IWorldClickRouter
+    /// (click-and-run) after the panic input delay.
     /// </summary>
     public sealed class IsoPicker : MonoBehaviour
     {
@@ -18,12 +20,18 @@ namespace SixtyOne.Iso
         [Tooltip("Layers to test.")]
         [SerializeField] private LayerMask layers = ~0;
 
+        [Tooltip("Component implementing IWorldClickRouter (click-and-run). Optional: without it targets are clicked directly.")]
+        [SerializeField] private MonoBehaviour router;
+
         /// <summary>Raised after a clickable was clicked.</summary>
         public event Action<IClickable> Clicked;
 
         private readonly List<Collider2D> hits = new List<Collider2D>();
         private readonly List<RaycastResult> uiHits = new List<RaycastResult>();
         private ContactFilter2D filter;
+        private IHoverable hovered;
+
+        private IWorldClickRouter Router => router as IWorldClickRouter;
 
         private void Awake()
         {
@@ -35,30 +43,51 @@ namespace SixtyOne.Iso
         private void Update()
         {
             Pointer pointer = Pointer.current;
-            if (pointer == null || !pointer.press.wasPressedThisFrame || SixtyOne.Core.InputGate.IsBlocked)
-            {
-                return;
-            }
+            if (pointer == null) return;
 
             Vector2 screen = pointer.position.ReadValue();
-            if (IsOverUI(screen))
-            {
-                return;
-            }
+            bool blocked = SixtyOne.Core.InputGate.IsBlocked || IsOverUI(screen);
+            IClickable target = blocked ? null : Pick(screen);
+            SetHover(target as IHoverable);
 
-            IClickable target = Pick(screen);
-            if (target == null)
-            {
-                return;
-            }
+            if (blocked || !pointer.press.wasPressedThisFrame) return;
+
+            Vector3 world = ScreenToWorld(screen);
+            IWorldClickRouter route = Router;
+            if (target == null && (route == null || !route.AcceptsFloorClicks)) return;
 
             // Panic input delay: instant feedback now, the action after the delay (if still valid).
             SixtyOne.Core.InputDelayRouter.Run(() =>
             {
-                if (!target.IsClickable) return;
+                if (SixtyOne.Core.InputGate.IsBlocked) return;
+                if (route != null && route.Route(target, world)) return;
+                if (target == null || !target.IsClickable) return;
                 target.OnClicked();
                 Clicked?.Invoke(target);
             }, screen);
+        }
+
+        private void OnDisable()
+        {
+            SetHover(null);
+        }
+
+        private void SetHover(IHoverable next)
+        {
+            if (ReferenceEquals(next, hovered)) return;
+            if (hovered is UnityEngine.Object o && o != null) hovered.SetHovered(false);
+            hovered = next;
+            hovered?.SetHovered(true);
+        }
+
+        /// <summary>World point under a screen position (z = 0 plane).</summary>
+        public Vector3 ScreenToWorld(Vector2 screenPosition)
+        {
+            Camera cam = worldCamera != null ? worldCamera : Camera.main;
+            if (cam == null) return Vector3.zero;
+            Vector3 world = cam.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, -cam.transform.position.z));
+            world.z = 0f;
+            return world;
         }
 
         /// <summary>Top-most clickable under a screen position, or null.</summary>
@@ -67,7 +96,7 @@ namespace SixtyOne.Iso
             Camera cam = worldCamera != null ? worldCamera : Camera.main;
             if (cam == null) return null;
 
-            Vector3 world = cam.ScreenToWorldPoint(new Vector3(screenPosition.x, screenPosition.y, -cam.transform.position.z));
+            Vector3 world = ScreenToWorld(screenPosition);
             hits.Clear();
             Physics2D.OverlapPoint(world, filter, hits);
 

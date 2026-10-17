@@ -60,6 +60,7 @@ namespace SixtyOne.Editor
             BuildingAssets data = BuildingLevelsGenerator.Generate();
             SceneKit.Art = PlaceholderArt.Generate();
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
+            SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
             Camera camera = BuildCamera(out Transform cameraRig, out Transform cameraPan);
             BuildEventSystem();
@@ -90,22 +91,27 @@ namespace SixtyOne.Editor
             SixtyOne.Prep.PrepPhase prepPhase = systems.AddComponent<SixtyOne.Prep.PrepPhase>();
             EpilogueController epilogue = systems.AddComponent<EpilogueController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
+            RoomNavigator navigator = systems.AddComponent<RoomNavigator>();
+            PlayerMover mover = systems.AddComponent<PlayerMover>();
+            SerializedWire.Set(picker, "router", mover);
 
             var familyRoot = new GameObject("Family").transform;
-            var family = new List<FamilyMember>
+            var family = new List<FamilyMember>();
+            foreach (MemberType type in new[] { MemberType.Player, MemberType.Wife, MemberType.Child })
             {
-                SceneKit.Member(familyRoot, MemberType.Player, new Color(0.35f, 0.6f, 1f, 1f), 1f),
-                SceneKit.Member(familyRoot, MemberType.Wife, new Color(1f, 0.5f, 0.75f, 1f), 0.95f),
-                SceneKit.Member(familyRoot, MemberType.Child, new Color(1f, 0.85f, 0.3f, 1f), 0.65f)
-            };
+                family.Add(SceneKit.AnimatedMember(familyRoot, type, CharacterArt.Import(type), data.Movement, survival));
+            }
 
             var rooms = new List<Room>();
             var practicals = new List<Light2D>();
             TileArt.TileSets tileSets = TileArt.Generate();
-            foreach (BuildingLayout.RoomSpec spec in BuildingLayout.Rooms())
+            List<BuildingLayout.RoomSpec> specs = BuildingLayout.Rooms();
+            foreach (BuildingLayout.RoomSpec spec in specs)
             {
-                rooms.Add(BuildRoom(spec, data, practicals, tileSets, nodePlayer));
+                rooms.Add(BuildRoom(spec, data, practicals, tileSets, nodePlayer, navigator));
             }
+
+            BuildDoors(specs, rooms, navigator);
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
 
@@ -113,6 +119,24 @@ namespace SixtyOne.Editor
             SerializedWire.SetArray(switcher, "rooms", rooms.ToArray());
             SerializedWire.SetArray(switcher, "members", family.ToArray());
             SerializedWire.Set(switcher, "transition", transition);
+
+            SerializedWire.Set(navigator, "gameManager", gameManager);
+            SerializedWire.Set(navigator, "nodePlayer", nodePlayer);
+            SerializedWire.Set(navigator, "rooms", switcher);
+            SerializedWire.Set(navigator, "config", data.Movement);
+            SerializedWire.Set(mover, "gameManager", gameManager);
+            SerializedWire.Set(mover, "player", family[0].GetComponent<CharacterMotor>());
+            SerializedWire.Set(mover, "rooms", switcher);
+            SerializedWire.Set(mover, "config", data.Movement);
+            for (int i = 1; i < family.Count; i++)
+            {
+                FamilyFollower follower = family[i].gameObject.AddComponent<FamilyFollower>();
+                SerializedWire.Set(follower, "member", family[i]);
+                SerializedWire.Set(follower, "motor", family[i].GetComponent<CharacterMotor>());
+                SerializedWire.Set(follower, "leader", family[0].transform);
+                SerializedWire.Set(follower, "rooms", switcher);
+                SerializedWire.Set(follower, "config", data.Movement);
+            }
 
             SerializedWire.Set(dropped, "gameManager", gameManager);
             SerializedWire.Set(dropped, "rooms", switcher);
@@ -135,7 +159,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(prepPhase, "alertCue", data.Cues.Find(c => c != null && c.Id == "cue_afad_alert"));
 
             ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
-                data.Level.MaxInventorySlots, KeyItems(data), out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
+                data.Level.MaxInventorySlots, KeyItems(data), theme, out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
             SerializedWire.Set(qte, "gameManager", gameManager);
             SerializedWire.Set(qte, "view", qteView);
             SerializedWire.Set(qte, "cameraShake", camera.GetComponent<CameraShake>());
@@ -149,6 +173,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(framing, "rooms", switcher);
             SerializedWire.Set(framing, "targetCamera", camera);
             SerializedWire.Set(framing, "director", director);
+            SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
+            // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 90% of it.
+            SerializedWire.SetRect(framing, "freeViewport", new Rect(0f, 0.07f, TestSceneUi.ColumnLeft - 0.01f, 0.83f));
             if (rooms.Count > 0) framing.Frame(rooms[0]);
 
             SerializedWire.Set(dialogue, "gameManager", gameManager);
@@ -162,6 +189,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(nodePlayer, "content", data.Content);
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
+            SerializedWire.Set(nodePlayer, "choiceFilter", navigator);
             SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, qte, epilogue });
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
@@ -176,10 +204,14 @@ namespace SixtyOne.Editor
             return items.ToArray();
         }
 
-        private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer)
+        private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
+            RoomNavigator navigator)
         {
             Room room = SceneKit.NewRoom("Room_" + spec.Id, spec.Id);
             Transform t = room.transform;
+            var extraCells = new List<Vector2Int>();
+            foreach (Vector2 extra in spec.ExtraTiles) extraCells.Add(new Vector2Int(Mathf.FloorToInt(extra.x), Mathf.FloorToInt(extra.y)));
+            room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells));
 
             RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor : tileSets.Home;
             if (tileSet != null && tileSet.FloorTile != null)
@@ -236,6 +268,11 @@ namespace SixtyOne.Editor
                 SceneKit.RopeDescent(t, rope.Id, rope.Gx, rope.Gy, data.Items["bedsheet_rope"], data.Items["child_harness"], data.Nodes[rope.TargetNodeId], nodePlayer);
             }
 
+            foreach (BuildingLayout.HotspotSpec h in spec.Hotspots)
+            {
+                SceneKit.Hotspot(t, h, navigator);
+            }
+
             foreach (BuildingLayout.LightSpec l in spec.Lights)
             {
                 practicals.Add(TestSceneCinematic.PracticalLight(t, l.Name, l.Gx, l.Gy, l.Lift, l.Color, l.Radius));
@@ -244,6 +281,26 @@ namespace SixtyOne.Editor
             SceneKit.SetSpawns(room, spec.PlayerSpawn, spec.WifeSpawn, spec.ChildSpawn);
             SerializedWire.SetRect(room, "viewBounds", RoomTiles.ViewBounds(t, spec));
             return room;
+        }
+
+        /// <summary>Second pass (every room exists): doors with arrival points inside their target rooms.</summary>
+        private static void BuildDoors(List<BuildingLayout.RoomSpec> specs, List<Room> rooms, RoomNavigator navigator)
+        {
+            for (int i = 0; i < specs.Count; i++)
+            {
+                foreach (BuildingLayout.DoorSpec door in specs[i].Doors)
+                {
+                    Room target = rooms.Find(r => r.RoomId == door.TargetRoom);
+                    if (target == null)
+                    {
+                        Debug.LogError($"[TestScene] Door in '{specs[i].Id}' leads to unknown room '{door.TargetRoom}'.");
+                        continue;
+                    }
+
+                    Transform arrival = SceneKit.Point(target.transform, "Arrive_from_" + specs[i].Id, door.Arrival);
+                    SceneKit.Door(rooms[i].transform, specs[i], door, arrival, navigator);
+                }
+            }
         }
 
         private static Camera BuildCamera(out Transform rig, out Transform pan)

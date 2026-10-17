@@ -59,7 +59,7 @@ namespace SixtyOne.UI
 
             float remaining = prep.Remaining;
             int total = Mathf.CeilToInt(remaining);
-            label.text = $"{total / 60}:{total % 60:00}";
+            label.text = $"<mspace=0.62em>{total / 60}</mspace>:<mspace=0.62em>{total % 60:00}</mspace>";
             label.color = remaining <= tickFrom ? tickColor : normalColor;
         }
 

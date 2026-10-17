@@ -4,6 +4,98 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 08:59] LOCAL — Visual + interaction overhaul: full-screen rooms, multi-room flats, doors + click-and-run, animated family, Inter + UITheme
+### Done
+- **Rooms fill the screen.**
+  - `RoomCameraFraming` fits each room to 90% of the playfield (the screen left of the HUD column, above the panel peek strip, below the timer).
+  - The HUD is compact overlays: timer top-centre (Bold, tabular digits), loop + Notes top-left, and a slim right column (key items, 6 bag slots, Drop / Tie rope, a thin stamina bar). The column collapses to a tab (`CollapsiblePanel`, remembered in PlayerPrefs).
+- **Choice panel is a bottom overlay.**
+  - It sizes to its content and slides in only when it has something to show.
+  - It sinks to a title-only peek strip when it has no buttons (after a reading delay) or while the player runs; click the strip to reopen it.
+  - Dialogue typewrites at 90 cps. Clicking completes the line, and the first click on "Devam" while text is still typing only completes it. Per-line time costs are untouched (DialogueController pays them on advance).
+- **Multi-room flats (24 rooms, was 14).** Each flat is entrance hall + living room + kitchen/bedroom, sharing one zone (= one node):
+  - Flat 11 already had 4 rooms; doors were added.
+  - Flat 12: hall / living / bedroom. Flat 9: hall (fuse box) / living (balcony + rope) / kitchen (hanging cables). Flat 10: hall / kitchen (stove) / living (collapsed floor + hidden tape). Flat 7: living (placement) / hall / kitchen (stove). Flat 8: hall / living (hidden water) / bedroom.
+  - Corridors stay single rooms, with one door per flat plus the stairs exit.
+  - Sub-room choices use the new `Condition.InRoom`: Flat 9 repair in the hall, cables in the kitchen; Flat 10 valve in the kitchen, hole in the living room; Flat 7 valve in the kitchen.
+- **Doors replace the room buttons.**
+  - `Door` sits on a wall gap or floor exit. Hover shows a brighter threshold mat, an arrow and the room name (dimmed when unavailable).
+  - Inside a flat a door switches rooms for `DoorSeconds` = 1s. Into another zone it plays the node's move choice that leads there (`RoomLinkRules`), so move costs, locks, fatal locks and flags behave exactly as before. Those choices are hidden from the panel.
+  - `ChoiceHotspot`s: Hasan (talk), Cemil (trader), the F4 and F2-stairs elevators (trap). Hasan disappears after his gift.
+- **Click-and-run.**
+  - `IsoPicker` gained hover and routing: after the panic input delay, `PlayerMover` runs to a floor point (straight line, clamped to the room's `FloorArea` diamond plus balcony cells) or to a target's approach point, then uses it.
+  - Placement / QTE / dialogue clicks are unchanged.
+  - Wife and child follow (`FamilyFollower`: delay + offset, injured = slower) and snap around the arrival point on a room change.
+- **Character animation.** `SixtyOne > Art > Import Character Frames` (re-runnable): numeric sort, Sprite, Max 512, compressed, no mips, one shared PPU (1690), pivot bottom-centre at the feet (lowest opaque row over all frames).
+  - `CharacterAnimator`: run loop at 12 fps × speed ratio, flipX by direction (the art faces right).
+  - Idle holds the most neutral frame (checked on a contact sheet) and breathes: scaleY 1.0↔1.02, 0.008u bob, 1.6s period, random phase, up to 2.2× faster at full panic.
+  - Soft shadow under the feet; SortingGroup + IsoSorter; Sprite-Lit-Default material.
+- **Text.**
+  - Inter 4.1 (OFL) downloaded from the official rsms/inter GitHub release into `Art/Fonts/` (+ license).
+  - `SixtyOne > Text > Generate Fonts + Theme` bakes static SDF assets (Regular / SemiBold / Bold, ASCII + full Turkish + punctuation, 154 glyphs, no missing characters) with a dynamic Inter fallback. It makes Inter the TMP default font and writes `Data/UI/UITheme.asset`.
+  - Buttons are rounded semi-transparent panels with hover / pressed tints and an accent left bar (muted when locked). Locked choices put the reason on their own line. Small labels are all-caps and letter-spaced. Everything is ≥ 16 px at 1080p (enforced by the builder).
+- **Validator:** new `CheckDoors`: door targets and arrival points exist, hotspots name real choices, and every non-heavy cross-zone move has a door.
+- **Results:**
+  - Validate Content: 25 nodes, 0 problems. Text > Validate: 335 referenced, 0 missing / empty / unused.
+  - EditMode **124/124** (114 + 10 new `NavigationTests`). No existing test referenced the room buttons, so none needed changes.
+
+### Frame counts and final values
+- Frames: Mehmet (player) **11**, wife (anne) **10**, child (çocuk) **9**.
+- Idle frames: Mehmet (3), anne (10), çocuk (3).
+- Heights: shared PPU 1690. The player is 0.90u tall (1.0× body scale); wife 0.846u (×0.971); child 0.675u (×1.311).
+  - The source art is not drawn to scale (wife ~3% taller than the player, child 0.59×), so the body transform corrects it. The PPU stays shared and the files are not resized.
+- **MovementConfig:** runSpeed 2.4 u/s, followers ×1.1, injured ×0.75, floorMargin 0.25 cells, wife delay 0.2s / offset (0.38, 0.1), child delay 0.35s / offset (−0.32, 0.12), followStart 0.35u, doorSeconds 1, runFps 12, breath 1.6s / +2% / 0.008u, panic ×2.2.
+- **UITheme:**
+  - Sizes: timer 64, title 30, speaker 26, body 25 (+12 line spacing), choice 23, small 18, label 16 (letter spacing 8).
+  - Colours: accent #FFC24A, panel 6% grey @ 86%.
+  - Choice row 56 px, typewriter 90 cps, slide 0.22s.
+- **RoomCameraFraming:** fill 0.9, free viewport (0, 0.07, 0.89, 0.83), min ortho 1.2.
+
+### Files created / changed
+- Runtime (new):
+  - `Placement/`: `Door`, `ChoiceHotspot`, `RoomLink`, `RoomLinkRules` (pure), `RoomNavigator`, `FloorArea` (pure), `CharacterMotor`, `PlayerMover`, `FamilyFollower`, `CharacterAnimator`, `MovementConfig`
+  - `Iso/IWorldClickRouter`, `Nodes/IChoiceFilter`
+  - `UI/`: `UITheme`, `TypewriterText`, `CollapsiblePanel`
+- Runtime (changed):
+  - `IsoPicker` (hover, routing, floor clicks)
+  - `RoomSwitcher` (zones, pending arrival, local switch, `CurrentRoomId` = shown room)
+  - `Room` (zone, floor area, links); `IRoomPresenter` + `NodePlayer` (rewind keeps the sub-room; choice filter)
+  - `Condition` / `ConditionEvaluator` (`InRoom`); `FamilyMember` (stops its motor on snap)
+  - `ChoicePanel` / `ChoiceButton` (overlay, fit, peek, typewriter, accent bar); timer displays (tabular digits)
+  - `RoomCameraFraming`; `WorldInteractable` / `RopeDescent` / `WorldDroppedItem` (approach points); `UiKeys`
+- Editor:
+  - `BuildingLayout` (rewritten: zones, doors via `Link` / `OneWay`, hotspots)
+  - `SceneKit` (Door, Hotspot, AnimatedMember); `TestSceneBuilder` (wiring, door second pass); `TestSceneUi` (rewritten layout, theme)
+  - `UiFactory` (themed); `PlaceholderArt` (shadow, rounded 9-slice, arrow); `WorldLabelStyle` (theme font)
+  - new `Art/CharacterArt`, new `Text/FontAssetsGenerator`
+  - `BuildingLevelsGenerator` (MovementConfig asset, sub-room ids, InRoom choices); `ContentValidator` (CheckDoors)
+- Content: `strings_tr.csv` gains 28 keys (24 `room.*` door labels, `ui.door.unavailable`, `ui.not_now`, `ui.bag.collapse/expand`), and two stale strings were fixed ("Antre", "Antreye koş").
+- Assets:
+  - `Art/Fonts/*` (Inter TTFs, SDF assets, OFL license); `Art/char/RUN` import settings; `Data/UI/UITheme.asset`; `Data/MovementConfig.asset`
+  - `TMP Settings.asset` (default font = Inter); the rebuilt `Test_Building.unity`; regenerated node assets
+- Tests: `Tests/EditMode/NavigationTests.cs`; docs: `CLAUDE.md`.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Nothing mandatory: Build Test Scene runs fonts / theme / frame import and reproduces everything. After pulling, run SixtyOne > Generate Building Levels then Build Test Scene if anything looks stale.
+- [ ] Optional: play once with a real mouse to feel the hover markers, the run speed (2.4 u/s) and the panel peek timing (the playthrough here was scripted).
+
+### Not verified / risks
+- **Playthrough was scripted, not hand-played.** MCP cannot send pointer clicks, so the run used `execute_code` calls to `Door.OnClicked`, `PlayerMover.Route`, hotspots, `NodePlayer.Choose`, the panel buttons, anchors and `QTEController.OnKey`.
+  - Because MCP round-trips take seconds, the test topped up `PrepTime` / `BuildingTime` and extended placement timers. Real mouse hover and click picking was not exercised by hand.
+  - Route covered: prep (hall wrench + flashlight, kitchen valve + gloves) → quake → bedroom sheets → Sevim → Hasan (hotspot) → Flat 12 (3 rooms, tie rope, harness) → stairs → F3 aftershock → Cemil (gloves) → Flat 9 fuse QTE → balcony rope → F2 aftershock → Flat 7 kitchen valve → dog (food) → stairs → street epilogue.
+- **Props never block the run line** (no pathfinding at all); targets are only clamped to the floor diamond.
+- **Placeholder art:** doors are wall gaps + a threshold mat (no door sprite); NPCs are capsule placeholders.
+- **Screenshot artefact:** some screenshots taken during a room fade show no HUD (a capture artefact); the HUD is present on the next frame.
+- **Editor auto-edits again:** `ProjectSettings/VersionControlSettings` (→ Unity Version Control) and `TimeManager` (serialization upgrade). Both were reverted and are not committed.
+
+### Next suggested step
+- Hand-play once with the mouse; tune `runSpeed` / `DoorSeconds` / peek delay by feel; have the artist deliver door-frame and NPC sprites (swap them in `SceneKit.Door` / `Hotspot`).
+
+### Screenshots (local only, `Temp/Screens/`, not committed)
+- before_prep, after_prep_salon_hd, running_family, kitchen_run_to_drawer, f4_prep_kitchen2, f4_flat11_hall, f4_flat11_bedroom2, f4_sevim_dialogue-1, f4_sevim_choices, f4_corridor_hasan, dialogue_hasan, f4_flat12_living, bag_rope_tied, f4_corridor, f3_corridor_aftershock, f3_flat9_hall-1, qte_breaker, f3_flat9_living-1, f2_flat7_placement, f2_corridor, f2_stairs, f2_epilogue_street, panel_fit_collapsed_bag, rooms_sheet.jpg (all 24 rooms), run_sheet.png (frame contact sheet)
+
+---
+
 ## [2026-10-17 06:23] LOCAL — Verified the cloud bag/key-item/rope/transition/QTE merge in Unity; restored the child rule on the rope descent; fixed an F3 gas soft-lock; tuned the QTEs
 ### Done
 - **Compile:** 0 errors on the first import. All the first-time APIs were fine: `InputAction(name, type, binding)`, `anchoredPosition`, `FillMethod.Horizontal`, pointer enter/exit, `GetComponentInParent<T>(bool)`, and the TileArt tuple-foreach. No asmdef changes needed.

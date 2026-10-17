@@ -60,5 +60,14 @@ namespace SixtyOne.Text
         public const string QteDogTitle = "ui.qte.dog";
         public const string QteMiss = "ui.qte.miss";
         public const string QteTimeout = "ui.qte.timeout";
+
+        // Doors, hotspots and the collapsible HUD.
+        public const string DoorUnavailable = "ui.door.unavailable";
+        public const string NotNow = "ui.not_now";
+        public const string BagCollapse = "ui.bag.collapse";
+        public const string BagExpand = "ui.bag.expand";
+
+        /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
+        public static string RoomName(string roomId) => "room." + roomId;
     }
 }

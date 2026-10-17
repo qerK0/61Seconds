@@ -28,6 +28,7 @@ namespace SixtyOne.Editor
         public SixtyOne.Items.TraderProfile Trader;
         public SixtyOne.Items.RecipeBook RecipeBook;
         public SixtyOne.Placement.TransitionConfig Transition;
+        public SixtyOne.Placement.MovementConfig Movement;
         public SixtyOne.QTE.QTEConfig QteBreaker;
         public SixtyOne.QTE.QTEConfig QteDog;
         public List<SixtyOne.Items.Recipe> Recipes = new List<SixtyOne.Items.Recipe>();
@@ -55,6 +56,8 @@ namespace SixtyOne.Editor
         public const string Flat11Bedroom = "flat11_bedroom";
         public const string F4Corridor = "f4_corridor";
         public const string Flat12 = "flat12";
+        public const string Flat12Living = "flat12_living";
+        public const string Flat12Bedroom = "flat12_bedroom";
         public const string F3Corridor = "f3_corridor";
 
         // Flags.
@@ -152,6 +155,10 @@ namespace SixtyOne.Editor
 
             result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
             result.Transition.Configure(0.35f, 0.6f, 0.6f, 1.2f, door, footsteps, descend);
+
+            // Click-and-run: 2.4 u/s run, 1 s per door inside a flat, 12 fps run cycle, 1.6 s idle breath.
+            result.Movement = Asset<SixtyOne.Placement.MovementConfig>(DataRoot + "/MovementConfig.asset");
+            result.Movement.Configure(2.4f, 1f, 12f, 1.6f);
 
             // Tuned for ~60-70% first-try success (Monte Carlo: ~0.62s median 4-choice reaction, +0.35s to orient on
             // the first key, 2.5% wrong keys). Breaker ~65%; dog ~64% with longer sequences and a higher penalty.

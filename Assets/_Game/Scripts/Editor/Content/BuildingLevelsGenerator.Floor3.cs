@@ -11,6 +11,10 @@ namespace SixtyOne.Editor
     {
         public const string Flat9 = "flat9";
         public const string Flat10 = "flat10";
+        public const string Flat9Living = "flat9_living";
+        public const string Flat9Kitchen = "flat9_kitchen";
+        public const string Flat10Kitchen = "flat10_kitchen";
+        public const string Flat10Living = "flat10_living";
 
         public const string F3Aftershock = "f3.aftershock";
         public const string F3CorridorNode = "f3.corridor";
@@ -101,6 +105,7 @@ namespace SixtyOne.Editor
             Setup(flat9, F3Flat9, Flat9, 2);
             flat9.AddChoice(C(F3Flat9, "repair")
                 .ShowWhen(Condition.FlagFalse(PowerCutF3))
+                .ShowWhen(Condition.InRoom(Flat9))
                 .Require(Condition.HasAnyItem(Item("gloves"), Item("insulated_grip")))
                 .Require(Condition.HasItem(Item("tape")))
                 .WhenLocked(FailBehaviour.ShowLockedFatal, Locked(F3Flat9, "repair"))
@@ -111,6 +116,7 @@ namespace SixtyOne.Editor
                 .Then(Outcome.GoTo(fuse)));
             flat9.AddChoice(C(F3Flat9, "cables").Costs(12f, 25f, isHeavy: true, move: true)
                 .ShowWhen(Condition.FlagTrue(PowerCutF3))
+                .ShowWhen(Condition.InRoom(Flat9Kitchen))
                 .Require(Condition.HasItem(Item("child_harness")))
                 .WhenLocked(FailBehaviour.ShowLocked, Locked(F3Flat9, "cables"))
                 .Then(Outcome.GoTo(f2Arrival)));
@@ -133,10 +139,12 @@ namespace SixtyOne.Editor
                 .Then(Outcome.SetFlag(Flat10Lit)));
             flat10.AddChoice(C(F3Flat10, "valve").Costs(5f)
                 .ShowWhen(Condition.FlagTrue(Flat10Lit))
+                .ShowWhen(Condition.InRoom(Flat10Kitchen))
                 .ShowWhen(Condition.FlagFalse(GasOffF3))
                 .Then(Outcome.SetFlag(GasOffF3)));
             flat10.AddChoice(C(F3Flat10, "hole").Costs(10f, 20f, isHeavy: true, move: true)
                 .ShowWhen(Condition.FlagTrue(Flat10Lit))
+                .ShowWhen(Condition.InRoom(Flat10Living))
                 .Then(Outcome.GoTo(f2Arrival)));
             flat10.AddChoice(C(F3Flat10, "back").Move(2f).Then(Outcome.GoTo(corridor)));
         }

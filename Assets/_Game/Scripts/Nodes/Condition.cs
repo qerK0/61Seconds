@@ -14,7 +14,9 @@ namespace SixtyOne.Nodes
         FlagFalse,
         MemberState,
         /// <summary>At least one of the listed items is in the bag.</summary>
-        HasAnyItem
+        HasAnyItem,
+        /// <summary>The player is in this room (sub-rooms of a flat share one node; GameState.CurrentRoomId).</summary>
+        InRoom
     }
 
     /// <summary>A single requirement on the game state (item, flag or member health).</summary>
@@ -39,6 +41,9 @@ namespace SixtyOne.Nodes
         [Tooltip("Required health for MemberState.")]
         [SerializeField] private MemberHealth health;
 
+        [Tooltip("Room id for InRoom.")]
+        [SerializeField] private string room;
+
         public ConditionType Type => type;
         public Item Item => item;
         public string ItemId => item != null ? item.Id : null;
@@ -46,6 +51,7 @@ namespace SixtyOne.Nodes
         public IReadOnlyList<Item> AnyItems => anyItems;
         public MemberType Member => member;
         public MemberHealth Health => health;
+        public string Room => room;
 
         public Condition()
         {
@@ -57,5 +63,6 @@ namespace SixtyOne.Nodes
         public static Condition FlagFalse(string flag) => new Condition { type = ConditionType.FlagFalse, flag = flag };
         public static Condition HasAnyItem(params Item[] items) => new Condition { type = ConditionType.HasAnyItem, anyItems = new List<Item>(items) };
         public static Condition MemberIs(MemberType member, MemberHealth health) => new Condition { type = ConditionType.MemberState, member = member, health = health };
+        public static Condition InRoom(string roomId) => new Condition { type = ConditionType.InRoom, room = roomId };
     }
 }

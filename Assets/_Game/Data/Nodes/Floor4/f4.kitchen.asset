@@ -34,6 +34,7 @@ MonoBehaviour:
       flag: GasOff
       member: 0
       health: 0
+      room: 
     conditions:
     - type: 0
       item: {fileID: 11400000, guid: a1d15fd41db48b741a2fcd7c05297a9d, type: 2}
@@ -41,6 +42,7 @@ MonoBehaviour:
       flag: 
       member: 0
       health: 0
+      room: 
     failBehaviour: 1
     lockedReasonKey:
       key: f4.kitchen.c_valve.locked
@@ -84,6 +86,7 @@ MonoBehaviour:
       flag: GasOff
       member: 0
       health: 0
+      room: 
     conditions: []
     failBehaviour: 0
     lockedReasonKey:

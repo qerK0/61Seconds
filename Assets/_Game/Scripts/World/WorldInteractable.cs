@@ -12,7 +12,7 @@ namespace SixtyOne.World
     /// Using it subtracts its time cost from the building timer. One-shot uses are stored as a Used_ flag so
     /// rewinds restore them. Borrowed items are recorded in the BorrowLedger ("ödünç al").
     /// </summary>
-    public class WorldInteractable : MonoBehaviour, IClickable
+    public class WorldInteractable : MonoBehaviour, IClickable, IApproachable
     {
         [Tooltip("Unique id (used for the Used_ flag).")]
         [SerializeField] private string id;
@@ -64,6 +64,8 @@ namespace SixtyOne.World
         private Color baseColor = Color.white;
         private bool highlighted;
 
+        /// <summary>The player runs here before using it (the mover clamps it onto the floor).</summary>
+        public Vector3 ApproachPoint => transform.position;
         public string Id => string.IsNullOrEmpty(id) ? name : id;
         public TextKey LabelKey => labelKey;
         public float TimeCost => timeCost;

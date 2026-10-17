@@ -15,6 +15,12 @@ namespace SixtyOne.Editor
         public Sprite Ring;
         public Sprite Dot;
         public Sprite Lock;
+        /// <summary>Soft ellipse under characters' feet.</summary>
+        public Sprite Shadow;
+        /// <summary>Rounded rectangle, 9-sliced (UI panels and buttons).</summary>
+        public Sprite Rounded;
+        /// <summary>Upward chevron (door hover).</summary>
+        public Sprite Arrow;
     }
 
     /// <summary>Writes simple shapes to Assets/_Game/Art/Placeholder and imports them as sprites.</summary>
@@ -34,12 +40,15 @@ namespace SixtyOne.Editor
                 Character = Make("ph_character", 48, 96, new Vector2(0.5f, 0f), Capsule),
                 Ring = Make("ph_ring", 96, 48, new Vector2(0.5f, 0.5f), Ring),
                 Dot = Make("ph_dot", 48, 48, new Vector2(0.5f, 0.5f), Dot),
-                Lock = Make("ph_lock", 32, 32, new Vector2(0.5f, 0.5f), Lock)
+                Lock = Make("ph_lock", 32, 32, new Vector2(0.5f, 0.5f), Lock),
+                Shadow = Make("ph_shadow", 128, 64, new Vector2(0.5f, 0.5f), Shadow),
+                Rounded = Make("ph_rounded", 64, 64, new Vector2(0.5f, 0.5f), Rounded, new Vector4(22f, 22f, 22f, 22f)),
+                Arrow = Make("ph_arrow", 48, 48, new Vector2(0.5f, 0.5f), Arrow)
             };
             return sprites;
         }
 
-        private static Sprite Make(string fileName, int width, int height, Vector2 pivot, Func<float, float, float, float, Color> shader)
+        private static Sprite Make(string fileName, int width, int height, Vector2 pivot, Func<float, float, float, float, Color> shader, Vector4 border = default)
         {
             string path = $"{Folder}/{fileName}.png";
             var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
@@ -72,6 +81,7 @@ namespace SixtyOne.Editor
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
             settings.spritePivot = pivot;
+            settings.spriteBorder = border;
             importer.SetTextureSettings(settings);
             importer.SaveAndReimport();
 
@@ -117,6 +127,36 @@ namespace SixtyOne.Editor
             float d = Mathf.Sqrt(Mathf.Pow((u - 0.5f) * 2f, 2f) + Mathf.Pow((v - 0.5f) * 2f, 2f));
             if (d > 1f) return Color.clear;
             return d > 0.82f ? new Color(0.2f, 0.2f, 0.2f, 1f) : Color.white;
+        }
+
+        private static Color Shadow(float u, float v, float w, float h)
+        {
+            float d = Mathf.Sqrt(Mathf.Pow((u - 0.5f) * 2f, 2f) + Mathf.Pow((v - 0.5f) * 2f, 2f));
+            float a = Mathf.Clamp01(1f - d);
+            return new Color(0f, 0f, 0f, a * a * (3f - 2f * a));
+        }
+
+        private static Color Rounded(float u, float v, float w, float h)
+        {
+            // 64 px square, 18 px corner radius, 1 px anti-aliased edge.
+            const float radius = 18f;
+            float px = u * w;
+            float py = v * h;
+            float cx = Mathf.Clamp(px, radius, w - radius);
+            float cy = Mathf.Clamp(py, radius, h - radius);
+            float dist = Vector2.Distance(new Vector2(px, py), new Vector2(cx, cy));
+            float a = Mathf.Clamp01(radius - dist + 0.5f);
+            return new Color(1f, 1f, 1f, a);
+        }
+
+        private static Color Arrow(float u, float v, float w, float h)
+        {
+            // Upward chevron: two strokes meeting at the top centre.
+            float x = Mathf.Abs(u - 0.5f);
+            float target = 0.78f - x * 1.1f;
+            float thickness = 0.13f;
+            bool stroke = x < 0.42f && Mathf.Abs(v - target) < thickness;
+            return stroke ? Color.white : Color.clear;
         }
 
         private static Color Lock(float u, float v, float w, float h)
