@@ -13,7 +13,7 @@ Linear earthquake-escape game. The player, their **wife** and their **child** li
 - Floor 3: aftershock placement on arrival; a needs-aware trader in the corridor; Flat 9 fuse box wiring as a WASD QTE (needs insulated gloves or the crafted grip + tape, else electrocution) which unlocks the cable descent (needs the child harness), plus a balcony where the bedsheet rope climbs down to Flat 7; Flat 10 (dark, gas leak, lighter = explosion, flashlight is safe, collapsed floor = alternative way down).
 - Floor 2: strong aftershock placement in Flat 7 (gas leak); a frightened dog blocks the corridor (feed it, use the whistle, or slip past with a WASD QTE whose failures cost building time and re-roll); stairs → street → epilogue (family state, borrow line, loop count).
 
-**Survival systems.** Stamina (food/water restore it; it drains over time and per heavy action; at 0 heavy actions are locked and everything costs more time), poison (gas rooms with an open valve; darkening + vignette; max = death with a gas tip; the wet cloth halves it), panic (rises as the timer falls, when poisoned and on aftershocks; above `panicDelayThreshold` clicks get an input delay up to `maxInputDelay`, with instant visual feedback; Reduce Effects forces 0), crafting (two bag items → one, order-independent; 3 bedsheets → 1 bedsheet rope), a 6-slot bag (`LevelConfig.MaxInventorySlots`) with Drop (the item stays in that room and can be picked up again), key items (flashlight, whistle: no bag slot, not droppable, shown in the corner HUD), WASD quick-time events (random W/A/S/D sequence per attempt, never 3 identical keys in a row; a miss costs building time and re-rolls), hidden items (invisible hotspots in the room art; optional sparkle in later loops or after N seconds).
+**Survival systems.** Stamina (food/water restore it; it drains over time and per heavy action; at 0 heavy actions are locked and everything costs more time), poison (gas rooms with an open valve; darkening + vignette; max = death with a gas tip; the wet cloth halves it), panic (rises as the timer falls, when poisoned and on aftershocks; above `panicDelayThreshold` clicks get an input delay up to `maxInputDelay`, with instant visual feedback; Reduce Effects forces 0), crafting (two bag items → one, order-independent; 3 bedsheets → 1 bedsheet rope), an 8-slot bag (`LevelConfig.MaxInventorySlots`; the pixel-art backpack's 2x4 compartment) with Drop (the item stays in that room and can be picked up again), key items (flashlight, whistle: no bag slot, not droppable, kept in the backpack's side pockets: left = flashlight, right = whistle; a pocket click plays the node's choice that needs the item, toggles the flashlight (`FlashlightOff` flag) or shows the name), WASD quick-time events (random W/A/S/D sequence per attempt, never 3 identical keys in a row; a miss costs building time and re-rolls), hidden items (invisible hotspots in the room art; optional sparkle in later loops or after N seconds).
 
 Choices work like Henry Stickmin. A wrong choice ("what NOT to do in an earthquake") causes a death, a visible LOOP counter goes up, and each death shows a one-line real earthquake safety tip ("Deprem Notu"). Tips are collected across loops. **The loop has two layers:**
 - **Micro rewind:** a wrong placement or choice rewinds to the last decision node.
@@ -41,7 +41,7 @@ Scripts/World/       WorldInteractable, PickupItem, HiddenItemHotspot
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
 Scripts/Cinematic/   CinematicProfile, CinematicMixer (pure), CinematicDirector, LetterboxBars
 Scripts/Audio/       AudioCue (SO), AudioService
-Scripts/UI/          ChoicePanel, UITheme, TypewriterText, CollapsiblePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, QTEView, KeyItemCornerHUD, LoopCounterUI, DeathCard, TipJournal, RewindFX
+Scripts/UI/          ChoicePanel, UITheme, TypewriterText, CollapsiblePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, QTEView, KeyItemPocket (KeyItemCornerHUD only for future key items), SubtitleView, PauseMenu, LedClock, LoopCounterUI, DeathCard, TipJournal, RewindFX
 Scripts/Editor/      Validators, BuildingLevelsGenerator (one partial per floor), test-scene builder (BuildingLayout tables)
 Content/Text/        strings_tr.csv  ← the lore writer edits this
 Data/                Nodes/Floor4..2 Hazards/ Items/ Tips/ Traders/ Recipes/ Audio/ LevelConfig (ScriptableObject assets)
@@ -52,7 +52,7 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 
 ### Core concepts
 - **GameState** is plain C#, owned by a `GameManager` MonoBehaviour. It holds:
-  - `Inventory` (max 4 item ids), `Flags` (string → bool, e.g. `GasOff`, `PowerCut_F3`, `LeftNote`, `DogGone`)
+  - `Inventory` (8 item ids by default), `Flags` (string → bool, e.g. `GasOff`, `PowerCut_F3`, `LeftNote`, `DogGone`)
   - the family members' states and anchor positions, the current node id and floor stage
   - `BuildingTime`, `Stamina`, `Poison` and the `BorrowLedger` (all restored by snapshots)
   - `LoopCount`, the collected tip ids, revealed anchor labels and the `KnowledgeSet` (these persist across every rewind)

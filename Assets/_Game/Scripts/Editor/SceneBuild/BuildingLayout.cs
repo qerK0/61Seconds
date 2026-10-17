@@ -305,7 +305,7 @@ namespace SixtyOne.Editor
             // Corridor: one door per flat, the stairs down (front-left exit), the elevator (trap) and Hasan Amca.
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor);
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
-            corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 6.6f, 1.0f, 1.0f, 1.6f, Metal));
+            corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 7.0f, 1.5f, 1.0f, 1.6f, Metal));
             corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f)));
             // Sevim Teyze: decorative (her dialogue starts on the way out of Flat 11), idle-animated.
             corridor.Hotspots.Add(new HotspotSpec { Name = "Sevim", Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim" });
@@ -410,7 +410,8 @@ namespace SixtyOne.Editor
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
             corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
-            corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, Metal));
+            // Elevators sit flush on the back-right wall line, centred on a wall segment (DoorArt fits them to it).
+            corridor.Props.Add(P(null, "Elevator", 7.0f, 1.5f, 0f, 1.0f, 1.6f, Metal));
 
             // Flat 8: empty flat (one hidden item).
             RoomSpec f8Hall = Art(Room(BuildingLevelsGenerator.Flat8, 3, 3, new Color(0.68f, 0.64f, 0.6f, 1f)), RoomArt.Home);
@@ -424,7 +425,7 @@ namespace SixtyOne.Editor
             RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.DamagedCorridor);
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
             stairs.Props.Add(P(null, "StairsDown", 1.5f, 4.3f, 0f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
-            stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 2.7f, 1.5f, 0.6f, 1.6f, Metal));
+            stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 3.0f, 1.5f, 0.6f, 1.6f, Metal));
 
             RoomSpec street = Art(Room(BuildingLevelsGenerator.Street, 6, 4, new Color(0.4f, 0.42f, 0.45f, 1f)), RoomArt.Corridor, walls: false);
             street.Lights.Add(L("StreetLamp", 5.0f, 3.0f, 2.0f, 3.5f, new Color(0.8f, 0.85f, 1f, 1f)));

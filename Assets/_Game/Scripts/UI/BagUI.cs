@@ -11,7 +11,7 @@ using UnityEngine.UI;
 namespace SixtyOne.UI
 {
     /// <summary>
-    /// The bag (LevelConfig.MaxInventorySlots, 6 by default). Click a slot to select it; click it again to use it
+    /// The bag (LevelConfig.MaxInventorySlots, 8 by default). Click a slot to select it; click it again to use it
     /// (food, water, first aid; a bedsheet ties the rope once there are enough); click another slot to combine
     /// the two (crafting recipes). With a slot selected, Drop leaves the item in the current room (it can be
     /// picked up again there). Key items never appear here (see KeyItemCornerHUD). Flashes red when full.

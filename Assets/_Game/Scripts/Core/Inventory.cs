@@ -2,10 +2,10 @@ using System.Collections.Generic;
 
 namespace SixtyOne.Core
 {
-    /// <summary>The bag: a number of item id slots (LevelConfig.MaxInventorySlots, 6 by default). Key items are not stored here.</summary>
+    /// <summary>The bag: a number of item id slots (LevelConfig.MaxInventorySlots, 8 by default). Key items are not stored here.</summary>
     public sealed class Inventory
     {
-        public const int DefaultCapacity = 6;
+        public const int DefaultCapacity = 8;
 
         private readonly List<string> items = new List<string>();
 

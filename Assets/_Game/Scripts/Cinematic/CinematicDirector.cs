@@ -329,7 +329,8 @@ namespace SixtyOne.Cinematic
             }
 
             if (flashlight == null) return;
-            bool hasFlashlight = gameManager != null && StateOps.HasItem(gameManager.State, p.FlashlightItemId);
+            bool hasFlashlight = gameManager != null && StateOps.HasItem(gameManager.State, p.FlashlightItemId)
+                && !gameManager.State.Flags.Get(FlagNames.FlashlightOff);
             bool on = powerOut && state.PostQuake > 0.01f && hasFlashlight && deathTarget <= 0f;
             flashlight.enabled = on;
             if (!on) return;

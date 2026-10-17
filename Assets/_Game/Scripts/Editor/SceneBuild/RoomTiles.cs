@@ -27,6 +27,9 @@ namespace SixtyOne.Editor
         // Rows overlap by 1 px so no seam line shows between stacked faces.
         private const float RowOverlap = 1f / TileArt.PixelsPerUnit;
 
+        /// <summary>Vertical height of a stacked wall in any one pixel column (the face height doors are fitted to).</summary>
+        public static float WallColumnHeight(int rows) => Mathf.Max(1, rows) * WallFaceHeight - (Mathf.Max(1, rows) - 1) * RowOverlap;
+
         /// <summary>Wall top above the floor edge for a wall stacked <paramref name="rows"/> faces high.</summary>
         public static float WallTopAboveEdge(int rows) => WallSpriteTop + (Mathf.Max(1, rows) - 1) * (WallFaceHeight - RowOverlap);
 

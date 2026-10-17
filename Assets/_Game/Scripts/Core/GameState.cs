@@ -8,7 +8,7 @@ namespace SixtyOne.Core
     {
         private readonly Dictionary<MemberType, FamilyMemberState> members = new Dictionary<MemberType, FamilyMemberState>();
 
-        /// <summary>The bag (6 slots by default; key items live in KeyItems instead).</summary>
+        /// <summary>The bag (8 slots by default; key items live in KeyItems instead).</summary>
         public Inventory Inventory { get; private set; } = new Inventory();
 
         /// <summary>Key items (flashlight, whistle): no bag slot, cannot be dropped. Restored by snapshots.</summary>

@@ -355,3 +355,5 @@ ui.pause.quit,Oyundan Çık,pause menu button (asks for confirmation)
 ui.pause.confirm,Emin misin? İlerleme kaybolacak.,confirmation for Ana Menü / Oyundan Çık
 ui.pause.yes,Evet,confirmation yes
 ui.pause.no,Hayır,confirmation no
+ui.pocket.flashlight_on,El fenerini açtın.,backpack pocket click (flashlight on)
+ui.pocket.flashlight_off,El fenerini kapattın.,backpack pocket click (flashlight off)

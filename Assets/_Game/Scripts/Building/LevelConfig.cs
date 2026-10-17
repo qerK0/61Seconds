@@ -41,7 +41,7 @@ namespace SixtyOne.Building
         [Header("Bag")]
         [Tooltip("Bag slots (key items such as the flashlight and whistle never use one).")]
         [Min(1)]
-        [SerializeField] private int maxInventorySlots = 6;
+        [SerializeField] private int maxInventorySlots = 8;
         [Tooltip("Bedsheets needed to tie a rope.")]
         [Min(1)]
         [SerializeField] private int requiredBedsheetsForRope = 3;

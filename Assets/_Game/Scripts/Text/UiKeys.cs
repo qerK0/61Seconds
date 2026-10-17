@@ -85,6 +85,8 @@ namespace SixtyOne.Text
         public const string PauseConfirm = "ui.pause.confirm";
         public const string PauseYes = "ui.pause.yes";
         public const string PauseNo = "ui.pause.no";
+        public const string FlashlightOn = "ui.pocket.flashlight_on";
+        public const string FlashlightOff = "ui.pocket.flashlight_off";
 
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;

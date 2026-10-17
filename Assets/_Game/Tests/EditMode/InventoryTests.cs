@@ -7,7 +7,7 @@ using SixtyOne.World;
 
 namespace SixtyOne.Tests
 {
-    /// <summary>6-slot bag, dropping into rooms, key items (no slot, corner HUD), bedsheet rope.</summary>
+    /// <summary>8-slot bag, dropping into rooms, key items (no slot, backpack pockets), bedsheet rope.</summary>
     public class InventoryTests
     {
         private TestData data;
@@ -23,14 +23,16 @@ namespace SixtyOne.Tests
         public void TearDown() => data.Cleanup();
 
         [Test]
-        public void BagHoldsSixItems()
+        public void BagHoldsEightItems()
         {
             var state = new GameState();
-            Assert.AreEqual(6, Inventory.DefaultCapacity);
-            Assert.AreEqual(6, state.Inventory.Capacity);
-            for (int i = 0; i < 6; i++) Assert.IsTrue(StateOps.TryAddItem(state, "item" + i));
+            Assert.AreEqual(8, Inventory.DefaultCapacity);
+            Assert.AreEqual(8, state.Inventory.Capacity);
+            for (int i = 0; i < 7; i++) Assert.IsTrue(StateOps.TryAddItem(state, "item" + i));
+            Assert.IsFalse(state.Inventory.IsFull, "7/8 is not full");
+            Assert.IsTrue(StateOps.TryAddItem(state, "item7"));
             Assert.IsTrue(state.Inventory.IsFull);
-            Assert.IsFalse(StateOps.TryAddItem(state, "item6"), "seventh item does not fit");
+            Assert.IsFalse(StateOps.TryAddItem(state, "item8"), "ninth item does not fit");
 
             state.Inventory.Resize(4);
             Assert.AreEqual(4, state.Inventory.Capacity, "LevelConfig.MaxInventorySlots can change it");
@@ -90,7 +92,7 @@ namespace SixtyOne.Tests
             Assert.IsTrue(StateOps.TryAddItem(state, flashlight.Id, flashlight.IsKeyItem));
             Assert.IsTrue(StateOps.TryAddItem(state, whistle.Id, whistle.IsKeyItem));
 
-            Assert.AreEqual(0, state.Inventory.Count, "bag stays 0/6");
+            Assert.AreEqual(0, state.Inventory.Count, "bag stays 0/8");
             Assert.AreEqual(2, state.KeyItems.Count);
             Assert.AreEqual("whistle", acquired);
             Assert.IsTrue(KeyItemCornerHUD.IsShownAsOwned(state, "flashlight"));
@@ -100,7 +102,8 @@ namespace SixtyOne.Tests
             Assert.IsFalse(StateOps.DropItem(state, "flashlight", "room"), "key items cannot be dropped");
             Assert.IsTrue(state.KeyItems.Has("flashlight"));
 
-            for (int i = 0; i < 6; i++) StateOps.TryAddItem(state, "item" + i);
+            for (int i = 0; i < Inventory.DefaultCapacity; i++) StateOps.TryAddItem(state, "item" + i);
+            Assert.IsTrue(state.Inventory.IsFull);
             Assert.IsTrue(StateOps.TryAddItem(state, "whistle", true), "a full bag never blocks a key item");
         }
 

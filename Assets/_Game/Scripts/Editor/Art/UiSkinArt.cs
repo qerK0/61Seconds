@@ -29,8 +29,32 @@ namespace SixtyOne.Editor
         // Inside the body's inner frame line (body-local, top-left origin): filled flat for bag_frame.png.
         private static readonly RectInt BodyInterior = new RectInt(7, 10, 50, 77);
 
+        /// <summary>Backpack sprite size in sheet pixels.</summary>
+        public static Vector2Int BackpackSize => new Vector2Int(Backpack.width, Backpack.height);
+
+        /// <summary>Size of one drawn cell (sheet pixels).</summary>
+        public const int CellSize = 14;
+
+        /// <summary>
+        /// Top-left of a main-compartment cell inside the backpack sprite (sheet pixels, top-left origin): the drawn
+        /// 2 columns x 4 rows at a 16 px pitch.
+        /// </summary>
+        public static Vector2Int CellOrigin(int column, int row) => new Vector2Int(43 + 16 * column, 17 + 16 * row);
+
+        public const int CellColumns = 2;
+        public const int CellRows = 4;
+
+        /// <summary>Pocket click areas inside the backpack sprite (sheet pixels, top-left origin): left and right side pockets.</summary>
+        public static readonly RectInt LeftPocket = new RectInt(0, 40, 26, 49);
+        public static readonly RectInt RightPocket = new RectInt(90, 45, 10, 43);
+
+        /// <summary>Icon centre of each pocket (the left pocket's two drawn cells, the right flap's middle).</summary>
+        public static readonly Vector2 LeftPocketIconCentre = new Vector2(18f, 64f);
+        public static readonly Vector2 RightPocketIconCentre = new Vector2(95f, 66f);
+
         public sealed class Sprites
         {
+            public Sprite Backpack;
             public Sprite Frame;
             public Sprite Cell;
             public Sprite KeyPanel;
@@ -80,6 +104,7 @@ namespace SixtyOne.Editor
             {
                 if (!(o is Sprite s)) continue;
                 if (s.name == "slot_cell") result.Cell = s;
+                else if (s.name == "backpack") result.Backpack = s;
                 else if (s.name == "key_panel") result.KeyPanel = s;
             }
 

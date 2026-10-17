@@ -4,6 +4,62 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 20:42] LOCAL — Task 07 follow-ups: wall-fitted doors/elevators, 8-slot backpack with key-item pockets
+### Done
+- **Doors and elevators fitted to the two-row wall:** `DoorArt` now generates `Art/Concept/Generated/door_wall.png` and `elevator_wall.png` from the originals.
+  - Each source column is remapped between the door's least-squares bottom and top lines. At one shared PPU:
+    - the bottom edge lies exactly on the gap's floor edge, at the wall's 2:1 slant;
+    - the width fills one wall segment (0.5u);
+    - the height is **90% of the stacked wall** (`RoomTiles.WallColumnHeight(rows)`; 2 rows → about 0.91u).
+  - A uniform scale can't meet all three, which is why the art is remapped. The pivot is the bottom-edge midpoint (the gap's edge centre); R walls flip X.
+  - Door colliders are `DoorArt.ColliderSize/Offset` (0.5 × (height + rise)). Approach points are unchanged.
+  - Elevators now sit flush on the back-right wall line, centred on a segment: F4 corridor hotspot (7.0, 1.5), F2 stairs hotspot (3.0, 1.5), F2 corridor prop (7.0, 1.5). Their colliders and hover use the new height; approach points are still in front.
+  - Checked in Play: salon (zoomed on a back-left door: no floating), F4 corridor and F2 stairs.
+  - **Height conflict:** the two-row wall is 1.0u tall per pixel column, and the player's visible height is about 0.76u. With the door at 90% of the wall, the player reaches about **85%** of the door, not ⅔. A ⅔ door (≈1.15u) would stick out above the wall. Fixing that needs about 2.5–3 wall rows or a smaller player; it's a design call, so I didn't change either.
+- **Bag (8 slots) and pockets:**
+  - `Inventory.DefaultCapacity`, `LevelConfig.maxInventorySlots` and the generator's `ConfigureBag` are now **8**; docs updated.
+  - Validators only check ≥1 and bedsheets ≤ slots, so nothing else assumed 6. BagUI is array-driven.
+  - The whole red backpack (100×140 sheet px) shows at an integer **×3** with Point filter. The 8 slots sit exactly on its drawn 2×4 compartment (`UiSkinArt.CellOrigin`, 16 px pitch). Icons are 80% of a cell; names show under the backpack on hover.
+  - New `KeyItemPocket`: left pocket = flashlight, right flap = whistle.
+    - Owned: the icon. Missing: a black 55% silhouette. The flashlight is greyed while switched off.
+    - Never droppable.
+    - A click goes through pure `KeyItemPocketRules`: it plays the current node's available choice that requires the item (checked live: the whistle at `f2.corridor` → `c_whistle`), otherwise toggles the flashlight (new `FlagNames.FlashlightOff`; CinematicDirector respects it), otherwise shows the item's name.
+  - `KeyItemCornerHUD` is now built only for key items other than flashlight and whistle; currently there are none, so the scene has 0.
+  - To fit the ×3 backpack, the right column is wider: `TestSceneUi.ColumnLeft` 0.9 → **0.835**. RoomCameraFraming follows it.
+- **Tests:** InventoryTests updated (`BagHoldsEightItems`, full at 8/8, ninth refused). New `KeyItemPocketTests` (5): LevelConfig defaults to 8; missing item → name; owned whistle → the node's whistle choice; whistle with no use → name; flashlight toggles and stays owned and undroppable.
+- **Verify:** EditMode **148/148** passed. Validate Content: 25 nodes, 0 problems. Text > Validate: 358 referenced, 0 missing / empty / unused. Interaction Mode was restored to 0.
+- **Screenshots** (`Screenshots/`, local): `t07b_salon_doors`, `t07b_door_zoom`, `t07b_f4_corridor`, `t07b_f2_stairs`, `t07b_bag_empty_full`, `t07b_bag_half`, `t07b_bag_full`.
+
+### Files created / changed
+- `Scripts/Editor/Art/DoorArt.cs`: wall-fitted door/elevator generation, collider helpers, `Configure(rows)`.
+- `Scripts/Editor/SceneBuild/RoomTiles.cs`: `WallColumnHeight(rows)`.
+- `Scripts/Editor/SceneBuild/SceneKit.cs`: door/elevator colliders.
+- `Scripts/Editor/SceneBuild/BuildingLayout.cs`: elevators on the wall line.
+- `Scripts/Editor/SceneBuild/TestSceneBuilder.cs`: `DoorArt.Configure`.
+- `Scripts/Editor/Art/UiSkinArt.cs`: backpack sprite, cell and pocket layout.
+- `Scripts/Editor/SceneBuild/TestSceneUi.cs`: backpack bag, pockets, wider column, corner HUD only for other key items.
+- `Scripts/Items/KeyItemPocketRules.cs` (new), `Scripts/UI/KeyItemPocket.cs` (new).
+- `Scripts/Core/FlagNames.cs` (`FlashlightOff`), `Scripts/Cinematic/CinematicDirector.cs`.
+- `Scripts/Core/Inventory.cs`, `GameState.cs`, `Scripts/Building/LevelConfig.cs`, `Scripts/UI/BagUI.cs`, `Scripts/Editor/Content/BuildingLevelsGenerator.cs`: 8 slots.
+- `Scripts/Text/UiKeys.cs`, `Content/Text/strings_tr.csv`: `ui.pocket.flashlight_on/off`.
+- `Tests/EditMode/InventoryTests.cs`, `Tests/EditMode/KeyItemPocketTests.cs` (new).
+- `Data/LevelConfig.asset`, `Scenes/Test_Building.unity`, `Art/Concept/Generated/*` (regenerated).
+- `CLAUDE.md`: 8-slot bag, pockets, UI list.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Nothing required.
+- [ ] Decide the door/player ratio (see the height conflict above). For a door ⅔ taller than the player, set `wallRows` to 3 on RoomVisualConfig (in the generator, `Visual.Configure(1.5f, 3)`) and rebuild; the doors refit automatically.
+
+### Not verified / risks
+- The flashlight icon reads small in its pocket and in the cells (thin art at 80% of a cell).
+- The wider right column (0.835) makes the room view slightly smaller.
+- `FlashlightOff` only affects the light: conditions that need the flashlight still pass while it's off.
+- Real mouse clicks on the pockets weren't tested; I invoked the Button onClick.
+- Building a scene while scripts are compiling can open a modal save dialog that blocks MCP. Save or let the compile finish first.
+
+### Next suggested step
+- Settle the wall-rows vs door-ratio question and try 3 rows if wanted. Consider a softer pocket icon size for the thin flashlight art.
+
 ## [2026-10-17 19:54] LOCAL — Two-row walls + door/elevator art, LED building timer, main menu + ESC pause, backpack bag skin, cinematic subtitles
 ### Done
 - **Walls and scale (task 1):**

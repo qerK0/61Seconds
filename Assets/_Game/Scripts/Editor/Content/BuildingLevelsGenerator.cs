@@ -176,7 +176,7 @@ namespace SixtyOne.Editor
             // water +25 (~60s). At 0 exhaustion rises 0.03/s (~33s to death) and falls 0.2/s after eating.
             result.Level.ConfigureStamina(100f, 0.42f, 1.5f, 0.03f, 0.2f, "death.exhaustion", Tip("tip.supplies"));
             result.Level.ConfigurePrep(PrepSeconds, 10);
-            result.Level.ConfigureBag(6, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
+            result.Level.ConfigureBag(8, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
 
             result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
             // Old room rises 0.35s, new room drops 0.4s (descend 0.65s, higher), wave 0.12s, family pops 0.15s.

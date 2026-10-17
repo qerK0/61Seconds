@@ -28,7 +28,7 @@ namespace SixtyOne.Editor
         private static UITheme theme;
 
         /// <summary>Left edge (viewport x) of the right HUD column; RoomCameraFraming keeps rooms left of it.</summary>
-        public const float ColumnLeft = 0.9f;
+        public const float ColumnLeft = 0.835f;
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
@@ -63,7 +63,7 @@ namespace SixtyOne.Editor
             BuildBuildingTimer(root, survival);
             BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
-            BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems);
+            BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
             SubtitleView subtitles = BuildSubtitles(root);
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             SerializedWire.Set(choicePanel, "subtitles", subtitles);
@@ -447,14 +447,24 @@ namespace SixtyOne.Editor
         /// stamina bar at the bottom.
         /// </summary>
         private static void BuildRightColumn(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival,
-            RecipeBook recipes, int slots, Item[] keyItems)
+            RecipeBook recipes, int slots, Item[] keyItems, NodePlayer nodePlayer)
         {
             RectTransform columnRoot = UiFactory.MakeRect("RightColumn", root, Vector2.zero, Vector2.one);
             Image column = UiFactory.MakePanel("Column", columnRoot, new Vector2(ColumnLeft, 0.13f), new Vector2(0.995f, 0.985f), Panel, raycast: true);
             Transform c = column.transform;
 
-            BuildKeyItemHud(c, root, gameManager, keyItems, art);
-            BuildBag(c, gameManager, content, art, survival, recipes, slots);
+            // Flashlight and whistle live in the backpack's side pockets; the corner HUD only shows any other key items.
+            var otherKeyItems = new System.Collections.Generic.List<Item>();
+            if (keyItems != null)
+            {
+                foreach (Item item in keyItems)
+                {
+                    if (item != null && item.Id != "flashlight" && item.Id != "whistle") otherKeyItems.Add(item);
+                }
+            }
+
+            if (otherKeyItems.Count > 0) BuildKeyItemHud(c, root, gameManager, otherKeyItems.ToArray(), art);
+            BuildBag(c, gameManager, content, art, survival, recipes, slots, keyItems, nodePlayer);
             BuildStamina(c, survival);
 
             Button toggle = UiFactory.MakeButton("Toggle", columnRoot, new Vector2(ColumnLeft - 0.022f, 0.925f), new Vector2(ColumnLeft - 0.004f, 0.985f), Panel, 22f, out TextMeshProUGUI toggleLabel);
@@ -478,63 +488,57 @@ namespace SixtyOne.Editor
             SerializedWire.Set(bar, "fillImage", fill);
         }
 
-        private static void BuildBag(Transform column, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival, RecipeBook recipes, int slots)
+        private static void BuildBag(Transform column, GameManager gameManager, GameContent content, PlaceholderSprites art, SurvivalController survival, RecipeBook recipes, int slots,
+            Item[] keyItems, NodePlayer nodePlayer)
         {
-            RectTransform bagRect = UiFactory.MakeRect("Bag", column, new Vector2(0f, 0.07f), new Vector2(1f, 0.83f));
-            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bagRect, new Vector2(0.08f, 0.93f), new Vector2(0.7f, 1f), TextRole.Label, TextAlignmentOptions.MidlineLeft);
+            RectTransform bagRect = UiFactory.MakeRect("Bag", column, new Vector2(0f, 0.07f), new Vector2(1f, 0.985f));
+            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bagRect, new Vector2(0.06f, 0.96f), new Vector2(0.7f, 1f), TextRole.Label, TextAlignmentOptions.MidlineLeft);
             title.color = Accent;
             SerializedWire.SetTextKey(title.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.BagTitle);
-            TextMeshProUGUI count = UiFactory.MakeLabel("Count", bagRect, new Vector2(0.6f, 0.93f), new Vector2(0.92f, 1f), TextRole.Small, TextAlignmentOptions.MidlineRight);
+            TextMeshProUGUI count = UiFactory.MakeLabel("Count", bagRect, new Vector2(0.6f, 0.96f), new Vector2(0.94f, 1f), TextRole.Small, TextAlignmentOptions.MidlineRight);
             count.color = Muted;
 
-            // Pixel-art backpack (Art/uı/examples.png) at an integer x3 scale: a 9-sliced frame holding a 3-column
-            // grid of blue cells. Item icons stay smooth at ~80% of a cell; names show under the bag on hover.
-            slots = Mathf.Max(1, slots);
+            // The red pixel-art backpack (Art/uı/examples.png) at an integer x3 scale: the 8 bag slots sit on its drawn
+            // 2x4 main compartment, the two side pockets hold the key items (left = flashlight, right = whistle).
+            // Item icons stay smooth at ~80% of a cell; names show under the backpack on hover.
             UiSkinArt.Sprites skin = UiSkinArt.Import();
             const int scale = UiSkinArt.Scale;
-            const int columns = 3;
-            int rows = Mathf.CeilToInt(slots / (float)columns);
-            const float cell = 14f * scale;
-            const float gap = 4f;
-            float frameW = 14f * scale + columns * cell + (columns - 1) * gap;
-            float frameH = 18f * scale + rows * cell + (rows - 1) * gap;
-
-            Image frame = UiFactory.MakeImage("Backpack", bagRect, new Vector2(0.5f, 0.915f), new Vector2(0.5f, 0.915f), Color.white);
+            Vector2Int packSize = UiSkinArt.BackpackSize;
+            Image frame = UiFactory.MakeImage("Backpack", bagRect, new Vector2(0.5f, 0.95f), new Vector2(0.5f, 0.95f), Color.white);
             frame.rectTransform.pivot = new Vector2(0.5f, 1f);
-            frame.rectTransform.sizeDelta = new Vector2(frameW, frameH);
-            if (skin.Frame != null)
+            frame.rectTransform.sizeDelta = new Vector2(packSize.x * scale, packSize.y * scale);
+            if (skin.Backpack != null)
             {
-                frame.sprite = skin.Frame;
-                frame.type = Image.Type.Sliced;
-                frame.pixelsPerUnitMultiplier = 1f / scale;
+                frame.sprite = skin.Backpack;
+                frame.preserveAspect = false;
             }
             else
             {
                 frame.color = new Color(0.7f, 0.35f, 0.27f, 1f);
             }
 
-            RectTransform names = UiFactory.MakeRect("SlotNames", bagRect, new Vector2(0f, 0.915f), new Vector2(1f, 0.915f));
+            RectTransform names = UiFactory.MakeRect("SlotNames", bagRect, new Vector2(0f, 0.95f), new Vector2(1f, 0.95f));
             names.pivot = new Vector2(0.5f, 1f);
-            names.anchoredPosition = new Vector2(0f, -frameH - 4f);
+            names.anchoredPosition = new Vector2(0f, -packSize.y * scale - 4f);
             names.sizeDelta = new Vector2(0f, 48f);
 
+            float cell = UiSkinArt.CellSize * scale;
+            slots = Mathf.Clamp(slots, 1, UiSkinArt.CellColumns * UiSkinArt.CellRows);
             var icons = new Object[slots];
             var labels = new Object[slots];
             var backgrounds = new Object[slots];
             var buttons = new Object[slots];
             for (int i = 0; i < slots; i++)
             {
-                int col = i % columns;
-                int row = i / columns;
+                Vector2Int origin = UiSkinArt.CellOrigin(i % UiSkinArt.CellColumns, i / UiSkinArt.CellColumns);
                 Image slot = UiFactory.MakeImage("Slot" + i, frame.transform, new Vector2(0f, 1f), new Vector2(0f, 1f), skin.Cell != null ? Color.white : new Color(0.25f, 0.32f, 0.45f, 1f), raycast: true);
                 slot.rectTransform.pivot = new Vector2(0f, 1f);
                 slot.rectTransform.sizeDelta = new Vector2(cell, cell);
-                slot.rectTransform.anchoredPosition = new Vector2(7f * scale + col * (cell + gap), -(10f * scale + row * (cell + gap)));
+                slot.rectTransform.anchoredPosition = new Vector2(origin.x * scale, -origin.y * scale);
                 if (skin.Cell != null)
                 {
                     slot.sprite = skin.Cell;
-                    slot.type = Image.Type.Sliced;
-                    slot.pixelsPerUnitMultiplier = 1f / scale;
+                    slot.preserveAspect = false;
                 }
 
                 Button slotButton = slot.gameObject.AddComponent<Button>();
@@ -568,6 +572,9 @@ namespace SixtyOne.Editor
                 labels[i] = name;
             }
 
+            BuildPocket(frame.transform, "PocketLeft", UiSkinArt.LeftPocket, UiSkinArt.LeftPocketIconCentre, keyItems, "flashlight", nodePlayer, names);
+            BuildPocket(frame.transform, "PocketRight", UiSkinArt.RightPocket, UiSkinArt.RightPocketIconCentre, keyItems, "whistle", nodePlayer, names);
+
             BagUI bag = bagRect.gameObject.AddComponent<BagUI>();
             SerializedWire.Set(bag, "gameManager", gameManager);
             SerializedWire.Set(bag, "content", content);
@@ -588,6 +595,55 @@ namespace SixtyOne.Editor
             SerializedWire.Set(bag, "dropButton", drop);
             SerializedWire.Set(bag, "ropeButton", rope);
             SerializedWire.Set(bag, "countLabel", count);
+        }
+
+        /// <summary>
+        /// A backpack side pocket for one key item: an invisible click area over the pocket art and the item icon
+        /// (~80% of a bag cell) at the pocket's centre; the name shows under the backpack on hover.
+        /// </summary>
+        private static void BuildPocket(Transform frame, string objectName, RectInt area, Vector2 iconCentre, Item[] keyItems, string itemId, NodePlayer nodePlayer,
+            RectTransform names)
+        {
+            Item item = null;
+            if (keyItems != null)
+            {
+                foreach (Item k in keyItems)
+                {
+                    if (k != null && k.Id == itemId) item = k;
+                }
+            }
+
+            if (item == null) return;
+            const int scale = UiSkinArt.Scale;
+            Image hit = UiFactory.MakeImage(objectName, frame, new Vector2(0f, 1f), new Vector2(0f, 1f), new Color(1f, 1f, 1f, 0f), raycast: true);
+            hit.rectTransform.pivot = new Vector2(0f, 1f);
+            hit.rectTransform.anchoredPosition = new Vector2(area.x * scale, -area.y * scale);
+            hit.rectTransform.sizeDelta = new Vector2(area.width * scale, area.height * scale);
+            Button button = hit.gameObject.AddComponent<Button>();
+            button.transition = Selectable.Transition.None;
+
+            float iconSize = UiSkinArt.CellSize * scale * 0.8f;
+            Image icon = UiFactory.MakeImage("Icon", frame, new Vector2(0f, 1f), new Vector2(0f, 1f), Color.white, sprite: item.Icon != null ? item.Icon : null);
+            icon.rectTransform.pivot = new Vector2(0.5f, 0.5f);
+            icon.rectTransform.anchoredPosition = new Vector2(iconCentre.x * scale, -iconCentre.y * scale);
+            icon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
+            icon.preserveAspect = true;
+            icon.raycastTarget = false;
+            icon.name = objectName + "Icon";
+
+            TextMeshProUGUI name = UiFactory.MakeLabel("PocketName_" + itemId, names, Vector2.zero, Vector2.one, TextRole.Small, TextAlignmentOptions.Top);
+            SerializedWire.SetTextKey(name.gameObject.AddComponent<LocalizedText>(), "key", item.NameKey.Key);
+            CanvasGroup nameGroup = name.gameObject.AddComponent<CanvasGroup>();
+            nameGroup.alpha = 0f;
+            nameGroup.blocksRaycasts = false;
+            SerializedWire.Set(hit.gameObject.AddComponent<HoverReveal>(), "target", nameGroup);
+
+            KeyItemPocket pocket = hit.gameObject.AddComponent<KeyItemPocket>();
+            SerializedWire.Set(pocket, "item", item);
+            SerializedWire.Set(pocket, "icon", icon);
+            SerializedWire.Set(pocket, "button", button);
+            SerializedWire.Set(pocket, "nodePlayer", nodePlayer);
+            SerializedWire.Set(pocket, "clickCue", UnityEditor.AssetDatabase.LoadAssetAtPath<SixtyOne.Audio.AudioCue>("Assets/_Game/Data/Audio/cue_choice_click.asset"));
         }
 
         /// <summary>Top of the right column: one icon per key item (no bag slot), dim until owned, with a hover tooltip.</summary>

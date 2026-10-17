@@ -16,6 +16,9 @@ namespace SixtyOne.Core
         /// <summary>Set by "Not bırak" in a neighbour's flat (epilogue).</summary>
         public const string LeftNote = "LeftNote";
 
+        /// <summary>Set while the player has switched the flashlight off (backpack pocket click).</summary>
+        public const string FlashlightOff = "FlashlightOff";
+
         /// <summary>Flag set when a world pickup has been collected.</summary>
         public static string Picked(string itemId)
         {

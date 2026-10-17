@@ -120,6 +120,7 @@ namespace SixtyOne.Editor
             var practicals = new List<Light2D>();
             TileArt.TileSets tileSets = TileArt.Generate();
             List<BuildingLayout.RoomSpec> specs = BuildingLayout.Rooms();
+            DoorArt.Configure(WallRows(data));
             foreach (BuildingLayout.RoomSpec spec in specs)
             {
                 rooms.Add(BuildRoom(spec, data, practicals, tileSets, nodePlayer, navigator));

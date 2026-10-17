@@ -258,8 +258,8 @@ namespace SixtyOne.Editor
                 }
 
                 BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-                box.size = new Vector2(0.62f, 1.15f);
-                box.offset = new Vector2(0f, 0.5f);
+                box.size = DoorArt.ColliderSize;
+                box.offset = DoorArt.ColliderOffset;
             }
             else
             {
@@ -334,8 +334,9 @@ namespace SixtyOne.Editor
             }
             else if (spec.Name == "Elevator" && DoorArt.Apply(r, DoorArt.Elevator, true))
             {
-                // Every elevator stands against a back-right wall: flipped elevator door art.
-                height = DoorArt.Height;
+                // Every elevator stands flush in a back-right wall segment (layout puts it on the wall line):
+                // flipped, wall-fitted elevator door art.
+                height = DoorArt.Height + DoorArt.Rise;
             }
             else
             {
@@ -354,7 +355,7 @@ namespace SixtyOne.Editor
             }
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-            box.size = new Vector2(spec.Person ? 0.45f : spec.Scale.x * 0.5f, height);
+            box.size = new Vector2(spec.Person ? 0.45f : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Scale.x * 0.5f, height);
             box.offset = new Vector2(0f, height * 0.5f);
 
             GameObject hover = HoverMarker(go.transform, new Vector3(0f, height + 0.3f, 0f), spec.ChoiceKey, out TextMeshPro label);

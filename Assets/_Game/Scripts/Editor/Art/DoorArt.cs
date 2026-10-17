@@ -5,27 +5,54 @@ using UnityEngine;
 namespace SixtyOne.Editor
 {
     /// <summary>
-    /// Door and elevator art (Art/Concept/door.png, asansorkapı.png): single sprites, pivot at the bottom-centre of
-    /// the opaque door (measured from the source PNG), PPU chosen so the visible door is ~1.15x the player's height.
-    /// The art faces the back-left wall; callers flip X for back-right walls.
+    /// Door and elevator art (Art/Concept/door.png, asansorkapı.png) fitted to a back-wall gap. A uniform scale cannot
+    /// fill the gap width, reach the wanted height and keep the wall slant at once, so a wall-fitted copy is generated
+    /// (Art/Concept/Generated/*_wall.png): each source column is remapped between the door's fitted bottom and top
+    /// lines so that, at one shared PPU, the bottom edge lies exactly on the gap's floor edge (2:1 slant), the width
+    /// fills one wall segment and the height is HeightOfWall x the stacked wall. Pivot = bottom-edge midpoint
+    /// (the gap's edge centre). The art faces the back-left wall; callers flip X for back-right walls.
     /// </summary>
     public static class DoorArt
     {
         public const string DoorPath = "Assets/_Game/Art/Concept/door.png";
         public const string ElevatorPath = "Assets/_Game/Art/Concept/asansorkapı.png";
+        private const string OutFolder = "Assets/_Game/Art/Concept/Generated";
 
-        /// <summary>Visible door height relative to the player.</summary>
-        public const float HeightRatio = 1.15f;
+        /// <summary>Door top as a fraction of the stacked wall height (per pixel column).</summary>
+        public const float HeightOfWall = 0.9f;
 
-        public static float Height => CharacterArt.PlayerHeight * HeightRatio;
+        /// <summary>World width of one wall segment (one tile edge), which the door fills.</summary>
+        public const float Width = 0.5f;
 
+        /// <summary>Rise of the floor edge across one segment (2:1 isometric).</summary>
+        public const float Rise = Width * 0.5f;
+
+        private static int wallRows = 2;
         private static Sprite door;
         private static Sprite elevator;
 
-        public static Sprite Door => door != null ? door : door = Import(DoorPath);
-        public static Sprite Elevator => elevator != null ? elevator : elevator = Import(ElevatorPath);
+        /// <summary>Visible door height (vertical, per column) for the configured wall rows.</summary>
+        public static float Height => HeightOfWall * RoomTiles.WallColumnHeight(wallRows);
 
-        /// <summary>Puts the door or elevator art on a renderer (white, unscaled parent assumed).</summary>
+        /// <summary>Collider box for a door/elevator whose pivot is its bottom-edge midpoint.</summary>
+        public static Vector2 ColliderSize => new Vector2(Width, Height + Rise);
+
+        public static Vector2 ColliderOffset => new Vector2(0f, (Height + Rise) * 0.5f);
+
+        public static Sprite Door => door != null ? door : door = Build(DoorPath, "door_wall");
+        public static Sprite Elevator => elevator != null ? elevator : elevator = Build(ElevatorPath, "elevator_wall");
+
+        /// <summary>Sets the wall rows the art is fitted to (the scene builder calls it before building rooms).</summary>
+        public static void Configure(int rows)
+        {
+            rows = Mathf.Max(1, rows);
+            if (rows == wallRows && door != null) return;
+            wallRows = rows;
+            door = null;
+            elevator = null;
+        }
+
+        /// <summary>Puts the door or elevator art on a renderer (white, unscaled; pivot at the renderer's position).</summary>
         public static bool Apply(SpriteRenderer renderer, Sprite sprite, bool rightWall)
         {
             if (renderer == null || sprite == null) return false;
@@ -36,63 +63,109 @@ namespace SixtyOne.Editor
             return true;
         }
 
-        private static Sprite Import(string path)
+        private static Sprite Build(string sourcePath, string outName)
         {
-            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer) || !File.Exists(path)) return null;
+            if (!File.Exists(sourcePath)) return null;
+            var source = new Texture2D(2, 2);
+            source.LoadImage(File.ReadAllBytes(sourcePath));
+            int w = source.width;
+            int h = source.height;
+            Color32[] px = source.GetPixels32();
 
-            var texture = new Texture2D(2, 2);
-            texture.LoadImage(File.ReadAllBytes(path));
-            int w = texture.width;
-            int h = texture.height;
-            Color32[] px = texture.GetPixels32();
-            Object.DestroyImmediate(texture);
-
-            int minX = w, maxX = 0, minY = h, maxY = 0;
-            for (int y = 0; y < h; y++)
+            // Per column: lowest and highest opaque row (bottom-origin).
+            int x0 = w, x1 = -1;
+            var bottom = new int[w];
+            var top = new int[w];
+            for (int x = 0; x < w; x++)
             {
-                for (int x = 0; x < w; x++)
+                bottom[x] = -1;
+                top[x] = -1;
+                for (int y = 0; y < h; y++) if (px[y * w + x].a > 40) { bottom[x] = y; break; }
+                if (bottom[x] < 0) continue;
+                for (int y = h - 1; y >= 0; y--) if (px[y * w + x].a > 40) { top[x] = y; break; }
+                x0 = Mathf.Min(x0, x);
+                x1 = Mathf.Max(x1, x);
+            }
+
+            if (x1 <= x0)
+            {
+                Object.DestroyImmediate(source);
+                return null;
+            }
+
+            // Straight bottom / top lines fitted over the door face (skip the thin side edge and the far rim).
+            int span = x1 - x0;
+            FitLine(bottom, x0 + span * 15 / 100, x1 - span * 10 / 100, out float bA, out float bB);
+            FitLine(top, x0 + span * 15 / 100, x1 - span * 10 / 100, out float tA, out float tB);
+
+            int outW = span + 1;
+            float ppu = outW / Width;
+            float doorPx = Height * ppu;
+            float risePx = Rise * ppu;
+            int margin = Mathf.CeilToInt(doorPx * 0.15f);
+            int outH = Mathf.CeilToInt(doorPx + risePx) + 2 * margin;
+            var output = new Texture2D(outW, outH, TextureFormat.RGBA32, false);
+            var clear = new Color(0f, 0f, 0f, 0f);
+            for (int xo = 0; xo < outW; xo++)
+            {
+                float xs = x0 + xo;
+                float srcBottom = bA + bB * xs;
+                float srcTop = tA + tB * xs;
+                float outBottom = margin + risePx * xo / outW;
+                for (int yo = 0; yo < outH; yo++)
                 {
-                    if (px[y * w + x].a <= 40) continue;
-                    if (x < minX) minX = x;
-                    if (x > maxX) maxX = x;
-                    if (y < minY) minY = y;
-                    if (y > maxY) maxY = y;
+                    float rel = (yo - outBottom) / doorPx;
+                    float ys = srcBottom + rel * (srcTop - srcBottom);
+                    Color c = ys < 0f || ys >= h ? clear : source.GetPixelBilinear((xs + 0.5f) / w, (ys + 0.5f) / h);
+                    output.SetPixel(xo, yo, c);
                 }
             }
 
-            if (maxY <= minY) return null;
+            Object.DestroyImmediate(source);
+            if (!AssetDatabase.IsValidFolder(OutFolder)) AssetDatabase.CreateFolder("Assets/_Game/Art/Concept", "Generated");
+            string outPath = $"{OutFolder}/{outName}.png";
+            File.WriteAllBytes(outPath, output.EncodeToPNG());
+            Object.DestroyImmediate(output);
+            AssetDatabase.ImportAsset(outPath);
 
-            // Base at the centre column: the slanted bottom edge's midpoint sits on the wall line.
-            int cx = (minX + maxX) / 2;
-            int baseY = minY;
-            for (int y = 0; y < h; y++)
-            {
-                if (px[y * w + cx].a > 40)
-                {
-                    baseY = y;
-                    break;
-                }
-            }
-
-            float ppu = (maxY - minY) / Height;
-            var pivot = new Vector2(cx / (float)w, baseY / (float)h);
-
+            var importer = (TextureImporter)AssetImporter.GetAtPath(outPath);
             importer.textureType = TextureImporterType.Sprite;
             importer.spriteImportMode = SpriteImportMode.Single;
             importer.spritePixelsPerUnit = ppu;
-            importer.maxTextureSize = 512;
+            importer.maxTextureSize = 1024;
             importer.textureCompression = TextureImporterCompression.Compressed;
             importer.mipmapEnabled = false;
             importer.alphaIsTransparency = true;
             importer.filterMode = FilterMode.Bilinear;
+            importer.wrapMode = TextureWrapMode.Clamp;
             var settings = new TextureImporterSettings();
             importer.ReadTextureSettings(settings);
             settings.spriteAlignment = (int)SpriteAlignment.Custom;
-            settings.spritePivot = pivot;
+            // Bottom-edge midpoint: centre column, on the remapped bottom line.
+            settings.spritePivot = new Vector2(0.5f, (margin + risePx * 0.5f) / outH);
             settings.spriteMeshType = SpriteMeshType.FullRect;
             importer.SetTextureSettings(settings);
             importer.SaveAndReimport();
-            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(outPath);
+        }
+
+        /// <summary>Least-squares line y = a + b*x over the columns in [from, to] that have a value.</summary>
+        private static void FitLine(int[] values, int from, int to, out float a, out float b)
+        {
+            double n = 0, sx = 0, sy = 0, sxx = 0, sxy = 0;
+            for (int x = from; x <= to; x++)
+            {
+                if (values[x] < 0) continue;
+                n++;
+                sx += x;
+                sy += values[x];
+                sxx += (double)x * x;
+                sxy += (double)x * values[x];
+            }
+
+            double d = n * sxx - sx * sx;
+            b = d != 0 ? (float)((n * sxy - sx * sy) / d) : 0f;
+            a = n > 0 ? (float)((sy - b * sx) / n) : 0f;
         }
     }
 }
