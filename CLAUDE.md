@@ -9,11 +9,11 @@ Linear earthquake-escape game. The player, their **wife** and their **child** li
 **The building timer (where the tension comes from).** A `BuildingTimer` (default 300s, on the `LevelConfig` asset) starts with the game. At 0 the building collapses: death and rewind. It pulses the UI at 60s and sounds an alarm with ticks in the last 30s. Every action subtracts its time cost (moving between rooms, opening drawers, closing valves, talking, crafting); injured family members make moves slower until treated with the first aid kit.
 
 **Flow.**
-- Floor 4: the neighbour Sevim visits (dialogue; each line costs time, "Kısa kes" skips her info and whistle), then the opening quake (placement moment), then Flat 11 (gas valve, breaker), the corridor (a kind neighbour gives food + water) and Flat 12 (borrow cloth, rope, tape, flashlight, lighter, first aid; "Not bırak" leaves a note).
-- Floor 3: aftershock placement on arrival; a needs-aware trader in the corridor; Flat 9 fuse puzzle (needs insulated gloves or the crafted grip + tape, else electrocution) which unlocks the cable descent (needs the child harness); Flat 10 (dark, gas leak, lighter = explosion, flashlight is safe, collapsed floor = alternative way down).
-- Floor 2: strong aftershock placement in Flat 7 (gas leak); a frightened dog blocks the corridor (feed it or use the whistle; walking past = bitten, injured, pushed back); stairs → street → epilogue (family state, borrow line, loop count).
+- Floor 4: an AFAD early warning opens a 60s **prep** in our own flat (salon / kitchen / hall; loot costs prep seconds, the valve needs the wrench, valuables are traps; the building timer is not running yet). At prep zero the quake hits and the building timer starts: opening quake placement → Flat 11 after the quake (gas valve, breaker, bedroom with bedsheets) → Sevim in the corridor (dialogue; each line costs time, "Kısa kes" skips her info and whistle) → the corridor (a kind neighbour gives food + water) and Flat 12 (borrow cloth, rope, tape, flashlight, lighter, first aid; "Not bırak" leaves a note).
+- Floor 3: aftershock placement on arrival; a needs-aware trader in the corridor; Flat 9 fuse box wiring as a WASD QTE (needs insulated gloves or the crafted grip + tape, else electrocution) which unlocks the cable descent (needs the child harness), plus a balcony where the bedsheet rope climbs down to Flat 7; Flat 10 (dark, gas leak, lighter = explosion, flashlight is safe, collapsed floor = alternative way down).
+- Floor 2: strong aftershock placement in Flat 7 (gas leak); a frightened dog blocks the corridor (feed it, use the whistle, or slip past with a WASD QTE whose failures cost building time and re-roll); stairs → street → epilogue (family state, borrow line, loop count).
 
-**Survival systems.** Stamina (food/water restore it; it drains over time and per heavy action; at 0 heavy actions are locked and everything costs more time), poison (gas rooms with an open valve; darkening + vignette; max = death with a gas tip; the wet cloth halves it), panic (rises as the timer falls, when poisoned and on aftershocks; above `panicDelayThreshold` clicks get an input delay up to `maxInputDelay`, with instant visual feedback; Reduce Effects forces 0), crafting (two bag items → one, order-independent; the bag stays 4 slots), hidden items (invisible hotspots in the room art; optional sparkle in later loops or after N seconds).
+**Survival systems.** Stamina (food/water restore it; it drains over time and per heavy action; at 0 heavy actions are locked and everything costs more time), poison (gas rooms with an open valve; darkening + vignette; max = death with a gas tip; the wet cloth halves it), panic (rises as the timer falls, when poisoned and on aftershocks; above `panicDelayThreshold` clicks get an input delay up to `maxInputDelay`, with instant visual feedback; Reduce Effects forces 0), crafting (two bag items → one, order-independent; 3 bedsheets → 1 bedsheet rope), a 6-slot bag (`LevelConfig.MaxInventorySlots`) with Drop (the item stays in that room and can be picked up again), key items (flashlight, whistle: no bag slot, not droppable, shown in the corner HUD), WASD quick-time events (random W/A/S/D sequence per attempt, never 3 identical keys in a row; a miss costs building time and re-rolls), hidden items (invisible hotspots in the room art; optional sparkle in later loops or after N seconds).
 
 Choices work like Henry Stickmin. A wrong choice ("what NOT to do in an earthquake") causes a death, a visible LOOP counter goes up, and each death shows a one-line real earthquake safety tip ("Deprem Notu"). Tips are collected across loops. **The loop has two layers:**
 - **Micro rewind:** a wrong placement or choice rewinds to the last decision node.
@@ -31,16 +31,17 @@ Root folder: `Assets/_Game/`
 Scripts/Core/        GameState, Flags, Inventory, Snapshot, BorrowLedger, KnowledgeSet, GameEvents, routers (ActionCost, InputDelay, ExplorationGate)
 Scripts/Text/        CSV parser, TextDB, TextKey (lore/dialogue/UI strings)
 Scripts/Nodes/       SceneNode, Choice, Condition, Outcome, NodePlayer, ChoiceView
-Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver, Room/RoomSwitcher
+Scripts/Placement/   Anchor, Hazard, FamilyMember, PlacementNode, PlacementResolver, Room/RoomSwitcher, RoomTransitionController + TransitionConfig
 Scripts/Building/    LevelConfig, BuildingTimer + SurvivalModel (pure), SurvivalController, GasZone, Epilogue*
+Scripts/Prep/        PrepTimer + PrepRules (pure), PrepPhaseNode, PrepPhase (60s pre-quake loot countdown)
 Scripts/Dialogue/    DialogueLine, DialogueNode, DialogueController
 Scripts/Items/       Recipe, RecipeBook, Crafting, ItemUse, TraderProfile, TraderLogic
-Scripts/Puzzles/     FusePuzzle (pure), FusePuzzleNode, FusePuzzleController
+Scripts/QTE/         QTEKey, QTESequence + QTERun + QTESession (pure), QTEConfig, QTENode, QTEController (Input System W/A/S/D)
 Scripts/World/       WorldInteractable, PickupItem, HiddenItemHotspot
 Scripts/Iso/         IsoSorter, IsoPicker (pointer → world object), iso helpers
 Scripts/Cinematic/   CinematicProfile, CinematicMixer (pure), CinematicDirector, LetterboxBars
 Scripts/Audio/       AudioCue (SO), AudioService
-Scripts/UI/          ChoicePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, FusePuzzlePanel, LoopCounterUI, DeathCard, TipJournal, RewindFX
+Scripts/UI/          ChoicePanel, BagUI, BuildingTimerDisplay, StaminaBar, PoisonOverlay, ClickFeedback, QTEView, KeyItemCornerHUD, LoopCounterUI, DeathCard, TipJournal, RewindFX
 Scripts/Editor/      Validators, BuildingLevelsGenerator (one partial per floor), test-scene builder (BuildingLayout tables)
 Content/Text/        strings_tr.csv  ← the lore writer edits this
 Data/                Nodes/Floor4..2 Hazards/ Items/ Tips/ Traders/ Recipes/ Audio/ LevelConfig (ScriptableObject assets)
@@ -59,14 +60,16 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
   - `LastNode` (micro): restore the latest snapshot. Family members stay at their LAST chosen positions.
   - `Checkpoint` (macro): restore the floor checkpoint, including the building timer, and reset family positions.
   - Either way: keep the persistent data above, increment `LoopCount`, play the rewind FX (longer for macro rewinds).
-- **SceneNode** (ScriptableObject) has an id, title/body text keys, a room id, a timer (0 = untimed), `Choice`s, optional `onEnter` outcomes and "bomb checks" (conditions evaluated on enter that can kill). Subtypes are driven by `INodeHandler`s: `PlacementNode` (PlacementController), `DialogueNode` (DialogueController), `FusePuzzleNode` (FusePuzzleController), `EpilogueNode` (EpilogueController). With no handler the room is explorable (`ExplorationGate`).
+- **SceneNode** (ScriptableObject) has an id, title/body text keys, a room id, a timer (0 = untimed), `Choice`s, optional `onEnter` outcomes and "bomb checks" (conditions evaluated on enter that can kill). Subtypes are driven by `INodeHandler`s: `PlacementNode` (PlacementController), `DialogueNode` (DialogueController), `QTENode` (QTEController), `EpilogueNode` (EpilogueController). With no handler the room is explorable (`ExplorationGate`).
 - **Choice** has a label key, a type (`Normal`/`Trap`), `Condition`s (has item, has any item, flag, member state), a fail behaviour (`Hide`, `ShowLocked` with a reason, `ShowLockedFatal` = clickable death naming the first missing item), `Outcome`s (`GoToNode`, `Death`, `SetFlag`, `AddItem`, `RemoveItem`, `SetMemberState`, `TraderGive`, `ShowMessage`), and costs: time seconds, stamina, `heavy` (locked at 0 stamina), `isMove` (slower with injured members). A **delayed bomb** sets a flag now; a later node's bomb check reads it.
 - **Action costs** go through `ActionCostRouter` to the `SurvivalController` (building timer + stamina). Clicks go through `InputDelayRouter` (panic delay); `ClickFeedback` shows the instant ring.
 - **DialogueNode** has lines (speaker key, text key, time cost per line) and choices that show during the lines (e.g. "hurry") or at the end.
-- **WorldInteractable** (IClickable): time/stamina cost, optional required item, granted item, `borrowed` (recorded in the BorrowLedger), extra outcomes, one-shot as `Used_<id>` flags. `PickupItem` = open-surface preset; `HiddenItemHotspot` = invisible collider + painted overlay + sparkle.
-- **Recipe** (inputA, inputB, output, time, stamina) in a `RecipeBook`; BagUI: tap an item, tap it again to use it (food/water/first aid), tap another to combine.
+- **WorldInteractable** (IClickable): time/stamina cost, optional required item, granted item, `borrowed` (recorded in the BorrowLedger), extra outcomes, one-shot as `Used_<id>` flags. `PickupItem` = open-surface preset; `HiddenItemHotspot` = invisible collider + painted overlay + sparkle. `RopeDescentInteractable` = needs the bedsheet rope, enters a lower-floor node. `WorldDroppedItem` = an item the player dropped (spawned by `DroppedItemsPresenter` from `GameState.Dropped`).
+- **Recipe** (inputA, inputB, output, time, stamina) in a `RecipeBook`; BagUI: tap an item, tap it again to use it (food/water/first aid; a bedsheet ties the rope), tap another to combine, or Drop it into the current room.
+- **Bag state:** `Inventory` (slots), `KeyItemState` (key items), `RoomDropLedger` (dropped items per room), all restored by snapshots. Always add items through `StateOps.TryAddItem(state, id, item.IsKeyItem)` and check ownership with `StateOps.HasItem` (bag or key items). UI and world listen to `InventoryEvents`, never to each other.
+- **QTENode**: context (BreakerWiring / DogEvasion), `QTEConfig` (length 4–6, time per key, total timeout, building-timer penalty), success/fail outcomes, next node. HitStop freezes only the QTE; `Time.timeScale` is never touched.
 - **TraderProfile**: ordered needs + fallback food/water; the trader gives the first need the player lacks.
-- **LevelConfig**: building timer thresholds and texts, stamina, poison (`GasZone` per room with its valve flag), panic and input delay curves.
+- **LevelConfig**: building timer thresholds and texts, prep seconds, bag slots + bedsheet rope, stamina, poison (`GasZone` per room with its valve flag), panic and input delay curves.
 - **PlacementNode** is a SceneNode subtype with a timed phase (opening quake and each aftershock; magnitude + shake per node):
   - the player taps a family member and the valid anchors highlight
   - the player taps an anchor, and the member is repositioned instantly (no walk animation)
@@ -74,7 +77,7 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 - **Anchor** is a MonoBehaviour in the room: a tag (`Safe` or `Trap`), a capacity (a table holds 2), a linked Hazard, an adjacency list and a label key hidden until the player has died to it once.
 - **Hazard** (ScriptableObject): outcome per member type (player → Death, wife → Death or Injured, child → Trapped), text keys, a tip, and a motion type (`Topple`, `Drop`, `Shatter` or `None`) played as a code tween on the hazard prop.
 - **FamilyMember rules:** the wife goes wherever she is told; the child must be on the same anchor as an adult, or on an adjacent one; the player is placed last. Between rooms and floors the family follows the player (snaps to the room's spawns).
-- **One scene** (`Test_Building.unity`) holds every room of every floor; `RoomSwitcher` shows one room at a time. One GameManager, GameState and UI means checkpoints and rewinds never load scenes.
+- **One scene** (`Test_Building.unity`) holds every room of every floor; `RoomSwitcher` shows one room at a time; a room change plays `RoomTransitionController` (input locked between `NavigationEvents.OnTransitionStart` and `OnTransitionComplete`, room swapped at the midpoint, descend look when the floor changes; rewinds are instant). The camera sits under a `CameraRig` that the transition pans. One GameManager, GameState and UI means checkpoints and rewinds never load scenes.
 
 ### Isometric (2.5D) rules
 - Art is pre-rendered isometric sprites (2:1 diamond). The camera is orthographic.
@@ -111,7 +114,7 @@ Namespace: `SixtyOne.<Folder>` (e.g. `SixtyOne.Nodes`). Assembly definitions: `S
 ### CLOUD sessions (no Unity Editor available)
 - Write and refactor C# under `Assets/_Game/Scripts/` and `Assets/_Game/Tests/`.
 - Write editor scripts: validators, and `[MenuItem]` generators that create ScriptableObject assets, sample content and test scenes from code.
-- Write or extend `strings_tr.csv` with placeholder text for any new keys, prefixing the placeholder text with `TODO:`.
+- Write or extend `strings_tr.csv` with finished Turkish text for any new keys. Never write "TODO" anywhere in the CSV: Validate Content and `LocalizationTests` fail on it (case-insensitive, every column).
 
 Cloud sessions MUST NOT:
 - Hand-edit `.unity`, `.prefab` or `.asset` files, or hand-write `.meta` files. Let the Editor generate GUIDs. If assets or scenes are needed, write a `[MenuItem]` that builds them and list it in the handoff.

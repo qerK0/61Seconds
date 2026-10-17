@@ -4,6 +4,128 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 02:41 UTC] CLOUD — 6-slot bag + drop, key items (corner HUD), bedsheet rope descent, room transitions, WASD QTE, TODO-free strings
+(Written after rebasing onto the three LOCAL commits below: 05:10, 04:27 and 03:39. The local clock runs ahead of cloud UTC.)
+### Merge with the local work (prep phase, tilemaps, camera framing)
+- **Camera layers:** `CameraRig` (RoomCameraFraming, per room) → `TransitionPan` (RoomTransitionController) → `Main Camera` (CameraShake, director tilt/zoom). Framing, transition pan and shake each own one transform, so they never fight.
+- **Bedroom placement:** the Flat 11 bedroom (2 bedsheets) is reachable after the quake from the salon. The prep hall is still titled "Antre ve yatak odası"; rename it if that confuses players.
+- **Whistle:** it is now a key item, so the earlier "full bag loses Sevim's whistle" risk is gone. Hasan's food/water and trader items can still be lost to a full bag, but the bag now has 6 slots.
+- **PrepPhase fix:** it now resets the props of the node's own room (`rooms.FindRoom(prep.RoomId)`), not `rooms.Current`, which is still the previous room during a transition.
+- **Key-item HUD:** sits top-right, just left of the Notes button.
+- **QTE panel:** sits in the room band (0.3–0.7 × 0.42–0.83), like the old fuse panel.
+- **Removed:** the orphan `.meta` files of the deleted Puzzles scripts and FusePuzzlePanel.
+- **Text:** the local session's new rows (prep alert, prep rooms, f4.sevim, wrench/gold/laptop/console, valve locked) only had their `TODO:` prefix removed. Their texts were already final. strings_tr.csv has 306 rows and 0 TODO.
+- **Verification after the merge:**
+  - mcs compile clean. TileArt.cs uses tuple-foreach syntax mcs cannot parse, so a stand-in with its public surface was used.
+  - **EditMode 113/113**, including PrepTests.
+  - Harness: 0 missing/unused keys, 25/25 nodes reachable, validator 0 problems, 12 playthroughs pass, all starting from f4.prep.salon with the wrench.
+### Done
+- **Bag:**
+  - `LevelConfig.MaxInventorySlots` = 6, applied by SurvivalController. BagUI builds one slot per configured slot and shows a `used/total` counter.
+  - **Drop** button, shown while a slot is selected, costs 0.5s. The item goes into `GameState.Dropped` (`RoomDropLedger`, per room, restored by snapshots).
+  - `DroppedItemsPresenter` spawns a clickable `WorldDroppedItem` in that room. Clicking it puts the item back in the bag (1s).
+  - Events go through `InventoryEvents` (`OnItemDropped`, `OnInventoryChanged`, `OnKeyItemAcquired`); UI and world never reference each other.
+- **Key items:** `Item.IsKeyItem` is set on the flashlight and whistle by the generator.
+  - They go to `GameState.KeyItems`: no bag slot, not droppable, never blocked by a full bag.
+  - `KeyItemCornerHUD` sits top-right (left of the Notes button): dim until owned, then lit with a short pop and a hover tooltip.
+  - `StateOps.HasItem` (bag or key items) is used by conditions, the trader, interactables, the cinematic flashlight and the wet-cloth check.
+- **Bedsheets → rope → descent:**
+  - New Flat 11 bedroom (salon → "Yatak odasına geç") holds 2 bedsheets; Flat 12's wardrobe holds 1 (borrowed).
+  - `LevelConfig.RequiredBedsheetsForRope` = 3. A "Halat yap" bag prompt (or tapping a bedsheet twice) turns 3 sheets into 1 `bedsheet_rope` (5s, 3 stamina).
+  - `RopeDescentInteractable` on the new Flat 9 balcony needs the rope and stamina (heavy). It costs 10s and 20 stamina, keeps the rope tied, and enters `f2.aftershock`.
+- **Room transitions:** `RoomTransitionController` (coroutines, unscaled time, no DOTween).
+  - Locks input (`InputGate` + `NavigationEvents.OnTransitionStart`), fades the overlay while panning the new `CameraRig`, swaps the room at the midpoint, then unlocks (`OnTransitionComplete`).
+  - `TransitionConfig`: 0.35s lateral, 0.6s descend. Plays door + footstep cues, or a descend cue when the floor stage changes.
+  - Rewinds swap instantly. Placement nodes finish a running transition first. Reduce Effects drops the pan.
+- **WASD QTE:**
+  - Pure core: `QTESequence` (random W/A/S/D only, at most 2 identical keys in a row, length rolled per attempt), `QTERun` (per-key window + total timeout), `QTESession` (re-roll on every failure, success/failure callbacks).
+  - `QTEConfig` assets: breaker 4–6 keys, 1.2s per key, 8s total, −5s; dog 5–6 keys, 1.0s per key, 7s total, −6s.
+  - `QTENode` + `QTEController` read W/A/S/D through Input System actions. `QTEView` shows the big key, wire-stage pips, two countdown bars and on-screen W/A/S/D buttons for touch.
+  - On a miss: building-timer penalty, camera shake, red flash, a 0.15s QTE-only hit-stop (Time.timeScale untouched), and a new sequence.
+  - `f3.fuse` (breaker wiring) replaces the old switch puzzle: success sets PowerCut_F3.
+  - `f2.dog` (dog evasion) replaces "walk past = bitten": success sets DogGone; food and whistle still work.
+- **Localization:**
+  - Every `TODO` prefix is stripped. All 280 rows are final Turkish, including the AFAD popup and the new drop, key-item, rope and QTE keys.
+  - `ui.bag.used` and `ui.craft.done` no longer show a literal `{0}`.
+  - ContentValidator logs an **error** for any `TODO` (case-insensitive, every column). It also checks that the flashlight and whistle are key items, the bag/rope config, QTE nodes (config, next node, prompt), QTE configs and rope points.
+  - The CLAUDE.md CLOUD rule now says to write final text, never `TODO`.
+- **Tests:** (counts here are from before the merge; see the merge section above for the current totals)
+  - New: `InventoryTests` (6 slots, drop/recover/snapshot, key items 0 slots + HUD state, 3 sheets → rope, rope descent rule), `QTETests` (WASD only, no 3-in-a-row, fresh sequences, run hit/miss/timeouts, session callbacks for BreakerWiring and DogEvasion), `LocalizationTests` (no TODO in the real CSV).
+  - 106/106 pass in the cloud Mono runner (no Unity).
+  - The generator harness reports: 0 missing/unused keys, 22/22 nodes reachable, validator 0 problems, an injected `TODO` is caught, and 12 scripted playthroughs pass, including the rope route and both dog outcomes.
+
+### Name mapping (spec → code)
+| Spec name | Code |
+|---|---|
+| ItemDefinition | `Item` |
+| InventoryController / InventorySlotUI | `BagUI` |
+| AudioManager | `AudioService` |
+| UITheme / TransitionConfig | `TransitionConfig` asset |
+| RoomTabs | `RoomSwitcher` (RoomTabs was removed earlier) |
+| BreakerQTEInteractable / DogHazardQTE | `QTENode` with `QTEContext.BreakerWiring` / `.DogEvasion`, played by `QTEController` |
+| CraftingConfig | the bag fields on `LevelConfig` |
+
+### Files created / changed
+- **New runtime:**
+  - Core/: InventoryEvents, KeyItemState, RoomDropLedger, NavigationEvents
+  - Placement/: RoomTransitionController, TransitionConfig
+  - QTE/: QTEKey, QTESequence, QTERun, QTESession, QTEConfig, QTENode, IQTEView, QTEController
+  - UI/: KeyItemCornerHUD, HoverRelay, QTEView
+  - World/: WorldDroppedItem, DroppedItemsPresenter, RopeDescentInteractable
+  - Text/: TextLint
+- **Removed:** Puzzles/* and UI/FusePuzzlePanel.
+- **Changed:**
+  - Core: Inventory, GameState, Snapshot, StateOps, GameEvents
+  - Item, ConditionEvaluator, OutcomeExecutor, NodePlayer, TraderLogic, Crafting, WorldInteractable
+  - LevelConfig, SurvivalController, CinematicDirector, PlacementController, RoomSwitcher, BagUI, UiKeys
+  - Generator (all floors), BuildingLayout, SceneKit, TestSceneBuilder, TestSceneUi, SerializedWire, ContentValidator
+  - strings_tr.csv, CLAUDE.md, Floor2/Floor3 rule tests
+
+### Needs local wiring (checklist for the MCP session, in run order)
+1. `git pull`, open Unity and let it compile; expect 0 errors.
+   - Unity deletes the orphan `.meta` files of the removed Puzzles scripts, if your local copy has any.
+   - New scripts get their `.meta` files on import.
+2. Run **SixtyOne > Generate Building Levels**. It creates:
+   - `Data/QTE/qte.breaker.asset`, `qte.dog.asset` and `Data/TransitionConfig.asset`
+   - items `bedsheet` and `bedsheet_rope`
+   - nodes `f4.bedroom` and `f2.dog`; `f3.fuse` becomes a QTE node, and the old FusePuzzleNode asset is replaced
+   - 6 new audio cues (cue_door, cue_footsteps, cue_descend, cue_qte_hit, cue_qte_miss, cue_qte_success), which have no clips yet
+   - Then check that `item.flashlight` and `item.whistle` have **Is Key Item** ticked.
+3. Run **SixtyOne > Cinematic > Generate Profiles**, then **SixtyOne > Build Test Scene**. This adds the CameraRig, the 6-slot bag with Drop / Halat yap, the KeyItems corner, the QTE panel and the RoomTransition overlay.
+4. With `Test_Building` open, run **SixtyOne > Validate Content**; expect 0 problems and **no** red TODO errors. Then **Text > Validate**.
+5. Run the Test Runner (EditMode); expect 106 passing. `LocalizationTests` reads `Assets/_Game/Content/Text/strings_tr.csv` relative to the project root, which is the Unity default working directory.
+6. Play Mode via MCP:
+   1. Prep: the hall's flashlight nightstand goes to the corner HUD, not the bag. After the quake, hall → exit → Sevim "Sağ ol" → whistle in the corner too, and the bag count does not change.
+   2. Take an item (e.g. rope) → select its slot → Bırak → slot freed (n/6). Leave the room and come back → the item lies near the spawn → click it to pick it up again.
+   3. Move salon → kitchen → back. Check the 0.35s fade + pan, and that choices and world clicks are ignored during it.
+   4. Bedroom: take 2 bedsheets; Flat 12 wardrobe: 1 bedsheet → "Halat yap" → 1 rope.
+   5. F3 → Flat 9 → "Kabloyu onar" (with gloves/grip + tape, e.g. from the trader) → QTE panel. Press wrong keys once (−5s, new sequence), then complete it → back in Flat 9 with power cut.
+   6. Click the balcony "Halatla aşağı in" → descend transition → F2 aftershock placement.
+   7. Flat 7 valve → corridor → "Köpeğin yanından sıyrılmayı dene" → dog QTE (fail once, then succeed) → stairs → out → epilogue.
+   8. Scan every popup and dialogue for "TODO"; there should be none.
+7. Tuning: QTE lengths, timings and penalties are on the two QTEConfig assets; transition timing is on TransitionConfig. Check that the 0.35s transitions don't eat too much of the 60s prep (each prep move fades once).
+
+### Not verified / risks
+- No Unity in this session: compiled with mcs against API stubs. APIs used for the first time:
+  - `InputAction(name, InputActionType, binding)` + `performed`
+  - `RectTransform.anchoredPosition`
+  - `Image.FillMethod.Horizontal`
+  - `IPointerEnterHandler` / `IPointerExitHandler`
+  - `GetComponentInParent<T>(bool)`
+- **Rope descent:** `RopeDescentInteractable` enters the target node directly, not through a choice. It works only in explorable rooms (Flat 9 has no handler).
+- **Keyboard focus:** the QTE keys are global keyboard actions. They are enabled only while a QTE node is active, so W/A/S/D don't conflict with anything else today.
+- **Panic delay:** QTE keys bypass the panic input delay (QTE tension is its own timer). Say if you want the delay applied.
+- **Overlapping transitions:** if two room changes come faster than 0.35s, the first one completes immediately (`Finish`). Watch for flicker.
+- **Item icons:** dropped items and corner icons use the placeholder dot until items get icons.
+
+### Cut / simplified
+- The F4 hall breaker stays a simple choice; the QTE is the Floor 3 fuse box (the "Fuse Box wiring" in the verify list).
+- "Walk past the dog = bitten/injured" is replaced by the dog QTE, as the spec asks: failure costs time and re-rolls, with no injury.
+- Hit-stop is QTE-local, because CLAUDE.md forbids changing `Time.timeScale`.
+- Rope tying is a prompt or a double-tap, not automatic, so the player decides when to spend the 5s.
+
+### Next suggested step
+- LOCAL: run the checklist above with MCP Play Mode, screenshot the bag/corner HUD/QTE panel, tune the QTE and transition numbers, and add clips to the 6 new cues.
 ## [2026-10-17 05:10] LOCAL — Floor 4 opening flow: 60 s home loot prep → quake (building timer starts) → placement → Sevim in the corridor
 ### Done
 - **Prep phase** (new `Scripts/Prep/`):
