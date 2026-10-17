@@ -31,3 +31,16 @@ Then check each of these, and fix what's broken:
 10. **Full playthrough** from the main menu to the epilogue once, without dev shortcuts. List every bug found and fixed.
 
 Restore Interaction Mode. Write the HANDOFF entry, then commit and push to `cloud/foundation`.
+
+## Extra fixes from Bora's playtest (do these too)
+1. **Sevim's old placeholder is still visible.** The white capsule ("bean") is drawn next to or under her idle animation. Remove or hide the placeholder renderer on every NPC hotspot that has real art (Sevim now; later Hasan, Cemil, the dog, the robber). Check the scene builder, so a rebuild doesn't bring it back.
+2. **You can get down a floor without the rope.** Audit EVERY way down: F3→F2 via the Flat 9 balcony, the Flat 9 kitchen cables / shaft, the Flat 10 collapsed floor, and any door or stair link that skips a floor.
+   - Bora's rule: apart from the normal F4→F3 stairs and the F2 stairs to the street, every descent needs the **bedsheet rope** (and the **child harness** for the child, as before).
+   - Without them, the option shows locked-fatal (`ShowLockedFatal`) with the missing item's text, or is hidden, never silently allowed.
+   - Check `RoomLinkRules` / doors too: a door into another zone must never bypass the node's move choice and its conditions.
+   - Add an EditMode test that walks every descent link and asserts the rope condition.
+3. **The dog and Hasan Amca (dede) have no art yet.** Keep their hotspots working with a clean neutral silhouette (a dark tinted capsule with a soft shadow, no white bean). The art pipeline must accept their idle frames the same way as Sevim's: `Art/char/DOG_IDLE/`, `Art/char/HASAN_IDLE/`, `Art/char/CEMIL_IDLE/`, `Art/char/ROBBER_IDLE/`, each `frame0000.png…`, with any frame count, auto-detected when the folder exists. Use per-character height ratios: dog about 0.45 of the player, Hasan 0.95, Cemil 1.0, robber 1.0.
+4. **"Güç" → "Panik".** The bar labelled `Güç` (`ui.stamina.label`) is the STAMINA bar (food/water energy). Bora wants the HUD to show **Panik**:
+   - add a visible **Panik** meter (panic 0..1) under the timer, with the label `Panik`. It fills red as panic rises and pulses above `panicDelayThreshold`, so the player understands why clicks get delayed;
+   - rename the stamina label to `Enerji`, so the two bars aren't confused;
+   - add the new keys to the CSV.
