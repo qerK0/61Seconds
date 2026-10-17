@@ -24,7 +24,8 @@ namespace SixtyOne.Placement
         [Tooltip("Run speed and floor margin.")]
         [SerializeField] private MovementConfig config;
 
-        private float Speed => config != null ? config.RunSpeed : 2.4f;
+        // Config speeds are tuned at world scale 1; rooms scaled by RoomVisualConfig run proportionally faster.
+        private float Speed => (config != null ? config.RunSpeed : 2.4f) * (rooms != null && rooms.Current != null ? rooms.Current.Scale : 1f);
         private float Margin => config != null ? config.FloorMargin : 0.25f;
 
         /// <summary>True while the player may run (exploration, alive, no transition).</summary>
@@ -41,7 +42,7 @@ namespace SixtyOne.Placement
 
         private void Start()
         {
-            if (player != null) player.ReferenceSpeed = Speed;
+            if (player != null) player.ReferenceSpeed = config != null ? config.RunSpeed : 2.4f;
         }
 
         private void Update()

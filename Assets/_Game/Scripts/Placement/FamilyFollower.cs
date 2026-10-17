@@ -51,19 +51,21 @@ namespace SixtyOne.Placement
             bool child = member != null && member.Type == MemberType.Child;
             Vector2 offset = child ? config.ChildOffset : config.WifeOffset;
             float delay = child ? config.ChildDelay : config.WifeDelay;
-            Vector3 spot = rooms.Current.ClampToFloor(leader.position + (Vector3)offset, config.FloorMargin);
+            // Offsets, distances and speeds are tuned at world scale 1.
+            float scale = rooms.Current.Scale;
+            Vector3 spot = rooms.Current.ClampToFloor(leader.position + rooms.Current.WorldOffset(offset), config.FloorMargin);
             float distance = Vector2.Distance(transform.position, spot);
-            float speed = config.RunSpeed * config.FollowerSpeedFactor;
+            float speed = config.RunSpeed * config.FollowerSpeedFactor * scale;
             if (member != null && gm.State.GetMember(member.Type).Health == MemberHealth.Injured) speed *= config.InjuredSpeedFactor;
 
             if (motor.IsMoving)
             {
-                if (distance <= SettleDistance) motor.Stop();
+                if (distance <= SettleDistance * scale) motor.Stop();
                 else motor.Retarget(spot, speed);
                 return;
             }
 
-            if (distance <= config.FollowStartDistance)
+            if (distance <= config.FollowStartDistance * scale)
             {
                 farTime = 0f;
                 following = false;

@@ -73,18 +73,19 @@ namespace SixtyOne.World
             if (gm == null || room == null) return;
 
             IReadOnlyList<string> items = gm.State.Dropped.ItemsIn(room.RoomId);
-            Vector3 origin = room.GetSpawn(MemberType.Player) + (Vector3)firstOffset;
+            // Offsets are room-local (tuned at world scale 1), so they follow RoomVisualConfig.WorldScale.
+            Vector3 origin = room.transform.InverseTransformPoint(room.GetSpawn(MemberType.Player)) + (Vector3)firstOffset;
             for (int i = 0; i < items.Count; i++)
             {
                 spawned.Add(Spawn(room, items[i], origin + (Vector3)(spacing * i)));
             }
         }
 
-        private GameObject Spawn(Room room, string itemId, Vector3 position)
+        private GameObject Spawn(Room room, string itemId, Vector3 localPosition)
         {
             var go = new GameObject("Dropped_" + itemId);
-            go.transform.SetParent(room.transform, true);
-            go.transform.position = position;
+            go.transform.SetParent(room.transform, false);
+            go.transform.localPosition = localPosition;
 
             Item item = content != null ? content.FindItem(itemId) : null;
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();

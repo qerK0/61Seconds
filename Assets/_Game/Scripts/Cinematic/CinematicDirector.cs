@@ -333,8 +333,10 @@ namespace SixtyOne.Cinematic
             flashlight.enabled = on;
             if (!on) return;
             flashlight.intensity = p.FlashlightIntensity * state.PostQuake;
-            flashlight.pointLightOuterRadius = p.FlashlightRadius;
-            if (player != null) flashlight.transform.position = player.position + new Vector3(0f, 0.4f, 0f);
+            // Profile radius and offset are tuned at world scale 1 (RoomVisualConfig scales the World root).
+            float worldScale = player != null && player.parent != null ? Mathf.Abs(player.parent.lossyScale.x) : 1f;
+            flashlight.pointLightOuterRadius = p.FlashlightRadius * worldScale;
+            if (player != null) flashlight.transform.position = player.position + new Vector3(0f, 0.4f * worldScale, 0f);
         }
 
         private void SetLights(bool on, CinematicProfile p)

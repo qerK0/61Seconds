@@ -58,7 +58,9 @@ namespace SixtyOne.Placement
         /// <summary>Snaps to an anchor's ground point (small offset so shared anchors don't overlap).</summary>
         public void PlaceAt(Anchor anchor)
         {
-            PlaceAt(anchor.GroundPoint + SlotOffset(type));
+            // Slot offsets are tuned at world scale 1.
+            float scale = transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.x) : 1f;
+            PlaceAt(anchor.GroundPoint + SlotOffset(type) * scale);
         }
 
         /// <summary>Snaps to a world point (instant, no walk).</summary>

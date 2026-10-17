@@ -82,7 +82,9 @@ namespace SixtyOne.Placement
             Vector3 move = delta / distance * step;
             transform.position = position + move;
             Velocity = Time.deltaTime > 0f ? (Vector2)(move / Time.deltaTime) : Vector2.zero;
-            SpeedRatio = speed / Mathf.Max(0.01f, ReferenceSpeed);
+            // Reference speed is tuned at world scale 1; compare against it at this character's world scale.
+            float scale = transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.x) : 1f;
+            SpeedRatio = speed / Mathf.Max(0.01f, ReferenceSpeed * scale);
         }
 
         private void OnDied(DeathInfo info) => Stop();

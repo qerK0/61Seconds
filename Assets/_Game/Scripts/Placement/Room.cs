@@ -30,16 +30,22 @@ namespace SixtyOne.Placement
         private Anchor[] anchors;
         private RoomLink[] links;
 
-        /// <summary>World rect to frame (relative to the room's position).</summary>
+        /// <summary>World rect to frame (stored room-local, so it follows the room's position and world scale).</summary>
         public Rect ViewBounds
         {
             get
             {
-                Rect r = viewBounds;
-                r.position += (Vector2)transform.position;
-                return r;
+                Vector3 min = transform.TransformPoint(new Vector3(viewBounds.xMin, viewBounds.yMin, 0f));
+                Vector3 max = transform.TransformPoint(new Vector3(viewBounds.xMax, viewBounds.yMax, 0f));
+                return Rect.MinMaxRect(Mathf.Min(min.x, max.x), Mathf.Min(min.y, max.y), Mathf.Max(min.x, max.x), Mathf.Max(min.y, max.y));
             }
         }
+
+        /// <summary>World units per room-local unit (RoomVisualConfig.WorldScale, applied to the World root).</summary>
+        public float Scale => Mathf.Abs(transform.lossyScale.x);
+
+        /// <summary>A room-local offset (tuned at scale 1) as a world vector.</summary>
+        public Vector3 WorldOffset(Vector2 localOffset) => transform.TransformVector(new Vector3(localOffset.x, localOffset.y, 0f));
         private HazardProp[] props;
 
         public string RoomId => string.IsNullOrEmpty(roomId) ? name : roomId;
@@ -59,8 +65,9 @@ namespace SixtyOne.Placement
         /// <summary>Nearest walkable world point (margin in grid cells from the walls).</summary>
         public Vector3 ClampToFloor(Vector3 world, float margin = 0.2f)
         {
-            Vector3 local = floor.ClampLocal(world - transform.position, margin);
-            return new Vector3(local.x + transform.position.x, local.y + transform.position.y, world.z);
+            Vector3 local = floor.ClampLocal(transform.InverseTransformPoint(world), margin);
+            Vector3 clamped = transform.TransformPoint(new Vector3(local.x, local.y, 0f));
+            return new Vector3(clamped.x, clamped.y, world.z);
         }
 
         public Anchor[] Anchors
