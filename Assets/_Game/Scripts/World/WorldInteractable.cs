@@ -57,6 +57,7 @@ namespace SixtyOne.World
 
         private Renderer[] renderers;
         private Collider2D[] colliders;
+        private TMPro.TMP_Text[] labels;
         private Color baseColor = Color.white;
         private bool highlighted;
 
@@ -191,6 +192,8 @@ namespace SixtyOne.World
             bool visible = !(used && hideWhenUsed);
             foreach (Renderer r in renderers) if (r != null) r.enabled = visible;
             foreach (Collider2D c in colliders) if (c != null) c.enabled = visible;
+            // A used prop may stay visible (opened drawer), but its "what you get here" label must go.
+            foreach (TMPro.TMP_Text label in labels) if (label != null) label.enabled = visible && !used;
 
             highlighted = !used && IsKnownItem();
             if (body != null) body.color = used ? baseColor * usedTint : baseColor;
@@ -220,6 +223,7 @@ namespace SixtyOne.World
         {
             renderers = GetComponentsInChildren<Renderer>(true);
             colliders = GetComponentsInChildren<Collider2D>(true);
+            labels = GetComponentsInChildren<TMPro.TMP_Text>(true);
             if (body != null) baseColor = body.color;
         }
 

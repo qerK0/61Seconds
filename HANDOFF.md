@@ -4,6 +4,101 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 03:39] LOCAL — Building design verified in Unity: full route played twice with real timing, 5 bugs fixed, timers tuned
+### Done
+- **Compile:** the cloud code compiled first time with 0 errors and 0 warnings. Unity generated the `.meta` files. The APIs flagged as first-time all work: `GetComponentInParent<T>(bool)`, `Image.fillMethod`/`fillAmount` (click ring), `ContactFilter2D.noFilter`. No asmdef changes were needed.
+- **Checklist:**
+  - Generate Building Levels deleted the old Act1/Act2 nodes, items and `tip.leave_quickly`. No missing-script assets were left under `Data/`.
+  - Generate Profiles kept the tuned Act 1–3 values.
+  - Build Test Scene created `Test_Building.unity` (13 rooms) and deleted `Test_Act1`.
+  - **Validate Content: 20 nodes, 0 problems. Text > Validate: 252 referenced, 0 missing/empty/unused. EditMode: 95/95 passed.** All three were re-run after my fixes with the same results.
+- **Played the full route**, first step by step with checks, then twice as a timed run in Play mode. Each choice took 3s, each dialogue line 2.5s and each placement tap 1s, and every click went through the real `InputDelayRouter`.
+  - Intro lines tick the timer: 4+4+3+3 = 14s, paused while a line is showing. "Kısa kes" skips them, sets `IntroCutShort` and gives no whistle.
+  - Opening quake placement: wife + child on the table, player on the inner wall. Everyone survives.
+  - Kitchen: poison rose 0.025/s, the overlay darkened and the valve stopped it. The gloves drawer works.
+  - Hall breaker, then the exit.
+  - Hasan (food + water).
+  - Flat 12: borrowed cloth, rope and tape, left the note, and crafted cloth + rope into the harness.
+  - F3 aftershock, then the trader. The trader gave the first missing need (tape in run B); with a full bag it shows "Bag full" and the gift is lost.
+  - Flat 9: repair, then the fuse panel. A wrong try costs 3s; 1,3,4 ON is accepted. Then the cables (12s, −25 stamina).
+  - F2 strong aftershock, then the Flat 7 valve.
+  - Dog: the whistle works (kept), food works (consumed), and walking past = injured + pushed to Flat 7. An injured move costs 1.25×.
+  - Stairs, then the street epilogue (family line, borrow line by ledger + note, loop count).
+- **Extra checks:**
+  - Last-30s alarm: fires at exactly 30.0, ticks 30/29/28…, and the timer turns red.
+  - Collapse at 0: `death.collapse`, then a macro rewind to `f2.aftershock` with the saved **93.0s**. Flags reset, family snapped to spawns, LoopCount +1.
+  - Stamina 0: the heavy cables choice is locked ("exhausted"), and a normal 2s move cost 3s (1.5×).
+  - Click delay: 0 at panic 0.5, 0.08s at 0.78, 0.30s at 1.0. Panic only rose above 0.7 right after aftershocks.
+  - Hidden-item sparkle: it switched on after 25s in the hall (alpha 0.89). It is very small on screen.
+  - Flat 10 lighter: `death.lighter_explosion` + `tip.no_flame`, micro rewind.
+  - Electrocution without gloves: a ShowLockedFatal death card naming the missing "Lastik eldiven" + `tip.electric`, micro rewind back to Flat 9 with the gloves.
+- **Bugs found and fixed:**
+  1. **ClickFeedback swallowed every click after the first** (game-breaking with a real mouse). An instant click ran inside the coroutine before `StartCoroutine` returned, so `pending` stayed set forever. Instant clicks now run synchronously and only delayed clicks use `pending`. Run A: 57 routed clicks, 0 dropped.
+  2. **The building timer kept running on the street:** the player could "collapse" after winning. `SurvivalController` now stops ticking, poison and panic on an `EpilogueNode`. Verified: T stayed at 57.1 after 5s on the street.
+  3. **Flat 7 gas built up during the 7s placement and the quake:** the player arrived with poison 0.66 and a near-black screen. Gas no longer builds while a `PlacementNode` is active. Arrival poison is now 0.03.
+  4. **Used interactables kept their "what you get here" label** (e.g. "Lastik eldiven" on the empty kitchen drawer). `WorldInteractable.Refresh` now hides child TMP labels once used.
+  5. **Fuse panel layout:** the toast ("wrong pattern", hints) drew behind the panel's "Şalteri kaldır" button. The toast is now built after the fuse panel (on top). The panel moved to y 0.53–0.81, clear of the toast and of the timer caption.
+- **Balance**, from timed play at the pace above (300s timer):
+  - **Route A** (whistle intro, gloves, harness, Flat 9 fuse + **cables**): **57.1s left**. That run used the old 8s/7s aftershock timers and failed both placements once; macro rewinds restore the timer, so the deaths cost nothing.
+  - **Route B** ("Kısa kes", flashlight, **Flat 10** hole, dog food): **83.0s left**, 0 deaths.
+  - Segment cost: **cables ≈ 32.7s** (Flat 9 + repair + fuse + 12s descent, plus about 14s of F4 prep for gloves/tape/harness) vs **Flat 10 ≈ 27.7s** (+1s flashlight pickup).
+  - Total action costs on Route A ≈ 114s; the other ≈ 130s is real time (placements, quakes, ~57 decisions).
+  - The aftershock placement timers were too tight: 6 taps plus the AFAD popup. **F3 8 → 10s, F2 7 → 9s**, after which Route B placed everything first try.
+  - Kept **buildingSeconds = 300**. A good first-timer on the main route lands at about 50–57s at 3s/decision. A slower reader (4s/decision) would lose about 40s more, so watch real playtests.
+- **Look:** Acts 2/3 were crushed to near black on real rooms (F2 corridor/Flat 7). Raised post-quake light, and the poison now clears 3× faster so rooms read again soon after the valve.
+
+### Final values
+- **LevelConfig:**
+  - unchanged: buildingSeconds 300, pulseAt 60, alarmAt 30, realtimeTick on, pauseInDialogue on, injuredMoveExtraPerMember 0.25, staminaMax 100, staminaDrainPerSecond 0.15, staminaZeroTimeMultiplier 1.5, gas kitchen 0.025 / flat10 0.03 / flat7 0.035 per s, wetClothFactor 0.5, panicFromPoison 0.6, aftershockPanic 0.45, panicCalmPerSecond 0.04
+  - changed: **poisonDecayPerSecond 0.01 → 0.03** (also the code default)
+- **Nodes (generator):** f4.quake 10s, **f3.aftershock 8 → 10s**, **f2.aftershock 7 → 9s**.
+- **GameSettings** (unchanged): panicDelayThreshold 0.7, maxInputDelay 0.3, hiddenItemSparkle on, hiddenSparkleAfterSeconds 25, reduceEffects off, reducedShakeScale 0.35.
+- **Cinematic:** CinematicAct2 postQuakeGlobalLight 0.34 → **0.38**, postQuakeExposureOffset −0.35 → **−0.30**. CinematicAct3 postQuakeGlobalLight 0.28 → **0.34**, postQuakeExposureOffset −0.40 → **−0.30**. Act 1 unchanged.
+
+### Screenshots (`Captures/`, git-ignored)
+- `b01_intro`: HUD reads well (04:56 timer, loop, notes, bag, stamina "Güç"); Sevim's line with "Devam" / "Kısa kes".
+- `b02_f4_placement`, `b08_f3_aftershock`: the AFAD popup covers the top half of the room during placement (it fades out). The tap hint and the "-3 sn" spent label show.
+- `b03_f4_after_quake`: the salon after the quake, family on their anchors.
+- `b04_kitchen_poison`: the poison overlay visibly darkens the room. `c01`/`d01`: kitchen before/after the label fix.
+- `b05_hall_sparkle`: the sparkle is a tiny white dot, easy to miss.
+- `b06`/`b07`/`c02`: the bag with labels, the crafted "Çocuk taşıma kuşağı", the note toast, the bag-full red flash.
+- `b10_electrocution_death`, `b18_collapse_death`: death cards with the missing item / tip / GERİ SAR.
+- `b11_fuse_panel` (old layout, toast behind the button) → `c04_fuse` (fixed).
+- `b09`/`c03` F3 corridor, `b13`/`c05` Flat 7, `b14`/`b15`/`c06` F2 corridor (before/after the brightness and poison fixes). `d02`/`d03`: Flat 10 dark, then lit by the flashlight.
+- `b17_alarm_last30`: red 00:28.
+- `b16`/`c07`/`d04`: the street epilogue (warm light, family together, borrow/note/loop lines).
+
+### Files created / changed
+- Assets/_Game/Scripts/UI/ClickFeedback.cs — instant clicks run synchronously (fix 1)
+- Assets/_Game/Scripts/Building/SurvivalController.cs — no ticking on the epilogue; no gas build-up during placement (fixes 2 and 3)
+- Assets/_Game/Scripts/World/WorldInteractable.cs — hide labels on used interactables (fix 4)
+- Assets/_Game/Scripts/Editor/SceneBuild/TestSceneUi.cs — toast above the fuse panel, panel moved (fix 5)
+- Assets/_Game/Scripts/Building/LevelConfig.cs — poisonDecayPerSecond default 0.03
+- Assets/_Game/Scripts/Editor/Content/BuildingLevelsGenerator.Floor3.cs / .Floor2.cs — aftershock timers 10s / 9s
+- Assets/_Game/Data/** — generated building content (Floor4/3/2 nodes, items, hazards, recipes, traders, tips, LevelConfig, cue_building_alarm); tuned CinematicAct2/3; GameSettings serialized new fields
+- Assets/_Game/Scenes/Test_Building.unity (new), Test_Act1.unity (deleted by the builder)
+- Editor-generated `.meta` files for the cloud scripts and tests
+- Not committed: `Assets/_Game/Art/Concept/` (left untouched, untracked) and the TMP `LiberationSans SDF - Fallback.asset` atlas churn
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Hand-play once with a real mouse to confirm fix 1 in the UI: choices, anchors and world clicks all respond repeatedly.
+- [ ] Assign audio clips: every cue is still silent, including the new `cue_building_alarm`.
+- [ ] Make the hidden-item sparkle bigger or brighter once the painted overlays exist.
+- [ ] Optional: remove `com.unity.collab-proxy`. It flipped VersionControlSettings to "Unity Version Control" again this session; I reset it each time.
+
+### Not verified / risks
+- Balance numbers come from scripted real-time play at a fixed pace, not a human. Watch the 300s total with a slow reader.
+- A full bag silently loses the gift from Hasan and the trader (the flags are still set). Consider refusing or deferring the gift when the bag is full.
+- The F2 corridor body text still says the dog blocks the way after `DogGone`. The epilogue says "0 kez yaşadın" for a no-death run. Both are writer TODOs.
+- Act 2/3 post-quake looks are readable now but still dark with placeholder art. Re-check with real art.
+- A test-harness side effect: `Application.runInBackground` persisted `PlayerSettings.runInBackground: 1`, and the Editor rewrote `QualitySettings` per-platform defaults. I reverted both files.
+
+### Next suggested step
+- LOCAL or the team: one human playthrough with mouse + sound to confirm feel and the 300s balance, then the writer replaces the `TODO:` texts.
+- CLOUD: handle the full-bag gift loss (trader/Hasan) and make the corridor body text conditional on `DogGone`.
+
+---
+
 ## [2026-10-16 23:45 UTC] CLOUD — Major design change: one quake, 300s building timer, floors 4→3→2 with checkpoints, survival systems, crafting, epilogue
 ### Done
 - **Building timer replaces the 61s prep.** `BuildingTimer` (pure) + `SurvivalController`: 300s on `Data/LevelConfig.asset`, pulse at 60s, alarm + ticks in the last 30s, collapse at 0 = death with a macro rewind. Every action cost (choices, interactables, dialogue lines, crafting, item use) subtracts from it via `ActionCostRouter`. Moves cost extra per injured member.

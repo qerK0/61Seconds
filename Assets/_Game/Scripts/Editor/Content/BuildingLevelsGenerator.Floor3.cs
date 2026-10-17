@@ -69,7 +69,7 @@ namespace SixtyOne.Editor
             result.Trader = profile;
 
             // Aftershock on arrival: placement in the corridor, floor checkpoint (timer included).
-            Setup(arrival, F3Aftershock, F3Corridor, 2, 8f);
+            Setup(arrival, F3Aftershock, F3Corridor, 2, 10f);
             arrival.SetCheckpoint(true);
             arrival.SetAfadAlert(true);
             arrival.ConfigurePlacement(corridor, result.Hazards["hz.f3_open"], new DeathData("death.child_alone", Tip("tip.keep_child_close"), MemberType.Child), 3f);

@@ -75,13 +75,16 @@ MonoBehaviour:
   rotationalShakeDegrees: 1.2
   dutchTiltDegrees: 2.5
   dustBurstCount: 200
-  postQuakeExposureOffset: -0.4
+  postQuakeExposureOffset: -0.3
   postQuakeSaturation: -61
   postQuakeVignette: 0.56
-  postQuakeGlobalLight: 0.28
+  postQuakeGlobalLight: 0.34
   flashlightItemId: flashlight
   flashlightIntensity: 1.2
   flashlightRadius: 2.4
+  poisonExposure: -0.9
+  poisonSaturation: -35
+  poisonVignette: 0.25
   deathBlendSeconds: 0.5
   deathSaturation: -100
   deathContrast: 40

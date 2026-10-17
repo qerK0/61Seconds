@@ -49,7 +49,7 @@ namespace SixtyOne.Building
         [Tooltip("Rooms with a gas leak and the valve flag that stops it.")]
         [SerializeField] private List<GasZone> gasZones = new List<GasZone>();
         [Tooltip("Poison lost per second outside gas (or once the valve is closed).")]
-        [SerializeField] private float poisonDecayPerSecond = 0.01f;
+        [SerializeField] private float poisonDecayPerSecond = 0.03f;
         [Tooltip("Item that reduces poison gain while in the bag (wet cloth).")]
         [SerializeField] private Item wetClothItem;
         [Tooltip("Poison gain multiplier with the wet cloth (0.5 = halved).")]

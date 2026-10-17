@@ -15,5 +15,9 @@ MonoBehaviour:
   knowledgeHighlight: 1
   reduceEffects: 0
   reducedShakeScale: 0.35
+  panicDelayThreshold: 0.7
+  maxInputDelay: 0.3
+  hiddenItemSparkle: 1
+  hiddenSparkleAfterSeconds: 25
   highlightColor: {r: 1, g: 0.95, b: 0.55, a: 1}
   highlightPulseSpeed: 1.5

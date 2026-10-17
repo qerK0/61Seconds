@@ -1,0 +1,67 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec41df283bec74346ba0e91276f3594e, type: 3}
+  m_Name: f3.aftershock
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.PlacementNode
+  id: f3.aftershock
+  titleKey:
+    key: f3.aftershock.title
+  bodyKey:
+    key: f3.aftershock.body
+  roomId: f3_corridor
+  act: 2
+  timerSeconds: 10
+  timeoutChoiceIndex: -1
+  isCheckpoint: 1
+  afadAlertOnEnter: 1
+  choices: []
+  onEnter: []
+  bombChecks:
+  - conditions:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: GasOff
+      member: 0
+      health: 0
+    outcomes:
+    - type: 1
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: death.kitchen_fire
+      tip: {fileID: 11400000, guid: 20589765cbc2ebb4c8862eaa29bb9f9f, type: 2}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+  nextNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
+  unplacedHazard: {fileID: 11400000, guid: 63ebbf423be506f4bb969f09be3b7525, type: 2}
+  childAloneDeath:
+    textKey:
+      key: death.child_alone
+    tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
+    cue: {fileID: 0}
+    victim: 2
+    rewindTarget: 0
+    rewindTo: {fileID: 0}
+  quakeSeconds: 3
+  magnitude: 5.4
+  shakeScale: 0.8

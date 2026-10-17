@@ -19,3 +19,7 @@ MonoBehaviour:
     key: item.water.desc
   icon: {fileID: 0}
   isTrap: 0
+  staminaRestore: 25
+  healsInjury: 0
+  consumedOnUse: 1
+  useSeconds: 2

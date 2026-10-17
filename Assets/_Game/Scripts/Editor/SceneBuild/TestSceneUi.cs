@@ -41,10 +41,11 @@ namespace SixtyOne.Editor
             BuildLoopCounter(root, gameManager);
             BuildBag(root, gameManager, content, art, survival, recipes);
             BuildStamina(root, survival);
-            BuildToast(root);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
             fusePanel = BuildFusePanel(root);
+            // After the fuse panel so "wrong pattern" messages draw on top of it.
+            BuildToast(root);
             BuildDeathCard(root, gameManager, content, art);
             BuildPoisonOverlay(root);
             BuildRewindFx(root, camera);
@@ -142,7 +143,7 @@ namespace SixtyOne.Editor
 
         private static FusePuzzlePanel BuildFusePanel(Transform root)
         {
-            Image bg = UiFactory.MakeImage("FusePuzzle", root, new Vector2(0.3f, 0.45f), new Vector2(0.7f, 0.8f), new Color(0.08f, 0.08f, 0.1f, 0.95f), raycast: true);
+            Image bg = UiFactory.MakeImage("FusePuzzle", root, new Vector2(0.3f, 0.53f), new Vector2(0.7f, 0.81f), new Color(0.08f, 0.08f, 0.1f, 0.95f), raycast: true);
             CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
             TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0.03f, 0.8f), new Vector2(0.97f, 0.97f), 30f, TextAlignmentOptions.Center, Accent, bold: true);
             LocalizedText titleText = title.gameObject.AddComponent<LocalizedText>();

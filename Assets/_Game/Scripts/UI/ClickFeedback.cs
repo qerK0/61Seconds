@@ -48,7 +48,25 @@ namespace SixtyOne.UI
         private void Schedule(Action action, Vector2 screenPosition, float delay)
         {
             if (pending != null) return;
+            if (delay <= 0f)
+            {
+                // Run synchronously: a coroutine that finishes before StartCoroutine returns would leave
+                // `pending` assigned forever and swallow every later click.
+                action();
+                if (ring != null) StartCoroutine(Flash(screenPosition));
+                return;
+            }
+
             pending = StartCoroutine(Run(action, screenPosition, delay));
+        }
+
+        private IEnumerator Flash(Vector2 screenPosition)
+        {
+            ring.enabled = true;
+            ring.transform.position = screenPosition;
+            ring.fillAmount = 1f;
+            yield return new WaitForSecondsRealtime(instantFlashSeconds);
+            if (pending == null) ring.enabled = false;
         }
 
         private IEnumerator Run(Action action, Vector2 screenPosition, float delay)
@@ -57,16 +75,7 @@ namespace SixtyOne.UI
             {
                 ring.enabled = true;
                 ring.transform.position = screenPosition;
-                ring.fillAmount = delay > 0f ? 0f : 1f;
-            }
-
-            if (delay <= 0f)
-            {
-                pending = null;
-                action();
-                yield return new WaitForSecondsRealtime(instantFlashSeconds);
-                if (pending == null && ring != null) ring.enabled = false;
-                yield break;
+                ring.fillAmount = 0f;
             }
 
             float time = 0f;

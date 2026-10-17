@@ -96,6 +96,8 @@ namespace SixtyOne.Building
         private void Update()
         {
             if (config == null || gameManager == null || gameManager.IsDead) return;
+            // Out on the street: the run is won, the building can no longer kill.
+            if (nodePlayer != null && nodePlayer.Current is EpilogueNode) return;
 
             float dt = Time.deltaTime;
             bool paused = config.PauseInDialogue && dialogue != null && dialogue.IsPlayingLines;
@@ -115,7 +117,9 @@ namespace SixtyOne.Building
         {
             SceneNode node = nodePlayer != null ? nodePlayer.Current : null;
             GasZone zone = config.ZoneFor(node != null ? node.RoomId : null);
-            bool openGas = zone != null && !State.Flags.Get(zone.ValveFlag);
+            // No gas build-up during a timed placement: the player cannot reach the valve until it ends.
+            bool placing = node is SixtyOne.Placement.PlacementNode;
+            bool openGas = zone != null && !placing && !State.Flags.Get(zone.ValveFlag);
             bool wetCloth = config.WetClothItem != null && State.Inventory.Has(config.WetClothItem.Id);
             float before = State.Poison;
             State.Poison = SurvivalModel.StepPoison(before, openGas, zone != null ? zone.PoisonPerSecond : 0f, wetCloth,

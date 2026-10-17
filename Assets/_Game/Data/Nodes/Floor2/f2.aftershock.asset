@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ec41df283bec74346ba0e91276f3594e, type: 3}
+  m_Name: f2.aftershock
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.PlacementNode
+  id: f2.aftershock
+  titleKey:
+    key: f2.aftershock.title
+  bodyKey:
+    key: f2.aftershock.body
+  roomId: flat7
+  act: 3
+  timerSeconds: 9
+  timeoutChoiceIndex: -1
+  isCheckpoint: 1
+  afadAlertOnEnter: 1
+  choices: []
+  onEnter: []
+  bombChecks: []
+  nextNode: {fileID: 11400000, guid: 0b4ba70ad30e1a344826fa4ba287d102, type: 2}
+  unplacedHazard: {fileID: 11400000, guid: 0d33f0dcb74433148b939d57021c2653, type: 2}
+  childAloneDeath:
+    textKey:
+      key: death.child_alone
+    tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
+    cue: {fileID: 0}
+    victim: 2
+    rewindTarget: 0
+    rewindTo: {fileID: 0}
+  quakeSeconds: 3.5
+  magnitude: 6.2
+  shakeScale: 1.1

@@ -1,0 +1,352 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
+  m_Name: f2.corridor
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
+  id: f2.corridor
+  titleKey:
+    key: f2.corridor.title
+  bodyKey:
+    key: f2.corridor.body
+  roomId: f2_corridor
+  act: 3
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f2.corridor.c_food
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: DogGone
+      member: 0
+      health: 0
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: 30ad8379863728843b6e8421fc7e8943, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+    failBehaviour: 1
+    lockedReasonKey:
+      key: f2.corridor.c_food.locked
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 4
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 11400000, guid: 30ad8379863728843b6e8421fc7e8943, type: 2}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: DogGone
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f2.corridor.msg_fed
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f2.corridor.c_whistle
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: DogGone
+      member: 0
+      health: 0
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: 5d95bc2995c84124189eee0d7134ee67, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+    failBehaviour: 1
+    lockedReasonKey:
+      key: f2.corridor.c_whistle.locked
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: DogGone
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f2.corridor.msg_whistle
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f2.corridor.c_pass
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: DogGone
+      member: 0
+      health: 0
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 3
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 5
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 1
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: PlayerInjured
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f2.corridor.msg_bitten
+      member: 0
+      health: 0
+    - type: 0
+      targetNode: {fileID: 11400000, guid: 0b4ba70ad30e1a344826fa4ba287d102, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f2.corridor.c_stairs
+    type: 0
+    showIf:
+    - type: 2
+      item: {fileID: 0}
+      anyItems: []
+      flag: DogGone
+      member: 0
+      health: 0
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 4
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: 6e5f1bed43f664f48b652eb8a64fd394, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f2.corridor.c_flat8
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: b6eff5ac8cfa3444e952bb0218a78428, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f2.corridor.c_flat7
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: 0b4ba70ad30e1a344826fa4ba287d102, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []

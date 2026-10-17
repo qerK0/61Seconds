@@ -81,7 +81,7 @@ namespace SixtyOne.Editor
             SceneNode exit = Node<SceneNode>(floor, F2Exit);
             EpilogueNode epilogue = Node<EpilogueNode>(floor, F2Epilogue);
 
-            Setup(arrival, F2Aftershock, Flat7, 3, 7f);
+            Setup(arrival, F2Aftershock, Flat7, 3, 9f);
             arrival.SetCheckpoint(true);
             arrival.SetAfadAlert(true);
             arrival.ConfigurePlacement(flat7, result.Hazards["hz.f7_open"], new DeathData("death.child_alone", Tip("tip.keep_child_close"), MemberType.Child), 3.5f);

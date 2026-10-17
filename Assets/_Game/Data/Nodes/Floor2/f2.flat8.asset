@@ -1,0 +1,66 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
+  m_Name: f2.flat8
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
+  id: f2.flat8
+  titleKey:
+    key: f2.flat8.title
+  bodyKey:
+    key: f2.flat8.body
+  roomId: flat8
+  act: 3
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f2.flat8.c_back
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: aa7e86076762ce540934d60aa80fcf47, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []
