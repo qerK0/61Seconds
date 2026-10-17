@@ -352,6 +352,8 @@ namespace SixtyOne.Editor
                     {
                         if (rope.RequiredItem == null) problems += Report($"rope descent '{rope.Id}' has no required item.", rope);
                         if (rope.TargetNode == null) problems += Report($"rope descent '{rope.Id}' has no target node.", rope);
+                        if (rope.FamilyItem == null) problems += Report($"rope descent '{rope.Id}' has no family item (the child must come down safely).", rope);
+                        if (rope.FamilyItem != null && rope.LockedKey.IsEmpty) problems += Report($"rope descent '{rope.Id}' has no locked reason.", rope);
                     }
                 }
             }

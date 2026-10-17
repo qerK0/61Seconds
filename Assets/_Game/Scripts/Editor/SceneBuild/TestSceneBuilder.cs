@@ -233,7 +233,7 @@ namespace SixtyOne.Editor
 
             foreach (BuildingLayout.RopeSpec rope in spec.Ropes)
             {
-                SceneKit.RopeDescent(t, rope.Id, rope.Gx, rope.Gy, data.Items["bedsheet_rope"], data.Nodes[rope.TargetNodeId], nodePlayer);
+                SceneKit.RopeDescent(t, rope.Id, rope.Gx, rope.Gy, data.Items["bedsheet_rope"], data.Items["child_harness"], data.Nodes[rope.TargetNodeId], nodePlayer);
             }
 
             foreach (BuildingLayout.LightSpec l in spec.Lights)

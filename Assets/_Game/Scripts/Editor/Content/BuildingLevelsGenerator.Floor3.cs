@@ -141,12 +141,15 @@ namespace SixtyOne.Editor
             flat10.AddChoice(C(F3Flat10, "back").Move(2f).Then(Outcome.GoTo(corridor)));
         }
 
-        /// <summary>Gas left open in Flat 11 → fire upstairs fills the stairwell with smoke on Floor 3.</summary>
+        /// <summary>
+        /// Gas left open in Flat 11 → fire upstairs fills the stairwell with smoke on Floor 3. Macro rewind: the
+        /// valve needs the wrench, which can only be taken during the prep, so a micro rewind would soft-lock.
+        /// </summary>
         private static void AddGasBomb(SceneNode arrival)
         {
             arrival.AddBombCheck(new BombCheck()
                 .When(Condition.FlagFalse(GasOffF4))
-                .Kills(Death("death.kitchen_fire", "tip.gas_off")));
+                .Kills(new DeathData("death.kitchen_fire", Tip("tip.gas_off"), MemberType.Player, null, null, RewindTarget.Checkpoint)));
         }
     }
 }

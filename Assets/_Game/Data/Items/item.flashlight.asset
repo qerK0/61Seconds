@@ -19,6 +19,7 @@ MonoBehaviour:
     key: item.flashlight.desc
   icon: {fileID: 0}
   isTrap: 0
+  isKeyItem: 1
   staminaRestore: 0
   healsInjury: 0
   consumedOnUse: 1

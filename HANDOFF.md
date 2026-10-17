@@ -4,6 +4,100 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 06:23] LOCAL — Verified the cloud bag/key-item/rope/transition/QTE merge in Unity; restored the child rule on the rope descent; fixed an F3 gas soft-lock; tuned the QTEs
+### Done
+- **Compile:** 0 errors on the first import. All the first-time APIs were fine: `InputAction(name, type, binding)`, `anchoredPosition`, `FillMethod.Horizontal`, pointer enter/exit, `GetComponentInParent<T>(bool)`, and the TileArt tuple-foreach. No asmdef changes needed.
+- **Checklist, in order:**
+  - Generate Building Levels: `item.flashlight` and `item.whistle` have Is Key Item ticked.
+  - Cinematic > Generate Profiles, Build Test Scene (14 rooms).
+  - Validate Content: 25 nodes, 0 problems, no TODO errors.
+  - Text > Validate: 307 referenced, 0 missing, 0 empty, 0 unused.
+  - EditMode tests: **114/114** (113 + 1 new).
+- **Local work survived the merge** (screenshots):
+  - The 60s prep with the AFAD popup; the building timer stays at 300 during the prep and starts at the quake.
+  - Sevim is in the F4 corridor.
+  - Tilemap floors and back walls in every room checked.
+  - Per-room camera framing: salon vs kitchen vs corridor framed differently.
+- **Full Play Mode route, played twice:**
+  - Flashlight and whistle → corner HUD; the bag count is unchanged (4→4 and 2→2).
+  - Drop + recover: water, 6/6→5/6 → leave → back → click → 6/6. Also dropped the wrench in the F4 corridor.
+  - Room transitions block input: a second `Choose` during the fade was ignored.
+  - Bedroom 2 sheets + Flat 12 1 sheet → "Halat yap" → `bedsheet_rope`. Cloth + rope → child harness.
+  - F3 aftershock placement → Flat 9 breaker QTE (a wrong key gives −5s and a new sequence; then success sets PowerCut_F3).
+  - Balcony rope descent → F2 aftershock placement → Flat 7 valve → dog QTE (miss −6s and re-roll, then success) → stairs → out → epilogue.
+  - **0 "TODO" and 0 `[[missing]]`** in every TMP text and the CSV. No console errors in run 2. Warnings: only the 13 expected "cue has no clips".
+- **Bugs fixed:**
+  1. **Rope descent no longer needed a way to bring the child** (5a). Restored; details under the answers below.
+  2. **F3 gas soft-lock (pre-existing, from the local wrench change `7a9b52a`):**
+     - Without the prep wrench, the F4 valve can never be closed. The F3 gas bomb micro-rewound to the F4 corridor, so the only way out was waiting ~3.5 min for the collapse.
+     - The bomb now rewinds to the **floor checkpoint** (prep start), where the wrench can be taken. The "Gazı kapat" tip is unchanged.
+  3. **VersionControlSettings:** the Editor had switched it to "Unity Version Control". I set it back to Visible Meta Files and the file is not committed.
+
+### Answers
+- **5a) Rope descent and the child: the rule was lost, now restored.**
+  - Only the Flat 9 *cables* choice still required `child_harness`; the balcony `RopeDescentInteractable` only checked the bedsheet rope and stamina.
+  - It now has a data-driven `familyItem` (= `child_harness`, the existing cloth + rope recipe) and a `lockedKey`.
+  - Without the harness the balcony is **shown locked** (sprite greyed via `InventoryEvents.OnInventoryChanged`), and a click shows the reason `ui.rope.descent_locked`: "Çocuğu halattan indiremezsin: önce bir taşıma kuşağı yap (bez + ip)."
+  - Pure rules: `FamilyCanCome` and `CanDescend(state, rope, family)`, plus a new test. ContentValidator reports a rope point that has no family item or no locked reason.
+  - Verified in Play Mode: with the harness removed, the click stays in Flat 9 and shows the reason; with it, the descent works.
+- **5b) Dog: yes, all three exist.** Food (consumed), whistle (kept), and "Köpeğin yanından sıyrılmayı dene" → `f2.dog` QTE. All three were shown side by side; nothing needed restoring.
+- **5c) Transitions vs prep:**
+  - The prep timer runs on `Time.deltaTime` during the fade, so each lateral transition eats its duration: 0.35s, plus at most one frame per half (≈0.38s at 60 fps).
+  - The full prep walk (salon→kitchen→salon→hall→salon) is 4 transitions ≈ **1.5s**, which is under the ~3s budget, so **TransitionConfig is unchanged (0.35s lateral, 0.6s descend)**.
+  - This does not count the data move costs (1s per prep move), which are design, not transition time.
+  - The in-Editor timings were not usable: MCP calls stall the main thread, so the measurements came out at 0.19–1.25s. The figure above comes from the code path (`RoomTransitionController.Run`).
+
+### Tuned values (QTEConfig, set in `BuildingLevelsGenerator.cs`, so Generate keeps them)
+- Monte Carlo model of a normal player: 4-choice reaction lognormal with a 0.62s median (σ 0.3), +0.35s to orient on the first key, 2.5% wrong keys.
+
+| Config | Keys | Per key | Total | Penalty | First-try success |
+|---|---|---|---|---|---|
+| `qte.breaker` | 4–6 | 1.2 → **1.15s** | 8 → **7s** | −5s | ≈71% → **≈65%** |
+| `qte.dog` | 5–6 | 1.0 → **1.15s** | 7 → **6.5s** | −6s | ≈38% → **≈64%** |
+
+- The old dog config was too hard: the first key alone often missed the 1.0s window.
+
+### Screenshots (local only, `Temp/Screens/`, not committed)
+- 01 prep salon + AFAD popup + 1:00
+- 02 prep kitchen (different framing, locked valve reason)
+- 03 death card + tip + GERİ SAR
+- 04b Sevim in the F4 corridor
+- 05 whistle lit in the corner HUD, bag 2/6
+- 06 Flat 12: flashlight lit, rope tied, 3/6
+- 07 dropped water dot in Flat 12
+- 08 F3 gas death
+- 09 rope locked reason without the harness
+- 10 breaker QTE panel (big key, pips, bars, WASD, −5 sn)
+- 11 F2 aftershock after the descent
+- 12 dog: food / whistle / slip past
+- 13 epilogue
+
+### Files created / changed
+- Scripts/World/RopeDescentInteractable.cs — family rule (harness), locked reason, grey tint, pure `FamilyCanCome` / `CanDescend(…, family)`
+- Scripts/Editor/SceneBuild/SceneKit.cs, TestSceneBuilder.cs — wire `child_harness` + the locked key + the tint sprite into the rope point
+- Scripts/Editor/Content/ContentValidator.cs — rope points need a family item and a locked reason
+- Scripts/Editor/Content/BuildingLevelsGenerator.cs — tuned QTE values
+- Scripts/Editor/Content/BuildingLevelsGenerator.Floor3.cs — F3 gas bomb → Checkpoint rewind
+- Scripts/Text/UiKeys.cs, Content/Text/strings_tr.csv — `ui.rope.descent_locked` (final Turkish)
+- Tests/EditMode/InventoryTests.cs — `RopeDescentIsLockedUntilTheChildCanComeSafely`
+- Regenerated by the menus: Data/ (QTE, TransitionConfig, items, nodes, 6 audio cues, LevelConfig, cinematic), Scenes/Test_Building.unity, and the .meta files of the cloud scripts
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Sound designer: clips for cue_door, cue_footsteps, cue_descend, cue_qte_hit / miss / success (all 13 cues are still silent)
+- [ ] Artist: item icons; dropped items and corner-HUD icons are still placeholder dots, and dropped items have no label
+
+### Not verified / risks
+- The QTE success rates are modelled, not playtested by a human. Watch a real first attempt.
+- QTE timers use unscaled time: an idle player loses −5s/−6s every ~7s. That is by design, but it is harsh for anyone who looks away.
+- The building timer was confirmed stopped only by a short check in the epilogue (70.71 at two reads).
+- "PlayerLoop called recursively" errors in run 1 came from my forced `QueuePlayerLoopUpdate`, not from game code. Run 2 had none.
+- To drive Play Mode I deleted the EditorPrefs `InteractionMode` and `ApplicationIdleTime`, which resets them to Unity's defaults. Reapply them if you had custom values. `Time.timeScale` was only changed from the MCP harness in Play Mode; no game code touches it.
+
+### Next suggested step
+- Human playtest of both QTEs (first-try rate) and the prep walk. Then the art and audio drop-ins.
+
+---
+
 ## [2026-10-17 02:41 UTC] CLOUD — 6-slot bag + drop, key items (corner HUD), bedsheet rope descent, room transitions, WASD QTE, TODO-free strings
 (Written after rebasing onto the three LOCAL commits below: 05:10, 04:27 and 03:39. The local clock runs ahead of cloud UTC.)
 ### Merge with the local work (prep phase, tilemaps, camera framing)

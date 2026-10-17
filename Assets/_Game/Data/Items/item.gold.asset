@@ -19,6 +19,7 @@ MonoBehaviour:
     key: item.gold.desc
   icon: {fileID: 0}
   isTrap: 0
+  isKeyItem: 0
   staminaRestore: 0
   healsInjury: 0
   consumedOnUse: 1

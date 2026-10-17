@@ -24,6 +24,12 @@ MonoBehaviour:
   tickCue: {fileID: 11400000, guid: 4503d0c4867fe2849985c11230b6e118, type: 2}
   prepSeconds: 60
   prepTickFrom: 10
+  maxInventorySlots: 6
+  requiredBedsheetsForRope: 3
+  bedsheetItem: {fileID: 11400000, guid: 416800530de0b804fb25c450fd812c4b, type: 2}
+  bedsheetRopeItem: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+  ropeCraftSeconds: 5
+  ropeCraftStamina: 3
   injuredMoveExtraPerMember: 0.25
   staminaMax: 100
   staminaDrainPerSecond: 0.15

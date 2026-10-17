@@ -50,7 +50,7 @@ MonoBehaviour:
       tip: {fileID: 11400000, guid: 20589765cbc2ebb4c8862eaa29bb9f9f, type: 2}
       cue: {fileID: 0}
       victim: 0
-      rewindTarget: 0
+      rewindTarget: 1
       rewindTo: {fileID: 0}
   nextNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
   unplacedHazard: {fileID: 11400000, guid: 63ebbf423be506f4bb969f09be3b7525, type: 2}

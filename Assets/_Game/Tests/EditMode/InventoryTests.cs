@@ -134,5 +134,18 @@ namespace SixtyOne.Tests
             state.Stamina = 0f;
             Assert.IsFalse(RopeDescentInteractable.CanDescend(state, rope), "heavy: locked at 0 stamina");
         }
+
+        [Test]
+        public void RopeDescentIsLockedUntilTheChildCanComeSafely()
+        {
+            Item rope = data.Item("bedsheet_rope");
+            Item harness = data.Item("child_harness");
+            var state = new GameState();
+            StateOps.TryAddItem(state, "bedsheet_rope");
+            Assert.IsFalse(RopeDescentInteractable.FamilyCanCome(state, harness));
+            Assert.IsFalse(RopeDescentInteractable.CanDescend(state, rope, harness), "rope alone: the child cannot come");
+            StateOps.TryAddItem(state, "child_harness");
+            Assert.IsTrue(RopeDescentInteractable.CanDescend(state, rope, harness));
+        }
     }
 }

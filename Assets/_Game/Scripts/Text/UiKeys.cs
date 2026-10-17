@@ -49,6 +49,7 @@ namespace SixtyOne.Text
         public const string RopeNeedsSheets = "ui.rope.needs_sheets";
         public const string RopeDescentMissing = "ui.rope.descent_missing";
         public const string RopeDescentLabel = "ui.rope.descent";
+        public const string RopeDescentLocked = "ui.rope.descent_locked";
         public const string KeyItemsTitle = "ui.key_items.title";
         public const string KeyItemOwned = "ui.key_items.owned";
         public const string KeyItemMissing = "ui.key_items.missing";

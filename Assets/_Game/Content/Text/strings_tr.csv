@@ -298,6 +298,7 @@ ui.quake,SARSINTI! ({0}),{0} = magnitude
 ui.rewind,GERİ SAR,
 ui.rope.descent,Halatla aşağı in,world label at the balcony
 ui.rope.descent_missing,İnmek için bir halat lazım. Çarşafları birleştir.,
+ui.rope.descent_locked,Çocuğu halattan indiremezsin: önce bir taşıma kuşağı yap (bez + ip).,balcony locked reason: child harness missing
 ui.rope.needs_sheets,Halat için daha fazla çarşaf topla.,
 ui.rope.tie,Halat yap,bag prompt button
 ui.rope.tied,Çarşafları düğümleyip halat yaptın.,

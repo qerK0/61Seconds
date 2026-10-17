@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d0a03188b0abb834aa902f6a8b42f0d2, type: 3}
+  m_Name: qte.breaker
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.QTE.QTEConfig
+  minSequenceLength: 4
+  maxSequenceLength: 6
+  timePerKey: 1.15
+  totalTimeout: 7
+  failureBuildingTimerPenalty: 5
+  hitStopSeconds: 0.15
+  failShake: 0.08
+  hitCue: {fileID: 11400000, guid: dce2bcfabdfbf9743b4b0ee9254301f6, type: 2}
+  missCue: {fileID: 11400000, guid: 49fe14e3fae25b44aada4528f4ef3fbb, type: 2}
+  successCue: {fileID: 11400000, guid: b53d27856b865ee459b42c22dc3e7f50, type: 2}

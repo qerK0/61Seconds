@@ -100,5 +100,43 @@ MonoBehaviour:
       rewindTarget: 0
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
+  - labelKey:
+      key: f4.salon.c_bedroom
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: f019d9c044d1fa14a8b13ddf41894413, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
   onEnter: []
   bombChecks: []

@@ -9,9 +9,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 795eefd9391abd0408743257481ccb99, type: 3}
+  m_Script: {fileID: 11500000, guid: 5d2a0e1a7c57702448668c32eae991f4, type: 3}
   m_Name: f3.fuse
-  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Puzzles.FusePuzzleNode
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.QTE.QTENode
   id: f3.fuse
   titleKey:
     key: f3.fuse.title
@@ -64,9 +64,15 @@ MonoBehaviour:
     cue: {fileID: 0}
   onEnter: []
   bombChecks: []
-  solution: 01000101y
-  wrongAttemptSeconds: 3
-  solvedOutcomes:
+  context: 0
+  config: {fileID: 11400000, guid: 3eec16d1eb6936c4ba3f089954f9f6d1, type: 2}
+  promptKey:
+    key: f3.fuse.prompt
+  successKey:
+    key: f3.fuse.success
+  failKey:
+    key: f3.fuse.fail
+  successOutcomes:
   - type: 2
     targetNode: {fileID: 0}
     flag: PowerCut_F3
@@ -77,4 +83,5 @@ MonoBehaviour:
       key: 
     member: 0
     health: 0
+  failOutcomes: []
   nextNode: {fileID: 11400000, guid: 220345c6998b0c64e9d869de015bee5f, type: 2}

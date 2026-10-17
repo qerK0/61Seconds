@@ -175,7 +175,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>A balcony/window rope point: needs the bedsheet rope, climbs down to the target node.</summary>
-        public static RopeDescentInteractable RopeDescent(Transform parent, string id, float gx, float gy, Item rope, SceneNode target, NodePlayer nodePlayer)
+        public static RopeDescentInteractable RopeDescent(Transform parent, string id, float gx, float gy, Item rope, Item familyItem, SceneNode target, NodePlayer nodePlayer)
         {
             var go = new GameObject("Rope_" + id);
             go.transform.SetParent(parent, false);
@@ -199,6 +199,7 @@ namespace SixtyOne.Editor
 
             RopeDescentInteractable descent = go.AddComponent<RopeDescentInteractable>();
             descent.Configure(id, UiKeys.RopeDescentLabel, rope, UiKeys.RopeDescentMissing, target, nodePlayer, 10f, 20f);
+            descent.ConfigureFamilyRule(familyItem, UiKeys.RopeDescentLocked, r);
             EditorUtility.SetDirty(descent);
             return descent;
         }

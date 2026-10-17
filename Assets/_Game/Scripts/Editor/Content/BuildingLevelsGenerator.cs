@@ -153,11 +153,12 @@ namespace SixtyOne.Editor
             result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
             result.Transition.Configure(0.35f, 0.6f, 0.6f, 1.2f, door, footsteps, descend);
 
-            // Breaker wiring: 4-6 keys, 1.2s each. Dog evasion: shorter windows, higher penalty (more tension).
+            // Tuned for ~60-70% first-try success (Monte Carlo: ~0.62s median 4-choice reaction, +0.35s to orient on
+            // the first key, 2.5% wrong keys). Breaker ~65%; dog ~64% with longer sequences and a higher penalty.
             result.QteBreaker = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.breaker.asset");
-            result.QteBreaker.Configure(4, 6, 1.2f, 8f, 5f, qteHit, qteMiss, qteSuccess);
+            result.QteBreaker.Configure(4, 6, 1.15f, 7f, 5f, qteHit, qteMiss, qteSuccess);
             result.QteDog = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.dog.asset");
-            result.QteDog.Configure(5, 6, 1.0f, 7f, 6f, qteHit, qteMiss, qteSuccess);
+            result.QteDog.Configure(5, 6, 1.15f, 6.5f, 6f, qteHit, qteMiss, qteSuccess);
 
             BuildFloor4();
             BuildFloor3();
