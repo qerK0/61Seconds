@@ -12,11 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b11eb03843208d74881f3ea3ec896d36, type: 3}
   m_Name: TransitionConfig
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.TransitionConfig
-  transitionDuration: 0.35
-  descendDuration: 0.6
-  lateralPan: 0.6
-  descendPan: 1.2
-  peakAlpha: 1
+  outDuration: 0.35
+  riseHeight: 1.2
+  inDuration: 0.4
+  dropHeight: 1
+  descendInDuration: 0.65
+  descendDropHeight: 2.5
+  stagger: 0.12
+  wallLag: 0.05
+  propLag: 0.1
+  bounce: 0.1
+  characterPop: 0.15
+  reducedFadeDuration: 0.25
   doorCue: {fileID: 11400000, guid: fac1cbae2e197954594600de70cde340, type: 2}
   footstepsCue: {fileID: 11400000, guid: 96ab3a750529a6642b9b6896fd29e341, type: 2}
   descendCue: {fileID: 11400000, guid: 565d7355b5cf0414090f98d8c31a2dcf, type: 2}

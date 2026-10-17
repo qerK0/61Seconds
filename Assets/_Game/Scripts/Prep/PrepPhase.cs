@@ -69,7 +69,8 @@ namespace SixtyOne.Prep
                 return;
             }
 
-            State.PrepTime = Timer.Advance(State.PrepTime, Time.deltaTime);
+            // Room transitions (tile rise/drop) never cost prep time.
+            State.PrepTime = Timer.Advance(State.PrepTime, NavigationEvents.TimerDelta(Time.deltaTime));
         }
 
         /// <summary>Spends prep seconds on an action (pickup, drawer, valve, move). Ignored outside prep.</summary>

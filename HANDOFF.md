@@ -4,6 +4,64 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 11:20] LOCAL — Verified the world scale + tile transition merge; transitions no longer cost time; framing and shake tuned (visual/playthrough tests skipped at the user's request)
+### Done
+- **Compile:** the cloud code (world scale 1.5, tile rise/drop transition, animator rules) compiled with **0 errors** in Unity 6000.6. No asmdef changes needed; all the first-time APIs (Tilemap per-tile access, sprite proxies, RoomVisualConfig, lossyScale helpers) were fine.
+- **Checklist steps 2–5:**
+  - Generate Building Levels: writes `RoomVisualConfig.asset` (1.5) and the new `TransitionConfig` fields.
+  - Import Character Frames: 11 / 10 / 9 frames, unchanged.
+  - Build Test Scene: 24 rooms under a `World` root at (1.5, 1.5, 1).
+  - Validate Content: 25 nodes, 0 problems. Text > Validate: 335 referenced, 0 missing / empty / unused.
+  - EditMode: **134/134**, run before my fixes.
+- **Not a bug, but worth knowing:** a transition looked "stuck" in Play Mode. The cause was Editor throttling, not the controller: when Unity is unfocused, the Play Mode player loop barely ticks (frameCount stayed frozen between MCP calls).
+  - The fix for MCP sessions is the Editor preference Interaction Mode = No Throttling (`EditorPrefs InteractionMode = 1`) plus `Application.runInBackground = true` at runtime.
+  - I used both for this session and restored the preference to 0 afterwards; no ProjectSettings were changed.
+- **4a Framing:** `RoomCameraFraming.fill` 0.9 → **0.97**; `minOrthoSize` 1.2 → **1.0**; playfield viewport (0, 0.07, 0.89, 0.83) → **(0, 0.065, 0.89, 0.845)**.
+  - Rooms now use about 97% of the playfield, and small rooms are framed closer.
+  - The top edge stays below the timer strip and the right edge left of the HUD column, so walls are not clipped under the HUD.
+- **4b Transitions cost no time:** `NavigationEvents.TimersPaused` / `TimerDelta(dt)` is true/0 from `RaiseTransitionStart` until `RaiseTransitionComplete` (also reset in `ClearAll`).
+  - `PrepPhase` and `SurvivalController` advance the prep countdown, building timer, stamina drain and poison with `TimerDelta(Time.deltaTime)`.
+  - The door / move cost is paid once, before the transition, as before.
+  - New `TransitionTimerTests` (4 tests): pause only between start and complete; the prep countdown and the building timer each pay only the door cost across a 1.15s transition; timers run again afterwards.
+- **4c Shake:** `CameraShake` multiplies every shake (quakes and QTE shakes) by `SizeFactor` = ortho size / `referenceOrthoSize`, clamped to 0.4–3.
+  - The reference is **2.0**, about the salon's ortho at the old world scale 1, so the act intensities keep their old on-screen feel at scale 1.5.
+  - Reduce Effects still multiplies by `ReducedShakeScale` first. Pure `SizeFactor(ortho, reference)` is available for tests.
+- **4d Dropped items:** left as is. `DroppedItemsPresenter` respawns dropped items on node enter, which happens mid-OUT, so they cannot ride the old room's tiles without reworking the presenter (respawning after the swap and registering them as transition pieces). They pop in with the new room instead.
+
+### Files created / changed
+- `Scripts/Core/NavigationEvents.cs`: TimersPaused / TimerDelta.
+- `Scripts/Prep/PrepPhase.cs`, `Scripts/Building/SurvivalController.cs`: paused timer delta.
+- `Scripts/Iso/CameraShake.cs`: ortho-size scaling (`sizeSource`, `referenceOrthoSize`, `SizeFactor`).
+- `Scripts/Iso/RoomCameraFraming.cs`: fill 0.97, min ortho 1.0.
+- `Scripts/Editor/SceneBuild/TestSceneBuilder.cs`: playfield viewport.
+- `Tests/EditMode/TransitionTimerTests.cs`: new.
+- Regenerated `Data/RoomVisualConfig.asset` (new), `Data/TransitionConfig.asset`, `Scenes/Test_Building.unity`; the cloud session's missing `.meta` files are now committed.
+- `CLAUDE.md`: transition timer pause + shake scaling.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Run the EditMode tests: expect **138/138** (134 + 4 new). They were compiled but **not run**.
+- [ ] The visual checks I skipped (screenshot each):
+  - character sizes and foot contact at 1.5;
+  - seams in the salon (wood) and the F3 corridor (stone);
+  - a small vs a big room with the new fill 0.97;
+  - lateral and descend transitions, an instant rewind, the Reduce Effects fade;
+  - clicks ignored mid-transition; rooms back in place after 10+ transitions;
+  - the profiler on a first visit to a room.
+- [ ] Play the full route once (prep → quake → floors 3/2 → dog QTE → epilogue). Check that the prep / building timers do not move during the tile animation and that quakes feel equally strong in small and big rooms.
+- [ ] For MCP Play Mode work, set Preferences > General > Interaction Mode = No Throttling first, or the player loop stalls when Unity is unfocused.
+
+### Not verified / risks
+- **Skipped at the user's request:** all visual checks, before/after fix screenshots, the profiler, the full playthrough, and the final EditMode run. Only compilation and the scene rebuild were verified after the fixes.
+- **Framing (fill 0.97, viewport top 0.91):** tall props on back walls could touch the timer strip in some rooms. If they do, lower the viewport height to 0.83 or fill to 0.95.
+- **Shake reference 2.0** is an estimate of the old salon framing; tune it on `Main Camera > CameraShake` if quakes feel too strong or weak.
+- **Placement timers keep running during transitions** (only prep and building timers pause). Placements start after the swap, so this should not matter.
+- **Before shots only:** `Temp/Screens/t05/before_salon.png`, `before_hall.png` (old scene, pre-scale) and `scaled_salon_prefix.png` (scale 1.5, before the framing fix; looks the same on screen as before because the framing normalises the scale).
+
+### Next suggested step
+- LOCAL: run the skipped visual checklist and the 138 tests; tune fill / shake reference by eye.
+
+---
+
 ## [2026-10-17 06:27 UTC] CLOUD — Character animation gaps + tests, one WorldScale (1.5x) for all room visuals, tiles-fly-up / drop-in room transition
 (The cloud clock is UTC; the 08:59 LOCAL entry below came earlier in real time. Built on top of `28bec4b`.)
 

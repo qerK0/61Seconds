@@ -180,8 +180,8 @@ namespace SixtyOne.Editor
             SerializedWire.Set(framing, "targetCamera", camera);
             SerializedWire.Set(framing, "director", director);
             SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
-            // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 90% of it.
-            SerializedWire.SetRect(framing, "freeViewport", new Rect(0f, 0.07f, TestSceneUi.ColumnLeft - 0.01f, 0.83f));
+            // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 97% of it (RoomCameraFraming.fill).
+            SerializedWire.SetRect(framing, "freeViewport", new Rect(0f, 0.065f, TestSceneUi.ColumnLeft - 0.01f, 0.845f));
             if (rooms.Count > 0) framing.Frame(rooms[0]);
 
             SerializedWire.Set(dialogue, "gameManager", gameManager);

@@ -103,7 +103,8 @@ namespace SixtyOne.Building
             // Out on the street: the run is won, the building can no longer kill.
             if (nodePlayer != null && nodePlayer.Current is EpilogueNode) return;
 
-            float dt = Time.deltaTime;
+            // Room transitions (tile rise/drop) never cost building time.
+            float dt = NavigationEvents.TimerDelta(Time.deltaTime);
             bool paused = config.PauseInDialogue && dialogue != null && dialogue.IsPlayingLines;
             // Before the quake (prep) the building stands: no collapse clock, no drain, no gas leak yet.
             if (SixtyOne.Prep.PrepRules.SpendsPrep(State))

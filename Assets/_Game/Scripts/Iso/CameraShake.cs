@@ -13,6 +13,13 @@ namespace SixtyOne.Iso
         [Tooltip("Transform to shake. Defaults to this one.")]
         [SerializeField] private Transform target;
 
+        [Tooltip("Camera whose orthographic size scales the shake. Defaults to the camera on this object.")]
+        [SerializeField] private Camera sizeSource;
+
+        [Tooltip("Ortho size the intensities are tuned at: framing that zooms out shakes proportionally more, so quakes feel equally strong in every room.")]
+        [Min(0.1f)]
+        [SerializeField] private float referenceOrthoSize = 2f;
+
         private Coroutine running;
         private Vector3 origin;
 
@@ -35,11 +42,11 @@ namespace SixtyOne.Iso
             StopShake();
         }
 
-        /// <summary>Shakes for a duration at a magnitude.</summary>
+        /// <summary>Shakes for a duration at a magnitude (world units at the reference ortho size; scaled by SizeFactor).</summary>
         public void Shake(float duration, float magnitude, bool grow = false)
         {
             StopShake();
-            running = StartCoroutine(ShakeRoutine(duration, magnitude, grow));
+            running = StartCoroutine(ShakeRoutine(duration, magnitude * SizeFactor(), grow));
         }
 
         private void OnQuakeStarted(QuakeInfo info)
@@ -50,6 +57,20 @@ namespace SixtyOne.Iso
             GameSettings settings = gm != null ? gm.Settings : null;
             if (settings != null && settings.ReduceEffects) magnitude *= settings.ReducedShakeScale;
             Shake(info.Duration, magnitude);
+        }
+
+        /// <summary>Current ortho size / reference size (screen-relative shake strength is then the same everywhere).</summary>
+        public float SizeFactor()
+        {
+            if (sizeSource == null) sizeSource = GetComponent<Camera>();
+            return SizeFactor(sizeSource != null && sizeSource.orthographic ? sizeSource.orthographicSize : referenceOrthoSize, referenceOrthoSize);
+        }
+
+        /// <summary>Pure scale rule (clamped so extreme framings stay sane).</summary>
+        public static float SizeFactor(float orthoSize, float referenceSize)
+        {
+            if (referenceSize <= 0f) return 1f;
+            return Mathf.Clamp(orthoSize / referenceSize, 0.4f, 3f);
         }
 
         private void OnDied(DeathInfo info)

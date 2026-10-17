@@ -5,7 +5,7 @@ using UnityEngine;
 namespace SixtyOne.Iso
 {
     /// <summary>
-    /// Frames the active room so it fills ~90% (fill) of the playfield: the whole screen minus the slim bag column
+    /// Frames the active room so it fills ~97% (fill) of the playfield: the whole screen minus the slim bag column
     /// on the right and the timer strip on top (the choice panel is a sliding overlay, not reserved space). Moves this rig (the camera is its child, so CameraShake and the cinematic tilt still work
     /// on the camera's local transform) and sets the un-zoomed orthographic size.
     /// </summary>
@@ -27,11 +27,11 @@ namespace SixtyOne.Iso
         [SerializeField] private float padding = 0f;
 
         [Tooltip("Never zoom in closer than this orthographic size.")]
-        [SerializeField] private float minOrthoSize = 1.2f;
+        [SerializeField] private float minOrthoSize = 1.0f;
 
-        [Tooltip("Share of the free area the room bounds fill (0.9 = 90%).")]
+        [Tooltip("Share of the free area the room bounds fill (0.97 = 97%: the room dominates the screen).")]
         [Range(0.5f, 1f)]
-        [SerializeField] private float fill = 0.9f;
+        [SerializeField] private float fill = 0.97f;
 
         private Room framed;
         private float framedAspect;
