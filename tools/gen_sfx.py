@@ -143,3 +143,28 @@ for _ in range(120):
     at = rng.uniform(0.2, D - 0.1); d = 0.01
     place(buf, rng.uniform(0.05, 0.35) * bp(noise(d), 2000, 7000) * env(int(SR*d), 0.0002, 0.002) * (1 - at/D), at)
 save('sfx_fire_explosion', buf)
+
+# Search: rummaging through furniture — cloth rustle bursts + soft wood knocks/creaks (~1.2s, loop-safe ends)
+D = 1.2; buf = np.zeros(int(SR*D))
+for _ in range(14):
+    at = rng.uniform(0.0, D - 0.18); d = rng.uniform(0.06, 0.18); n = int(SR*d)
+    rustle = bp(noise(d), 900, 5200) * np.hanning(n) * rng.uniform(0.25, 0.6)
+    place(buf, rustle, at)
+for _ in range(5):
+    at = rng.uniform(0.05, D - 0.12); d = 0.09; tt2 = t(d)
+    knock = (np.sin(2*np.pi*rng.uniform(170, 260)*tt2) + 0.4*bp(noise(d), 300, 1500)) * env(len(tt2), 0.001, 0.025)
+    place(buf, 0.55 * knock, at)
+creak_f = 420 + 60*np.sin(2*np.pi*1.3*t(0.35))
+creak = lp(np.sign(np.sin(2*np.pi*np.cumsum(creak_f)/SR)) * 0.2, 1800) * np.hanning(int(SR*0.35))
+place(buf, creak, 0.55)
+buf *= np.minimum(1, t(D)/0.03) * np.minimum(1, (D - t(D))/0.08)
+save('sfx_search', buf, 0.7)
+
+# Car alarm (loopable, 2.0s): classic two-tone whoop + horn honks, slightly distant (low-passed)
+D = 2.0; tt = t(D)
+f = np.where((tt % 0.5) < 0.25, 1050.0, 780.0) * (1 + 0.04*np.sin(2*np.pi*14*tt))
+ph = np.cumsum(f) / SR
+s = 0.6*np.sign(np.sin(2*np.pi*ph)) + 0.5*np.sin(2*np.pi*ph)
+x = lp(s, 2600) * 0.8
+x = x / (np.max(np.abs(x)) + 1e-9)
+wavfile.write(os.path.join(OUT, 'sfx_car_alarm_loop.wav'), SR, (x*0.6*32767).astype(np.int16)); print('sfx_car_alarm_loop 2.0 s')

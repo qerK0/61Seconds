@@ -15,6 +15,7 @@ namespace SixtyOne.Core
         public IEnumerable<string> Items => items;
 
         public bool Add(string itemId) => !string.IsNullOrEmpty(itemId) && items.Add(itemId);
+        public bool Remove(string itemId) => !string.IsNullOrEmpty(itemId) && items.Remove(itemId);
         public bool Contains(string itemId) => !string.IsNullOrEmpty(itemId) && items.Contains(itemId);
 
         public void CopyFrom(BorrowLedger other)

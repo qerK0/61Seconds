@@ -14,7 +14,8 @@ namespace SixtyOne.UI
     /// The bag (LevelConfig.MaxInventorySlots, 8 by default). Click a slot to select it; click it again to use it
     /// (food, water, first aid; a bedsheet ties the rope once there are enough); click another slot to combine
     /// the two (crafting recipes). With a slot selected, Drop leaves the item in the current room (it can be
-    /// picked up again there). Key items never appear here (see KeyItemCornerHUD). Flashes red when full.
+    /// picked up again there). While a loot container window is open, a click puts the item back into it.
+    /// Key items never appear here (see KeyItemPocket). Flashes red when full.
     /// </summary>
     public sealed class BagUI : MonoBehaviour
     {
@@ -130,6 +131,15 @@ namespace SixtyOne.UI
             if (item == null)
             {
                 selected = -1;
+                Refresh();
+                return;
+            }
+
+            // A container window is open: a bag click puts the item back into it.
+            if (LootEvents.IsOpen)
+            {
+                selected = -1;
+                LootLogic.PutBack(gm.State, LootEvents.Open.ContainerId, gm.State.Inventory.Items[slot]);
                 Refresh();
                 return;
             }

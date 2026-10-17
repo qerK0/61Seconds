@@ -51,6 +51,26 @@ namespace SixtyOne.Editor
             public Color Color = Color.white;
         }
 
+        /// <summary>Furniture you search: a LootContainer with its contents (item ids).</summary>
+        public sealed class ContainerSpec
+        {
+            public string Id;
+            /// <summary>container.wardrobe / cabinet / bookshelf / drawer / medicine / toolbox / nightstand / jewelry.</summary>
+            public string NameKey;
+            /// <summary>Prop art name (PropArtSet): Wardrobe, NeighbourWardrobe, Bookshelf, Cabinet; others are tinted blocks.</summary>
+            public string Art;
+            public float Gx;
+            public float Gy;
+            public string[] Items = new string[0];
+            public string[] Hidden = new string[0];
+            public float Cost = 3f;
+            public float Seconds = 1.5f;
+            public bool Borrowed;
+            public bool PrepOnly;
+            public Vector2 Scale = new Vector2(0.7f, 0.55f);
+            public Color Color = Color.white;
+        }
+
         public sealed class LightSpec
         {
             public string Name;
@@ -119,6 +139,7 @@ namespace SixtyOne.Editor
             public List<AnchorSpec> Anchors = new List<AnchorSpec>();
             public List<PropSpec> Props = new List<PropSpec>();
             public List<ItemSpec> Items = new List<ItemSpec>();
+            public List<ContainerSpec> Containers = new List<ContainerSpec>();
             public List<LightSpec> Lights = new List<LightSpec>();
             public List<Vector2> ExtraTiles = new List<Vector2>();
             public List<RopeSpec> Ropes = new List<RopeSpec>();
@@ -236,6 +257,39 @@ namespace SixtyOne.Editor
             return new ItemSpec { Id = id ?? itemId, ItemId = itemId, Gx = gx, Gy = gy, Color = color, Cost = cost, Surface = surface, Borrowed = borrowed, Hidden = hidden };
         }
 
+        /// <summary>A searchable piece of furniture (first search 3 s of building time + 1.5 s real time).</summary>
+        private static ContainerSpec Box(string id, string kind, float gx, float gy, Color color, params string[] items)
+        {
+            var spec = new ContainerSpec { Id = id, NameKey = "container." + kind, Gx = gx, Gy = gy, Items = items, Color = color };
+            switch (kind)
+            {
+                case "wardrobe": spec.Art = "Wardrobe"; spec.Scale = new Vector2(1.0f, 1.7f); break;
+                case "bookshelf": spec.Art = "Bookshelf"; spec.Scale = new Vector2(1.0f, 1.7f); break;
+                case "cabinet": spec.Art = "Cabinet"; spec.Scale = new Vector2(0.9f, 1.2f); break;
+                case "medicine": spec.Scale = new Vector2(0.6f, 0.7f); break;
+                case "drawer": spec.Scale = new Vector2(0.8f, 0.5f); break;
+                case "nightstand": spec.Scale = new Vector2(0.55f, 0.55f); break;
+                default: spec.Scale = new Vector2(0.55f, 0.35f); break;
+            }
+
+            return spec;
+        }
+
+        /// <summary>Our own flat: only searchable during the pre-quake prep.</summary>
+        private static ContainerSpec Own(ContainerSpec spec)
+        {
+            spec.PrepOnly = true;
+            return spec;
+        }
+
+        /// <summary>A neighbour's furniture: everything taken is borrowed ("ödünç al"), neighbour-style art.</summary>
+        private static ContainerSpec Lent(ContainerSpec spec)
+        {
+            spec.Borrowed = true;
+            if (spec.Art == "Wardrobe") spec.Art = "NeighbourWardrobe";
+            return spec;
+        }
+
         private static LightSpec L(string name, float gx, float gy, float lift, float radius, Color? color = null)
         {
             return new LightSpec { Name = name, Gx = gx, Gy = gy, Lift = lift, Radius = radius, Color = color ?? Warm };
@@ -254,6 +308,12 @@ namespace SixtyOne.Editor
             rooms.AddRange(floor3);
             rooms.AddRange(floor2);
             return rooms;
+        }
+
+        /// <summary>Where the player stands to search a container: in front of it (camera side), on the floor.</summary>
+        public static Vector2 ContainerApproach(RoomSpec room, ContainerSpec c)
+        {
+            return new Vector2(Mathf.Clamp(c.Gx - 0.45f, 0.3f, room.Width - 0.3f), Mathf.Clamp(c.Gy - 0.45f, 0.3f, room.Height - 0.3f));
         }
 
         // ---------- navigation (mirrors Room.RequiredCells / Room.BaseNav at runtime) ----------
@@ -280,6 +340,7 @@ namespace SixtyOne.Editor
             foreach (HotspotSpec h in room.Hotspots) if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(new Vector2(h.Gx - 0.5f, h.Gy - 0.5f));
             foreach (ItemSpec i in room.Items) points.Add(new Vector2(i.Gx, i.Gy));
             foreach (RopeSpec r in room.Ropes) points.Add(new Vector2(r.Gx, r.Gy));
+            foreach (ContainerSpec c in room.Containers) points.Add(ContainerApproach(room, c));
             var cells = new List<Vector2Int>();
             foreach (Vector2 p in points) cells.Add(GridNav.CellOf(p));
             return cells;
@@ -310,7 +371,9 @@ namespace SixtyOne.Editor
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
             // Our flat (pre-quake loot only): useful gear, two traps that waste slots/time, a hidden food tin.
             salon.Items.Add(Own(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food")));
-            salon.Items.Add(Own(I("first_aid", 0.4f, 3.0f, new Color(1f, 0.25f, 0.25f, 1f), cost: 3f, surface: false, id: "salon_cabinet")));
+            salon.Containers.Add(Own(Box("salon_cabinet", "medicine", 0.4f, 3.0f, new Color(0.92f, 0.92f, 0.9f, 1f), "first_aid")));
+            // An empty bookshelf: searching it only costs prep seconds.
+            salon.Containers.Add(Own(Box("salon_bookshelf", "bookshelf", 2.2f, 5.7f, Wood)));
             salon.Items.Add(Own(I("laptop", 1.6f, 1.0f, new Color(0.25f, 0.25f, 0.3f, 1f))));
             salon.Items.Add(Own(I("console", 3.6f, 1.2f, new Color(0.15f, 0.15f, 0.2f, 1f))));
             salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
@@ -318,7 +381,7 @@ namespace SixtyOne.Editor
 
             RoomSpec kitchen = Art(Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f)), RoomArt.Home, windows: "R1");
             kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
-            kitchen.Items.Add(Own(I("gloves", 1.2f, 3.3f, Wood, cost: 3f, surface: false, id: "kitchen_drawer")));
+            kitchen.Containers.Add(Own(Box("kitchen_drawer", "drawer", 1.2f, 3.3f, Wood, "gloves")));
             kitchen.Items.Add(Own(I("water", 2.6f, 3.4f, new Color(0.45f, 0.7f, 1f, 1f))));
             kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
 
@@ -326,16 +389,16 @@ namespace SixtyOne.Editor
             hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
             // Old emergency bag behind the coats: a second chance at a whistle for players who cut the intro short.
             hall.Items.Add(Own(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle")));
-            hall.Items.Add(Own(I("flashlight", 1.6f, 3.4f, Wood, cost: 3f, surface: false, id: "hall_nightstand")));
-            hall.Items.Add(Own(I("wrench", 0.5f, 1.8f, new Color(0.55f, 0.55f, 0.6f, 1f), cost: 3f, surface: false, id: "hall_toolbox")));
-            hall.Items.Add(Own(I("gold", 2.4f, 1.4f, new Color(0.9f, 0.75f, 0.2f, 1f), cost: 3f, surface: false, id: "hall_jewelry_box")));
+            hall.Containers.Add(Own(Box("hall_nightstand", "nightstand", 1.6f, 3.4f, Wood, "flashlight")));
+            hall.Containers.Add(Own(Box("hall_toolbox", "toolbox", 0.5f, 1.8f, new Color(0.75f, 0.2f, 0.15f, 1f), "wrench")));
+            // Trap: valuables waste a bag slot and prep seconds.
+            hall.Containers.Add(Own(Box("hall_jewelry_box", "jewelry", 2.4f, 1.4f, new Color(0.9f, 0.75f, 0.2f, 1f), "gold")));
 
             // Flat 11 bedroom: two bedsheets for the rope (bed = open surface, wardrobe = 3s).
             RoomSpec bedroom = Art(Room(BuildingLevelsGenerator.Flat11Bedroom, 4, 4, new Color(0.76f, 0.72f, 0.7f, 1f)), RoomArt.Home, windows: "R2");
             bedroom.Props.Add(P(null, "Bed", 1.6f, 2.6f, -0.05f, 1.6f, 0.6f, new Color(0.85f, 0.85f, 0.9f, 1f)));
-            bedroom.Props.Add(P(null, "Wardrobe", 3.6f, 3.3f, 0f, 1.0f, 1.7f, Wood));
             bedroom.Items.Add(I("bedsheet", 1.6f, 2.6f, new Color(0.92f, 0.92f, 1f, 1f), id: "bedroom_bed_sheet"));
-            bedroom.Items.Add(I("bedsheet", 3.4f, 3.1f, new Color(0.8f, 0.85f, 1f, 1f), cost: 3f, surface: false, id: "bedroom_wardrobe_sheet"));
+            bedroom.Containers.Add(Box("bedroom_wardrobe_sheet", "wardrobe", 3.6f, 3.3f, Wood, "bedsheet"));
             bedroom.Lights.Add(L("BedLamp", 0.6f, 3.4f, 0.8f, 2.4f));
 
             // Corridor: one door per flat, the stairs down (front-left exit), the elevator (trap) and Hasan Amca.
@@ -350,15 +413,16 @@ namespace SixtyOne.Editor
             RoomSpec f12Hall = Art(Room(BuildingLevelsGenerator.Flat12, 3, 3, new Color(0.7f, 0.66f, 0.74f, 1f)), RoomArt.Home);
             f12Hall.Items.Add(I("rope", 0.8f, 0.7f, new Color(0.8f, 0.65f, 0.4f, 1f), borrowed: true));
             f12Hall.Items.Add(I("tape", 1.6f, 2.5f, new Color(0.6f, 0.6f, 0.65f, 1f), borrowed: true));
-            f12Hall.Items.Add(I("flashlight", 2.4f, 2.4f, new Color(0.3f, 0.3f, 0.35f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_closet_flashlight"));
+            f12Hall.Containers.Add(Lent(Box("flat12_closet_flashlight", "wardrobe", 2.4f, 2.4f, Wood, "flashlight")));
             RoomSpec f12Living = Art(Room(BuildingLevelsGenerator.Flat12Living, 4, 4, new Color(0.74f, 0.7f, 0.78f, 1f), BuildingLevelsGenerator.Flat12), RoomArt.Home, windows: "R3");
             f12Living.Props.Add(P(null, "Sofa", 1.6f, 3.3f, -0.05f, 1.5f, 0.5f, new Color(0.45f, 0.35f, 0.5f, 1f)));
             f12Living.Items.Add(I("cloth", 0.9f, 1.0f, new Color(0.85f, 0.85f, 0.9f, 1f), borrowed: true));
             f12Living.Items.Add(I("lighter", 2.8f, 1.2f, new Color(1f, 0.4f, 0.2f, 1f), borrowed: true));
-            f12Living.Items.Add(I("first_aid", 0.6f, 3.2f, new Color(1f, 0.25f, 0.25f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_cabinet"));
+            f12Living.Containers.Add(Lent(Box("flat12_cabinet", "cabinet", 0.6f, 3.2f, Wood, "first_aid")));
+            f12Living.Containers.Add(Lent(Box("flat12_bookshelf", "bookshelf", 3.4f, 3.7f, Wood, "water")));
             RoomSpec f12Bedroom = Art(Room(BuildingLevelsGenerator.Flat12Bedroom, 4, 4, new Color(0.72f, 0.68f, 0.76f, 1f), BuildingLevelsGenerator.Flat12), RoomArt.Home, windows: "R3");
             f12Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.85f, 0.82f, 0.9f, 1f)));
-            f12Bedroom.Items.Add(I("bedsheet", 2.6f, 3.4f, new Color(0.85f, 0.8f, 0.95f, 1f), cost: 3f, surface: false, borrowed: true, id: "flat12_wardrobe_sheet"));
+            f12Bedroom.Containers.Add(Lent(Box("flat12_wardrobe_sheet", "wardrobe", 2.6f, 3.4f, Wood, "bedsheet")));
 
             Link(salon, "L3", hall, "L0");
             Link(salon, "L5", kitchen, "L0");
@@ -398,6 +462,7 @@ namespace SixtyOne.Editor
             f9Living.ExtraTiles.Add(new Vector2(4.5f, 0.5f));
             f9Living.ExtraTiles.Add(new Vector2(4.5f, 1.5f));
             f9Living.Props.Add(P(null, "Sofa", 1.4f, 3.3f, -0.05f, 1.5f, 0.5f, new Color(0.35f, 0.4f, 0.5f, 1f)));
+            f9Living.Containers.Add(Lent(Box("flat9_bookshelf", "bookshelf", 3.1f, 3.7f, Wood, "food")));
             f9Living.Props.Add(P(null, "BalconyRail", 4.95f, 0.6f, 0f, 1.0f, 0.5f, Metal));
             f9Living.Ropes.Add(new RopeSpec { Id = "flat9_balcony_rope", Gx = 4.5f, Gy = 0.6f, TargetNodeId = BuildingLevelsGenerator.F2Aftershock });
             RoomSpec f9Kitchen = Art(Room(BuildingLevelsGenerator.Flat9Kitchen, 3, 3, new Color(0.6f, 0.62f, 0.6f, 1f), BuildingLevelsGenerator.Flat9), RoomArt.Home, windows: "R0");
@@ -411,6 +476,7 @@ namespace SixtyOne.Editor
             RoomSpec f10Living = Art(Room(BuildingLevelsGenerator.Flat10Living, 4, 4, new Color(0.4f, 0.4f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
             f10Living.Props.Add(P(null, "CollapsedFloor", 2.0f, 2.2f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
             f10Living.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
+            f10Living.Containers.Add(Lent(Box("flat10_bookshelf", "bookshelf", 2.6f, 3.7f, Wood, "cloth")));
 
             Link(corridor, "L1", f9Hall, "R1");
             Link(f9Hall, "L0", f9Kitchen, "R1");
@@ -454,6 +520,7 @@ namespace SixtyOne.Editor
             RoomSpec f8Living = Art(Room(BuildingLevelsGenerator.Flat8Living, 4, 4, new Color(0.7f, 0.66f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Living.Props.Add(P(null, "Sofa", 1.4f, 3.3f, -0.05f, 1.5f, 0.5f, new Color(0.5f, 0.42f, 0.35f, 1f)));
             f8Living.Items.Add(I("water", 3.3f, 3.2f, new Color(0.45f, 0.7f, 1f, 1f), cost: 2f, surface: false, hidden: true, id: "flat8_hidden_water"));
+            f8Living.Containers.Add(Lent(Box("flat8_bookshelf", "bookshelf", 3.7f, 2.5f, Wood, "food")));
             RoomSpec f8Bedroom = Art(Room(BuildingLevelsGenerator.Flat8Bedroom, 4, 4, new Color(0.7f, 0.64f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
 

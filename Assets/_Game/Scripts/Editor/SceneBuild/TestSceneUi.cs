@@ -64,6 +64,8 @@ namespace SixtyOne.Editor
             BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
+            BuildLootWindow(root, gameManager, content, art);
+            BuildSearchRing(root, camera, art);
             SubtitleView subtitles = BuildSubtitles(root);
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             SerializedWire.Set(choicePanel, "subtitles", subtitles);
@@ -696,6 +698,102 @@ namespace SixtyOne.Editor
             Image overlay = UiFactory.MakeImage("PoisonOverlay", root, Vector2.zero, Vector2.one, new Color(0.02f, 0.05f, 0.02f, 0f));
             PoisonOverlay poison = overlay.gameObject.AddComponent<PoisonOverlay>();
             SerializedWire.Set(poison, "overlay", overlay);
+        }
+
+        /// <summary>
+        /// Container window just left of the bag column: title (container name or "Ödünç al"), 2x4 slots with the bag's
+        /// cell art, "Boş" when empty, "Hepsini al" and "Kapat".
+        /// </summary>
+        private static void BuildLootWindow(Transform root, GameManager gameManager, GameContent content, PlaceholderSprites art)
+        {
+            Image panel = UiFactory.MakePanel("LootWindow", root, new Vector2(ColumnLeft - 0.165f, 0.42f), new Vector2(ColumnLeft - 0.008f, 0.93f), Panel, raycast: true);
+            CanvasGroup group = UiFactory.MakeGroup(panel.gameObject);
+            Transform p = panel.transform;
+            TextMeshProUGUI title = UiFactory.MakeLabel("Title", p, new Vector2(0.06f, 0.9f), new Vector2(0.94f, 0.98f), TextRole.Label, TextAlignmentOptions.MidlineLeft);
+            title.color = Accent;
+            TextMeshProUGUI subtitle = UiFactory.MakeLabel("Subtitle", p, new Vector2(0.06f, 0.84f), new Vector2(0.94f, 0.9f), TextRole.Small, TextAlignmentOptions.MidlineLeft);
+            subtitle.color = Muted;
+
+            UiSkinArt.Sprites skin = UiSkinArt.Import();
+            const int columns = 2;
+            const int rows = 4;
+            var buttons = new Object[columns * rows];
+            var icons = new Object[columns * rows];
+            var labels = new Object[columns * rows];
+            for (int i = 0; i < columns * rows; i++)
+            {
+                int col = i % columns;
+                int row = i / columns;
+                float x0 = 0.06f + col * 0.45f;
+                float y1 = 0.82f - row * 0.155f;
+                Image slot = UiFactory.MakeImage("Slot" + i, p, new Vector2(x0, y1 - 0.145f), new Vector2(x0 + 0.42f, y1), skin.Cell != null ? Color.white : new Color(0.25f, 0.32f, 0.45f, 1f),
+                    raycast: true, sprite: skin.Cell);
+                if (skin.Cell != null)
+                {
+                    slot.type = Image.Type.Sliced;
+                    slot.pixelsPerUnitMultiplier = 1f / UiSkinArt.Scale;
+                }
+
+                Button button = slot.gameObject.AddComponent<Button>();
+                button.targetGraphic = slot;
+                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.95f), Color.white, sprite: art.Dot);
+                icon.preserveAspect = true;
+                icon.enabled = false;
+                TextMeshProUGUI name = UiFactory.MakeLabel("Name", slot.transform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.3f), TextRole.Small, TextAlignmentOptions.Center);
+                name.enableAutoSizing = true;
+                name.fontSizeMin = 16f;
+                name.fontSizeMax = 18f;
+                buttons[i] = button;
+                icons[i] = icon;
+                labels[i] = name;
+            }
+
+            TextMeshProUGUI empty = UiFactory.MakeLabel("Empty", p, new Vector2(0.06f, 0.45f), new Vector2(0.94f, 0.55f), TextRole.Body, TextAlignmentOptions.Center);
+            empty.color = Muted;
+            SerializedWire.SetTextKey(empty.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.LootEmpty);
+
+            Button takeAll = UiFactory.MakeButton("TakeAll", p, new Vector2(0.06f, 0.1f), new Vector2(0.94f, 0.18f), new Color(0.22f, 0.42f, 0.28f, 0.95f), 18f, out TextMeshProUGUI takeLabel);
+            SerializedWire.SetTextKey(takeLabel.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.LootTakeAll);
+            Button close = UiFactory.MakeButton("Close", p, new Vector2(0.06f, 0.015f), new Vector2(0.94f, 0.09f), ButtonColor, 18f, out TextMeshProUGUI closeLabel);
+            SerializedWire.SetTextKey(closeLabel.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.LootClose);
+
+            LootWindow window = panel.gameObject.AddComponent<LootWindow>();
+            SerializedWire.Set(window, "gameManager", gameManager);
+            SerializedWire.Set(window, "content", content);
+            SerializedWire.Set(window, "group", group);
+            SerializedWire.Set(window, "title", title);
+            SerializedWire.Set(window, "subtitle", subtitle);
+            SerializedWire.Set(window, "emptyLabel", empty);
+            SerializedWire.SetArray(window, "slotButtons", buttons);
+            SerializedWire.SetArray(window, "slotIcons", icons);
+            SerializedWire.SetArray(window, "slotLabels", labels);
+            SerializedWire.Set(window, "takeAllButton", takeAll);
+            SerializedWire.Set(window, "closeButton", close);
+        }
+
+        /// <summary>Radial ring + "Aranıyor…" over the container being searched (never blocks clicks).</summary>
+        private static void BuildSearchRing(Transform root, Camera camera, PlaceholderSprites art)
+        {
+            RectTransform holder = UiFactory.MakeRect("LootSearch", root, Vector2.zero, Vector2.one);
+            RectTransform ringRoot = UiFactory.MakeRect("Ring", holder, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f));
+            ringRoot.sizeDelta = new Vector2(72f, 72f);
+            Image back = UiFactory.MakeImage("Back", ringRoot, Vector2.zero, Vector2.one, new Color(0f, 0f, 0f, 0.45f), sprite: art.Ring);
+            back.raycastTarget = false;
+            Image fill = UiFactory.MakeImage("Fill", ringRoot, Vector2.zero, Vector2.one, Accent, sprite: art.Ring);
+            fill.type = Image.Type.Filled;
+            fill.fillMethod = Image.FillMethod.Radial360;
+            fill.fillOrigin = (int)Image.Origin360.Top;
+            fill.fillAmount = 0f;
+            fill.raycastTarget = false;
+            TextMeshProUGUI label = UiFactory.MakeLabel("Label", ringRoot, new Vector2(-1f, -0.7f), new Vector2(2f, -0.05f), TextRole.Small, TextAlignmentOptions.Center);
+            label.raycastTarget = false;
+            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.LootSearching);
+
+            LootSearchRing ring = holder.gameObject.AddComponent<LootSearchRing>();
+            SerializedWire.Set(ring, "worldCamera", camera);
+            SerializedWire.Set(ring, "root", ringRoot);
+            SerializedWire.Set(ring, "fill", fill);
+            SerializedWire.Set(ring, "label", label);
         }
 
         private static void BuildClickFeedback(Transform root, PlaceholderSprites art)

@@ -357,3 +357,16 @@ ui.pause.yes,Evet,confirmation yes
 ui.pause.no,Hayır,confirmation no
 ui.pocket.flashlight_on,El fenerini açtın.,backpack pocket click (flashlight on)
 ui.pocket.flashlight_off,El fenerini kapattın.,backpack pocket click (flashlight off)
+ui.loot.searching,Aranıyor…,search ring over furniture
+ui.loot.take_all,Hepsini al,container window button
+ui.loot.close,Kapat,container window button
+ui.loot.borrow_title,Ödünç al,container window title in neighbours' flats
+ui.loot.empty,Boş,container window: nothing left
+container.wardrobe,Gardırop,container name
+container.cabinet,Dolap,container name
+container.bookshelf,Kitaplık,container name
+container.drawer,Çekmece,container name
+container.medicine,Ecza dolabı,container name
+container.toolbox,Alet kutusu,container name
+container.nightstand,Komodin,container name
+container.jewelry,Mücevher kutusu,container name

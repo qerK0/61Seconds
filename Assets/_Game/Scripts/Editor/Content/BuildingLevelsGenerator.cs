@@ -22,6 +22,7 @@ namespace SixtyOne.Editor
         public AudioEventMap AudioMap;
         public List<AudioCue> Cues = new List<AudioCue>();
         public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue;
+        public AudioCue SearchCue, CarAlarmCue, StreetQuakeCue;
         public AudioCue MusicPrep, MusicTension, MusicOutro;
         public DialogueVoiceProfile Voices;
         public Dictionary<string, Hazard> Hazards = new Dictionary<string, Hazard>();
@@ -144,6 +145,8 @@ namespace SixtyOne.Editor
             result.DogGrowlCue = Cue("cue_dog_growl", 0.3f, loop: true);
             result.HeartbeatCue = Cue("cue_heartbeat", 0.7f, loop: true);
             result.DripCue = Cue("cue_amb_drip", 0.15f, loop: true);
+            result.SearchCue = Cue("cue_search", 0.55f, 0.95f, 1.05f);
+            result.CarAlarmCue = Cue("cue_car_alarm", 0.45f, loop: true);
             result.MusicPrep = Cue("cue_music_prep", 0.4f, loop: true);
             result.MusicTension = Cue("cue_music_tension", 0.35f, loop: true);
             result.MusicOutro = Cue("cue_music_outro", 0.5f, loop: true);

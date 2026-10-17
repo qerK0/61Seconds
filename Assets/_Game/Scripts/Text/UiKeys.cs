@@ -88,6 +88,13 @@ namespace SixtyOne.Text
         public const string FlashlightOn = "ui.pocket.flashlight_on";
         public const string FlashlightOff = "ui.pocket.flashlight_off";
 
+        // Loot containers.
+        public const string LootSearching = "ui.loot.searching";
+        public const string LootTakeAll = "ui.loot.take_all";
+        public const string LootClose = "ui.loot.close";
+        public const string LootBorrowTitle = "ui.loot.borrow_title";
+        public const string LootEmpty = "ui.loot.empty";
+
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;
     }

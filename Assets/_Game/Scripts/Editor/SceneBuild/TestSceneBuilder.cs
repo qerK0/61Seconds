@@ -215,6 +215,8 @@ namespace SixtyOne.Editor
             SerializedWire.Set(framing, "targetCamera", camera);
             SerializedWire.Set(framing, "director", director);
             SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
+            LootWindow lootWindow = choicePanel.transform.parent.GetComponentInChildren<LootWindow>(true);
+            if (lootWindow != null) SerializedWire.Set(lootWindow, "runner", family[0].GetComponent<CharacterMotor>());
             // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 97% of it (RoomCameraFraming.fill).
             SerializedWire.SetRect(framing, "freeViewport", new Rect(0f, 0.065f, TestSceneUi.ColumnLeft - 0.01f, 0.845f));
             if (rooms.Count > 0) framing.Frame(rooms[0]);
@@ -262,6 +264,9 @@ namespace SixtyOne.Editor
             foreach (string id in BuildingLevelsGenerator.KeyItemIds) items.Add(data.Items[id]);
             return items.ToArray();
         }
+
+        /// <summary>Furniture art for a container (PropArtSet); null = tinted block.</summary>
+        private static Sprite ContainerArt(string artName) => null;
 
         /// <summary>Debris sprites (enkaz 1 / 2) from the prop art set; empty = tinted blocks.</summary>
         private static Sprite[] DebrisSprites() => new Sprite[0];
@@ -326,6 +331,15 @@ namespace SixtyOne.Editor
                 Item item = data.Items[i.ItemId];
                 if (i.Hidden) HiddenItems.Build(t, i, item);
                 else SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly);
+            }
+
+            foreach (BuildingLayout.ContainerSpec c in spec.Containers)
+            {
+                var items = new List<Item>();
+                foreach (string id in c.Items) items.Add(data.Items[id]);
+                var hidden = new List<Item>();
+                foreach (string id in c.Hidden) hidden.Add(data.Items[id]);
+                SceneKit.Container(t, spec, c, items, hidden, ContainerArt(c.Art), data.SearchCue, data.Content);
             }
 
             foreach (BuildingLayout.RopeSpec rope in spec.Ropes)

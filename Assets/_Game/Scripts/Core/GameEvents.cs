@@ -80,6 +80,7 @@ namespace SixtyOne.Core
             TimeSpent = null;
             InventoryEvents.ClearAll();
             NavigationEvents.ClearAll();
+            LootEvents.ClearAll();
         }
     }
 }

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using SixtyOne.Audio;
 using SixtyOne.Core;
 using SixtyOne.Iso;
 using SixtyOne.Nodes;
@@ -185,6 +186,65 @@ namespace SixtyOne.Editor
             interactable.Configure(id, labelKey, cost, grants, null, default(TextKey), true, surface, null, r, borrowed, 0f, prepOnly);
             EditorUtility.SetDirty(interactable);
             return interactable;
+        }
+
+        /// <summary>
+        /// A searchable piece of furniture (LootContainer): its prop art when one is mapped (bottom-centre pivot),
+        /// else a tinted block; collider over the body, the container name above it, the approach point in front.
+        /// </summary>
+        public static LootContainer Container(Transform parent, BuildingLayout.RoomSpec room, BuildingLayout.ContainerSpec spec, IEnumerable<Item> items,
+            IEnumerable<Item> hidden, Sprite art, AudioCue searchCue, GameContent content)
+        {
+            var go = new GameObject("Container_" + spec.Id);
+            go.transform.SetParent(parent, false);
+            go.transform.localPosition = IsoMath.GridToWorld(spec.Gx, spec.Gy);
+
+            var bodyGo = new GameObject("Body");
+            bodyGo.transform.SetParent(go.transform, false);
+            SpriteRenderer r = bodyGo.AddComponent<SpriteRenderer>();
+            float height;
+            float width;
+            if (art != null)
+            {
+                r.sprite = art;
+                r.color = Color.white;
+                height = art.bounds.size.y;
+                width = art.bounds.size.x;
+            }
+            else
+            {
+                r.sprite = Art.Block;
+                r.color = spec.Color;
+                bodyGo.transform.localScale = new Vector3(spec.Scale.x, spec.Scale.y, 1f);
+                height = spec.Scale.y;
+                width = spec.Scale.x * 0.5f;
+            }
+
+            Material lit = RoomTiles.LitMaterial;
+            if (lit != null) r.sharedMaterial = lit;
+
+            BoxCollider2D box = go.AddComponent<BoxCollider2D>();
+            box.size = new Vector2(Mathf.Max(0.35f, width * 0.8f), Mathf.Max(0.3f, height));
+            box.offset = new Vector2(0f, box.size.y * 0.5f);
+
+            TextMeshPro label = WorldLabel(go.transform, new Vector3(0f, height + 0.15f, 0f), 1.4f, Color.white);
+            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", spec.NameKey);
+
+            IsoSorter sorter = go.AddComponent<IsoSorter>();
+            sorter.Mode = IsoSortMode.Static;
+            SerializedWire.SetBool(sorter, "includeChildren", true);
+            sorter.Apply();
+
+            Vector2 stand = BuildingLayout.ContainerApproach(room, spec);
+            var approach = new GameObject("Approach").transform;
+            approach.SetParent(parent, false);
+            approach.localPosition = IsoMath.GridToWorld(stand.x, stand.y);
+            approach.SetParent(go.transform, true);
+
+            LootContainer container = go.AddComponent<LootContainer>();
+            container.Configure(spec.Id, spec.NameKey, spec.Seconds, spec.Cost, items, hidden, spec.Borrowed, spec.PrepOnly, approach, r, searchCue, content);
+            EditorUtility.SetDirty(container);
+            return container;
         }
 
         /// <summary>A balcony/window rope point: needs the bedsheet rope, climbs down to the target node.</summary>

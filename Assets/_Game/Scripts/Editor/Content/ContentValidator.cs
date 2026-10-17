@@ -548,6 +548,18 @@ namespace SixtyOne.Editor
             Scene scene = SceneManager.GetActiveScene();
             if (scene.IsValid() && scene.isLoaded)
             {
+                foreach (LootContainer c in Object.FindObjectsByType<LootContainer>(FindObjectsInactive.Include))
+                {
+                    if (c.NameKey.IsEmpty) problems += Report($"container '{c.Id}' has no name key.", c);
+                    foreach (Item item in c.Contents) if (item == null) problems += Report($"container '{c.Id}' lists an empty item slot.", c);
+                    if (!c.PrepOnly) continue;
+                    Room room = c.GetComponentInParent<Room>(true);
+                    if (room == null || !prepRooms.Contains(room.RoomId))
+                    {
+                        problems += Report($"prep-only container '{c.Id}' is not in a prep room; it can never be searched.", c);
+                    }
+                }
+
                 foreach (WorldInteractable w in Object.FindObjectsByType<WorldInteractable>(FindObjectsInactive.Include))
                 {
                     if (!w.PrepOnly) continue;
