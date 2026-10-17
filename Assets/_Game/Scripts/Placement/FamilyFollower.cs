@@ -138,7 +138,8 @@ namespace SixtyOne.Placement
             Vector2 offset = config != null ? (child ? config.ChildOffset : config.WifeOffset) : Vector2.zero;
             // Offsets, distances and speeds are tuned at world scale 1.
             float margin = config != null ? config.FloorMargin : 0.25f;
-            return rooms.Current.ClampToFloor(leader.position + rooms.Current.WorldOffset(offset), margin);
+            // A spot under debris moves to the nearest free cell, so followers settle instead of re-planning forever.
+            return rooms.Current.ApproachTarget(leader.position + rooms.Current.WorldOffset(offset), margin);
         }
 
         private float Speed()
