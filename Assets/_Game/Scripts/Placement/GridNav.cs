@@ -213,6 +213,25 @@ namespace SixtyOne.Placement
             return best;
         }
 
+        /// <summary>The cell itself if it is on the floor, else the nearest floor cell (blocked or not).</summary>
+        public Vector2Int NearestFloor(Vector2Int cell)
+        {
+            if (floor.Contains(cell)) return cell;
+            Vector2Int best = cell;
+            float bestDist = float.MaxValue;
+            foreach (Vector2Int c in floor)
+            {
+                float d = (Center(c) - Center(cell)).sqrMagnitude;
+                if (d < bestDist)
+                {
+                    best = c;
+                    bestDist = d;
+                }
+            }
+
+            return best;
+        }
+
         /// <summary>
         /// True if a body of BodyRadius can move straight from a to b (grid points) over walkable cells only.
         /// Samples the segment and the four corners of the body, so diagonal squeezes between two blocked corners fail.

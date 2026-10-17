@@ -101,6 +101,7 @@ namespace SixtyOne.Editor
             QTEController qte = systems.AddComponent<QTEController>();
             RoomTransitionController transition = systems.AddComponent<RoomTransitionController>();
             DroppedItemsPresenter dropped = systems.AddComponent<DroppedItemsPresenter>();
+            DebrisPresenter debris = systems.AddComponent<DebrisPresenter>();
             SurvivalController survival = systems.AddComponent<SurvivalController>();
             SixtyOne.Prep.PrepPhase prepPhase = systems.AddComponent<SixtyOne.Prep.PrepPhase>();
             EpilogueController epilogue = systems.AddComponent<EpilogueController>();
@@ -163,6 +164,10 @@ namespace SixtyOne.Editor
             SerializedWire.Set(dropped, "rooms", switcher);
             SerializedWire.Set(dropped, "content", data.Content);
             SerializedWire.Set(dropped, "fallbackSprite", SceneKit.Art.Dot);
+
+            debris.Configure(gameManager, switcher, data.Level, DebrisSprites(), SceneKit.Art.Block, SceneKit.Art.Dot, RoomTiles.LitMaterial,
+                data.CrashCue);
+            EditorUtility.SetDirty(debris);
 
             SerializedWire.Set(placement, "gameManager", gameManager);
             SerializedWire.Set(placement, "rooms", switcher);
@@ -258,6 +263,9 @@ namespace SixtyOne.Editor
             return items.ToArray();
         }
 
+        /// <summary>Debris sprites (enkaz 1 / 2) from the prop art set; empty = tinted blocks.</summary>
+        private static Sprite[] DebrisSprites() => new Sprite[0];
+
         private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
 
         private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
@@ -267,7 +275,7 @@ namespace SixtyOne.Editor
             Transform t = room.transform;
             var extraCells = new List<Vector2Int>();
             foreach (Vector2 extra in spec.ExtraTiles) extraCells.Add(new Vector2Int(Mathf.FloorToInt(extra.x), Mathf.FloorToInt(extra.y)));
-            room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells));
+            room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells), spec.Depth, spec.Blocked);
 
             RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.DamagedCorridor ? tileSets.DamagedCorridor
                 : spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor : tileSets.Home;

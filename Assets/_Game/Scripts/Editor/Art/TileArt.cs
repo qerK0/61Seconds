@@ -99,6 +99,16 @@ namespace SixtyOne.Editor
                     new[] { "Flat Stone 13", "Flat Stone 13", CrackedB + "_R", "Flat Stone 13", "Flat Stone 13", CrackedA + "_R", "Flat Stone 13" },
                     CorridorWindows + "_L", CorridorWindows + "_R", new Color(0.92f, 0.92f, 0.94f, 1f), new Color(0.86f, 0.86f, 0.9f, 1f))
             };
+            // Every set can crack after a quake (WallCracks swaps these in, seeded per segment).
+            Sprite[] crackedLeft = FindAll(new[] { CrackedA + "_L", CrackedB + "_L" });
+            Sprite[] crackedRight = FindAll(new[] { CrackedB + "_R", CrackedA + "_R" });
+            foreach (RoomTileSet set in new[] { sets.Home, sets.Corridor, sets.DamagedCorridor })
+            {
+                if (set == null) continue;
+                set.ConfigureCracks(crackedLeft, crackedRight);
+                EditorUtility.SetDirty(set);
+            }
+
             AssetDatabase.SaveAssets();
             return sets;
         }

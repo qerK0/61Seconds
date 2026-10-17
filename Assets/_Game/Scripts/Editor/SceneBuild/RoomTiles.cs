@@ -84,6 +84,7 @@ namespace SixtyOne.Editor
             var root = new GameObject("Walls").transform;
             root.SetParent(room, false);
             root.gameObject.AddComponent<TransitionLayerTag>().Configure(TransitionLayer.Walls);
+            WallCracks cracks = root.gameObject.AddComponent<WallCracks>();
 
             // Back-left edge: grid y = Height, one segment per x. Back-right edge: grid x = Width, one per y.
             rows = Mathf.Max(1, rows);
@@ -91,13 +92,13 @@ namespace SixtyOne.Editor
             {
                 bool top = row == rows - 1;
                 var lift = new Vector3(0f, row * (WallFaceHeight - RowOverlap), 0f);
-                for (int x = 0; x < spec.Width; x++) Segment(root, spec, set, false, x, IsoMath.GridToWorld(x + 0.5f, spec.Height) + lift, row, top);
-                for (int y = 0; y < spec.Height; y++) Segment(root, spec, set, true, y, IsoMath.GridToWorld(spec.Width, y + 0.5f) + lift, row, top);
+                for (int x = 0; x < spec.Width; x++) Segment(root, spec, set, false, x, IsoMath.GridToWorld(x + 0.5f, spec.Height) + lift, row, top, cracks);
+                for (int y = 0; y < spec.Height; y++) Segment(root, spec, set, true, y, IsoMath.GridToWorld(spec.Width, y + 0.5f) + lift, row, top, cracks);
             }
         }
 
         private static void Segment(Transform parent, BuildingLayout.RoomSpec spec, RoomTileSet set, bool rightEdge, int index, Vector3 edgeMid,
-            int row, bool topRow)
+            int row, bool topRow, WallCracks cracks)
         {
             string code = (rightEdge ? "R" : "L") + index;
             if (spec.Gaps.Contains(code)) return;
@@ -122,6 +123,13 @@ namespace SixtyOne.Editor
             Color c = set.WallTint * shade;
             c.a = 1f;
             r.color = c;
+
+            // Plain segments can crack after a quake (windows keep their glass look).
+            if (!window)
+            {
+                Sprite cracked = set.CrackedSprite(rightEdge, index + row * 3 + (rightEdge ? 1 : 0), out bool crackedFlip);
+                cracks.Add(code + "_r" + row, r, sprite, flipX, cracked, crackedFlip);
+            }
         }
 
         /// <summary>

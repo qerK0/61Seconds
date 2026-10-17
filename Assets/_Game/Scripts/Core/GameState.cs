@@ -58,6 +58,15 @@ namespace SixtyOne.Core
         /// <summary>Hunger/thirst exhaustion 0..1 (rises at 0 stamina; 1 = death). Restored by snapshots.</summary>
         public float Exhaustion { get; set; }
 
+        /// <summary>Quakes so far: 0 before the quake, opening quake 1, F3 aftershock 2, F2 aftershock 3, street 4. Restored by snapshots.</summary>
+        public int QuakeCount { get; set; }
+
+        /// <summary>Checkpoint seed for debris and wall cracks: the same checkpoint always gives the same layout. Restored by snapshots.</summary>
+        public int DebrisSeed { get; set; } = 61;
+
+        /// <summary>Items left in searched furniture (loot containers). Restored by snapshots.</summary>
+        public ContainerLedger Containers { get; private set; } = new ContainerLedger();
+
         /// <summary>Items borrowed from neighbours' flats. Restored by snapshots (reset by checkpoint rewinds).</summary>
         public BorrowLedger Borrowed { get; private set; } = new BorrowLedger();
 
@@ -100,6 +109,9 @@ namespace SixtyOne.Core
                 Stamina = Stamina,
                 Poison = Poison,
                 Exhaustion = Exhaustion,
+                QuakeCount = QuakeCount,
+                DebrisSeed = DebrisSeed,
+                Containers = Containers.Clone(),
                 Borrowed = Borrowed.Clone(),
                 CollectedTips = new HashSet<string>(CollectedTips, StringComparer.Ordinal),
                 RevealedAnchors = new HashSet<string>(RevealedAnchors, StringComparer.Ordinal),

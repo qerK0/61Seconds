@@ -29,6 +29,12 @@ namespace SixtyOne.World
         [Tooltip("Optional window segment for the back-right edge.")]
         [SerializeField] private Sprite rightWindowSprite;
 
+        [Tooltip("Cracked back-left segments (swapped in after quakes by WallCracks).")]
+        [SerializeField] private Sprite[] crackedLeftSprites = new Sprite[0];
+
+        [Tooltip("Cracked back-right segments; empty = flip the cracked left ones.")]
+        [SerializeField] private Sprite[] crackedRightSprites = new Sprite[0];
+
         [Tooltip("Floor tint.")]
         [SerializeField] private Color floorTint = Color.white;
 
@@ -64,6 +70,27 @@ namespace SixtyOne.World
             if (!HasWalls) return null;
             flipX = rightEdge;
             return leftWallSprites[Mathf.Abs(index) % leftWallSprites.Length];
+        }
+
+        /// <summary>Cracked variant for a segment, or null if the set has none; flipX as for WallSprite.</summary>
+        public Sprite CrackedSprite(bool rightEdge, int index, out bool flipX)
+        {
+            flipX = false;
+            if (rightEdge && crackedRightSprites != null && crackedRightSprites.Length > 0)
+            {
+                return crackedRightSprites[Mathf.Abs(index) % crackedRightSprites.Length];
+            }
+
+            if (crackedLeftSprites == null || crackedLeftSprites.Length == 0) return null;
+            flipX = rightEdge;
+            return crackedLeftSprites[Mathf.Abs(index) % crackedLeftSprites.Length];
+        }
+
+        /// <summary>Authoring helper: the cracked wall variants.</summary>
+        public void ConfigureCracks(Sprite[] left, Sprite[] right)
+        {
+            crackedLeftSprites = left ?? new Sprite[0];
+            crackedRightSprites = right ?? new Sprite[0];
         }
 
         /// <summary>Authoring helper for the tile-set generator.</summary>

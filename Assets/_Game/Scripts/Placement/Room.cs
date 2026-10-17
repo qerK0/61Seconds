@@ -106,6 +106,14 @@ namespace SixtyOne.Placement
             }
         }
 
+        /// <summary>A fresh grid of this room without any debris (static blocked cells only): what DebrisPlanner plans on.</summary>
+        public GridNav BaseNav()
+        {
+            var baseNav = new GridNav(floor.Width, floor.Height, floor.ExtraCells);
+            baseNav.SetBlocked(blockedCells);
+            return baseNav;
+        }
+
         /// <summary>Replaces the debris cells (DebrisPresenter); paths avoid them from now on.</summary>
         public void SetDebris(IEnumerable<Vector2Int> cells)
         {
@@ -191,6 +199,24 @@ namespace SixtyOne.Placement
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Cells that debris must never cover or cut off: member spawns, anchors, and the approach cell of every door,
+        /// hotspot, pickup, container and rope point authored in the room (dropped items are excluded so the layout
+        /// stays the same for a checkpoint).
+        /// </summary>
+        public List<Vector2Int> RequiredCells()
+        {
+            var cells = new List<Vector2Int>();
+            foreach (MemberType type in new[] { MemberType.Player, MemberType.Wife, MemberType.Child }) cells.Add(CellOf(GetSpawn(type)));
+            foreach (Anchor a in Anchors) cells.Add(CellOf(a.GroundPoint));
+            foreach (MonoBehaviour b in GetComponentsInChildren<MonoBehaviour>(true))
+            {
+                if (b is IApproachable approachable && !(b is SixtyOne.World.WorldDroppedItem)) cells.Add(CellOf(approachable.ApproachPoint));
+            }
+
+            return cells;
         }
 
         /// <summary>Spawn point for a member (room position if none set).</summary>

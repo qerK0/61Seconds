@@ -28,6 +28,10 @@ namespace SixtyOne.Placement
         [Tooltip("Camera shake multiplier (1 = act default).")]
         [SerializeField] private float shakeScale = 1f;
 
+        [Tooltip("Which quake this is (GameState.QuakeCount after it): opening 1, F3 aftershock 2, F2 aftershock 3. 0 = one more than before.")]
+        [Min(0)]
+        [SerializeField] private int quakeNumber;
+
         public SceneNode NextNode => nextNode;
         public Hazard UnplacedHazard => unplacedHazard;
         public DeathData ChildAloneDeath => childAloneDeath;
@@ -35,6 +39,10 @@ namespace SixtyOne.Placement
         public float Magnitude => magnitude;
         public override float AlertMagnitude => magnitude > 0f ? magnitude : base.AlertMagnitude;
         public float ShakeScale => shakeScale;
+        public int QuakeNumber => quakeNumber;
+
+        /// <summary>Authoring helper: the quake count this placement's quake brings the building to (debris, cracks).</summary>
+        public void ConfigureQuakeNumber(int number) => quakeNumber = number;
 
         /// <summary>Authoring helper: magnitude and shake strength of this quake moment.</summary>
         public void ConfigureQuake(float quakeMagnitude, float cameraShakeScale)

@@ -177,6 +177,8 @@ namespace SixtyOne.Editor
             result.Level.ConfigureStamina(100f, 0.42f, 1.5f, 0.03f, 0.2f, "death.exhaustion", Tip("tip.supplies"));
             result.Level.ConfigurePrep(PrepSeconds, 10);
             result.Level.ConfigureBag(8, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
+            // Debris: 0 / 6 / 10 / 15 / 20 % of the free cells (+3 % per lower floor); cracks ~0 / 15 / 35 / 55 / 70 %.
+            result.Level.ConfigureDamage(new[] { 0f, 0.06f, 0.10f, 0.15f, 0.20f }, 0.03f, new[] { 0f, 0.15f, 0.35f, 0.55f, 0.7f }, 0.05f);
 
             result.Transition = Asset<SixtyOne.Placement.TransitionConfig>(DataRoot + "/TransitionConfig.asset");
             // Old room rises 0.35s, new room drops 0.4s (descend 0.65s, higher), wave 0.12s, family pops 0.15s.

@@ -4,7 +4,8 @@ namespace SixtyOne.Core
     /// Deep copy of GameState taken when a decision/placement node starts.
     /// Restoring keeps the live LoopCount, collected tips, revealed anchor labels and knowledge.
     /// Member anchor positions are kept for micro rewinds and restored for macro (checkpoint) rewinds.
-    /// The building timer, stamina, poison, borrow ledger, key items and dropped items come back with the snapshot.
+    /// The building timer, stamina, poison, borrow ledger, key items, dropped items, searched containers, the quake
+    /// count and the debris seed come back with the snapshot.
     /// </summary>
     public sealed class Snapshot
     {
@@ -44,6 +45,9 @@ namespace SixtyOne.Core
             live.Stamina = saved.Stamina;
             live.Poison = saved.Poison;
             live.Exhaustion = saved.Exhaustion;
+            live.QuakeCount = saved.QuakeCount;
+            live.DebrisSeed = saved.DebrisSeed;
+            live.Containers.CopyFrom(saved.Containers);
             live.Borrowed.CopyFrom(saved.Borrowed);
 
             foreach (FamilyMemberState member in live.Members)

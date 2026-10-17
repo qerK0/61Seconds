@@ -102,7 +102,23 @@ namespace SixtyOne.Building
         [Tooltip("Panic lost per second while calm (down to the timer/poison baseline).")]
         [SerializeField] private float panicCalmPerSecond = 0.04f;
 
+        [Header("Damage (debris and wall cracks)")]
+        [Tooltip("Share of a room's free floor cells covered by debris, indexed by quake count (0 = before the quake, 1 = opening quake ... 4 = street aftershock).")]
+        [SerializeField] private float[] debrisDensityPerQuake = { 0f, 0.06f, 0.10f, 0.15f, 0.20f };
+        [Tooltip("Extra debris density per floor below the top floor.")]
+        [Min(0f)]
+        [SerializeField] private float debrisDepthBonus = 0.03f;
+        [Tooltip("Chance a wall segment is cracked, indexed by quake count.")]
+        [SerializeField] private float[] crackChancePerQuake = { 0f, 0.15f, 0.35f, 0.55f, 0.7f };
+        [Tooltip("Extra crack chance per floor below the top floor.")]
+        [Min(0f)]
+        [SerializeField] private float crackDepthBonus = 0.05f;
+
         public float BuildingSeconds => buildingSeconds;
+        public IReadOnlyList<float> DebrisDensityPerQuake => debrisDensityPerQuake;
+        public float DebrisDepthBonus => debrisDepthBonus;
+        public IReadOnlyList<float> CrackChancePerQuake => crackChancePerQuake;
+        public float CrackDepthBonus => crackDepthBonus;
         public float PulseAtSeconds => pulseAtSeconds;
         public float PrepSeconds => prepSeconds;
         public int PrepTickFrom => prepTickFrom;
@@ -196,6 +212,15 @@ namespace SixtyOne.Building
             exhaustionDecayPerSecond = exhaustionDecay;
             exhaustionTextKey = deathText;
             exhaustionTip = tip;
+        }
+
+        /// <summary>Authoring helper: debris density and crack chance per quake count (+ per floor below the top).</summary>
+        public void ConfigureDamage(float[] debrisPerQuake, float debrisPerDepth, float[] cracksPerQuake, float cracksPerDepth)
+        {
+            debrisDensityPerQuake = debrisPerQuake;
+            debrisDepthBonus = debrisPerDepth;
+            crackChancePerQuake = cracksPerQuake;
+            crackDepthBonus = cracksPerDepth;
         }
 
         /// <summary>Authoring helper for generators.</summary>

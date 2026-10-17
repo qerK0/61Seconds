@@ -3,6 +3,7 @@
     "rootNamespace": "SixtyOne.Tests",
     "references": [
         "SixtyOne.Runtime",
+        "SixtyOne.Editor",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],

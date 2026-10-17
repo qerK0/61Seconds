@@ -93,6 +93,7 @@ namespace SixtyOne.Editor
             arrival.SetAfadAlert(true);
             arrival.ConfigurePlacement(flat7, result.Hazards["hz.f7_open"], new DeathData("death.child_alone", Tip("tip.keep_child_close"), MemberType.Child), 3.5f);
             arrival.ConfigureQuake(6.2f, 1.1f);
+            arrival.ConfigureQuakeNumber(3);
 
             // Flat 7: gas leaking (poison until the valve is closed). The wet cloth halves the gain.
             Setup(flat7, F2Flat7, Flat7, 3);

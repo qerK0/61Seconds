@@ -124,6 +124,10 @@ namespace SixtyOne.Editor
             public List<RopeSpec> Ropes = new List<RopeSpec>();
             public List<DoorSpec> Doors = new List<DoorSpec>();
             public List<HotspotSpec> Hotspots = new List<HotspotSpec>();
+            /// <summary>Floors below the top floor (0 = floor 4 ... 3 = street): more debris and cracks.</summary>
+            public int Depth;
+            /// <summary>Cells that are never walkable (the street's power line).</summary>
+            public List<Vector2Int> Blocked = new List<Vector2Int>();
         }
 
         /// <summary>How far inside a door the player stands / arrives (grid cells).</summary>
@@ -242,11 +246,43 @@ namespace SixtyOne.Editor
         {
             var floor2 = new List<RoomSpec>(Floor2());
             var floor3 = new List<RoomSpec>(Floor3(floor2));
+            var floor4 = new List<RoomSpec>(Floor4(floor3));
+            foreach (RoomSpec r in floor3) r.Depth = 1;
+            foreach (RoomSpec r in floor2) r.Depth = r.Depth > 0 ? r.Depth : 2;
             var rooms = new List<RoomSpec>();
-            rooms.AddRange(Floor4(floor3));
+            rooms.AddRange(floor4);
             rooms.AddRange(floor3);
             rooms.AddRange(floor2);
             return rooms;
+        }
+
+        // ---------- navigation (mirrors Room.RequiredCells / Room.BaseNav at runtime) ----------
+
+        /// <summary>The room's walkable grid without debris.</summary>
+        public static GridNav NavFor(RoomSpec room)
+        {
+            var extra = new List<Vector2Int>();
+            foreach (Vector2 e in room.ExtraTiles) extra.Add(new Vector2Int(Mathf.FloorToInt(e.x), Mathf.FloorToInt(e.y)));
+            var nav = new GridNav(room.Width, room.Height, extra);
+            nav.SetBlocked(room.Blocked);
+            return nav;
+        }
+
+        /// <summary>
+        /// Cells debris must never cover or cut off: spawns, anchors, door approaches (and arrivals), hotspot
+        /// approaches, pickups / containers and rope points.
+        /// </summary>
+        public static List<Vector2Int> RequiredCells(RoomSpec room)
+        {
+            var points = new List<Vector2> { room.PlayerSpawn, room.WifeSpawn, room.ChildSpawn };
+            foreach (AnchorSpec a in room.Anchors) points.Add(new Vector2(a.Gx, a.Gy));
+            foreach (DoorSpec d in room.Doors) points.Add(EdgeInside(room, d.Edge));
+            foreach (HotspotSpec h in room.Hotspots) if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(new Vector2(h.Gx - 0.5f, h.Gy - 0.5f));
+            foreach (ItemSpec i in room.Items) points.Add(new Vector2(i.Gx, i.Gy));
+            foreach (RopeSpec r in room.Ropes) points.Add(new Vector2(r.Gx, r.Gy));
+            var cells = new List<Vector2Int>();
+            foreach (Vector2 p in points) cells.Add(GridNav.CellOf(p));
+            return cells;
         }
 
         private static RoomSpec Find(List<RoomSpec> rooms, string id) => rooms.Find(r => r.Id == id);

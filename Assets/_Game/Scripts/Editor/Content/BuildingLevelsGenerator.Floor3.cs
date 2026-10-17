@@ -75,6 +75,7 @@ namespace SixtyOne.Editor
             arrival.SetAfadAlert(true);
             arrival.ConfigurePlacement(corridor, result.Hazards["hz.f3_open"], new DeathData("death.child_alone", Tip("tip.keep_child_close"), MemberType.Child), 3f);
             arrival.ConfigureQuake(5.4f, 0.8f);
+            arrival.ConfigureQuakeNumber(2);
             AddGasBomb(arrival);
 
             Setup(corridor, F3CorridorNode, F3Corridor, 2);

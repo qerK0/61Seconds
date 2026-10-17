@@ -241,6 +241,8 @@ namespace SixtyOne.Placement
             Deselect();
             ClearHighlights();
             SnapUnfinishedRuns();
+            // Debris and cracks grow with the quake count (restored by snapshots, so a rewind takes them back).
+            State.QuakeCount = QuakeRules.CountAfter(State.QuakeCount, node.QuakeNumber);
 
             Dictionary<MemberType, string> placements = CurrentPlacements();
             List<PlacementResult> results = PlacementResolver.Resolve(layout, placements, node.Act);

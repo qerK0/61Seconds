@@ -73,6 +73,7 @@ namespace SixtyOne.Editor
             quake.SetAfadAlert(true);
             quake.ConfigurePlacement(salon, result.Hazards["hz.open_room"], new DeathData("death.child_alone", Tip("tip.keep_child_close"), MemberType.Child), 4f);
             quake.ConfigureQuake(7.1f, 1.3f);
+            quake.ConfigureQuakeNumber(1);
 
             Setup(salon, F4Salon, Flat11Salon, 1);
             salon.AddChoice(C(F4Salon, "kitchen").Move(2f).Then(Outcome.GoTo(kitchen)));

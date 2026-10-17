@@ -23,6 +23,16 @@ namespace SixtyOne.Placement
         }
     }
 
+    /// <summary>The building's quake counter (pure).</summary>
+    public static class QuakeRules
+    {
+        /// <summary>Quake count after a quake: its configured number (never lower than before), else one more.</summary>
+        public static int CountAfter(int before, int quakeNumber)
+        {
+            return quakeNumber > 0 ? System.Math.Max(before, quakeNumber) : before + 1;
+        }
+    }
+
     /// <summary>
     /// Placement runs in flight. Reserving writes the anchor into GameState at once (capacity and adjacency rules
     /// see it immediately, so the next member can be queued while the first is still running); FinishAll hands
