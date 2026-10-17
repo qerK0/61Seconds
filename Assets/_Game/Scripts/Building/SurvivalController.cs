@@ -24,6 +24,9 @@ namespace SixtyOne.Building
         [Tooltip("Timer, stamina, poison and panic settings.")]
         [SerializeField] private LevelConfig config;
 
+        [Tooltip("Pre-quake prep countdown: receives action costs until the building timer starts.")]
+        [SerializeField] private SixtyOne.Prep.PrepPhase prep;
+
         [Tooltip("Dialogue driver (the real-time tick pauses while lines play).")]
         [SerializeField] private DialogueController dialogue;
 
@@ -63,7 +66,7 @@ namespace SixtyOne.Building
             }
 
             Timer.Configure(config.BuildingSeconds, config.PulseAtSeconds, config.AlarmAtSeconds);
-            State.BuildingTime = config.BuildingSeconds;
+            SixtyOne.Prep.PrepRules.ResetForPrep(State, config.PrepSeconds, config.BuildingSeconds);
             State.Stamina = config.StaminaMax;
             Timer.Sync(State.BuildingTime);
 
@@ -101,6 +104,13 @@ namespace SixtyOne.Building
 
             float dt = Time.deltaTime;
             bool paused = config.PauseInDialogue && dialogue != null && dialogue.IsPlayingLines;
+            // Before the quake (prep) the building stands: no collapse clock, no drain, no gas leak yet.
+            if (SixtyOne.Prep.PrepRules.SpendsPrep(State))
+            {
+                Panic01 = SurvivalModel.StepPanic(Panic01, 0f, config.PanicCalmPerSecond, dt);
+                return;
+            }
+
             if (config.RealtimeTick && !paused)
             {
                 State.BuildingTime = Timer.Advance(State.BuildingTime, dt);
@@ -150,12 +160,19 @@ namespace SixtyOne.Building
 
         private void OnQuakeStarted(QuakeInfo info)
         {
-            if (config != null) Panic01 = Mathf.Clamp01(Panic01 + config.AftershockPanic);
+            // At least the aftershock panic (not additive: the opening quake raises an onset and the main shock).
+            if (config != null) Panic01 = Mathf.Clamp01(Mathf.Max(Panic01, config.AftershockPanic));
         }
 
         public void SpendTime(float seconds, bool isMove)
         {
             if (config == null || gameManager == null || gameManager.IsDead || seconds <= 0f) return;
+            if (SixtyOne.Prep.PrepRules.SpendsPrep(State))
+            {
+                if (prep != null) prep.Spend(seconds);
+                return;
+            }
+
             bool exhausted = State.Stamina <= ChoiceView.ExhaustedStamina;
             float multiplier = SurvivalModel.TimeMultiplier(SurvivalModel.InjuredCount(State), isMove, config.InjuredMoveExtraPerMember,
                 exhausted, config.StaminaZeroTimeMultiplier);

@@ -34,6 +34,12 @@ namespace SixtyOne.Core
         /// <summary>Seconds left until the building collapses. Restored by snapshots.</summary>
         public float BuildingTime { get; set; }
 
+        /// <summary>Seconds left on the pre-quake prep countdown (Floor 4 loot phase). Restored by snapshots.</summary>
+        public float PrepTime { get; set; }
+
+        /// <summary>False during the prep phase; the building timer only runs once the quake hits. Restored by snapshots.</summary>
+        public bool BuildingTimerStarted { get; set; } = true;
+
         /// <summary>Stamina (0..LevelConfig.StaminaMax). Restored by snapshots.</summary>
         public float Stamina { get; set; } = 100f;
 
@@ -74,6 +80,8 @@ namespace SixtyOne.Core
                 CurrentNodeId = CurrentNodeId,
                 Act = Act,
                 BuildingTime = BuildingTime,
+                PrepTime = PrepTime,
+                BuildingTimerStarted = BuildingTimerStarted,
                 Stamina = Stamina,
                 Poison = Poison,
                 Borrowed = Borrowed.Clone(),

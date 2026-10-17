@@ -131,6 +131,7 @@ namespace SixtyOne.Cinematic
             GameEvents.Rewound += OnRewound;
             GameEvents.NodeEntered += OnNodeEntered;
             GameEvents.BuildingTick += OnHeartbeat;
+            GameEvents.PrepTick += OnHeartbeat;
         }
 
         private void OnDisable()
@@ -141,6 +142,7 @@ namespace SixtyOne.Cinematic
             GameEvents.Rewound -= OnRewound;
             GameEvents.NodeEntered -= OnNodeEntered;
             GameEvents.BuildingTick -= OnHeartbeat;
+            GameEvents.PrepTick -= OnHeartbeat;
             SetLowPass(false, 0f);
         }
 
@@ -212,8 +214,12 @@ namespace SixtyOne.Cinematic
             float dt = Time.unscaledDeltaTime;
             bool reduce = ReduceEffects;
 
-            // Tension follows the building timer over the whole game.
-            state.Prep = survival != null ? survival.Timer.ElapsedFraction(survival.Remaining) : 0f;
+            // Tension: the prep countdown before the quake, then the building timer for the rest of the game.
+            GameState gs = gameManager != null ? gameManager.State : null;
+            bool inPrep = gs != null && !gs.BuildingTimerStarted && survival != null && survival.Config != null && survival.Config.PrepSeconds > 0f;
+            if (inPrep) state.Prep = 1f - Mathf.Clamp01(gs.PrepTime / survival.Config.PrepSeconds);
+            else state.Prep = survival != null ? survival.Timer.ElapsedFraction(survival.Remaining) : 0f;
+            bool prepTicking = inPrep && gs.PrepTime > 0f && gs.PrepTime <= survival.Config.PrepTickFrom;
             state.Poison = gameManager != null ? gameManager.State.Poison : 0f;
 
             bool inWindow = nodePlayer != null && nodePlayer.Current is PlacementNode && nodePlayer.Timer.Running;
@@ -246,7 +252,7 @@ namespace SixtyOne.Cinematic
             UpdateCamera(p, frame, reduce, dt);
             UpdateLights(p);
 
-            bool bars = (inWindow || quaking) && deathTarget <= 0f;
+            bool bars = (inWindow || quaking || prepTicking) && deathTarget <= 0f;
             if (letterbox != null) letterbox.Show(bars, p.LetterboxAspect, p.LetterboxSlideSeconds);
             SetLowPass(inWindow && deathTarget <= 0f && p.PlacementLowPassHz > 0f, p.PlacementLowPassHz);
         }

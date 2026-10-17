@@ -44,7 +44,7 @@ namespace SixtyOne.Editor
             sorter.Apply();
 
             HiddenItemHotspot hotspot = go.AddComponent<HiddenItemHotspot>();
-            hotspot.Configure(spec.Id, item.NameKey, spec.Cost, item, null, default(TextKey), true, true, null, null, spec.Borrowed);
+            hotspot.Configure(spec.Id, item.NameKey, spec.Cost, item, null, default(TextKey), true, true, null, null, spec.Borrowed, 0f, spec.PrepOnly);
             hotspot.ConfigureHidden(overlay, sparkle);
             EditorUtility.SetDirty(hotspot);
             return hotspot;

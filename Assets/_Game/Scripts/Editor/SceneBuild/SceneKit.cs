@@ -135,7 +135,8 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>A pickup (open surface) or a furniture interactable (drawer/cabinet) granting an item.</summary>
-        public static WorldInteractable Interactable(Transform parent, string id, Item grants, float gx, float gy, float cost, bool surface, bool borrowed, Color color)
+        public static WorldInteractable Interactable(Transform parent, string id, Item grants, float gx, float gy, float cost, bool surface, bool borrowed, Color color,
+            bool prepOnly = false)
         {
             var go = new GameObject("Item_" + id);
             go.transform.SetParent(parent, false);
@@ -168,7 +169,7 @@ namespace SixtyOne.Editor
             sorter.Apply();
 
             WorldInteractable interactable = surface ? go.AddComponent<PickupItem>() : go.AddComponent<WorldInteractable>();
-            interactable.Configure(id, labelKey, cost, grants, null, default(TextKey), true, surface, null, r, borrowed);
+            interactable.Configure(id, labelKey, cost, grants, null, default(TextKey), true, surface, null, r, borrowed, 0f, prepOnly);
             EditorUtility.SetDirty(interactable);
             return interactable;
         }

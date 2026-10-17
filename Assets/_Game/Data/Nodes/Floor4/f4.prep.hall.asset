@@ -9,25 +9,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f1a45025b91bd4c41b761ea89f195d29, type: 3}
-  m_Name: f4.intro
-  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Dialogue.DialogueNode
-  id: f4.intro
+  m_Script: {fileID: 11500000, guid: 15af6cbc57b76f2418d25ee3816fe366, type: 3}
+  m_Name: f4.prep.hall
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Prep.PrepPhaseNode
+  id: f4.prep.hall
   titleKey:
-    key: f4.intro.title
+    key: f4.prep.hall.title
   bodyKey:
-    key: f4.intro.body
-  roomId: flat11_salon
+    key: f4.prep.hall.body
+  roomId: flat11_hall
   act: 1
   timerSeconds: 0
   timeoutChoiceIndex: -1
-  isCheckpoint: 1
+  isCheckpoint: 0
   afadAlertOnEnter: 0
   choices:
   - labelKey:
-      key: f4.intro.c_hurry
+      key: f4.prep.hall.c_breaker
     type: 0
-    showIf: []
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: PowerOff
+      member: 0
+      health: 0
     conditions: []
     failBehaviour: 0
     lockedReasonKey:
@@ -36,26 +42,16 @@ MonoBehaviour:
     missingItemTextKey:
       key: 
     missingItemRewind: 1
-    timeCost: 0
+    timeCost: 4
     staminaCost: 0
     heavy: 0
     isMove: 0
-    duringDialogue: 1
+    duringDialogue: 0
     timeoutOnly: 0
     outcomes:
     - type: 2
       targetNode: {fileID: 0}
-      flag: IntroCutShort
-      flagValue: 1
-      item: {fileID: 0}
-      trader: {fileID: 0}
-      messageKey:
-        key: 
-      member: 0
-      health: 0
-    - type: 0
-      targetNode: {fileID: 11400000, guid: 96480b765679eb142a73a660265f2236, type: 2}
-      flag: 
+      flag: PowerOff
       flagValue: 1
       item: {fileID: 0}
       trader: {fileID: 0}
@@ -73,7 +69,7 @@ MonoBehaviour:
       rewindTo: {fileID: 0}
     cue: {fileID: 0}
   - labelKey:
-      key: f4.intro.c_thanks
+      key: f4.prep.hall.c_back
     type: 0
     showIf: []
     conditions: []
@@ -84,35 +80,15 @@ MonoBehaviour:
     missingItemTextKey:
       key: 
     missingItemRewind: 1
-    timeCost: 0
+    timeCost: 1
     staminaCost: 0
     heavy: 0
-    isMove: 0
+    isMove: 1
     duringDialogue: 0
     timeoutOnly: 0
     outcomes:
-    - type: 3
-      targetNode: {fileID: 0}
-      flag: 
-      flagValue: 1
-      item: {fileID: 11400000, guid: 5d95bc2995c84124189eee0d7134ee67, type: 2}
-      trader: {fileID: 0}
-      messageKey:
-        key: 
-      member: 0
-      health: 0
-    - type: 2
-      targetNode: {fileID: 0}
-      flag: KnowsFlat12
-      flagValue: 1
-      item: {fileID: 0}
-      trader: {fileID: 0}
-      messageKey:
-        key: 
-      member: 0
-      health: 0
     - type: 0
-      targetNode: {fileID: 11400000, guid: 96480b765679eb142a73a660265f2236, type: 2}
+      targetNode: {fileID: 11400000, guid: 007e8bf9d7eab9845a6dec479bab9695, type: 2}
       flag: 
       flagValue: 1
       item: {fileID: 0}
@@ -132,24 +108,10 @@ MonoBehaviour:
     cue: {fileID: 0}
   onEnter: []
   bombChecks: []
-  lines:
-  - speakerKey:
-      key: npc.sevim.name
-    textKey:
-      key: f4.intro.l1
-    timeCost: 4
-  - speakerKey:
-      key: npc.sevim.name
-    textKey:
-      key: f4.intro.l2
-    timeCost: 4
-  - speakerKey:
-      key: npc.sevim.name
-    textKey:
-      key: f4.intro.l3
-    timeCost: 3
-  - speakerKey:
-      key: npc.sevim.name
-    textKey:
-      key: f4.intro.l4
-    timeCost: 3
+  quakeNode: {fileID: 11400000, guid: 96480b765679eb142a73a660265f2236, type: 2}
+  showAlertOnEnter: 0
+  alertTitleKey:
+    key: 
+  alertBodyKey:
+    key: 
+  onsetShakeScale: 0.4

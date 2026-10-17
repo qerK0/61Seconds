@@ -12,13 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a52b019817b04704aa4e38dda39c541d, type: 3}
   m_Name: GameContent
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.GameContent
-  startNode: {fileID: 11400000, guid: 6420d87129d6a4544b933a29010a3bce, type: 2}
+  startNode: {fileID: 11400000, guid: 007e8bf9d7eab9845a6dec479bab9695, type: 2}
   nodes:
-  - {fileID: 11400000, guid: 6420d87129d6a4544b933a29010a3bce, type: 2}
+  - {fileID: 11400000, guid: 007e8bf9d7eab9845a6dec479bab9695, type: 2}
+  - {fileID: 11400000, guid: fcfea467e06968247b7e563971449e14, type: 2}
+  - {fileID: 11400000, guid: 9385a9321d1d47044944cfc912e30062, type: 2}
   - {fileID: 11400000, guid: 96480b765679eb142a73a660265f2236, type: 2}
   - {fileID: 11400000, guid: 8fd558f0a38a2dd488cd09577bf4a955, type: 2}
   - {fileID: 11400000, guid: 4bd29f1b52520e64bb6e57f9552e7034, type: 2}
   - {fileID: 11400000, guid: b3255d8598a7ffd47acc789c21b7c283, type: 2}
+  - {fileID: 11400000, guid: 552771f761ae0bd4b9d48d1bff64a2e2, type: 2}
   - {fileID: 11400000, guid: e303dfb2a48f04944b7431b398d391e1, type: 2}
   - {fileID: 11400000, guid: e31a7360b04bcd741acf9426b661bb96, type: 2}
   - {fileID: 11400000, guid: a6b91824e6c87464b9b22b5faf872869, type: 2}
@@ -48,6 +51,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: 48838efbe712b134b896f19053a5c45c, type: 2}
   - {fileID: 11400000, guid: 2ca871432eb396741bc8889595946001, type: 2}
   - {fileID: 11400000, guid: 8a64092b88da83c468696fcfab5c41e4, type: 2}
+  - {fileID: 11400000, guid: a1d15fd41db48b741a2fcd7c05297a9d, type: 2}
+  - {fileID: 11400000, guid: 2d4a75204320b9c429ba57d540188a60, type: 2}
+  - {fileID: 11400000, guid: 72be67fcd0d819f45b9d3a510026726f, type: 2}
+  - {fileID: 11400000, guid: 497659524d157f0459efd77dd1413f77, type: 2}
   tips:
   - {fileID: 11400000, guid: 643b2d67efc04ad409b3c711259a0f4f, type: 2}
   - {fileID: 11400000, guid: ee82e8506c736db46a4322b8e187554e, type: 2}

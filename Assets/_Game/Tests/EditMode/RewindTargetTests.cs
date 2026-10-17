@@ -18,7 +18,7 @@ namespace SixtyOne.Tests
             session = new GameSession();
 
             // Checkpoint: empty bag, no flags, family unplaced.
-            session.TakeCheckpoint("f4.intro");
+            session.TakeCheckpoint("f4.prep.salon");
 
             // Later on the floor: collect gear, close gas.
             session.State.Inventory.TryAdd("wrench");
@@ -51,7 +51,7 @@ namespace SixtyOne.Tests
             session.State.RevealedAnchors.Add("lr_wardrobe");
             session.Die(new DeathInfo { TextKey = "death.missing.crowbar", RewindTarget = RewindTarget.Checkpoint, MissingItemId = "crowbar", TipId = "tip.emergency_bag" });
 
-            Assert.AreEqual("f4.intro", session.Rewind());
+            Assert.AreEqual("f4.prep.salon", session.Rewind());
             Assert.IsTrue(session.LastRewindWasMacro);
             Assert.AreEqual(0, session.State.Inventory.Count, "empty bag");
             Assert.IsFalse(session.State.Flags.Get(FlagNames.GasOff), "flags reset");

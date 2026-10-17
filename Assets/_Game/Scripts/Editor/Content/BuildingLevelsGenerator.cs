@@ -59,12 +59,15 @@ namespace SixtyOne.Editor
         public const string IntroCutShort = "IntroCutShort";
         public const string GiftDone = "GiftDone";
         public const string NeighborGone = "NeighborGone";
+        public const string SevimDone = "SevimDone";
 
         /// <summary>Every item id in the game. No firearms anywhere.</summary>
         public static readonly string[] ItemIds =
         {
             "food", "water", "cloth", "rope", "tape", "flashlight", "lighter", "first_aid", "gloves", "whistle",
-            "child_harness", "wet_cloth", "insulated_grip"
+            "child_harness", "wet_cloth", "insulated_grip", "wrench",
+            // Trap loot in our own flat: valuables that waste a bag slot and prep seconds.
+            "gold", "laptop", "console"
         };
 
         private static readonly string[] TipIds =
@@ -129,13 +132,14 @@ namespace SixtyOne.Editor
             result.Level = Asset<LevelConfig>(DataRoot + "/LevelConfig.asset");
             result.Level.ConfigureTimer(300f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
             result.Level.ConfigurePoison(GasZones(), Item("wet_cloth"), "death.gas_poison", Tip("tip.gas_poison"));
+            result.Level.ConfigurePrep(PrepSeconds, 10);
 
             BuildFloor4();
             BuildFloor3();
             BuildFloor2();
 
             result.Content = Asset<GameContent>(DataRoot + "/GameContent.asset");
-            result.Content.Configure(result.Nodes[F4Intro], result.Nodes.Values, result.Items.Values, result.Tips.Values);
+            result.Content.Configure(result.Nodes[F4PrepSalon], result.Nodes.Values, result.Items.Values, result.Tips.Values);
 
             DeleteStaleAssets();
             foreach (string path in Produced)

@@ -22,6 +22,8 @@ MonoBehaviour:
   collapseTip: {fileID: 11400000, guid: 88079bf52ac55f847ae52b3943f031e6, type: 2}
   alarmCue: {fileID: 11400000, guid: 7ce406087b2e171438a379a086325082, type: 2}
   tickCue: {fileID: 11400000, guid: 4503d0c4867fe2849985c11230b6e118, type: 2}
+  prepSeconds: 60
+  prepTickFrom: 10
   injuredMoveExtraPerMember: 0.25
   staminaMax: 100
   staminaDrainPerSecond: 0.15

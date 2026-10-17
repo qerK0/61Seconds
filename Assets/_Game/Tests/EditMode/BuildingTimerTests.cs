@@ -111,7 +111,7 @@ namespace SixtyOne.Tests
         {
             var session = new GameSession();
             session.State.Stamina = 80f;
-            session.TakeCheckpoint("f4.intro");
+            session.TakeCheckpoint("f4.prep.salon");
 
             session.State.Stamina = 10f;
             session.State.Poison = 0.6f;

@@ -6,6 +6,7 @@ using SixtyOne.Items;
 using SixtyOne.Nodes;
 using SixtyOne.Puzzles;
 using SixtyOne.Placement;
+using SixtyOne.Prep;
 using SixtyOne.World;
 using SixtyOne.Text;
 using UnityEditor;
@@ -35,6 +36,7 @@ namespace SixtyOne.Editor
             AddAll<DialogueNode>(nodes);
             AddAll<FusePuzzleNode>(nodes);
             AddAll<EpilogueNode>(nodes);
+            AddAll<PrepPhaseNode>(nodes);
 
             foreach (SceneNode node in nodes)
             {
@@ -54,6 +56,7 @@ namespace SixtyOne.Editor
             problems += CheckPlacementRooms(nodes);
             problems += CheckNoFirearms();
             problems += CheckReachability(nodes);
+            problems += CheckPrep(nodes);
             problems += CheckTextKeys();
 
             string summary = $"[Content] Validate: {nodes.Count} nodes checked, {problems} problem(s).";
@@ -413,6 +416,59 @@ namespace SixtyOne.Editor
             return problems;
         }
 
+        /// <summary>
+        /// Pre-quake prep: every prep node links a placement; with prep configured the start node must be the prep
+        /// checkpoint (macro rewinds return to the loot phase); the AFAD alert has keys; prep-only interactables
+        /// sit in prep rooms (otherwise they could never be used).
+        /// </summary>
+        private static int CheckPrep(List<SceneNode> nodes)
+        {
+            int problems = 0;
+            var prepRooms = new HashSet<string>();
+            foreach (SceneNode node in nodes)
+            {
+                if (!(node is PrepPhaseNode prep)) continue;
+                prepRooms.Add(prep.RoomId);
+                if (prep.QuakeNode == null) problems += Report($"prep node '{prep.Id}' has no quake (placement) node.", prep);
+                if (prep.ShowAlertOnEnter && (prep.AlertTitleKey.IsEmpty || prep.AlertBodyKey.IsEmpty))
+                {
+                    problems += Report($"prep node '{prep.Id}' shows the AFAD alert but has no title/body key.", prep);
+                }
+
+                if (prep.TimerSeconds > 0f) problems += Report($"prep node '{prep.Id}' must be untimed (the prep countdown drives it).", prep);
+            }
+
+            foreach (LevelConfig level in LoadAll<LevelConfig>())
+            {
+                if (level.PrepSeconds <= 0f) continue;
+                foreach (GameContent content in LoadAll<GameContent>())
+                {
+                    if (!(content.StartNode is PrepPhaseNode start) || !start.IsCheckpoint)
+                    {
+                        problems += Report($"LevelConfig has {level.PrepSeconds}s prep but the start node of '{content.name}' is not a checkpoint PrepPhaseNode.", content);
+                    }
+                }
+
+                if (level.PrepTickFrom > level.PrepSeconds) problems += Report("LevelConfig prepTickFrom is longer than the prep itself.", level);
+            }
+
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.IsValid() && scene.isLoaded)
+            {
+                foreach (WorldInteractable w in Object.FindObjectsByType<WorldInteractable>(FindObjectsInactive.Include))
+                {
+                    if (!w.PrepOnly) continue;
+                    Room room = w.GetComponentInParent<Room>(true);
+                    if (room == null || !prepRooms.Contains(room.RoomId))
+                    {
+                        problems += Report($"prep-only interactable '{w.Id}' is not in a prep room; it can never be used.", w);
+                    }
+                }
+            }
+
+            return problems;
+        }
+
         private static IEnumerable<SceneNode> Targets(SceneNode node)
         {
             foreach (Choice choice in node.Choices)
@@ -431,6 +487,7 @@ namespace SixtyOne.Editor
 
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
             if (node is FusePuzzleNode fuse && fuse.NextNode != null) yield return fuse.NextNode;
+            if (node is PrepPhaseNode prep && prep.QuakeNode != null) yield return prep.QuakeNode;
         }
 
         private static int CheckTextKeys()

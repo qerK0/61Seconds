@@ -33,6 +33,12 @@ namespace SixtyOne.Building
         [Tooltip("Played every second during the alarm.")]
         [SerializeField] private AudioCue tickCue;
 
+        [Header("Prep (pre-quake loot phase)")]
+        [Tooltip("Seconds between the AFAD early warning and the quake. The building timer starts only at the quake. 0 = no prep.")]
+        [SerializeField] private float prepSeconds = 60f;
+        [Tooltip("Countdown ticks (and the letterbox/heartbeat tension) for the last N prep seconds.")]
+        [SerializeField] private int prepTickFrom = 10;
+
         [Header("Moves")]
         [Tooltip("Extra fraction of a move's time per injured family member (0.25 = +25% each).")]
         [SerializeField] private float injuredMoveExtraPerMember = 0.25f;
@@ -71,6 +77,8 @@ namespace SixtyOne.Building
 
         public float BuildingSeconds => buildingSeconds;
         public float PulseAtSeconds => pulseAtSeconds;
+        public float PrepSeconds => prepSeconds;
+        public int PrepTickFrom => prepTickFrom;
         public float AlarmAtSeconds => alarmAtSeconds;
         public bool RealtimeTick => realtimeTick;
         public bool PauseInDialogue => pauseInDialogue;
@@ -124,6 +132,13 @@ namespace SixtyOne.Building
         }
 
         /// <summary>Authoring helper for generators.</summary>
+        /// <summary>Authoring helper: pre-quake prep countdown.</summary>
+        public void ConfigurePrep(float seconds, int tickFrom)
+        {
+            prepSeconds = seconds;
+            prepTickFrom = tickFrom;
+        }
+
         public void ConfigurePoison(IEnumerable<GasZone> zones, Item wetCloth, TextKey deathText, Tip tip)
         {
             gasZones = new List<GasZone>(zones);

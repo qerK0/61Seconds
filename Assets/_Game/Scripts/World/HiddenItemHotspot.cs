@@ -59,7 +59,7 @@ namespace SixtyOne.World
             GameManager gm = GameManager.Instance;
             if (used && gm != null) gm.State.Knowledge.Add(KnowledgeKey);
             if (paintedOverlay != null) paintedOverlay.SetActive(!used);
-            if (sparkle != null) sparkle.enabled = !used && ShouldSparkle();
+            if (sparkle != null) sparkle.enabled = !used && !IsGone && ShouldSparkle();
         }
 
         protected override void Update()
@@ -68,7 +68,7 @@ namespace SixtyOne.World
             secondsInRoom += Time.unscaledDeltaTime;
             if (sparkle == null) return;
 
-            bool show = !IsUsed && ShouldSparkle();
+            bool show = !IsUsed && !IsGone && ShouldSparkle();
             if (sparkle.enabled != show) sparkle.enabled = show;
             if (!show) return;
 

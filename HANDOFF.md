@@ -4,6 +4,66 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 05:10] LOCAL — Floor 4 opening flow: 60 s home loot prep → quake (building timer starts) → placement → Sevim in the corridor
+### Done
+- **Prep phase** (new `Scripts/Prep/`):
+  - `PrepPhaseNode` (rooms f4.prep.salon / f4.prep.kitchen / f4.prep.hall); f4.prep.salon is the floor checkpoint.
+  - `PrepTimer` (pure, ticks for the last 10 s); `PrepPhase` driver (real-time drain, cost sink, AFAD alert, quake at zero); `PrepRules` (pure).
+  - `GameState.PrepTime` and `GameState.BuildingTimerStarted` are restored by snapshots.
+- **Action costs during prep** come out of the prep countdown (`SurvivalController.SpendTime` → `PrepPhase.Spend`): pickup 1 s, drawer/cabinet 3 s, breaker 4 s, valve 5 s (needs the wrench), moves 1 s.
+- **Building timer:** hidden and frozen during prep (new `PrepCountdownDisplay` shows "Depreme kalan 0:59" in its spot). No stamina drain or gas leak before the quake.
+- **At prep zero:** quake onset (QuakeStarted, shake 0.4) → f4.quake placement; the building timer starts at 300.
+  - Quake panic is now "at least aftershockPanic", not additive, so the onset + main shock don't stack.
+- **Our flat loot** (prep-only `WorldInteractable.prepOnly`; dimmed, unlabelled and unclickable after the quake):
+  - salon: laptop + console (traps), first aid cabinet, hidden food
+  - kitchen: gloves drawer, water
+  - hall: wrench toolbox, flashlight nightstand, gold box (trap), hidden whistle
+  - New items: wrench, gold, laptop, console.
+- **After the quake:** the breaker and valve stay available (valve needs the wrench) and cost building time. The hall exit leads to **f4.sevim** (DialogueNode in the corridor; was f4.intro):
+  - "Kısa kes" sets `IntroCutShort`: no whistle, no Flat 12 info.
+  - "Sağ ol" gives the whistle and `KnowsFlat12`.
+  - `exit_again` once `SevimDone`. Hasan and Flat 12 are unchanged.
+- **Cinematic:** tension follows the prep countdown before the quake; letterbox + heartbeat in the last 10 prep seconds (`GameEvents.PrepTick`).
+- **Bug fixed:** after a macro rewind, toppled hazard props stayed toppled. `PrepPhase` now resets the room's props on prep entry (verified: wardrobe 80° → 0°).
+- **ContentValidator `CheckPrep`:** prep nodes need a quake node and must be untimed; the alert needs keys; with prep configured the start node must be a checkpoint PrepPhaseNode; prep-only interactables must sit in prep rooms.
+- **CSV:** f4.intro.* renamed to f4.sevim.* (l1 adjusted to the post-quake corridor). New TODO keys: prep nodes, prep.alert.*, ui.prep.label, valve locked reasons, f4.hall.c_exit_again, the 4 new items.
+- **Results:** Validate Content: 23 nodes, 0 problems. Text > Validate: 278 referenced, 0 missing/unused. **EditMode 102/102** (new PrepTests: tick thresholds, cost routing, building timer frozen during prep, f4 checkpoint restore of both timers, micro rewind into the placement).
+
+### Play-mode verification (`Captures/p*`, `q*`)
+- **Run 1** (2 s per click, 0 deaths):
+  - p01: AFAD alert, prep 0:59, building timer hidden.
+  - Loot: laptop (trap), water; the valve stayed locked without the wrench; wrench, flashlight, then gold refused with "Çanta dolu" (p02); breaker, valve.
+  - p03: 0:07 in red.
+  - Quake at 0 → building 300 starts. p04: placement shows 04:53.
+  - p05: salon after the quake (laptop gone, not clickable).
+  - p06: Sevim, full dialogue, whistle. p07: Hasan (bag full, gift lost). p08: Flat 12 + note.
+  - Floor 3 (Flat 10 route) and Floor 2 (whistle at the dog) → p10: ending with **131.5 s left**.
+- **Run 2:**
+  - Player left unplaced → death → micro rewind into f4.quake with building 300 saved, wrench kept (q01).
+  - "Kısa kes" → IntroCutShort, no whistle, Flat 12 hidden, only "search" offered (q02).
+  - Forced collapse → macro rewind to f4.prep.salon: prep 60, building 300 and stopped, empty bag, alert shown again (q03).
+
+### Files created / changed
+- Scripts/Prep/{PrepTimer, PrepPhaseNode, PrepPhase, PrepRules}.cs (new); UI/PrepCountdownDisplay.cs (new)
+- Core/GameState, Snapshot, GameEvents; Building/SurvivalController, LevelConfig (prepSeconds 60, prepTickFrom 10); World/WorldInteractable, HiddenItemHotspot; Cinematic/CinematicDirector; UI/BuildingTimerDisplay; Text/UiKeys
+- Editor: BuildingLevelsGenerator(.Floor4), ContentValidator, SceneBuild/{BuildingLayout, TestSceneBuilder, TestSceneUi, SceneKit, HiddenItems}
+- Tests: PrepTests (new); f4.intro ids renamed in BuildingTimerTests, RewindTargetTests, DialogueTests
+- Content/Text/strings_tr.csv; Data/** regenerated; Scenes/Test_Building.unity rebuilt
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Rebalance: the prep moved most looting off the building timer, so Route B now ends with about 130 s left at a brisk pace (target 30–60). Consider buildingSeconds 200–230 in `BuildingLevelsGenerator` (`ConfigureTimer`) after a human playtest.
+- [ ] Writer: replace the new TODO texts (prep alert, prep room bodies, items).
+
+### Not verified / risks
+- The AFAD alert (bottom strip) covers the two prep move buttons for up to 3.5 s; tap to dismiss. Consider a shorter showSeconds for the prep alert.
+- Full bag: Sevim's whistle, Hasan's gift and the trader item are silently lost (unchanged behaviour).
+- The letterbox in the last 10 s is hard to see against the black background (known).
+
+### Next suggested step
+- A human playtest of Floor 4 with mouse + sound, then the timer rebalance above.
+
+---
+
 ## [2026-10-17 04:27] LOCAL — Real isometric tiles: Tilemap floors, back walls, tile sets, per-room camera framing
 ### Done
 - **Missing files:** `Assets/_Game/Art/Tiles/` does not exist and none of the named files exist anywhere ("Wood Floor 13", "Floor Stone 0", "Flat Stone 0/1/12/13"). That includes the artist pack in `Downloads\Assets`, which uses other names (Floor_Stone_01, Floor_Wood_02, Flat_Wood_01…).

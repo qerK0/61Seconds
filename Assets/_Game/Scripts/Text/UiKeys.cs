@@ -30,6 +30,7 @@ namespace SixtyOne.Text
         public const string StaminaLabel = "ui.stamina.label";
         public const string TimeSpent = "ui.time_spent";
         public const string BuildingTimerLabel = "ui.building.label";
+        public const string PrepTimerLabel = "ui.prep.label";
         public const string BuildingAlarm = "ui.building.alarm";
         public const string CraftFail = "ui.craft.fail";
         public const string CraftDone = "ui.craft.done";

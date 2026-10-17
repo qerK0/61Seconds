@@ -9,7 +9,7 @@ namespace SixtyOne.UI
 {
     /// <summary>
     /// Building collapse timer (mm:ss). Pulses after the pulse threshold, turns red and punches on every alarm
-    /// tick, and flashes "-Ns" whenever an action costs time.
+    /// tick, and flashes "-Ns" whenever an action costs time. Hidden during the pre-quake prep.
     /// </summary>
     public sealed class BuildingTimerDisplay : MonoBehaviour
     {
@@ -21,6 +21,9 @@ namespace SixtyOne.UI
 
         [Tooltip("'-Ns' label next to the timer.")]
         [SerializeField] private TMP_Text spentLabel;
+
+        [Tooltip("Hidden until the quake starts the building timer (the prep countdown shows instead). Optional.")]
+        [SerializeField] private CanvasGroup group;
 
         [Tooltip("Normal color.")]
         [SerializeField] private Color normalColor = Color.white;
@@ -49,6 +52,9 @@ namespace SixtyOne.UI
         private void Update()
         {
             if (survival == null || label == null) return;
+            bool started = GameManager.Instance == null || GameManager.Instance.State.BuildingTimerStarted;
+            if (group != null) group.alpha = started ? 1f : 0f;
+            if (!started) return;
             float remaining = survival.Remaining;
             int total = Mathf.CeilToInt(remaining);
             label.text = $"{total / 60:00}:{total % 60:00}";
@@ -74,6 +80,7 @@ namespace SixtyOne.UI
         private void OnSpent(float seconds)
         {
             if (spentLabel == null || seconds < 0.5f) return;
+            if (GameManager.Instance != null && !GameManager.Instance.State.BuildingTimerStarted) return;
             if (spentRoutine != null) StopCoroutine(spentRoutine);
             spentRoutine = StartCoroutine(ShowSpent(seconds));
         }

@@ -83,6 +83,7 @@ namespace SixtyOne.Editor
             DialogueController dialogue = systems.AddComponent<DialogueController>();
             FusePuzzleController fuse = systems.AddComponent<FusePuzzleController>();
             SurvivalController survival = systems.AddComponent<SurvivalController>();
+            SixtyOne.Prep.PrepPhase prepPhase = systems.AddComponent<SixtyOne.Prep.PrepPhase>();
             EpilogueController epilogue = systems.AddComponent<EpilogueController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
 
@@ -115,8 +116,15 @@ namespace SixtyOne.Editor
             SerializedWire.Set(survival, "nodePlayer", nodePlayer);
             SerializedWire.Set(survival, "config", data.Level);
             SerializedWire.Set(survival, "dialogue", dialogue);
+            SerializedWire.Set(survival, "prep", prepPhase);
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook,
+            SerializedWire.Set(prepPhase, "gameManager", gameManager);
+            SerializedWire.Set(prepPhase, "nodePlayer", nodePlayer);
+            SerializedWire.Set(prepPhase, "config", data.Level);
+            SerializedWire.Set(prepPhase, "rooms", switcher);
+            SerializedWire.Set(prepPhase, "alertCue", data.Cues.Find(c => c != null && c.Id == "cue_afad_alert"));
+
+            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
                 out LetterboxBars letterbox, out FusePuzzlePanel fusePanel);
             SerializedWire.Set(fuse, "gameManager", gameManager);
             SerializedWire.Set(fuse, "panel", fusePanel);
@@ -199,7 +207,7 @@ namespace SixtyOne.Editor
             {
                 Item item = data.Items[i.ItemId];
                 if (i.Hidden) HiddenItems.Build(t, i, item);
-                else SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color);
+                else SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly);
             }
 
             foreach (BuildingLayout.LightSpec l in spec.Lights)

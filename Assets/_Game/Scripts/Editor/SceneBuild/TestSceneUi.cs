@@ -21,7 +21,7 @@ namespace SixtyOne.Editor
 
         /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
         public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
-            SurvivalController survival, RecipeBook recipes, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
+            SurvivalController survival, RecipeBook recipes, SixtyOne.Prep.PrepPhase prep, out LetterboxBars letterbox, out FusePuzzlePanel fusePanel)
         {
             var canvasGo = new GameObject("UI", typeof(RectTransform), typeof(Canvas), typeof(CanvasScaler), typeof(GraphicRaycaster)) { layer = 5 };
             var canvas = canvasGo.GetComponent<Canvas>();
@@ -38,6 +38,7 @@ namespace SixtyOne.Editor
             ChoicePanel choicePanel = BuildChoicePanel(root, art);
             BuildTimerBar(root, nodePlayer);
             BuildBuildingTimer(root, survival);
+            BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
             BuildBag(root, gameManager, content, art, survival, recipes);
             BuildStamina(root, survival);
@@ -129,6 +130,7 @@ namespace SixtyOne.Editor
         private static void BuildBuildingTimer(Transform root, SurvivalController survival)
         {
             RectTransform rect = UiFactory.MakeRect("BuildingTimer", root, new Vector2(0.4f, 0.86f), new Vector2(0.6f, 0.95f));
+            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
             TextMeshProUGUI label = UiFactory.MakeLabel("Time", rect, Vector2.zero, Vector2.one, 72f, TextAlignmentOptions.Center, Color.white, bold: true);
             TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(1f, 0.1f), new Vector2(1.5f, 0.9f), 34f, TextAlignmentOptions.Left, new Color(1f, 0.45f, 0.35f, 1f), bold: true);
             TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, -0.35f), new Vector2(1f, 0f), 20f, TextAlignmentOptions.Center, new Color(1f, 1f, 1f, 0.7f));
@@ -139,6 +141,26 @@ namespace SixtyOne.Editor
             SerializedWire.Set(display, "survival", survival);
             SerializedWire.Set(display, "label", label);
             SerializedWire.Set(display, "spentLabel", spent);
+            SerializedWire.Set(display, "group", group);
+        }
+
+        /// <summary>Pre-quake prep countdown in the building timer's spot (the building timer is hidden until the quake).</summary>
+        private static void BuildPrepCountdown(Transform root, SixtyOne.Prep.PrepPhase prep, SurvivalController survival)
+        {
+            RectTransform rect = UiFactory.MakeRect("PrepCountdown", root, new Vector2(0.4f, 0.86f), new Vector2(0.6f, 0.95f));
+            CanvasGroup group = UiFactory.MakeGroup(rect.gameObject);
+            TextMeshProUGUI label = UiFactory.MakeLabel("Time", rect, Vector2.zero, Vector2.one, 80f, TextAlignmentOptions.Center, Accent, bold: true);
+            TextMeshProUGUI spent = UiFactory.MakeLabel("Spent", rect, new Vector2(1f, 0.1f), new Vector2(1.5f, 0.9f), 34f, TextAlignmentOptions.Left, new Color(1f, 0.45f, 0.35f, 1f), bold: true);
+            TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, -0.35f), new Vector2(1f, 0f), 22f, TextAlignmentOptions.Center, Accent);
+            LocalizedText localized = caption.gameObject.AddComponent<LocalizedText>();
+            SerializedWire.SetTextKey(localized, "key", UiKeys.PrepTimerLabel);
+
+            PrepCountdownDisplay display = rect.gameObject.AddComponent<PrepCountdownDisplay>();
+            SerializedWire.Set(display, "prep", prep);
+            SerializedWire.Set(display, "group", group);
+            SerializedWire.Set(display, "label", label);
+            SerializedWire.Set(display, "spentLabel", spent);
+            if (survival != null && survival.Config != null) SerializedWire.SetInt(display, "tickFrom", survival.Config.PrepTickFrom);
         }
 
         private static FusePuzzlePanel BuildFusePanel(Transform root)

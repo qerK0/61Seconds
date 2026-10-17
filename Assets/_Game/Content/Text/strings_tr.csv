@@ -128,14 +128,14 @@ f4.hall.c_back,TODO: Salona dön,
 f4.hall.c_breaker,TODO: Ana sigortayı indir,
 f4.hall.c_exit,TODO: Daireden çık,
 f4.hall.title,TODO: Antre,
-f4.intro.body,TODO: Kapı çalıyor. Komşun Sevim Teyze içeri giriyor.,
-f4.intro.c_hurry,TODO: Kısa kes,"consequence: no info, no whistle"
-f4.intro.c_thanks,TODO: Sağ ol Sevim Teyze,
-f4.intro.l1,"TODO: Kızım şeker kalmış mı sizde? Bu sabah yer biraz sallandı, fark ettiniz mi?",each line costs building time
-f4.intro.l2,"TODO: 12 numaradakiler tatilde, kapıyı açık bırakmışlar. Her şeyleri içeride.",info: Flat 12
-f4.intro.l3,"TODO: Bak, bu düdüğü deprem çantamdan aldım. Siz de bir tane bulundurun.",gives whistle
-f4.intro.l4,"TODO: Neyse, ben gideyim de...",
-f4.intro.title,TODO: Daire 11,
+f4.sevim.body,TODO: Koridorda Sevim Teyze karşına çıkıyor; elleri titriyor.,
+f4.sevim.c_hurry,TODO: Kısa kes,"consequence: no info, no whistle"
+f4.sevim.c_thanks,TODO: Sağ ol Sevim Teyze,
+f4.sevim.l1,"TODO: Kızım iyi misiniz? Çocuk iyi mi? Ne sallandı ama!",each line costs building time
+f4.sevim.l2,"TODO: 12 numaradakiler tatilde, kapıyı açık bırakmışlar. Her şeyleri içeride.",info: Flat 12
+f4.sevim.l3,"TODO: Bak, bu düdüğü deprem çantamdan aldım. Siz de bir tane bulundurun.",gives whistle
+f4.sevim.l4,"TODO: Neyse, ben gideyim de...",
+f4.sevim.title,TODO: Sevim Teyze,
 f4.kitchen.body,TODO: Ağır bir gaz kokusu var.,gas room: poison rises until the valve is closed
 f4.kitchen.c_back,TODO: Salona dön,
 f4.kitchen.c_light,TODO: Karanlık... ışığı aç,trap with gas
@@ -251,3 +251,29 @@ ui.stamina.exhausted,TODO: Çok yorgunsun. Bir şey ye ya da iç.,heavy action l
 ui.stamina.label,TODO: Güç,stamina bar label
 ui.time_spent,TODO: -{0} sn,{0} = seconds spent
 ui.tip_header,TODO: Deprem Notu,header above the safety tip on the death card
+f4.prep.salon.title,TODO: Salon,prep: 60 s before the quake
+f4.prep.salon.body,"TODO: Telefonlar aynı anda öttü: deprem geliyor! Bir dakikan var, işine yarayacakları topla.",prep start (checkpoint)
+f4.prep.salon.c_kitchen,TODO: Mutfağa koş,1 s prep
+f4.prep.salon.c_hall,TODO: Antreye / yatak odasına koş,1 s prep
+f4.prep.kitchen.title,TODO: Mutfak,
+f4.prep.kitchen.body,"TODO: Ocak, dolaplar, çekmeceler. Gazı şimdi kapatırsan sonra uğraşmazsın.",
+f4.prep.kitchen.c_valve,TODO: Gaz vanasını kapat,"5 s, needs the wrench"
+f4.prep.kitchen.c_valve.locked,TODO: Vana sıkışmış: İngiliz anahtarı lazım.,
+f4.prep.kitchen.c_back,TODO: Salona dön,
+f4.prep.hall.title,TODO: Antre ve yatak odası,
+f4.prep.hall.body,TODO: Sigorta kutusu kapının yanında. Komodin ve alet kutusu burada.,
+f4.prep.hall.c_breaker,TODO: Ana sigortayı indir,4 s
+f4.prep.hall.c_back,TODO: Salona dön,
+f4.kitchen.c_valve.locked,TODO: Vana sıkışmış: İngiliz anahtarı lazım.,
+f4.hall.c_exit_again,TODO: Koridora çık,after Sevim
+prep.alert.title,TODO: AFAD ERKEN UYARI,prep start popup
+prep.alert.body,"TODO: Deprem 1 dakika sonra! ({0} sn) Gerekli olanı al, ailenle güvenli yere geç.",{0} = seconds
+ui.prep.label,TODO: Depreme kalan,caption under the prep countdown
+item.wrench.name,TODO: İngiliz anahtarı,
+item.wrench.desc,TODO: Sıkışan gaz vanası için.,
+item.gold.name,TODO: Altınlar,trap loot
+item.gold.desc,"TODO: Değerli, ama depremde işe yaramaz.",trap loot
+item.laptop.name,TODO: Dizüstü bilgisayar,trap loot
+item.laptop.desc,TODO: Ağır ve gereksiz.,trap loot
+item.console.name,TODO: Oyun konsolu,trap loot
+item.console.desc,TODO: Şimdi oyun zamanı değil.,trap loot

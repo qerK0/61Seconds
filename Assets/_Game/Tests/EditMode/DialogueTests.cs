@@ -23,8 +23,8 @@ namespace SixtyOne.Tests
         public void DuringAndAfterDialogueChoicesAreSplit()
         {
             DialogueNode node = data.Make<DialogueNode>();
-            node.Configure("f4.intro", "t", "b", "room", 1);
-            node.SetLines(new[] { new DialogueLine("npc", "f4.intro.l1", 4f), new DialogueLine("npc", "f4.intro.l2", 3f) });
+            node.Configure("f4.sevim", "t", "b", "room", 1);
+            node.SetLines(new[] { new DialogueLine("npc", "f4.sevim.l1", 4f), new DialogueLine("npc", "f4.sevim.l2", 3f) });
             node.AddChoice(new Choice("hurry").AsDuringDialogue());
             node.AddChoice(new Choice("thanks"));
 

@@ -49,6 +49,9 @@ namespace SixtyOne.World
         [Tooltip("Hide after use (pickups). Otherwise it is dimmed.")]
         [SerializeField] private bool hideWhenUsed;
 
+        [Tooltip("Only usable during the pre-quake prep (our own flat): once the quake hits, what was not packed is gone.")]
+        [SerializeField] private bool prepOnly;
+
         [Tooltip("Main sprite (dimmed when used, pulses when highlighted). Optional.")]
         [SerializeField] private SpriteRenderer body;
 
@@ -69,6 +72,17 @@ namespace SixtyOne.World
         public bool Borrowed => borrowed;
         public IReadOnlyList<Outcome> Outcomes => outcomes;
         public bool OneShot => oneShot;
+        public bool PrepOnly => prepOnly;
+
+        /// <summary>A prep-only interactable after the quake: no longer usable.</summary>
+        public bool IsGone
+        {
+            get
+            {
+                GameManager gm = GameManager.Instance;
+                return prepOnly && gm != null && gm.State.BuildingTimerStarted;
+            }
+        }
 
         /// <summary>Flag set when a one-shot interactable has been used.</summary>
         public string UsedFlag => "Used_" + Id;
@@ -87,7 +101,7 @@ namespace SixtyOne.World
             get
             {
                 GameManager gm = GameManager.Instance;
-                return isActiveAndEnabled && gm != null && !gm.IsDead && ExplorationGate.Allowed && !InputGate.IsBlocked && !IsUsed;
+                return isActiveAndEnabled && gm != null && !gm.IsDead && ExplorationGate.Allowed && !InputGate.IsBlocked && !IsUsed && !IsGone;
             }
         }
 
@@ -124,7 +138,8 @@ namespace SixtyOne.World
 
         /// <summary>Authoring helper for generators / scene builders.</summary>
         public void Configure(string interactableId, TextKey label, float cost, Item grants, Item required, TextKey missingRequirement,
-            bool isOneShot, bool hide, IEnumerable<Outcome> extraOutcomes, SpriteRenderer mainSprite, bool isBorrowed = false, float stamina = 0f)
+            bool isOneShot, bool hide, IEnumerable<Outcome> extraOutcomes, SpriteRenderer mainSprite, bool isBorrowed = false, float stamina = 0f,
+            bool isPrepOnly = false)
         {
             id = interactableId;
             labelKey = label;
@@ -138,6 +153,7 @@ namespace SixtyOne.World
             body = mainSprite;
             borrowed = isBorrowed;
             staminaCost = stamina;
+            prepOnly = isPrepOnly;
         }
 
         public void OnClicked()
@@ -193,10 +209,11 @@ namespace SixtyOne.World
             foreach (Renderer r in renderers) if (r != null) r.enabled = visible;
             foreach (Collider2D c in colliders) if (c != null) c.enabled = visible;
             // A used prop may stay visible (opened drawer), but its "what you get here" label must go.
-            foreach (TMPro.TMP_Text label in labels) if (label != null) label.enabled = visible && !used;
+            bool spent = used || IsGone;
+            foreach (TMPro.TMP_Text label in labels) if (label != null) label.enabled = visible && !spent;
 
-            highlighted = !used && IsKnownItem();
-            if (body != null) body.color = used ? baseColor * usedTint : baseColor;
+            highlighted = !spent && IsKnownItem();
+            if (body != null) body.color = spent ? baseColor * usedTint : baseColor;
         }
 
         /// <summary>True if the knowledge highlight applies (setting on, item in the KnowledgeSet).</summary>

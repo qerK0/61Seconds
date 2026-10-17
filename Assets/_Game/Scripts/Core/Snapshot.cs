@@ -36,6 +36,8 @@ namespace SixtyOne.Core
             live.CurrentNodeId = NodeId;
             live.Act = saved.Act;
             live.BuildingTime = saved.BuildingTime;
+            live.PrepTime = saved.PrepTime;
+            live.BuildingTimerStarted = saved.BuildingTimerStarted;
             live.Stamina = saved.Stamina;
             live.Poison = saved.Poison;
             live.Borrowed.CopyFrom(saved.Borrowed);

@@ -32,6 +32,10 @@ namespace SixtyOne.Core
         public static event Action<int> BuildingTick;
         /// <summary>Seconds actually subtracted from the building timer by an action (after multipliers).</summary>
         public static event Action<float> TimeSpent;
+        /// <summary>A whole second passed in the last seconds of the pre-quake prep countdown. Argument is seconds left.</summary>
+        public static event Action<int> PrepTick;
+        /// <summary>The prep countdown reached zero: the quake starts.</summary>
+        public static event Action PrepZero;
 
         public static void RaiseNodeEntered(string nodeId) => NodeEntered?.Invoke(nodeId);
         public static void RaiseChoiceMade(string nodeId, string labelKey) => ChoiceMade?.Invoke(nodeId, labelKey);
@@ -50,6 +54,8 @@ namespace SixtyOne.Core
         public static void RaiseBuildingAlarm() => BuildingAlarm?.Invoke();
         public static void RaiseBuildingTick(int secondsLeft) => BuildingTick?.Invoke(secondsLeft);
         public static void RaiseTimeSpent(float seconds) => TimeSpent?.Invoke(seconds);
+        public static void RaisePrepTick(int secondsLeft) => PrepTick?.Invoke(secondsLeft);
+        public static void RaisePrepZero() => PrepZero?.Invoke();
 
         /// <summary>Drops all listeners. Runs automatically before play (safe with domain reload off).</summary>
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]

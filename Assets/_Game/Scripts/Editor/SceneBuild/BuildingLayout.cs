@@ -42,6 +42,8 @@ namespace SixtyOne.Editor
             public bool Surface = true;
             public bool Borrowed;
             public bool Hidden;
+            /// <summary>Our own flat: only usable during the pre-quake prep.</summary>
+            public bool PrepOnly;
             public Color Color = Color.white;
         }
 
@@ -113,6 +115,13 @@ namespace SixtyOne.Editor
             return new PropSpec { PropId = propId, Name = name, Gx = gx, Gy = gy, Lift = lift, Scale = new Vector2(sx, sy), Color = color, Topple = topple, Drop = drop };
         }
 
+        /// <summary>Marks an item of our own flat: only usable during the pre-quake prep.</summary>
+        private static ItemSpec Own(ItemSpec spec)
+        {
+            spec.PrepOnly = true;
+            return spec;
+        }
+
         private static ItemSpec I(string itemId, float gx, float gy, Color color, float cost = 1f, bool surface = true, bool borrowed = false, bool hidden = false, string id = null)
         {
             return new ItemSpec { Id = id ?? itemId, ItemId = itemId, Gx = gx, Gy = gy, Color = color, Cost = cost, Surface = surface, Borrowed = borrowed, Hidden = hidden };
@@ -154,14 +163,19 @@ namespace SixtyOne.Editor
             salon.Props.Add(P("door_frame", "DoorLintel", 3.5f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
             salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, new Color(0.5f, 0.5f, 0.55f, 1f), drop: 0.6f));
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
-            salon.Items.Add(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food"));
+            // Our flat (pre-quake loot only): useful gear, two traps that waste slots/time, a hidden food tin.
+            salon.Items.Add(Own(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food")));
+            salon.Items.Add(Own(I("first_aid", 0.4f, 3.0f, new Color(1f, 0.25f, 0.25f, 1f), cost: 3f, surface: false, id: "salon_cabinet")));
+            salon.Items.Add(Own(I("laptop", 1.6f, 1.0f, new Color(0.25f, 0.25f, 0.3f, 1f))));
+            salon.Items.Add(Own(I("console", 3.6f, 1.2f, new Color(0.15f, 0.15f, 0.2f, 1f))));
             salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
             salon.Lights.Add(L("Window", 5.95f, 1.5f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
             yield return salon;
 
             RoomSpec kitchen = Art(Room(BuildingLevelsGenerator.Flat11Kitchen, 4, 4, new Color(0.7f, 0.8f, 0.78f, 1f)), RoomArt.Home, gaps: "L0", windows: "R1");
             kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
-            kitchen.Items.Add(I("gloves", 1.2f, 3.3f, Wood, cost: 3f, surface: false, id: "kitchen_drawer"));
+            kitchen.Items.Add(Own(I("gloves", 1.2f, 3.3f, Wood, cost: 3f, surface: false, id: "kitchen_drawer")));
+            kitchen.Items.Add(Own(I("water", 2.6f, 3.4f, new Color(0.45f, 0.7f, 1f, 1f))));
             kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
             yield return kitchen;
 
@@ -169,7 +183,10 @@ namespace SixtyOne.Editor
             hall.Props.Add(P(null, "FuseBox", 0.3f, 2.5f, 0.4f, 0.5f, 0.6f, new Color(0.6f, 0.6f, 0.65f, 1f)));
             hall.Props.Add(P(null, "FlatDoor", 2.85f, 3.5f, 0f, 0.9f, 1.5f, Wood));
             // Old emergency bag behind the coats: a second chance at a whistle for players who cut the intro short.
-            hall.Items.Add(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle"));
+            hall.Items.Add(Own(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle")));
+            hall.Items.Add(Own(I("flashlight", 1.6f, 3.4f, Wood, cost: 3f, surface: false, id: "hall_nightstand")));
+            hall.Items.Add(Own(I("wrench", 0.5f, 1.8f, new Color(0.55f, 0.55f, 0.6f, 1f), cost: 3f, surface: false, id: "hall_toolbox")));
+            hall.Items.Add(Own(I("gold", 2.4f, 1.4f, new Color(0.9f, 0.75f, 0.2f, 1f), cost: 3f, surface: false, id: "hall_jewelry_box")));
             yield return hall;
 
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor, gaps: "L1 L4");

@@ -34,10 +34,16 @@ MonoBehaviour:
       flag: GasOff
       member: 0
       health: 0
-    conditions: []
-    failBehaviour: 0
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: a1d15fd41db48b741a2fcd7c05297a9d, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+    failBehaviour: 1
     lockedReasonKey:
-      key: 
+      key: f4.kitchen.c_valve.locked
     missingItem: {fileID: 0}
     missingItemTextKey:
       key: 
