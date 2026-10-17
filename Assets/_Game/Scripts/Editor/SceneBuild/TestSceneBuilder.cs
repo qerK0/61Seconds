@@ -166,6 +166,7 @@ namespace SixtyOne.Editor
 
             SerializedWire.Set(placement, "gameManager", gameManager);
             SerializedWire.Set(placement, "rooms", switcher);
+            SerializedWire.Set(placement, "movement", data.Movement);
 
             SerializedWire.Set(survival, "gameManager", gameManager);
             SerializedWire.Set(survival, "nodePlayer", nodePlayer);

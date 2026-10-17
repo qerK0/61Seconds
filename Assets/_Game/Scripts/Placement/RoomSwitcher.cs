@@ -10,8 +10,10 @@ namespace SixtyOne.Placement
     /// Activates the room of the current node and moves the family there (they follow the player between rooms
     /// and floors). Rooms of one flat share a zone (one node): entering the zone through a door shows the room
     /// behind that door; a node change inside the zone keeps the current room. A room change plays the
-    /// RoomTransitionController (lateral on the same floor, descend when the floor stage changes); rewinds swap
-    /// instantly. GameState.CurrentRoomId always names the room actually shown.
+    /// RoomTransitionController (lateral on the same floor, descend when the floor stage changes): the player
+    /// stands at the arrival point and, once the transition completes, the wife and child appear at that point
+    /// (the arrival door, or the descent point) and run to their follow spots. Rewinds swap and snap instantly.
+    /// GameState.CurrentRoomId always names the room actually shown.
     /// </summary>
     public sealed class RoomSwitcher : MonoBehaviour, IRoomPresenter
     {
@@ -40,15 +42,22 @@ namespace SixtyOne.Placement
         private bool instantNext = true;
         private string pendingRoom;
         private Vector3? pendingPoint;
+        private readonly List<FamilyMember> arrivals = new List<FamilyMember>();
+        private Vector3 arrivalEntry;
+
+        /// <summary>True if the last ShowRoom was instant (a rewind or the first show): placement snaps members then.</summary>
+        public bool LastShowInstant { get; private set; } = true;
 
         private void OnEnable()
         {
             GameEvents.Died += OnDied;
+            NavigationEvents.OnTransitionComplete += OnTransitionComplete;
         }
 
         private void OnDisable()
         {
             GameEvents.Died -= OnDied;
+            NavigationEvents.OnTransitionComplete -= OnTransitionComplete;
         }
 
         // The rewind after a death re-enters a node: no transition for that.
@@ -146,6 +155,8 @@ namespace SixtyOne.Placement
             lastFloorStage = floorStage;
             bool instant = instantNext;
             instantNext = false;
+            LastShowInstant = instant;
+            if (instant) CancelArrivals();
 
             if (target == Current)
             {
@@ -156,20 +167,76 @@ namespace SixtyOne.Placement
             if (transition == null || Current == null || instant)
             {
                 FinishTransition();
-                Swap(target, arrival);
+                Swap(target, arrival, MoveMode.Snap);
                 return;
             }
 
-            transition.Play(floorChanged ? TransitionKind.Descend : TransitionKind.Lateral, Current, target, () => Swap(target, arrival));
+            bool reduce = gm != null && gm.Settings != null && gm.Settings.ReduceEffects;
+            MoveMode mode = MemberMoveRules.ArrivalMode(false, reduce);
+            transition.Play(floorChanged ? TransitionKind.Descend : TransitionKind.Lateral, Current, target, () => Swap(target, arrival, mode));
         }
 
-        private void Swap(Room target, Vector3? arrival)
+        private void Swap(Room target, Vector3? arrival, MoveMode mode)
         {
             SetActiveRoom(target);
             if (target == Current) return;
             Current = target;
-            SnapMembers(arrival);
+            if (mode == MoveMode.Snap) SnapMembers(arrival);
+            else PlaceArrivals(arrival);
             RoomShown?.Invoke(target);
+        }
+
+        /// <summary>
+        /// Non-instant room change: members with an anchor in this room snap to it, the player stands at the arrival
+        /// point (else the spawn); the wife and child wait at that point and run in once the transition completes.
+        /// </summary>
+        private void PlaceArrivals(Vector3? arrival)
+        {
+            CancelArrivals();
+            GameManager gm = gameManager != null ? gameManager : GameManager.Instance;
+            Vector3 entry = arrival.HasValue ? Current.ClampToFloor(arrival.Value) : Current.GetSpawn(MemberType.Player);
+            arrivalEntry = entry;
+            foreach (FamilyMember member in members)
+            {
+                if (member == null) continue;
+                string anchorId = gm != null ? gm.State.GetMember(member.Type).AnchorId : null;
+                Anchor anchor = Current.FindAnchor(anchorId);
+                if (anchor != null)
+                {
+                    member.PlaceAt(anchor);
+                    continue;
+                }
+
+                member.PlaceAt(entry);
+                if (member.Type != MemberType.Player && member.GetComponent<FamilyFollower>() != null) arrivals.Add(member);
+            }
+        }
+
+        // The room has landed: the waiting wife and child appear at the arrival point and run to their spots.
+        private void OnTransitionComplete(string roomId)
+        {
+            if (arrivals.Count == 0) return;
+            var running = new List<FamilyMember>(arrivals);
+            arrivals.Clear();
+            GameManager gm = gameManager != null ? gameManager : GameManager.Instance;
+            if (gm != null && gm.IsDead) return;
+            foreach (FamilyMember member in running)
+            {
+                if (member == null) continue;
+                FamilyFollower follower = member.GetComponent<FamilyFollower>();
+                if (follower != null) follower.ArriveFrom(arrivalEntry);
+            }
+        }
+
+        private void CancelArrivals()
+        {
+            arrivals.Clear();
+            foreach (FamilyMember member in members)
+            {
+                if (member == null) continue;
+                FamilyFollower follower = member.GetComponent<FamilyFollower>();
+                if (follower != null) follower.CancelArrival();
+            }
         }
 
         private void SetActiveRoom(Room target)
@@ -180,10 +247,11 @@ namespace SixtyOne.Placement
             }
         }
 
-        /// <summary>Puts each member on their stored anchor in this room, else around the arrival point, else at the room spawn.</summary>
+        /// <summary>Puts each member on their stored anchor in this room, else around the arrival point, else at the room spawn (instant).</summary>
         public void SnapMembers(Vector3? arrival = null)
         {
             if (Current == null) return;
+            CancelArrivals();
             GameManager gm = gameManager != null ? gameManager : GameManager.Instance;
             foreach (FamilyMember member in members)
             {

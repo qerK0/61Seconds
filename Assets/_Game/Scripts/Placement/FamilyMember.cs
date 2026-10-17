@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SixtyOne.Core;
 using SixtyOne.Iso;
 using UnityEngine;
@@ -58,9 +59,29 @@ namespace SixtyOne.Placement
         /// <summary>Snaps to an anchor's ground point (small offset so shared anchors don't overlap).</summary>
         public void PlaceAt(Anchor anchor)
         {
+            PlaceAt(SlotPoint(anchor));
+        }
+
+        /// <summary>This member's standing point on an anchor (ground point + a per-member slot offset).</summary>
+        public Vector3 SlotPoint(Anchor anchor)
+        {
             // Slot offsets are tuned at world scale 1.
             float scale = transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.x) : 1f;
-            PlaceAt(anchor.GroundPoint + SlotOffset(type) * scale);
+            return anchor.GroundPoint + SlotOffset(type) * scale;
+        }
+
+        /// <summary>Runs along world waypoints (run frames, flip by direction); arrived fires at the end.</summary>
+        public void RunAlong(IReadOnlyList<Vector3> path, float unitsPerSecond, Action arrived, object owner)
+        {
+            CharacterMotor motor = GetComponent<CharacterMotor>();
+            if (motor == null)
+            {
+                if (path != null && path.Count > 0) PlaceAt(path[path.Count - 1]);
+                arrived?.Invoke();
+                return;
+            }
+
+            motor.RunPath(path, unitsPerSecond, arrived, owner);
         }
 
         /// <summary>Snaps to a world point (instant, no walk).</summary>

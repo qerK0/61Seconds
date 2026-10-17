@@ -5,9 +5,9 @@ using UnityEngine;
 namespace SixtyOne.Placement
 {
     /// <summary>
-    /// Click-and-run (IsoPicker router). In exploration a floor click runs the player there (straight line,
-    /// clamped onto the room's floor diamond); a click on a door / pickup / NPC runs to its approach point and
-    /// then uses it. Outside exploration (placement, dialogue, QTE) clicks go straight to their targets.
+    /// Click-and-run (IsoPicker router). In exploration a floor click runs the player there along the room's grid
+    /// path (around debris; a blocked cell runs to the nearest reachable free cell); a click on a door / pickup /
+    /// NPC runs to its approach cell (or the nearest free neighbour) and then uses it. Outside exploration (placement, dialogue, QTE) clicks go straight to their targets.
     /// The panic input delay is applied by IsoPicker before Route is called.
     /// </summary>
     public sealed class PlayerMover : MonoBehaviour, IWorldClickRouter
@@ -47,8 +47,8 @@ namespace SixtyOne.Placement
 
         private void Update()
         {
-            // A dialogue, placement or death took over: stop where we are.
-            if (player != null && player.IsMoving && !CanMove) player.Stop();
+            // A dialogue or death took over: stop our own run where we are (placement runs belong to placement).
+            if (player != null && player.IsMoving && player.Owner == (object)this && !CanMove) player.Stop();
         }
 
         public bool Route(IClickable target, Vector3 worldPoint)
@@ -56,17 +56,18 @@ namespace SixtyOne.Placement
             if (!CanMove) return false;
             if (target is IApproachable approachable)
             {
-                Vector3 point = rooms.Current.ClampToFloor(approachable.ApproachPoint, Margin);
-                player.RunTo(point, Speed, () =>
+                Room room = rooms.Current;
+                Vector3 point = room.ApproachTarget(approachable.ApproachPoint, Margin);
+                player.RunPath(room.PlanPath(player.transform.position, point, Margin), Speed, () =>
                 {
                     if (CanMove && target.IsClickable) target.OnClicked();
-                });
+                }, this);
                 return true;
             }
 
             // Members, anchors and other clickables keep their direct click.
             if (target != null) return false;
-            player.RunTo(rooms.Current.ClampToFloor(worldPoint, Margin), Speed);
+            player.RunPath(rooms.Current.PlanPath(player.transform.position, worldPoint, Margin), Speed, null, this);
             return true;
         }
     }

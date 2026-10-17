@@ -10,8 +10,11 @@ using UnityEngine;
 namespace SixtyOne.Placement
 {
     /// <summary>
-    /// Runs a PlacementNode: select member -> highlight valid anchors -> place.
-    /// On timeout: quake, hazard tweens, resolve. First Death/Trapped result rewinds; injuries persist.
+    /// Runs a PlacementNode: select member -> highlight valid anchors -> place. Placing reserves the anchor at once
+    /// (GameState) and the member RUNS there (grid path, run frames), so the next member can be queued meanwhile;
+    /// the player, placed last, runs too. On timeout every member still running snaps the last bit onto their
+    /// target anchor, then the quake plays, hazards tween and resolve. First Death/Trapped result rewinds;
+    /// injuries persist. Rewinds snap (RoomSwitcher.LastShowInstant).
     /// </summary>
     public sealed class PlacementController : MonoBehaviour, INodeHandler
     {
@@ -21,11 +24,15 @@ namespace SixtyOne.Placement
         [Tooltip("Provides the current room and the family members.")]
         [SerializeField] private RoomSwitcher rooms;
 
+        [Tooltip("Run speed (members run to their anchor at the follower speed).")]
+        [SerializeField] private MovementConfig movement;
+
         private PlacementNode node;
         private Room room;
         private PlacementLayout layout;
         private Action<SceneNode> onFinished;
         private FamilyMember selected;
+        private readonly PlacementRuns runs = new PlacementRuns();
         private Coroutine quakeRoutine;
         private bool active;
         private bool quaking;
@@ -56,7 +63,9 @@ namespace SixtyOne.Placement
 
             layout = BuildLayout(room, node);
             room.ResetProps();
-            rooms.SnapMembers();
+            runs.Clear();
+            // Rewinds snap everyone back; a normal entry keeps them where they are (they ran in through the door).
+            if (rooms.LastShowInstant) rooms.SnapMembers();
             foreach (Anchor anchor in room.Anchors)
             {
                 anchor.RefreshLabel(State.RevealedAnchors.Contains(anchor.Id));
@@ -87,6 +96,7 @@ namespace SixtyOne.Placement
             if (active) Subscribe(false);
             active = false;
             quaking = false;
+            StopRuns();
             Deselect();
             ClearHighlights();
         }
@@ -165,10 +175,64 @@ namespace SixtyOne.Placement
                 return;
             }
 
-            State.GetMember(selected.Type).AnchorId = anchor.Id;
-            selected.PlaceAt(anchor);
+            FamilyMember member = selected;
+            runs.Reserve(State, member.Type, anchor.Id);
             Deselect();
             ClearHighlights();
+            RunToAnchor(member, anchor);
+        }
+
+        /// <summary>Runs the member to its slot on the anchor (same speed as FamilyFollower, scaled by the room).</summary>
+        private void RunToAnchor(FamilyMember member, Anchor anchor)
+        {
+            float margin = movement != null ? movement.FloorMargin : 0.25f;
+            Vector3 slot = member.SlotPoint(anchor);
+            List<Vector3> path = room.PlanPath(member.transform.position, slot, margin);
+            // The anchor slot itself is the goal (anchors may sit right against a wall, inside the floor margin).
+            if (path.Count > 0) path[path.Count - 1] = slot;
+            else path.Add(slot);
+            MemberType type = member.Type;
+            member.RunAlong(path, RunSpeed(type), () => runs.Arrived(type), this);
+        }
+
+        private float RunSpeed(MemberType type)
+        {
+            float speed = movement != null ? movement.RunSpeed * movement.FollowerSpeedFactor : 2.6f;
+            speed *= room != null ? room.Scale : 1f;
+            if (movement != null && State.GetMember(type).Health == MemberHealth.Injured) speed *= movement.InjuredSpeedFactor;
+            return speed;
+        }
+
+        /// <summary>The quake is here: everyone still running snaps the last bit onto their reserved anchor.</summary>
+        private void SnapUnfinishedRuns()
+        {
+            foreach (KeyValuePair<MemberType, string> run in runs.FinishAll())
+            {
+                FamilyMember member = MemberOf(run.Key);
+                Anchor anchor = room != null ? room.FindAnchor(run.Value) : null;
+                if (member != null && anchor != null) member.PlaceAt(anchor);
+            }
+        }
+
+        private void StopRuns()
+        {
+            foreach (KeyValuePair<MemberType, string> run in runs.FinishAll())
+            {
+                FamilyMember member = MemberOf(run.Key);
+                CharacterMotor motor = member != null ? member.GetComponent<CharacterMotor>() : null;
+                if (motor != null && motor.Owner == (object)this) motor.Stop();
+            }
+        }
+
+        private FamilyMember MemberOf(MemberType type)
+        {
+            if (rooms == null) return null;
+            foreach (FamilyMember member in rooms.Members)
+            {
+                if (member != null && member.Type == type) return member;
+            }
+
+            return null;
         }
 
         private IEnumerator QuakeRoutine()
@@ -176,6 +240,7 @@ namespace SixtyOne.Placement
             quaking = true;
             Deselect();
             ClearHighlights();
+            SnapUnfinishedRuns();
 
             Dictionary<MemberType, string> placements = CurrentPlacements();
             List<PlacementResult> results = PlacementResolver.Resolve(layout, placements, node.Act);

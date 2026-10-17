@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using SixtyOne.Core;
 using UnityEngine;
 
@@ -68,6 +69,18 @@ namespace SixtyOne.Placement
             Vector3 local = floor.ClampLocal(transform.InverseTransformPoint(world), margin);
             Vector3 clamped = transform.TransformPoint(new Vector3(local.x, local.y, 0f));
             return new Vector3(clamped.x, clamped.y, world.z);
+        }
+
+        /// <summary>World waypoints from one point to another on this room's floor (the last one is the clamped target).</summary>
+        public List<Vector3> PlanPath(Vector3 fromWorld, Vector3 toWorld, float margin = 0.2f)
+        {
+            return new List<Vector3> { ClampToFloor(toWorld, margin) };
+        }
+
+        /// <summary>Where to stand to use something whose approach point is given (clamped onto the floor).</summary>
+        public Vector3 ApproachTarget(Vector3 approachWorld, float margin = 0.2f)
+        {
+            return ClampToFloor(approachWorld, margin);
         }
 
         public Anchor[] Anchors

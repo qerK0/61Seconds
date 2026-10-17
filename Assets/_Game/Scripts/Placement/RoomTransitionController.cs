@@ -21,8 +21,9 @@ namespace SixtyOne.Placement
     /// Room-to-room transition (coroutines, unscaled time, no DOTween, never touches Time.timeScale). Locks input
     /// (NavigationEvents.OnTransitionStart), then: OUT, the old room's floor tiles, walls and props rise and fade
     /// in a wave from the far corner while the family fades; SWAP at the midpoint; IN, the new room's floor drops
-    /// in, then the walls, then the props, with a small settle, and the family pops in at the spawn; finally input
-    /// unlocks (OnTransitionComplete). Timing comes from TransitionConfig via the pure TileTransitionPlan.
+    /// in, then the walls, then the props, with a small settle, and the player pops in at the arrival point; the
+    /// wife and child stay hidden until input unlocks (OnTransitionComplete), then appear at the arrival door and run
+    /// in (RoomSwitcher / FamilyFollower). Timing comes from TransitionConfig via the pure TileTransitionPlan.
     /// Reduce Effects plays a quick fade instead. Rewinds never get here (RoomSwitcher swaps instantly).
     /// </summary>
     public sealed class RoomTransitionController : MonoBehaviour
@@ -33,7 +34,7 @@ namespace SixtyOne.Placement
         [Tooltip("Full-screen dark overlay for the Reduce Effects fade (never blocks clicks; input is locked through InputGate).")]
         [SerializeField] private CanvasGroup overlay;
 
-        [Tooltip("Family members (hidden during the swap, popped in after the new room has landed).")]
+        [Tooltip("Family members, player first (hidden during the swap; the player pops in after the new room has landed, the others run in after).")]
         [SerializeField] private Transform[] characters = new Transform[0];
 
         private readonly Dictionary<Room, RoomTransitionPieces> piecesByRoom = new Dictionary<Room, RoomTransitionPieces>();
@@ -148,11 +149,11 @@ namespace SixtyOne.Placement
 
             End(inPieces);
 
-            // The family pops in at the spawn.
+            // The player pops in at the arrival point; the wife and child run in once input unlocks.
             for (float t = 0f; t < timing.CharacterPop; t += Time.unscaledDeltaTime)
             {
                 float k = Mathf.Clamp01(t / timing.CharacterPop);
-                ShowCharacters(Mathf.Clamp01(k * 2f), TileTransitionPlan.PopScale(k));
+                ShowCharacters(Mathf.Clamp01(k * 2f), TileTransitionPlan.PopScale(k), 0f);
                 yield return null;
             }
 
@@ -243,22 +244,27 @@ namespace SixtyOne.Placement
         }
 
         // alpha 0..1 and a scale factor on the captured look (1, 1 = exactly as before the transition).
-        private void ShowCharacters(float alpha, float scale)
+        private void ShowCharacters(float alpha, float scale) => ShowCharacters(alpha, scale, alpha);
+
+        // The player (first character) gets alpha and scale; the others only an alpha at their normal scale.
+        private void ShowCharacters(float alpha, float scale, float othersAlpha)
         {
-            foreach (CharacterLook look in looks)
+            for (int i = 0; i < looks.Length; i++)
             {
+                CharacterLook look = looks[i];
                 if (look.Transform == null) continue;
-                look.Transform.localScale = look.Scale * scale;
+                look.Transform.localScale = look.Scale * (i == 0 ? scale : 1f);
+                float a = i == 0 ? alpha : othersAlpha;
                 for (int s = 0; s < look.Sprites.Length; s++)
                 {
                     if (look.Sprites[s] == null) continue;
                     Color c = look.Colors[s];
-                    c.a *= alpha;
+                    c.a *= a;
                     look.Sprites[s].color = c;
                 }
             }
 
-            if (alpha >= 1f && scale == 1f) looks = new CharacterLook[0];
+            if (alpha >= 1f && othersAlpha >= 1f && scale == 1f) looks = new CharacterLook[0];
         }
 
         private void Complete()
