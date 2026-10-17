@@ -16,7 +16,12 @@ namespace SixtyOne.Nodes
         /// <summary>The trader gives the first item the player lacks (TraderProfile).</summary>
         TraderGive,
         /// <summary>Shows a toast message (messageKey).</summary>
-        ShowMessage
+        ShowMessage,
+        /// <summary>
+        /// Someone takes items from the bag: every item in takeItems, else fallbackCount of the fallback item; key
+        /// items optionally never (the robber on the F2 stairs). The taken ids come back in OutcomeResult.Taken.
+        /// </summary>
+        TakeItems
     }
 
     /// <summary>One effect of a choice, bomb check or node entry.</summary>
@@ -50,6 +55,19 @@ namespace SixtyOne.Nodes
         [Tooltip("Health for SetMemberState.")]
         [SerializeField] private MemberHealth health;
 
+        [Tooltip("TakeItems: every one of these in the bag is taken (e.g. all the food).")]
+        [SerializeField] private System.Collections.Generic.List<Item> takeItems = new System.Collections.Generic.List<Item>();
+
+        [Tooltip("TakeItems: taken instead when none of the above was in the bag (e.g. water).")]
+        [SerializeField] private Item fallbackItem;
+
+        [Tooltip("TakeItems: how many of the fallback item.")]
+        [Min(0)]
+        [SerializeField] private int fallbackCount = 1;
+
+        [Tooltip("TakeItems: key items (flashlight, whistle) are never taken.")]
+        [SerializeField] private bool excludeKeyItems = true;
+
         public OutcomeType Type => type;
         public SceneNode TargetNode => targetNode;
         public string Flag => flag;
@@ -59,6 +77,10 @@ namespace SixtyOne.Nodes
         public SixtyOne.Items.TraderProfile Trader => trader;
         public SixtyOne.Text.TextKey MessageKey => messageKey;
         public MemberHealth Health => health;
+        public System.Collections.Generic.IReadOnlyList<Item> TakeItemsList => takeItems;
+        public Item FallbackItem => fallbackItem;
+        public int FallbackCount => fallbackCount;
+        public bool ExcludeKeyItems => excludeKeyItems;
 
         public Outcome()
         {
@@ -72,5 +94,18 @@ namespace SixtyOne.Nodes
         public static Outcome GiveFromTrader(SixtyOne.Items.TraderProfile profile) => new Outcome { type = OutcomeType.TraderGive, trader = profile };
         public static Outcome Message(SixtyOne.Text.TextKey key) => new Outcome { type = OutcomeType.ShowMessage, messageKey = key };
         public static Outcome SetMember(MemberType member, MemberHealth health) => new Outcome { type = OutcomeType.SetMemberState, member = member, health = health };
+
+        /// <summary>Takes every listed item from the bag, else fallbackCount of the fallback; key items optionally never.</summary>
+        public static Outcome TakeItems(System.Collections.Generic.IEnumerable<Item> items, Item fallback, int fallbackCount, bool excludeKeyItems = true)
+        {
+            return new Outcome
+            {
+                type = OutcomeType.TakeItems,
+                takeItems = new System.Collections.Generic.List<Item>(items),
+                fallbackItem = fallback,
+                fallbackCount = fallbackCount,
+                excludeKeyItems = excludeKeyItems
+            };
+        }
     }
 }

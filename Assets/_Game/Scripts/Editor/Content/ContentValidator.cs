@@ -593,6 +593,7 @@ namespace SixtyOne.Editor
             if (node is PlacementNode placement && placement.NextNode != null) yield return placement.NextNode;
             if (node is QTENode qte && qte.NextNode != null) yield return qte.NextNode;
             if (node is PrepPhaseNode prep && prep.QuakeNode != null) yield return prep.QuakeNode;
+            if (node is RobberNode robber && robber.NextNode != null) yield return robber.NextNode;
         }
 
         private static int CheckTextKeys()

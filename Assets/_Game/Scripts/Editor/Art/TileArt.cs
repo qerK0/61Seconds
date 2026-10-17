@@ -22,6 +22,7 @@ namespace SixtyOne.Editor
         public const string HomeTileSetPath = DataDir + "/HomeTileSet.asset";
         public const string CorridorTileSetPath = DataDir + "/CorridorTileSet.asset";
         public const string DamagedCorridorTileSetPath = DataDir + "/DamagedCorridorTileSet.asset";
+        public const string StreetTileSetPath = DataDir + "/StreetTileSet.asset";
 
         /// <summary>
         /// Corner-pair wall art in Concept/ (one PNG = left face + right face, 128 px each, 192 tall, like the sheet
@@ -44,6 +45,7 @@ namespace SixtyOne.Editor
         private static readonly (string[] Keywords, string Sheet)[] Fallbacks =
         {
             (new[] { "wood", "floor" }, "Floor_Wood_01-256x128"),
+            (new[] { "floor", "rocky" }, "Floor_Rocky_01-256x128"),
             (new[] { "floor", "stone" }, "Floor_Stone_02-256x128-Photoroom"),
             (new[] { "flat", "stone", "window" }, "Flat_Stone_01_WindowA-SW-128x192"),
             (new[] { "flat", "stone" }, "Flat_Stone_01-SW-128x192")
@@ -74,6 +76,8 @@ namespace SixtyOne.Editor
             public RoomTileSet Corridor;
             /// <summary>Post-quake corridors (F3/F2): the corridor stone with cracked segments mixed in.</summary>
             public RoomTileSet DamagedCorridor;
+            /// <summary>The street: Rocky 17 with ~15% Rocky 3 patches, no walls.</summary>
+            public RoomTileSet Street;
         }
 
         /// <summary>Applies import settings, then creates/updates HomeTileSet and CorridorTileSet.</summary>
@@ -99,6 +103,8 @@ namespace SixtyOne.Editor
                     new[] { "Flat Stone 13", "Flat Stone 13", CrackedB + "_R", "Flat Stone 13", "Flat Stone 13", CrackedA + "_R", "Flat Stone 13" },
                     CorridorWindows + "_L", CorridorWindows + "_R", new Color(0.92f, 0.92f, 0.94f, 1f), new Color(0.86f, 0.86f, 0.9f, 1f))
             };
+            sets.Street = BuildStreetSet();
+
             // Every set can crack after a quake (WallCracks swaps these in, seeded per segment).
             Sprite[] crackedLeft = FindAll(new[] { CrackedA + "_L", CrackedB + "_L" });
             Sprite[] crackedRight = FindAll(new[] { CrackedB + "_R", CrackedA + "_R" });
@@ -111,6 +117,27 @@ namespace SixtyOne.Editor
 
             AssetDatabase.SaveAssets();
             return sets;
+        }
+
+        /// <summary>Street floor: "Floor Rocky 17" with "Floor Rocky 3" patches (the Rocky sheet sliced like the others), no walls.</summary>
+        private static RoomTileSet BuildStreetSet()
+        {
+            Sprite floor = FindSprite("Floor Rocky 17");
+            Sprite patch = FindSprite("Floor Rocky 3");
+            Tile tile = AssetUtil.LoadOrCreate<Tile>($"{DataDir}/StreetFloorTile.asset");
+            tile.sprite = floor;
+            tile.colliderType = Tile.ColliderType.None;
+            EditorUtility.SetDirty(tile);
+            Tile patchTile = AssetUtil.LoadOrCreate<Tile>($"{DataDir}/StreetPatchTile.asset");
+            patchTile.sprite = patch;
+            patchTile.colliderType = Tile.ColliderType.None;
+            EditorUtility.SetDirty(patchTile);
+
+            RoomTileSet set = AssetUtil.LoadOrCreate<RoomTileSet>(StreetTileSetPath);
+            set.Configure(floor, tile, new Sprite[0], new Sprite[0], null, null, new Color(0.9f, 0.9f, 0.92f, 1f), Color.white);
+            set.ConfigurePatch(patch != null ? patchTile : null, 0.15f);
+            EditorUtility.SetDirty(set);
+            return set;
         }
 
         private static RoomTileSet BuildSet(string path, string tileName, string floorName, string[] left, string[] right,

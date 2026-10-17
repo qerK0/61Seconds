@@ -87,12 +87,13 @@ namespace SixtyOne.Audio
             quaking = true;
             if (map == null || Service == null) return;
             if (map.PreQuake != null) Service.FadeOut(map.PreQuake, 0.4f);
-            AudioCue cue = map.QuakeFor(info.Act);
+            AudioCue cue = map.QuakeFor(info.SoundAct);
             // The opening quake raises an onset and then the main shock: keep one recording running across both.
             if (cue == quakeCue && Service.IsPlaying(cue)) return;
             StopQuake(0.3f);
             quakeCue = cue;
-            Play(cue);
+            if (cue != null && !Mathf.Approximately(info.Loudness, 1f)) Service.Play(cue, info.Loudness, 1f);
+            else Play(cue);
         }
 
         private void OnQuakeEnded(QuakeInfo info)

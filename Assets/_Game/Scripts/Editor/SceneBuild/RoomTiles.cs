@@ -55,7 +55,9 @@ namespace SixtyOne.Editor
             {
                 for (int y = 0; y < spec.Height; y++)
                 {
-                    map.SetTile(new Vector3Int(x, y, 0), set.FloorTile);
+                    // Seeded patches (street: ~15% Floor Rocky 3 among Floor Rocky 17).
+                    bool patch = set.PatchTile != null && (DebrisPlanner.Hash(spec.Id, $"floor:{x},{y}", 61) % 1000) < set.PatchChance * 1000f;
+                    map.SetTile(new Vector3Int(x, y, 0), patch ? set.PatchTile : set.FloorTile);
                 }
             }
 

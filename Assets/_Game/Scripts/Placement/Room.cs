@@ -36,6 +36,13 @@ namespace SixtyOne.Placement
         [Min(0)]
         [SerializeField] private int depth;
 
+        [Tooltip("Long rooms (the street): the camera follows the player along the floor's long axis instead of framing the whole room.")]
+        [SerializeField] private bool followCamera;
+
+        [Tooltip("Follow mode: about this many cells of the long axis are visible.")]
+        [Min(1f)]
+        [SerializeField] private float followCells = 7f;
+
         private Anchor[] anchors;
         private GridNav nav;
         private readonly HashSet<Vector2Int> debris = new HashSet<Vector2Int>();
@@ -79,6 +86,17 @@ namespace SixtyOne.Placement
             Vector3 local = floor.ClampLocal(transform.InverseTransformPoint(world), margin);
             Vector3 clamped = transform.TransformPoint(new Vector3(local.x, local.y, 0f));
             return new Vector3(clamped.x, clamped.y, world.z);
+        }
+
+        /// <summary>The camera follows the player along the long axis (RoomCameraFraming).</summary>
+        public bool FollowCamera => followCamera;
+        public float FollowCells => followCells;
+
+        /// <summary>Authoring helper: camera follow mode for long rooms.</summary>
+        public void ConfigureFollow(bool follow, float cells)
+        {
+            followCamera = follow;
+            followCells = cells;
         }
 
         /// <summary>Floors below the top floor (debris density and crack odds grow with it).</summary>

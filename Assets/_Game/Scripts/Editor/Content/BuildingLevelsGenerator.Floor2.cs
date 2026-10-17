@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using SixtyOne.Building;
 using SixtyOne.Core;
+using SixtyOne.Dialogue;
 using SixtyOne.Items;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
@@ -26,6 +27,8 @@ namespace SixtyOne.Editor
         public const string F2Dog = "f2.dog";
         public const string F2Flat8 = "f2.flat8";
         public const string F2Exit = "f2.exit";
+        public const string F2Robber = RobberSetup.NodeId;
+        public const string F2Street = "f2.street";
         public const string F2Epilogue = "f2.epilogue";
 
         public const string GasOffF2 = "GasOff_F2_7";
@@ -48,6 +51,8 @@ namespace SixtyOne.Editor
             Hazard("hz.f7_bookshelf", HazardEffect.Death, HazardEffect.Death, HazardMotion.Topple, "bookshelf", "bookshelf", "tip.wardrobe");
             Hazard("hz.f7_window", HazardEffect.Death, HazardEffect.Injured, HazardMotion.Shatter, "f7_window", "window", "tip.no_window");
             Hazard("hz.f7_open", HazardEffect.Death, HazardEffect.Injured, HazardMotion.Drop, "f7_ceiling", "open_room", "tip.drop_cover_hold");
+            // Street aftershock: façade rubble (player dies, wife cut to black, child trapped).
+            Hazard("hz.street_facade", HazardEffect.Death, HazardEffect.Death, HazardMotion.None, "street_facade", "street_facade", "tip.street");
         }
 
         /// <summary>Recipes (order-independent): cloth+rope → child harness, cloth+water → wet cloth, tape+gloves → insulated grip.</summary>
@@ -75,7 +80,8 @@ namespace SixtyOne.Editor
         /// <summary>
         /// Floor 2: strong aftershock on arrival (placement in Flat 7, checkpoint) → Flat 7 (gas leak, poison) →
         /// corridor with the dog gate (food is consumed, the whistle is kept; slipping past is a WASD QTE whose
-        /// failures cost building time and re-roll) → stairs → street epilogue.
+        /// failures cost building time and re-roll) → stairs (the robbery) → street (checkpoint, the 4th quake) →
+        /// assembly-area sign → epilogue.
         /// </summary>
         private static void BuildFloor2()
         {
@@ -86,6 +92,10 @@ namespace SixtyOne.Editor
             QTENode dog = Node<QTENode>(floor, F2Dog);
             SceneNode flat8 = Node<SceneNode>(floor, F2Flat8);
             SceneNode exit = Node<SceneNode>(floor, F2Exit);
+            DialogueNode robber = Node<DialogueNode>(floor, F2Robber);
+            var replies = new List<RobberNode>();
+            foreach (string reply in RobberSetup.Replies) replies.Add(Node<RobberNode>(floor, RobberSetup.ReplyId(reply)));
+            SceneNode street = Node<SceneNode>(floor, F2Street);
             EpilogueNode epilogue = Node<EpilogueNode>(floor, F2Epilogue);
 
             Setup(arrival, F2Aftershock, Flat7, 3, 9f);
@@ -140,10 +150,38 @@ namespace SixtyOne.Editor
             Setup(flat8, F2Flat8, Flat8, 3);
             flat8.AddChoice(C(F2Flat8, "back").Move(2f).Then(Outcome.GoTo(corridor)));
 
-            // Stairs down to the street.
+            // Stairs down (click the stairs). A frightened, injured man blocks the way: the robbery is scripted and
+            // unavoidable; the choices only change his reply. He takes all the food (else one water), never key items.
             Setup(exit, F2Exit, F2Stairs, 3);
-            exit.AddChoice(C(F2Exit, "out").Move(5f).Then(Outcome.GoTo(epilogue)));
+            exit.AddChoice(C(F2Exit, "out").Move(5f).Then(Outcome.GoTo(robber)));
             exit.AddChoice(C(F2Exit, "elevator", ChoiceType.Trap).Kills(Death("death.elevator", "tip.no_elevator")));
+
+            Setup(robber, F2Robber, F2Stairs, 3);
+            robber.SetLines(new[]
+            {
+                Line(RobberSetup.SpeakerKey, F2Robber, 1, 3f),
+                Line(RobberSetup.SpeakerKey, F2Robber, 2, 3f),
+                Line(RobberSetup.SpeakerKey, F2Robber, 3, 3f),
+                Line(RobberSetup.SpeakerKey, F2Robber, 4, 2f)
+            });
+            // One reply line per choice (Yalvar / Kısa kes / Ona bağır); every reply ends the same way.
+            for (int i = 0; i < replies.Count; i++)
+            {
+                string id = RobberSetup.ReplyId(RobberSetup.Replies[i]);
+                Setup(replies[i], id, F2Stairs, 3);
+                replies[i].SetLines(new[] { Line(RobberSetup.SpeakerKey, id, 1, 2f) });
+            }
+
+            RobberSetup.Wire(robber, replies, street, Item("food"), Item("water"), new UnityEngine.Vector2(1.5f, 4.6f));
+
+            // The street (checkpoint: macro rewinds land here). The strongest aftershock hits ~6 s in
+            // (StreetQuakeDirector); the assembly-area sign at the far left is the way out once it has passed.
+            Setup(street, F2Street, Street, 3);
+            street.SetCheckpoint(true);
+            street.AddChoice(C(F2Street, "sign").Move(1f)
+                .Require(Condition.FlagTrue(FlagNames.StreetQuakeDone))
+                .WhenLocked(FailBehaviour.ShowLocked, Locked(F2Street, "sign"))
+                .Then(Outcome.GoTo(epilogue)));
 
             Setup(epilogue, F2Epilogue, Street, 3);
             epilogue.ConfigureEpilogue(F2Epilogue);

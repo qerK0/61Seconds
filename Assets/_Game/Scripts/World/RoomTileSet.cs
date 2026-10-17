@@ -35,6 +35,13 @@ namespace SixtyOne.World
         [Tooltip("Cracked back-right segments; empty = flip the cracked left ones.")]
         [SerializeField] private Sprite[] crackedRightSprites = new Sprite[0];
 
+        [Tooltip("Optional patch tile mixed into the floor (street: Floor Rocky 3 among Floor Rocky 17).")]
+        [SerializeField] private TileBase patchTile;
+
+        [Tooltip("Share of floor cells using the patch tile (seeded per cell).")]
+        [Range(0f, 1f)]
+        [SerializeField] private float patchChance;
+
         [Tooltip("Floor tint.")]
         [SerializeField] private Color floorTint = Color.white;
 
@@ -46,6 +53,15 @@ namespace SixtyOne.World
         public Color FloorTint => floorTint;
         public Color WallTint => wallTint;
         public bool HasWalls => leftWallSprites != null && leftWallSprites.Length > 0;
+        public TileBase PatchTile => patchTile;
+        public float PatchChance => patchChance;
+
+        /// <summary>Authoring helper: random patches of a second floor tile.</summary>
+        public void ConfigurePatch(TileBase tile, float chance)
+        {
+            patchTile = tile;
+            patchChance = chance;
+        }
 
         /// <summary>Wall sprite for a segment; flipX is true when a left sprite stands in for a right edge.</summary>
         public Sprite WallSprite(bool rightEdge, int index, bool window, out bool flipX)

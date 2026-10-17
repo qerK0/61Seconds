@@ -9,7 +9,7 @@ namespace SixtyOne.Dialogue
     /// DuringDialogue (e.g. "Kısa kes") are offered while lines play; the rest appear after the last line.
     /// </summary>
     [CreateAssetMenu(menuName = "SixtyOne/Dialogue Node", fileName = "dlg_new")]
-    public sealed class DialogueNode : SceneNode
+    public class DialogueNode : SceneNode
     {
         [Tooltip("Lines in order.")]
         [SerializeField] private List<DialogueLine> lines = new List<DialogueLine>();

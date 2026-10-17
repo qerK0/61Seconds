@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using SixtyOne.Placement;
+using SixtyOne.World;
 using UnityEngine;
 
 namespace SixtyOne.Editor
@@ -82,7 +83,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Which RoomTileSet a room uses.</summary>
-        public enum RoomArt { Home, Corridor, DamagedCorridor }
+        public enum RoomArt { Home, Corridor, DamagedCorridor, Street }
 
         /// <summary>A window/balcony where the bedsheet rope lowers the family to another node.</summary>
         public sealed class RopeSpec
@@ -153,6 +154,8 @@ namespace SixtyOne.Editor
             public int Depth;
             /// <summary>Cells that are never walkable (the street's power line).</summary>
             public List<Vector2Int> Blocked = new List<Vector2Int>();
+            /// <summary>Long room: the camera follows the player (the street).</summary>
+            public bool FollowCamera;
         }
 
         /// <summary>How far inside a door the player stands / arrives (grid cells).</summary>
@@ -334,6 +337,56 @@ namespace SixtyOne.Editor
         public static Vector2 ContainerApproach(RoomSpec room, ContainerSpec c)
         {
             return new Vector2(Mathf.Clamp(c.Gx - 0.45f, 0.3f, room.Width - 0.3f), Mathf.Clamp(c.Gy - 0.45f, 0.3f, room.Height - 0.3f));
+        }
+
+        /// <summary>
+        /// The street finale (StreetLayout): 20 x 6 cells, Rocky floor, no walls; our building's door at the right end,
+        /// the "Acil Toplanma Alanı" sign far left, a kerb and façade silhouettes along the back edge, parked cars,
+        /// the downed power line (built by the scene builder) and its fallen pole. The camera follows the player.
+        /// </summary>
+        private static RoomSpec Street()
+        {
+            RoomSpec street = Art(Room(BuildingLevelsGenerator.Street, StreetLayout.Width, StreetLayout.Height, new Color(0.4f, 0.42f, 0.45f, 1f)), RoomArt.Street, walls: false);
+            street.Depth = 3;
+            street.FollowCamera = true;
+            Vector2Int door = StreetLayout.DoorCell;
+            street.PlayerSpawn = new Vector2(door.x + 0.5f, door.y + 0.5f);
+            street.WifeSpawn = new Vector2(door.x + 0.3f, door.y + 1.3f);
+            street.ChildSpawn = new Vector2(door.x + 0.3f, door.y - 0.4f);
+            street.Blocked.AddRange(StreetLayout.StaticBlocked());
+
+            Color facade = new Color(0.16f, 0.17f, 0.21f, 1f);
+            for (int x = 0; x < StreetLayout.Width; x += 2)
+            {
+                street.Props.Add(P(null, "Kerb", x + 1f, StreetLayout.Height + 0.05f, 0f, 1.1f, 0.1f, new Color(0.55f, 0.55f, 0.57f, 1f)));
+            }
+
+            for (int x = 0; x < StreetLayout.Width; x += 3)
+            {
+                float shade = 0.85f + 0.15f * ((x * 7) % 3);
+                street.Props.Add(P(null, "Facade", x + 1.5f, StreetLayout.Height + 0.9f, 0f, 1.6f, 2.6f + 0.4f * ((x / 3) % 3), facade * shade));
+            }
+
+            // Our building at the right end, its door where the family comes out.
+            street.Props.Add(P(null, "OurBuilding", StreetLayout.Width + 0.9f, door.y + 0.5f, 0f, 2.2f, 3.4f, new Color(0.24f, 0.22f, 0.24f, 1f)));
+            street.Props.Add(P(null, "BuildingDoor", StreetLayout.Width + 0.05f, door.y + 0.5f, 0f, 0.5f, 0.9f, new Color(0.3f, 0.2f, 0.12f, 1f)));
+
+            Color[] cars = { new Color(0.55f, 0.12f, 0.1f, 1f), new Color(0.2f, 0.3f, 0.5f, 1f), new Color(0.75f, 0.75f, 0.72f, 1f) };
+            for (int i = 0; i + 1 < StreetLayout.CarCells.Length; i += 2)
+            {
+                Vector2Int a = StreetLayout.CarCells[i];
+                Vector2Int b = StreetLayout.CarCells[i + 1];
+                street.Props.Add(P(null, "Car", (a.x + b.x) * 0.5f + 0.5f, (a.y + b.y) * 0.5f + 0.5f, 0f, 1.5f, 0.6f, cars[(i / 2) % cars.Length]));
+            }
+
+            // The power pole lies across the back of the street where the line snapped.
+            street.Props.Add(P(null, "FallenPole", StreetLayout.LineX + 0.5f, StreetLayout.Height - 0.3f, 0f, 0.25f, 1.4f, new Color(0.35f, 0.28f, 0.2f, 1f)));
+
+            Vector2Int sign = StreetLayout.SignCell;
+            street.Hotspots.Add(Thing("Sign", BuildingLevelsGenerator.F2Street + ".c_sign", sign.x + 1.0f, sign.y + 1.0f, 0.5f, 1.4f, new Color(0.15f, 0.55f, 0.3f, 1f)));
+            street.Lights.Add(L("StreetLampA", 5.0f, StreetLayout.Height - 0.5f, 2.0f, 4.5f, new Color(0.8f, 0.85f, 1f, 1f)));
+            street.Lights.Add(L("StreetLampB", 15.0f, StreetLayout.Height - 0.5f, 2.0f, 4.5f, new Color(0.8f, 0.85f, 1f, 1f)));
+            return street;
         }
 
         // ---------- navigation (mirrors Room.RequiredCells / Room.BaseNav at runtime) ----------
@@ -556,14 +609,15 @@ namespace SixtyOne.Editor
             RoomSpec f8Bedroom = Art(Room(BuildingLevelsGenerator.Flat8Bedroom, 4, 4, new Color(0.7f, 0.64f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
 
-            // Stairs down to the street (L1) and the elevator trap.
+            // Stairs down to the street (click the stairs) and the elevator trap. The frightened man (Telaşlı Adam)
+            // stands in front of the stairs: going down starts the scripted robbery, then the street.
             RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.DamagedCorridor);
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
-            stairs.Props.Add(P(null, "StairsDown", 1.5f, 4.3f, 0f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
+            stairs.Hotspots.Add(Thing("StairsDown", BuildingLevelsGenerator.F2Exit + ".c_out", 1.5f, 4.3f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 3.0f, 1.5f, 0.6f, 1.6f, Metal));
+            stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f) });
 
-            RoomSpec street = Art(Room(BuildingLevelsGenerator.Street, 6, 4, new Color(0.4f, 0.42f, 0.45f, 1f)), RoomArt.Corridor, walls: false);
-            street.Lights.Add(L("StreetLamp", 5.0f, 3.0f, 2.0f, 3.5f, new Color(0.8f, 0.85f, 1f, 1f)));
+            RoomSpec street = Street();
 
             Link(flat7, "L1", f7Hall, "R1");
             Link(flat7, "R3", f7Kitchen, "L0");
@@ -572,7 +626,6 @@ namespace SixtyOne.Editor
             Link(f8Hall, "L1", f8Living, "R1");
             Link(f8Living, "L2", f8Bedroom, "R1");
             OneWay(corridor, "G1", stairs, stairs.PlayerSpawn);
-            OneWay(stairs, "L1", street, street.PlayerSpawn);
 
             return new[] { flat7, f7Hall, f7Kitchen, corridor, f8Hall, f8Living, f8Bedroom, stairs, street };
         }

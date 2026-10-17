@@ -95,6 +95,12 @@ namespace SixtyOne.Text
         public const string LootBorrowTitle = "ui.loot.borrow_title";
         public const string LootEmpty = "ui.loot.empty";
 
+        // Robber and street finale.
+        public const string RobbedItem = "ui.robbed.item";
+        public const string StreetDropOpen = "ui.street.drop_open";
+        public const string StreetSafe = "ui.street.safe";
+        public const string StreetCollapseBehind = "ui.street.collapse_behind";
+
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;
     }

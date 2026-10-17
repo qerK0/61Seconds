@@ -62,6 +62,7 @@ namespace SixtyOne.World
 
         private readonly Dictionary<Room, RoomDebris> byRoom = new Dictionary<Room, RoomDebris>();
         private readonly Dictionary<string, HashSet<Vector2Int>> planCache = new Dictionary<string, HashSet<Vector2Int>>();
+        private readonly Dictionary<Room, HashSet<Vector2Int>> extras = new Dictionary<Room, HashSet<Vector2Int>>();
 
         private GameManager Gm => gameManager != null ? gameManager : GameManager.Instance;
 
@@ -80,7 +81,22 @@ namespace SixtyOne.World
         }
 
         private void OnRoomShown(Room room) => Refresh(room, false);
-        private void OnRewound(string _) => Refresh(rooms != null ? rooms.Current : null, false);
+        private void OnRewound(string _)
+        {
+            extras.Clear();
+            Refresh(rooms != null ? rooms.Current : null, false);
+        }
+
+        /// <summary>
+        /// Scripted rubble (street façade drops) that blocks paths on top of the planned debris until the next
+        /// rewind; cells that would cut a required path stay walkable (DebrisPlanner.SafeExtras). The caller draws it.
+        /// </summary>
+        public void SetExtraBlocked(Room room, IEnumerable<Vector2Int> cells)
+        {
+            if (room == null) return;
+            extras[room] = cells != null ? new HashSet<Vector2Int>(cells) : new HashSet<Vector2Int>();
+            Refresh(room, false);
+        }
         private void OnQuakeEnded(QuakeInfo _) => Refresh(rooms != null ? rooms.Current : null, true);
 
         /// <summary>Applies the debris and cracks for the current quake count; animate drops new pieces in.</summary>
@@ -91,7 +107,13 @@ namespace SixtyOne.World
             GameState state = gm.State;
 
             HashSet<Vector2Int> cells = PlanFor(room, state.QuakeCount, state.DebrisSeed);
-            room.SetDebris(cells);
+            var blocked = new HashSet<Vector2Int>(cells);
+            if (extras.TryGetValue(room, out HashSet<Vector2Int> extra) && extra.Count > 0)
+            {
+                foreach (Vector2Int c in DebrisPlanner.SafeExtras(room.BaseNav(), room.RequiredCells(), cells, extra)) blocked.Add(c);
+            }
+
+            room.SetDebris(blocked);
             Sync(room, cells, animate, state.DebrisSeed);
 
             WallCracks cracks = room.GetComponentInChildren<WallCracks>(true);

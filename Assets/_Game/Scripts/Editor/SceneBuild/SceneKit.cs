@@ -265,6 +265,54 @@ namespace SixtyOne.Editor
             return container;
         }
 
+        /// <summary>
+        /// The street's downed power line (StreetLayout): a dark cable over its blocked cells with one gap, a click
+        /// collider over it (electrocution), flickering sparks on the cut end, and the assembly-area sign label.
+        /// </summary>
+        public static StreetPowerLine StreetExtras(Transform street)
+        {
+            var root = new GameObject("PowerLine");
+            root.transform.SetParent(street, false);
+            foreach (Vector2Int c in StreetLayout.PowerLine)
+            {
+                var seg = new GameObject($"Cable_{c.x}_{c.y}");
+                seg.transform.SetParent(root.transform, false);
+                seg.transform.localPosition = IsoMath.GridToWorld(c.x + 0.5f, c.y + 0.5f);
+                seg.transform.localScale = new Vector3(0.9f, 0.08f, 1f);
+                seg.transform.localRotation = Quaternion.Euler(0f, 0f, -26.6f);
+                SpriteRenderer r = seg.AddComponent<SpriteRenderer>();
+                r.sprite = Art.Block;
+                r.color = new Color(0.08f, 0.08f, 0.09f, 1f);
+                r.sortingOrder = DecalOrder + 10;
+                PolygonCollider2D poly = seg.AddComponent<PolygonCollider2D>();
+                poly.points = new[] { new Vector2(-0.5f, -2f), new Vector2(0.5f, -2f), new Vector2(0.5f, 2f), new Vector2(-0.5f, 2f) };
+            }
+
+            var sparks = new List<SpriteRenderer>();
+            foreach (Vector2Int c in StreetLayout.SparkCells)
+            {
+                var spark = new GameObject($"Spark_{c.x}_{c.y}");
+                spark.transform.SetParent(root.transform, false);
+                spark.transform.localPosition = IsoMath.GridToWorld(c.x + 0.5f, c.y + 0.5f) + new Vector3(0f, 0.08f, 0f);
+                spark.transform.localScale = new Vector3(0.22f, 0.22f, 1f);
+                SpriteRenderer r = spark.AddComponent<SpriteRenderer>();
+                r.sprite = Art.Dot;
+                r.color = new Color(1f, 0.95f, 0.45f, 1f);
+                r.sortingOrder = LabelOrder - 10;
+                sparks.Add(r);
+            }
+
+            StreetPowerLine line = root.AddComponent<StreetPowerLine>();
+            line.Configure("death.street_power", "tip.electric", sparks.ToArray());
+            EditorUtility.SetDirty(line);
+
+            Vector2Int sign = StreetLayout.SignCell;
+            TextMeshPro label = WorldLabel(street, IsoMath.GridToWorld(sign.x + 1.0f, sign.y + 1.0f) + new Vector3(0f, 1.75f, 0f), 1.8f, new Color(0.6f, 1f, 0.7f, 1f), bold: true);
+            label.rectTransform.sizeDelta = new Vector2(3.2f, 0.4f);
+            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", "street.sign");
+            return line;
+        }
+
         /// <summary>A balcony/window rope point: needs the bedsheet rope, climbs down to the target node.</summary>
         public static RopeDescentInteractable RopeDescent(Transform parent, string id, float gx, float gy, Item rope, Item familyItem, SceneNode target, NodePlayer nodePlayer)
         {

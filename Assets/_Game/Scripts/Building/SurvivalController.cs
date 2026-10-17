@@ -1,3 +1,4 @@
+using System;
 using SixtyOne.Audio;
 using SixtyOne.Core;
 using SixtyOne.Dialogue;
@@ -241,9 +242,23 @@ namespace SixtyOne.Building
             AudioService.PlayCue(config.TickCue);
         }
 
+        /// <summary>
+        /// Asked when the building timer hits 0: true = the family is far enough away (out on the street), so the
+        /// collapse is a cinematic beat instead of a death. Set by StreetQuakeDirector while the street is shown.
+        /// </summary>
+        public static Func<bool> CollapseSpares { get; set; }
+
         private void OnCollapse()
         {
             if (gameManager.IsDead) return;
+            if (CollapseSpares != null && CollapseSpares())
+            {
+                StopAlarm();
+                StateOps.SetFlag(State, FlagNames.CollapsedBehind, true);
+                GameEvents.RaiseBuildingCollapsedBehind();
+                return;
+            }
+
             gameManager.Die(new DeathInfo
             {
                 Victim = MemberType.Player,

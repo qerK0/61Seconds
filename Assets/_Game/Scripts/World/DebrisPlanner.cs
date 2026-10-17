@@ -100,6 +100,33 @@ namespace SixtyOne.World
             return placed;
         }
 
+        /// <summary>
+        /// Extra rubble (street façade drops) that may block on top of the planned debris: each extra cell is kept
+        /// only if the required cells stay connected, so even scripted rubble never blocks progress.
+        /// </summary>
+        public static List<Vector2Int> SafeExtras(GridNav nav, IEnumerable<Vector2Int> required, IEnumerable<Vector2Int> planned, IEnumerable<Vector2Int> extras)
+        {
+            var accepted = new List<Vector2Int>();
+            if (nav == null || extras == null) return accepted;
+            var requiredSet = new HashSet<Vector2Int>();
+            if (required != null) foreach (Vector2Int r in required) requiredSet.Add(nav.NearestFloor(r));
+            List<List<Vector2Int>> groups = ConnectedGroups(nav, requiredSet);
+            GridNav work = nav.Clone();
+            if (planned != null) work.SetBlocked(planned);
+
+            var ordered = new List<Vector2Int>(extras);
+            ordered.Sort((a, b) => a.x != b.x ? a.x.CompareTo(b.x) : a.y.CompareTo(b.y));
+            foreach (Vector2Int cell in ordered)
+            {
+                if (requiredSet.Contains(cell) || !work.IsWalkable(cell)) continue;
+                work.SetBlocked(cell, true);
+                if (StillConnected(work, groups)) accepted.Add(cell);
+                else work.SetBlocked(cell, false);
+            }
+
+            return accepted;
+        }
+
         /// <summary>True if every group of required cells is still mutually reachable.</summary>
         public static bool StillConnected(GridNav nav, List<List<Vector2Int>> groups)
         {

@@ -19,6 +19,15 @@ namespace SixtyOne.Core
         /// <summary>Set while the player has switched the flashlight off (backpack pocket click).</summary>
         public const string FlashlightOff = "FlashlightOff";
 
+        /// <summary>The frightened man on the F2 stairs took our food (epilogue).</summary>
+        public const string RobbedAtExit = "RobbedAtExit";
+
+        /// <summary>The street aftershock is over: the assembly-area sign can be reached.</summary>
+        public const string StreetQuakeDone = "StreetQuakeDone";
+
+        /// <summary>The building timer hit 0 while the family was out of reach on the street (epilogue).</summary>
+        public const string CollapsedBehind = "CollapsedBehind";
+
         /// <summary>Flag set when a world pickup has been collected.</summary>
         public static string Picked(string itemId)
         {

@@ -91,7 +91,7 @@ namespace SixtyOne.Editor
         {
             "tip.drop_cover_hold", "tip.no_elevator", "tip.no_balcony", "tip.wardrobe", "tip.no_window", "tip.no_doorway",
             "tip.keep_child_close", "tip.no_switch_gas", "tip.no_flame", "tip.gas_off", "tip.emergency_bag",
-            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock", "tip.supplies"
+            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock", "tip.supplies", "tip.street"
         };
 
         /// <summary>Entering these nodes blends the cinematic look to "we got out".</summary>

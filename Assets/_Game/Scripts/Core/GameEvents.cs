@@ -22,6 +22,10 @@ namespace SixtyOne.Core
         public static event Action<float> AfadAlert;
         /// <summary>Short toast message. Argument is a text key.</summary>
         public static event Action<string> Message;
+        /// <summary>Already-resolved toast text, shown after the toasts before it (one per item the robber takes).</summary>
+        public static event Action<string> QueuedMessage;
+        /// <summary>The building collapsed behind the family out on the street (timer 0, far enough away): a cinematic beat, not a death.</summary>
+        public static event Action BuildingCollapsedBehind;
         /// <summary>Popup alert: (title key, body key, optional {0} argument).</summary>
         public static event Action<string, string, string> Alert;
         /// <summary>Building timer crossed the UI pulse threshold.</summary>
@@ -49,6 +53,8 @@ namespace SixtyOne.Core
         public static void RaiseQuakeEnded(QuakeInfo info) => QuakeEnded?.Invoke(info);
         public static void RaiseAfadAlert(float magnitude) => AfadAlert?.Invoke(magnitude);
         public static void RaiseMessage(string textKey) => Message?.Invoke(textKey);
+        public static void RaiseQueuedMessage(string text) => QueuedMessage?.Invoke(text);
+        public static void RaiseBuildingCollapsedBehind() => BuildingCollapsedBehind?.Invoke();
         public static void RaiseAlert(string titleKey, string bodyKey, string arg) => Alert?.Invoke(titleKey, bodyKey, arg);
         public static void RaiseBuildingPulse() => BuildingPulse?.Invoke();
         public static void RaiseBuildingAlarm() => BuildingAlarm?.Invoke();
@@ -73,6 +79,8 @@ namespace SixtyOne.Core
             QuakeEnded = null;
             AfadAlert = null;
             Message = null;
+            QueuedMessage = null;
+            BuildingCollapsedBehind = null;
             Alert = null;
             BuildingPulse = null;
             BuildingAlarm = null;

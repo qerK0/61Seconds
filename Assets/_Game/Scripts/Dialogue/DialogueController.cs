@@ -34,7 +34,7 @@ namespace SixtyOne.Dialogue
             if (gameManager == null) gameManager = GameManager.Instance;
         }
 
-        public bool CanHandle(SceneNode sceneNode) => sceneNode is DialogueNode;
+        public bool CanHandle(SceneNode sceneNode) => sceneNode is DialogueNode && !(sceneNode is RobberNode);
 
         public void Begin(SceneNode sceneNode, Action<SceneNode> done)
         {

@@ -11,6 +11,9 @@ namespace SixtyOne.Nodes
 
         /// <summary>True if a Death outcome ran.</summary>
         public bool Died;
+
+        /// <summary>Item ids a TakeItems outcome removed from the bag (in order), or null.</summary>
+        public List<string> Taken;
     }
 
     /// <summary>
@@ -59,10 +62,30 @@ namespace SixtyOne.Nodes
                     case OutcomeType.ShowMessage:
                         if (!o.MessageKey.IsEmpty) GameEvents.RaiseMessage(o.MessageKey.Key);
                         break;
+                    case OutcomeType.TakeItems:
+                        if (result.Taken == null) result.Taken = new List<string>();
+                        result.Taken.AddRange(TakeItems(o, state));
+                        break;
                 }
             }
 
             return result;
+        }
+
+        private static List<string> TakeItems(Outcome o, GameState state)
+        {
+            var ids = new HashSet<string>();
+            var keyItems = new HashSet<string>();
+            foreach (Item item in o.TakeItemsList)
+            {
+                if (item == null) continue;
+                ids.Add(item.Id);
+                if (item.IsKeyItem) keyItems.Add(item.Id);
+            }
+
+            if (o.FallbackItem != null && o.FallbackItem.IsKeyItem) keyItems.Add(o.FallbackItem.Id);
+            return SixtyOne.Items.RobberLogic.Take(state, ids, o.FallbackItem != null ? o.FallbackItem.Id : null, o.FallbackCount,
+                o.ExcludeKeyItems, keyItems.Contains);
         }
     }
 }

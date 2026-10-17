@@ -370,3 +370,43 @@ container.medicine,Ecza dolabı,container name
 container.toolbox,Alet kutusu,container name
 container.nightstand,Komodin,container name
 container.jewelry,Mücevher kutusu,container name
+npc.robber.name,Telaşlı Adam,"injured, panicked man on the F2 stairs; desperate, not evil"
+f2.robber.title,Merdivende biri var,
+f2.robber.body,"Kolunu tutan, yüzü tozdan bembeyaz bir adam merdiveni kapatıyor.",
+f2.robber.l1,"Durun! Yaklaşmayın… Kolum, kolum kırıldı galiba.",robber line 1
+f2.robber.l2,"Ne kadar oldu, bilmiyorum. Kafam durdu, her yer toz.",robber line 2
+f2.robber.l3,"Aşağıda, toplanma alanında oğlum bekliyor. Daha beş yaşında. Sabahtan beri bir lokma yemedi.",robber line 3: he has a child waiting too
+f2.robber.l4,"Çantanızda yiyecek var, görüyorum. Lütfen… zorlaştırmayın.",robber line 4
+f2.robber.c_beg,Yalvar,flavour only: he takes the food anyway
+f2.robber.c_short,Kısa kes,flavour only: he takes the food anyway
+f2.robber.c_shout,Ona bağır,flavour only: he takes the food anyway
+f2.robber.beg.title,Telaşlı Adam,
+f2.robber.beg.body,Adam başını iki yana sallıyor.,
+f2.robber.beg.l1,"Ben de yalvarıyorum, anlamıyor musunuz? Onun da karnı aç!",reply to Yalvar
+f2.robber.short.title,Telaşlı Adam,
+f2.robber.short.body,Adam elini uzatıyor.,
+f2.robber.short.l1,"Kısa keseyim o zaman: verin şunu, herkes yoluna gitsin.",reply to Kısa kes
+f2.robber.shout.title,Telaşlı Adam,
+f2.robber.shout.body,Adam irkiliyor ama geri çekilmiyor.,
+f2.robber.shout.l1,"Bağırın, bağırın! Ben de saatlerce bağırdım, kimse duymadı.",reply to Ona bağır
+f2.robber.taken,Affedin… Allah'a emanet olun.,after he takes the food; then he runs down the stairs
+f2.robber.empty,"Hiçbir şey yok mu? Demek hepimiz aynı durumdayız… Hadi, gidin buradan.",bitter line when the bag has no food and no water
+ui.robbed.item,{0} elinden alındı.,toast per item the robber takes; {0} = item name
+f2.street.title,Sokak,
+f2.street.body,"Dışarıdasınız ama tehlike geçmedi. Sola, toplanma alanına doğru ilerleyin.",
+f2.street.c_sign,Acil Toplanma Alanı,the assembly-area sign at the far left (exit)
+f2.street.c_sign.locked,"Yer hâlâ sallanıyor. Önce açık alanda çök, sarsıntı geçsin.",
+street.sign,ACİL TOPLANMA ALANI,world sign label
+ui.street.drop_open,Açık alana çök!,street aftershock hint
+ui.street.safe,"Açık alanda çöktün, başını koru. Sarsıntı geçecek.",player was in the open at the peak
+ui.street.collapse_behind,Arkanızda bina çöktü!,building timer hit 0 while the family was far enough away
+death.street_facade,Binanın dibindeydin; cephe üstüne yıkıldı.,street façade drop (player)
+death.wife.street_facade,"Karın, dökülen cephenin altında kaldı.","wife: cut to black, one line"
+death.child.street_facade,Çocuğun düşen molozların arasında sıkıştı.,"child is trapped, never dies"
+death.street_glass,Binaların dibinde kaldın; camlar ve sıvalar yağmur gibi indi.,not in the open when the street quake peaked
+death.street_power,Yerdeki kopuk kabloya dokundun. Kıvılcım hiç affetmedi.,downed power line / sparks
+tip.street,"Sarsıntı dışarıda yakalarsa binalardan, duvarlardan, direk ve tellerden uzak, açık alanda çök-kapan-tutun.",AFAD
+tip.street.title,Dışarıda binalardan uzaklaş,
+f2.epilogue.robbed,Merdivendeki adam yiyeceklerinizi aldı. Umarım oğluna yetmiştir.,RobbedAtExit
+f2.epilogue.collapsed_behind,Siz uzaklaşırken bina arkanızda çöktü. Birkaç saniye daha oyalansaydınız…,building timer hit 0 while you were on the street
+f2.epilogue.time_left,Siz çıktığınızda binanın {0} saniyesi kalmıştı.,{0} = building seconds left

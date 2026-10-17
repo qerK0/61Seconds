@@ -109,6 +109,9 @@ namespace SixtyOne.Editor
             EpilogueController epilogue = systems.AddComponent<EpilogueController>();
             NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
             RoomNavigator navigator = systems.AddComponent<RoomNavigator>();
+            RobberController robber = systems.AddComponent<RobberController>();
+            StreetQuakeDirector streetQuake = systems.AddComponent<StreetQuakeDirector>();
+            streetLine = null;
             PlayerMover mover = systems.AddComponent<PlayerMover>();
             SerializedWire.Set(picker, "router", mover);
 
@@ -216,6 +219,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(framing, "rooms", switcher);
             SerializedWire.Set(framing, "targetCamera", camera);
             SerializedWire.Set(framing, "director", director);
+            SerializedWire.Set(framing, "followTarget", family[0].transform);
             SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
             LootWindow lootWindow = choicePanel.transform.parent.GetComponentInChildren<LootWindow>(true);
             if (lootWindow != null) SerializedWire.Set(lootWindow, "runner", family[0].GetComponent<CharacterMotor>());
@@ -235,7 +239,17 @@ namespace SixtyOne.Editor
             SerializedWire.Set(nodePlayer, "presenter", choicePanel);
             SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
             SerializedWire.Set(nodePlayer, "choiceFilter", navigator);
-            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { dialogue, placement, qte, epilogue });
+            // The robber handler comes before the dialogue handler (a RobberNode is a DialogueNode).
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { robber, dialogue, placement, qte, epilogue });
+            SerializedWire.Set(robber, "gameManager", gameManager);
+            SerializedWire.Set(robber, "presenter", choicePanel);
+            SerializedWire.Set(robber, "rooms", switcher);
+            SerializedWire.Set(robber, "content", data.Content);
+
+            streetQuake.Configure(gameManager, switcher, debris, camera.GetComponent<CameraShake>(), BuildingLevelsGenerator.Street, BuildingLevelsGenerator.F2Street,
+                data.Hazards["hz.street_facade"], streetLine, SceneKit.Art.Tile, DebrisSprites(), SceneKit.Art.Dot, RoomTiles.LitMaterial, data.GlassCue, data.CrashCue,
+                data.CarAlarmCue);
+            EditorUtility.SetDirty(streetQuake);
 
             AssetUtil.EnsureFolder("Assets/_Game/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
@@ -275,6 +289,8 @@ namespace SixtyOne.Editor
 
         private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
 
+        private static StreetPowerLine streetLine;
+
         private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
             RoomNavigator navigator)
         {
@@ -284,8 +300,10 @@ namespace SixtyOne.Editor
             foreach (Vector2 extra in spec.ExtraTiles) extraCells.Add(new Vector2Int(Mathf.FloorToInt(extra.x), Mathf.FloorToInt(extra.y)));
             room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells), spec.Depth, spec.Blocked);
 
+            room.ConfigureFollow(spec.FollowCamera, 7f);
             RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.DamagedCorridor ? tileSets.DamagedCorridor
-                : spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor : tileSets.Home;
+                : spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor
+                : spec.Art == BuildingLayout.RoomArt.Street && tileSets.Street != null ? tileSets.Street : tileSets.Home;
             if (tileSet != null && tileSet.FloorTile != null)
             {
                 RoomTiles.Floor(t, spec, tileSet);
@@ -353,6 +371,9 @@ namespace SixtyOne.Editor
             {
                 SceneKit.Hotspot(t, h, navigator);
             }
+
+            // The street's downed power line (blocked cells, click = electrocution) and the assembly-area sign label.
+            if (spec.Id == BuildingLevelsGenerator.Street) streetLine = SceneKit.StreetExtras(t);
 
             foreach (BuildingLayout.LightSpec l in spec.Lights)
             {
