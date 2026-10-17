@@ -3,6 +3,16 @@ using UnityEngine;
 
 namespace SixtyOne.Placement
 {
+    /// <summary>What a character's sprite is doing.</summary>
+    public enum CharacterAnimState
+    {
+        /// <summary>Holding the idle frame and breathing.</summary>
+        Idle,
+
+        /// <summary>Looping the run frames.</summary>
+        Run
+    }
+
     /// <summary>
     /// Code sprite animator (any frame count): while the motor runs, loops the run frames at RunFps scaled by
     /// the move speed and flips by horizontal direction. Standing still holds the idle frame with a subtle
@@ -55,19 +65,47 @@ namespace SixtyOne.Placement
         {
             if (body == null || runFrames == null || runFrames.Length == 0) return;
             float dt = Time.deltaTime;
-            bool running = motor != null && motor.IsMoving && motor.Velocity.sqrMagnitude > 0.0001f;
-            if (running) Run(dt);
+            State = StateFor(motor != null && motor.IsMoving, motor != null ? motor.Velocity : Vector2.zero);
+            if (State == CharacterAnimState.Run) Run(dt);
             else Idle(dt);
+        }
+
+        /// <summary>Current state (Idle until the first frame).</summary>
+        public CharacterAnimState State { get; private set; }
+
+        /// <summary>Run while the motor moves with a real velocity; anything else is idle (pure).</summary>
+        public static CharacterAnimState StateFor(bool moving, Vector2 velocity)
+        {
+            return moving && velocity.sqrMagnitude > 0.0001f ? CharacterAnimState.Run : CharacterAnimState.Idle;
+        }
+
+        /// <summary>Looping run frame for an accumulated frame clock (pure).</summary>
+        public static int RunFrameIndex(float frameClock, int frameCount)
+        {
+            if (frameCount <= 0) return 0;
+            int frame = Mathf.FloorToInt(Mathf.Max(0f, frameClock)) % frameCount;
+            return frame;
+        }
+
+        /// <summary>flipX for a horizontal velocity; tiny velocities keep the current facing (pure).</summary>
+        public static bool FlipFor(float velocityX, bool artFacesRight, bool currentFlip)
+        {
+            if (Mathf.Abs(velocityX) <= 0.01f) return currentFlip;
+            return artFacesRight ? velocityX < 0f : velocityX > 0f;
+        }
+
+        /// <summary>Breathing phase speed in radians per second for a period and panic 0..1 (pure).</summary>
+        public static float BreathRate(float period, float panic01, float panicSpeed)
+        {
+            return Mathf.PI * 2f / Mathf.Max(0.05f, period) * Mathf.Lerp(1f, panicSpeed, Mathf.Clamp01(panic01));
         }
 
         private void Run(float dt)
         {
             float fps = config != null ? config.RunFps : 12f;
             frameClock += dt * fps * Mathf.Max(0.3f, motor.SpeedRatio);
-            int frame = Mathf.FloorToInt(frameClock) % runFrames.Length;
-            body.sprite = runFrames[frame];
-            float vx = motor.Velocity.x;
-            if (Mathf.Abs(vx) > 0.01f) body.flipX = artFacesRight ? vx < 0f : vx > 0f;
+            body.sprite = runFrames[RunFrameIndex(frameClock, runFrames.Length)];
+            body.flipX = FlipFor(motor.Velocity.x, artFacesRight, body.flipX);
             body.transform.localScale = baseScale;
             body.transform.localPosition = basePosition;
         }
@@ -79,7 +117,7 @@ namespace SixtyOne.Placement
             float period = config != null ? config.BreathPeriod : 1.6f;
             float panicSpeed = config != null ? config.PanicBreathSpeed : 2f;
             float panic = survival != null ? survival.Panic01 : 0f;
-            breathPhase += dt * Mathf.PI * 2f / period * Mathf.Lerp(1f, panicSpeed, panic);
+            breathPhase += dt * BreathRate(period, panic, panicSpeed);
             float k = (Mathf.Sin(breathPhase) + 1f) * 0.5f;
             float scale = config != null ? config.BreathScale : 0.02f;
             float bob = config != null ? config.BreathBob : 0.008f;

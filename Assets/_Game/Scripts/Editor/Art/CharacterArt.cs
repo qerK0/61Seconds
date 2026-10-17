@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.IO;
-using System.Text.RegularExpressions;
 using SixtyOne.Core;
+using SixtyOne.Placement;
 using UnityEditor;
 using UnityEngine;
 
@@ -129,16 +129,12 @@ namespace SixtyOne.Editor
                 paths.Add(file.Replace('\\', '/'));
             }
 
-            paths.Sort((a, b) => FrameNumber(a).CompareTo(FrameNumber(b)));
+            FrameOrder.Sort(paths);
             return paths;
         }
 
         /// <summary>The number in parentheses of a frame file name, or 0.</summary>
-        public static int FrameNumber(string path)
-        {
-            Match match = Regex.Match(Path.GetFileNameWithoutExtension(path), @"\((\d+)\)");
-            return match.Success ? int.Parse(match.Groups[1].Value) : 0;
-        }
+        public static int FrameNumber(string path) => FrameOrder.NumberOf(path);
 
         /// <summary>Opaque rows (from the bottom) of a source PNG.</summary>
         private static void Measure(string path, out int width, out int height, out int bottom, out int top)
