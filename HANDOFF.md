@@ -34,7 +34,7 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
   - `LevelConfig.RequiredBedsheetsForRope` = 3. A "Halat yap" bag prompt (or tapping a bedsheet twice) turns 3 sheets into 1 `bedsheet_rope` (5s, 3 stamina).
   - `RopeDescentInteractable` on the new Flat 9 balcony needs the rope and stamina (heavy). It costs 10s and 20 stamina, keeps the rope tied, and enters `f2.aftershock`.
 - **Room transitions:** `RoomTransitionController` (coroutines, unscaled time, no DOTween).
-  - Locks input (`InputGate` + `NavigationEvents.OnTransitionStart`), fades the overlay while panning the new `CameraRig`, swaps the room at the midpoint, then unlocks (`OnTransitionComplete`).
+  - Locks input (`InputGate` + `NavigationEvents.OnTransitionStart`), fades the overlay while panning `TransitionPan` (between `CameraRig` and the camera), swaps the room at the midpoint, then unlocks (`OnTransitionComplete`).
   - `TransitionConfig`: 0.35s lateral, 0.6s descend. Plays door + footstep cues, or a descend cue when the floor stage changes.
   - Rewinds swap instantly. Placement nodes finish a running transition first. Reduce Effects drops the pan.
 - **WASD QTE:**
@@ -45,7 +45,7 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
   - `f3.fuse` (breaker wiring) replaces the old switch puzzle: success sets PowerCut_F3.
   - `f2.dog` (dog evasion) replaces "walk past = bitten": success sets DogGone; food and whistle still work.
 - **Localization:**
-  - Every `TODO` prefix is stripped. All 280 rows are final Turkish, including the AFAD popup and the new drop, key-item, rope and QTE keys.
+  - Every `TODO` prefix is stripped. All rows (306 after the merge) are final Turkish, including the AFAD popup and the new drop, key-item, rope and QTE keys.
   - `ui.bag.used` and `ui.craft.done` no longer show a literal `{0}`.
   - ContentValidator logs an **error** for any `TODO` (case-insensitive, every column). It also checks that the flashlight and whistle are key items, the bag/rope config, QTE nodes (config, next node, prompt), QTE configs and rope points.
   - The CLAUDE.md CLOUD rule now says to write final text, never `TODO`.
@@ -91,9 +91,9 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
    - nodes `f4.bedroom` and `f2.dog`; `f3.fuse` becomes a QTE node, and the old FusePuzzleNode asset is replaced
    - 6 new audio cues (cue_door, cue_footsteps, cue_descend, cue_qte_hit, cue_qte_miss, cue_qte_success), which have no clips yet
    - Then check that `item.flashlight` and `item.whistle` have **Is Key Item** ticked.
-3. Run **SixtyOne > Cinematic > Generate Profiles**, then **SixtyOne > Build Test Scene**. This adds the CameraRig, the 6-slot bag with Drop / Halat yap, the KeyItems corner, the QTE panel and the RoomTransition overlay.
+3. Run **SixtyOne > Cinematic > Generate Profiles**, then **SixtyOne > Build Test Scene**. This adds the TransitionPan under the CameraRig, the 6-slot bag with Drop / Halat yap, the KeyItems corner, the QTE panel and the RoomTransition overlay.
 4. With `Test_Building` open, run **SixtyOne > Validate Content**; expect 0 problems and **no** red TODO errors. Then **Text > Validate**.
-5. Run the Test Runner (EditMode); expect 106 passing. `LocalizationTests` reads `Assets/_Game/Content/Text/strings_tr.csv` relative to the project root, which is the Unity default working directory.
+5. Run the Test Runner (EditMode); expect 113 passing. `LocalizationTests` reads `Assets/_Game/Content/Text/strings_tr.csv` relative to the project root, which is the Unity default working directory.
 6. Play Mode via MCP:
    1. Prep: the hall's flashlight nightstand goes to the corner HUD, not the bag. After the quake, hall → exit → Sevim "Sağ ol" → whistle in the corner too, and the bag count does not change.
    2. Take an item (e.g. rope) → select its slot → Bırak → slot freed (n/6). Leave the room and come back → the item lies near the spawn → click it to pick it up again.
@@ -126,6 +126,9 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ### Next suggested step
 - LOCAL: run the checklist above with MCP Play Mode, screenshot the bag/corner HUD/QTE panel, tune the QTE and transition numbers, and add clips to the 6 new cues.
+
+---
+
 ## [2026-10-17 05:10] LOCAL — Floor 4 opening flow: 60 s home loot prep → quake (building timer starts) → placement → Sevim in the corridor
 ### Done
 - **Prep phase** (new `Scripts/Prep/`):
