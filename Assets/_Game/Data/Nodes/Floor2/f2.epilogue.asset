@@ -38,3 +38,9 @@ MonoBehaviour:
     key: f2.epilogue.borrow_no_note
   loopsKey:
     key: f2.epilogue.loops
+  robbedKey:
+    key: f2.epilogue.robbed
+  collapsedBehindKey:
+    key: f2.epilogue.collapsed_behind
+  timeLeftKey:
+    key: f2.epilogue.time_left

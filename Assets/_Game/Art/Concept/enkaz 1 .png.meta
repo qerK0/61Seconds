@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 365.7143
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -77,7 +77,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enkaz 1 _0
+      name: enkaz 1_prop
       rect:
         serializedVersion: 2
-        x: 11
-        y: 2
-        width: 130
-        height: 106
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 12
+        y: 3
+        width: 128
+        height: 103
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e08e6860d4304e4b0800000000000000
-      internalID: -5412197222835623922
+      spriteID: 33bb2ada0ab8317449687a49ad15469e
+      internalID: 1081521289
       vertices: []
       indices: 
       edges: []
@@ -140,7 +140,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: aca4426f45f140a41adb2531a07d99bd
     internalID: 0
     vertices: []
     indices: 
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enkaz 1 _0: -5412197222835623922
+      enkaz 1_prop: 1081521289
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

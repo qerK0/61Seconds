@@ -53,6 +53,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -83,5 +87,9 @@ MonoBehaviour:
       key: 
     member: 0
     health: 0
+    takeItems: []
+    fallbackItem: {fileID: 0}
+    fallbackCount: 1
+    excludeKeyItems: 1
   failOutcomes: []
   nextNode: {fileID: 11400000, guid: aa7e86076762ce540934d60aa80fcf47, type: 2}

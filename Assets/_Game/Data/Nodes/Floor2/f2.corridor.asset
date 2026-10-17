@@ -67,6 +67,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 2
       targetNode: {fileID: 0}
       flag: DogGone
@@ -77,6 +81,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 7
       targetNode: {fileID: 0}
       flag: 
@@ -87,6 +95,10 @@ MonoBehaviour:
         key: f2.corridor.msg_fed
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -139,6 +151,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 7
       targetNode: {fileID: 0}
       flag: 
@@ -149,6 +165,10 @@ MonoBehaviour:
         key: f2.corridor.msg_whistle
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -194,6 +214,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -239,6 +263,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -277,6 +305,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -315,6 +347,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 

@@ -53,6 +53,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 2
       targetNode: {fileID: 0}
       flag: SevimDone
@@ -63,6 +67,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: e303dfb2a48f04944b7431b398d391e1, type: 2}
       flag: 
@@ -73,6 +81,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -111,6 +123,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 2
       targetNode: {fileID: 0}
       flag: KnowsFlat12
@@ -121,6 +137,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 2
       targetNode: {fileID: 0}
       flag: SevimDone
@@ -131,6 +151,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: e303dfb2a48f04944b7431b398d391e1, type: 2}
       flag: 
@@ -141,6 +165,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 

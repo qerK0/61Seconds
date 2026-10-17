@@ -1,0 +1,47 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 98f50b504011d094a88b7b95a99c169c, type: 3}
+  m_Name: PropArtSet
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.World.PropArtSet
+  entries:
+  - Name: Table
+    Sprite: {fileID: -1343031814, guid: 292e9a1c3a44589488bfdbd40951c7de, type: 3}
+  - Name: Desk
+    Sprite: {fileID: -1343031814, guid: 292e9a1c3a44589488bfdbd40951c7de, type: 3}
+  - Name: Chair
+    Sprite: {fileID: 2129430607, guid: f1fb3dd31930b58489a56ab2d50ff00c, type: 3}
+  - Name: Wardrobe
+    Sprite: {fileID: 1552390509, guid: 0a6ca84dbe3d2dc47a1ee4f4394d6947, type: 3}
+  - Name: NeighbourWardrobe
+    Sprite: {fileID: 1448007105, guid: 9950b7ce94c2f304eb643af617c868bd, type: 3}
+  - Name: Cabinet
+    Sprite: {fileID: 1448007105, guid: 9950b7ce94c2f304eb643af617c868bd, type: 3}
+  - Name: Bookshelf
+    Sprite: {fileID: -709284696, guid: 475a7be30aed1be40aaeedfd88949fb6, type: 3}
+  - Name: Stove
+    Sprite: {fileID: -617263109, guid: 4981bea57d857c44e92aac524ddbc1e5, type: 3}
+  - Name: Valve
+    Sprite: {fileID: -22997411, guid: a3e04ccba7a372b4eaf6602b3efa4b38, type: 3}
+  - Name: FuseBox
+    Sprite: {fileID: 1492948420, guid: 06c99296fea62db4eb82a79003a50527, type: 3}
+  - Name: WallLamp
+    Sprite: {fileID: 2074405820, guid: c66570860f3404a4fb76e6828d98354d, type: 3}
+  chandelierFrames:
+  - {fileID: 1855002605, guid: b4356de72168d0441ac364a158ab1e34, type: 3}
+  - {fileID: -76074062, guid: 34d65166234f25241b56a5ea69a9970a, type: 3}
+  - {fileID: 1286115777, guid: 61a938f0e9e4f1744adc53f7cd63a812, type: 3}
+  - {fileID: -262722429, guid: 3faecaa3f922155458cba8af0975d198, type: 3}
+  - {fileID: -198865047, guid: 017999b5150aa4b40ab9743c69418142, type: 3}
+  - {fileID: -258369315, guid: d82818f8eca5c644da544266f611fe5f, type: 3}
+  debris:
+  - {fileID: 1081521289, guid: 99ac038d8fe30fd4d9c8b4ae01762fca, type: 3}
+  - {fileID: -2024647143, guid: c903e6689de598e4992b3c754a405cef, type: 3}

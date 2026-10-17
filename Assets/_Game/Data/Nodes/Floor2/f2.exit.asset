@@ -44,7 +44,7 @@ MonoBehaviour:
     timeoutOnly: 0
     outcomes:
     - type: 0
-      targetNode: {fileID: 11400000, guid: 77c1ecc508c503044b5e96b767ba897c, type: 2}
+      targetNode: {fileID: 11400000, guid: 46499719332fe1843a6d8ea7b1d72825, type: 2}
       flag: 
       flagValue: 1
       item: {fileID: 0}
@@ -53,6 +53,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -91,6 +95,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: death.elevator

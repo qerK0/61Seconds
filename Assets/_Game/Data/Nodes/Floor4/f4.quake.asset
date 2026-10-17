@@ -39,3 +39,4 @@ MonoBehaviour:
   quakeSeconds: 4
   magnitude: 7.1
   shakeScale: 1.3
+  quakeNumber: 1

@@ -452,6 +452,12 @@ namespace SixtyOne.Editor
                 if (node is PlacementNode placement && placement.UnplacedHazard != null) linked.Add(placement.UnplacedHazard);
             }
 
+            // The street quake drops façades with its own hazard (no anchor).
+            foreach (StreetQuakeDirector director in Object.FindObjectsByType<StreetQuakeDirector>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+            {
+                if (director.FacadeHazard != null) linked.Add(director.FacadeHazard);
+            }
+
             foreach (Hazard hazard in LoadAll<Hazard>())
             {
                 if (!linked.Contains(hazard))

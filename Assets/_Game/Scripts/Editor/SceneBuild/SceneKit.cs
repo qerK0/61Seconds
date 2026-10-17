@@ -303,7 +303,7 @@ namespace SixtyOne.Editor
             }
 
             StreetPowerLine line = root.AddComponent<StreetPowerLine>();
-            line.Configure("death.street_power", "tip.electric", sparks.ToArray());
+            line.Configure(UiKeys.StreetPowerDeath, "tip.electric", sparks.ToArray());
             EditorUtility.SetDirty(line);
 
             Vector2Int sign = StreetLayout.SignCell;
@@ -416,14 +416,28 @@ namespace SixtyOne.Editor
             return component;
         }
 
-        /// <summary>A person (capsule) or object (block) that plays a node choice; hover shows the choice label.</summary>
-        private static CharacterArt.Frames sevimFrames;
+        private static readonly Dictionary<string, CharacterArt.Frames> idleFrames = new Dictionary<string, CharacterArt.Frames>();
 
-        /// <summary>Sevim's idle frames, imported once per scene build.</summary>
-        private static CharacterArt.Frames SevimFrames => sevimFrames != null && sevimFrames.Sprites.Length > 0 && sevimFrames.Sprites[0] != null
-            ? sevimFrames
-            : sevimFrames = CharacterArt.ImportSevim();
+        /// <summary>An NPC's idle frames (imported once per editor session), or null when it has no art yet.</summary>
+        private static CharacterArt.Frames IdleFrames(string id)
+        {
+            if (string.IsNullOrEmpty(id)) return null;
+            if (!idleFrames.TryGetValue(id, out CharacterArt.Frames frames) || frames.Sprites.Length == 0 || frames.Sprites[0] == null)
+            {
+                frames = CharacterArt.ImportIdle(id);
+                idleFrames[id] = frames;
+            }
 
+            return frames.Sprites.Length > 0 ? frames : null;
+        }
+
+        /// <summary>Neutral NPC silhouette tint: dark, with a hint of the spec colour (never the white placeholder).</summary>
+        private static Color Silhouette(Color hint) => Color.Lerp(new Color(0.16f, 0.16f, 0.19f, 1f), new Color(hint.r, hint.g, hint.b, 1f), 0.2f);
+
+        /// <summary>
+        /// A person or object (block) that plays a node choice; hover shows the choice label. A person with idle art
+        /// loops it; without art it is a dark neutral silhouette with a soft shadow.
+        /// </summary>
         public static ChoiceHotspot Hotspot(Transform room, BuildingLayout.HotspotSpec spec, RoomNavigator navigator)
         {
             var go = new GameObject("Hotspot_" + spec.Name);
@@ -438,21 +452,31 @@ namespace SixtyOne.Editor
             Material lit = RoomTiles.LitMaterial;
             if (lit != null) r.sharedMaterial = lit;
             float height;
-            CharacterArt.Frames idle = spec.Idle == "sevim" ? SevimFrames : null;
+            bool small = false;
             if (spec.Person)
             {
-                body.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
-                height = 0.8f;
-                if (idle != null && idle.Sprites.Length > 0)
+                float ratio = CharacterArt.NpcHeightRatio(spec.Idle);
+                small = ratio < 0.6f;
+                height = CharacterArt.PlayerHeight * ratio;
+                CharacterArt.Frames idle = IdleFrames(spec.Idle);
+                if (idle != null)
                 {
+                    r.color = Color.white;
                     body.transform.localScale = Vector3.one * idle.BodyScale;
-                    height = CharacterArt.PlayerHeight * CharacterArt.SevimHeightRatio;
                     body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, 9f);
+                }
+                else
+                {
+                    // No art yet: the capsule sprite (0.75u tall at scale 1) as a dark silhouette at the NPC's height;
+                    // small NPCs (the dog) are wider than tall.
+                    r.color = Silhouette(spec.Color);
+                    float sy = height / 0.75f;
+                    body.transform.localScale = new Vector3(small ? sy * 2.2f : 1.1f, sy, 1f);
                 }
 
                 var shadow = new GameObject("Shadow");
                 shadow.transform.SetParent(go.transform, false);
-                shadow.transform.localScale = new Vector3(0.45f, 0.45f, 1f);
+                shadow.transform.localScale = small ? new Vector3(0.55f, 0.45f, 1f) : new Vector3(0.45f, 0.45f, 1f);
                 SpriteRenderer s = shadow.AddComponent<SpriteRenderer>();
                 s.sprite = Art.Shadow;
                 s.color = new Color(1f, 1f, 1f, 0.5f);
@@ -488,7 +512,7 @@ namespace SixtyOne.Editor
             }
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-            float boxWidth = spec.Person ? 0.45f : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Art != null && r.sprite != Art.Block ? Mathf.Max(0.3f, r.sprite.bounds.size.x) : spec.Scale.x * 0.5f;
+            float boxWidth = spec.Person ? (small ? 0.6f : 0.45f) : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Art != null && r.sprite != Art.Block ? Mathf.Max(0.3f, r.sprite.bounds.size.x) : spec.Scale.x * 0.5f;
             box.size = new Vector2(boxWidth, height);
             box.offset = new Vector2(0f, height * 0.5f);
 

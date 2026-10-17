@@ -1,5 +1,6 @@
 using SixtyOne.Core;
 using SixtyOne.Iso;
+using SixtyOne.Text;
 using UnityEngine;
 
 namespace SixtyOne.World
@@ -12,7 +13,7 @@ namespace SixtyOne.World
     public sealed class StreetPowerLine : MonoBehaviour, IClickable
     {
         [Tooltip("Death line.")]
-        [SerializeField] private string deathKey = "death.street_power";
+        [SerializeField] private string deathKey = UiKeys.StreetPowerDeath;
 
         [Tooltip("Tip unlocked by the death.")]
         [SerializeField] private string tipId = "tip.electric";

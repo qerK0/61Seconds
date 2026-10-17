@@ -61,6 +61,7 @@ namespace SixtyOne.Editor
 
             BuildTimerBar(root, nodePlayer);
             BuildBuildingTimer(root, survival);
+            BuildPanicMeter(root, survival);
             BuildPrepCountdown(root, prep, survival);
             BuildLoopCounter(root, gameManager);
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
@@ -238,6 +239,25 @@ namespace SixtyOne.Editor
             SerializedWire.Set(display, "clock", clock);
             SerializedWire.Set(display, "spentLabel", spent);
             SerializedWire.Set(display, "group", group);
+        }
+
+        /// <summary>"Panik" meter under the timer (and the node timer bar): caption left, bar right, threshold tick.</summary>
+        private static void BuildPanicMeter(Transform root, SurvivalController survival)
+        {
+            RectTransform rect = UiFactory.MakeRect("PanicMeter", root, new Vector2(0.42f, 0.848f), new Vector2(0.58f, 0.88f));
+            TextMeshProUGUI caption = UiFactory.MakeLabel("Caption", rect, new Vector2(0f, 0f), new Vector2(0.3f, 1f), TextRole.Label, TextAlignmentOptions.MidlineLeft);
+            SerializedWire.SetTextKey(caption.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.PanicLabel);
+            Image bg = UiFactory.MakeImage("Bar", rect, new Vector2(0.32f, 0.3f), new Vector2(1f, 0.7f), new Color(1f, 1f, 1f, 0.12f));
+            Image fill = UiFactory.MakeImage("Fill", bg.transform, Vector2.zero, new Vector2(0f, 1f), Danger);
+            fill.rectTransform.pivot = new Vector2(0f, 0.5f);
+            Image tick = UiFactory.MakeImage("Threshold", bg.transform, new Vector2(0.7f, -0.25f), new Vector2(0.7f, 1.25f), new Color(1f, 1f, 1f, 0.7f));
+            tick.rectTransform.sizeDelta = new Vector2(2f, 0f);
+
+            PanicMeter meter = bg.gameObject.AddComponent<PanicMeter>();
+            SerializedWire.Set(meter, "survival", survival);
+            SerializedWire.Set(meter, "fill", fill.rectTransform);
+            SerializedWire.Set(meter, "fillImage", fill);
+            SerializedWire.Set(meter, "thresholdTick", tick.rectTransform);
         }
 
         /// <summary>Pre-quake prep countdown in the building timer's spot (the building timer is hidden until the quake).</summary>

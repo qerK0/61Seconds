@@ -54,7 +54,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 380
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -80,7 +80,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -118,45 +118,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: enkaz 2_0
+      name: enkaz 2_prop
       rect:
         serializedVersion: 2
-        x: 6
-        y: 8
-        width: 90
-        height: 108
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 7
+        y: 9
+        width: 133
+        height: 106
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: 0acf12e382ef03f40800000000000000
-      internalID: 5706340176672980128
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: enkaz 2_1
-      rect:
-        serializedVersion: 2
-        x: 92
-        y: 17
-        width: 49
-        height: 48
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      customData: 
-      outline: []
-      physicsShape: []
-      tessellationDetail: -1
-      bones: []
-      spriteID: 5f62a9a69f0b79360800000000000000
-      internalID: 7176399116520007413
+      spriteID: 923a16bd78a57ca4fb8a5c518c0f4c20
+      internalID: -2024647143
       vertices: []
       indices: 
       edges: []
@@ -165,7 +143,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: e86af74f02f602643b3305d40e22ddfa
     internalID: 0
     vertices: []
     indices: 
@@ -175,8 +153,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      enkaz 2_0: 5706340176672980128
-      enkaz 2_1: 7176399116520007413
+      enkaz 2_prop: -2024647143
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

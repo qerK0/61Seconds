@@ -28,6 +28,9 @@ namespace SixtyOne.Text
         public const string DialogueContinue = "ui.dialogue.continue";
         public const string StaminaExhausted = "ui.stamina.exhausted";
         public const string StaminaLabel = "ui.stamina.label";
+        public const string PanicLabel = "ui.panic.label";
+        public const string StreetGlassDeath = "death.street_glass";
+        public const string StreetPowerDeath = "death.street_power";
         public const string TimeSpent = "ui.time_spent";
         public const string BuildingTimerLabel = "ui.building.label";
         public const string PrepTimerLabel = "ui.prep.label";

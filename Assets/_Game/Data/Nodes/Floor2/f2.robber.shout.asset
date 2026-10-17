@@ -1,0 +1,75 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 533df816dfe19124da2c960fd76c5d57, type: 3}
+  m_Name: f2.robber.shout
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Dialogue.RobberNode
+  id: f2.robber.shout
+  titleKey:
+    key: f2.robber.shout.title
+  bodyKey:
+    key: f2.robber.shout.body
+  roomId: f2_stairs
+  act: 3
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices: []
+  onEnter: []
+  bombChecks: []
+  lines:
+  - speakerKey:
+      key: npc.robber.name
+    textKey:
+      key: f2.robber.shout.l1
+    timeCost: 2
+  takeOutcomes:
+  - type: 8
+    targetNode: {fileID: 0}
+    flag: 
+    flagValue: 1
+    item: {fileID: 0}
+    trader: {fileID: 0}
+    messageKey:
+      key: 
+    member: 0
+    health: 0
+    takeItems:
+    - {fileID: 11400000, guid: 30ad8379863728843b6e8421fc7e8943, type: 2}
+    fallbackItem: {fileID: 11400000, guid: ffee839a0e4a57b4fa6354b529ab568a, type: 2}
+    fallbackCount: 1
+    excludeKeyItems: 1
+  - type: 2
+    targetNode: {fileID: 0}
+    flag: RobbedAtExit
+    flagValue: 1
+    item: {fileID: 0}
+    trader: {fileID: 0}
+    messageKey:
+      key: 
+    member: 0
+    health: 0
+    takeItems: []
+    fallbackItem: {fileID: 0}
+    fallbackCount: 1
+    excludeKeyItems: 1
+  speakerKey:
+    key: npc.robber.name
+  takenLineKey:
+    key: f2.robber.taken
+  nothingLineKey:
+    key: f2.robber.empty
+  takenItemKey:
+    key: ui.robbed.item
+  actorName: Robber
+  runOffGrid: {x: 1.5, y: 4.6}
+  nextNode: {fileID: 11400000, guid: 9b98e46f46a6421438092ad2b68a7b0d, type: 2}

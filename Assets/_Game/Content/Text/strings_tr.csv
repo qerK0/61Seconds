@@ -21,6 +21,7 @@ death.child.wardrobe,Dolap çocuğun önünü kapattı. Sıkıştı!,"child trap
 death.child.window,Cam kırıkları arasında çocuk mahsur kaldı!,
 death.child_alone,Çocuk tek başına kaldı ve mahsur kaldı!,
 death.collapse,Bina daha fazla dayanamadı.,building timer hit 0
+death.descent_no_gear,Halatsız ve kuşaksız aşağı inmeye kalktın. Tutunacak bir şey yoktu; düştün.,descent without bedsheet rope / child harness (macro rewind)
 death.doorway,Kapı kasası seni korumadı. Hiç korumaz.,
 death.electrocuted,Çıplak elle akımlı kabloya dokundun.,fuse box without insulated gloves/grip + tape
 death.elevator,Asansör kat arasında durdu. Sonsuza dek.,"player, comic allowed"
@@ -94,14 +95,15 @@ f3.flat10.body,Zifiri karanlık. Ocaktan gaz sızıyor; zemin bir yerde çökmü
 f3.flat10.c_back,Koridora dön,
 f3.flat10.c_flashlight,Feneri yak,
 f3.flat10.c_flashlight.locked,Zifiri karanlık. Bir ışık lazım.,
-f3.flat10.c_hole,Çökmüş zeminden aşağı in,heavy; alternative way down
+f3.flat10.c_hole,Çökmüş zeminden aşağı in,heavy; alternative way down; needs bedsheet rope + child harness (else fatal)
+f3.flat10.c_hole.locked,Aşağısı çok derin: çarşaf halat ve çocuk için taşıma kuşağı lazım.,still clickable: kills
 f3.flat10.c_lighter,Çakmakla etrafı aydınlat,trap while gas is open
 f3.flat10.c_valve,Ocak vanasını kapat,
 f3.flat10.title,Daire 10,
 f3.flat9.body,"Kablolar sarkıyor, asansör boşluğuna açılan bir delik var. Balkonun korkuluğu sağlam görünüyor.",rope descent from the balcony
 f3.flat9.c_back,Koridora dön,
-f3.flat9.c_cables,Kablolardan aşağı in,heavy; needs child harness
-f3.flat9.c_cables.locked,Çocuğu taşıyamazsın: bir taşıma kuşağı lazım.,
+f3.flat9.c_cables,Kablolardan aşağı in,heavy; needs bedsheet rope + child harness (else fatal)
+f3.flat9.c_cables.locked,Kablolar tek başına taşımaz: çarşaf halat ve çocuk için taşıma kuşağı lazım.,still clickable: kills
 f3.flat9.c_repair,"Kabloyu onar, sigortaları ayarla","needs (gloves or insulated grip) + tape, else electrocution"
 f3.flat9.c_repair.locked,Çıplak kablo! Yalıtım ve bant lazım.,still clickable: kills
 f3.flat9.title,Daire 9,
@@ -285,6 +287,7 @@ ui.key_items.title,Anahtar eşyalar,
 ui.locked,Kilitli,
 ui.loop,LOOP #{0},{0} = loop count
 ui.needs_item,Bunun için bir alet lazım.,
+ui.panic.label,Panik,"panic meter under the timer; pulses when clicks get delayed"
 ui.placement.child_alone,Çocuk bir yetişkinin yanında olmalı.,
 ui.placement.hint,"Bir aile üyesine, sonra güvenli bir noktaya dokun.",
 ui.placement.invalid,Oraya geçilemez.,
@@ -306,7 +309,7 @@ ui.rope.needs_sheets,Halat için daha fazla çarşaf topla.,
 ui.rope.tie,Halat yap,bag prompt button
 ui.rope.tied,Çarşafları düğümleyip halat yaptın.,
 ui.stamina.exhausted,Çok yorgunsun. Bir şey ye ya da iç.,heavy action locked at 0 stamina
-ui.stamina.label,Güç,stamina bar label
+ui.stamina.label,Enerji,"stamina bar label (food/water energy; not panic)"
 ui.time_spent,-{0} sn,{0} = seconds spent
 ui.tip_header,Deprem Notu,header above the safety tip on the death card
 room.flat11_salon,Salon,door hover label (target room name)
@@ -332,7 +335,6 @@ room.flat8,Daire 8,
 room.flat8_living,Oturma odası,
 room.flat8_bedroom,Yatak odası,
 room.f2_stairs,Merdiven,
-room.street,Sokağa çık,
 ui.door.unavailable,Şu an oradan geçemezsin.,door whose move is not available in this node
 ui.not_now,Şimdi olmaz.,hotspot with no matching choice
 ui.bag.collapse,›,bag column toggle (open)

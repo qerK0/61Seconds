@@ -53,6 +53,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
       flag: 
@@ -63,6 +67,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -101,6 +109,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 2
       targetNode: {fileID: 0}
       flag: TraderDone
@@ -111,6 +123,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
       flag: 
@@ -121,6 +137,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 

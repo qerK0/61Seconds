@@ -49,8 +49,9 @@ namespace SixtyOne.Editor
 
         /// <summary>
         /// Floor 3: aftershock on arrival (placement, checkpoint) → corridor (needs-aware trader, stairs below
-        /// collapsed) → Flat 9 (fuse box wiring = WASD QTE; gloves/grip + tape or electrocution; cables need the
-        /// child harness; balcony + bedsheet rope = RopeDescentInteractable) / Flat 10 (dark, gas leak, lighter = explosion, flashlight, collapsed floor = way down).
+        /// collapsed) → Flat 9 (fuse box wiring = WASD QTE; gloves/grip + tape or electrocution; cables need the rope +
+        /// child harness; balcony + bedsheet rope = RopeDescentInteractable) / Flat 10 (dark, gas leak, lighter = explosion,
+        /// flashlight, collapsed floor = way down with the rope + harness). See NeedsDescentGear.
         /// </summary>
         private static void BuildFloor3()
         {
@@ -115,11 +116,9 @@ namespace SixtyOne.Editor
                 .WithDeath(Death("death.electrocuted", "tip.electric"))
                 .Costs(4f)
                 .Then(Outcome.GoTo(fuse)));
-            flat9.AddChoice(C(F3Flat9, "cables").Costs(12f, 25f, isHeavy: true, move: true)
+            flat9.AddChoice(NeedsDescentGear(C(F3Flat9, "cables").Costs(12f, 25f, isHeavy: true, move: true)
                 .ShowWhen(Condition.FlagTrue(PowerCutF3))
-                .ShowWhen(Condition.InRoom(Flat9Kitchen))
-                .Require(Condition.HasItem(Item("child_harness")))
-                .WhenLocked(FailBehaviour.ShowLocked, Locked(F3Flat9, "cables"))
+                .ShowWhen(Condition.InRoom(Flat9Kitchen)), F3Flat9, "cables")
                 .Then(Outcome.GoTo(f2Arrival)));
             flat9.AddChoice(C(F3Flat9, "back").Move(2f).Then(Outcome.GoTo(corridor)));
 
@@ -143,12 +142,35 @@ namespace SixtyOne.Editor
                 .ShowWhen(Condition.InRoom(Flat10Kitchen))
                 .ShowWhen(Condition.FlagFalse(GasOffF3))
                 .Then(Outcome.SetFlag(GasOffF3)));
-            flat10.AddChoice(C(F3Flat10, "hole").Costs(10f, 20f, isHeavy: true, move: true)
+            flat10.AddChoice(NeedsDescentGear(C(F3Flat10, "hole").Costs(10f, 20f, isHeavy: true, move: true)
                 .ShowWhen(Condition.FlagTrue(Flat10Lit))
-                .ShowWhen(Condition.InRoom(Flat10Living))
+                .ShowWhen(Condition.InRoom(Flat10Living)), F3Flat10, "hole")
                 .Then(Outcome.GoTo(f2Arrival)));
             flat10.AddChoice(C(F3Flat10, "back").Move(2f).Then(Outcome.GoTo(corridor)));
         }
+
+        /// <summary>
+        /// Descent rule: apart from the F4→F3 stairs and the F2 stairs to the street, every way down needs the
+        /// bedsheet rope (used up) and the child harness. Without them the choice is ShowLockedFatal: clicking it
+        /// kills naming the first missing item and rewinds to the floor checkpoint (F3 has bedsheets too).
+        /// </summary>
+        private static Choice NeedsDescentGear(Choice choice, string nodeId, string suffix)
+        {
+            return choice
+                .Require(Condition.HasItem(Item(DescentRopeId)))
+                .Require(Condition.HasItem(Item(DescentFamilyItemId)))
+                .WhenLocked(FailBehaviour.ShowLockedFatal, Locked(nodeId, suffix))
+                .WithMissingText(Item(DescentRopeId), "death.descent_no_gear")
+                .WithDeath(Death("death.descent_no_gear", "tip.keep_child_close"))
+                .FatalRewind(RewindTarget.Checkpoint)
+                .Then(Outcome.RemoveItem(Item(DescentRopeId)));
+        }
+
+        /// <summary>Item every non-stair descent needs (and uses up).</summary>
+        public const string DescentRopeId = "bedsheet_rope";
+
+        /// <summary>Item every non-stair descent needs to bring the child down.</summary>
+        public const string DescentFamilyItemId = "child_harness";
 
         /// <summary>
         /// Gas left open in Flat 11 → fire upstairs fills the stairwell with smoke on Floor 3. Macro rewind: the

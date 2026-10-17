@@ -20,5 +20,13 @@ MonoBehaviour:
   - {fileID: -449300294, guid: a127f190c401b2a45af60d3b7182db1f, type: 3}
   leftWindowSprite: {fileID: -1110486975, guid: 63d5541dfb04e0643be032a1ae39eca0, type: 3}
   rightWindowSprite: {fileID: -195021739, guid: 63d5541dfb04e0643be032a1ae39eca0, type: 3}
+  crackedLeftSprites:
+  - {fileID: 842646960, guid: cfffe4a0bf4b68042abc14d3df540225, type: 3}
+  - {fileID: 1923743286, guid: 5eb89cdc9bae426468f3c14dc2e184e8, type: 3}
+  crackedRightSprites:
+  - {fileID: -370250807, guid: 5eb89cdc9bae426468f3c14dc2e184e8, type: 3}
+  - {fileID: -379265021, guid: cfffe4a0bf4b68042abc14d3df540225, type: 3}
+  patchTile: {fileID: 0}
+  patchChance: 0
   floorTint: {r: 0.92, g: 0.92, b: 0.94, a: 1}
   wallTint: {r: 0.86, g: 0.86, b: 0.9, a: 1}

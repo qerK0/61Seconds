@@ -17,11 +17,29 @@ namespace SixtyOne.Editor
     {
         public const string Folder = "Assets/_Game/Art/char/RUN";
 
-        /// <summary>Sevim Teyze's idle loop (frame0000.png ...), imported the same way as the family.</summary>
-        public const string SevimFolder = "Assets/_Game/Art/char/SEVIM_IDLE";
+        /// <summary>Root of the NPC idle folders (&lt;ID&gt;_IDLE/frame0000.png ...).</summary>
+        public const string CharRoot = "Assets/_Game/Art/char";
 
-        /// <summary>Sevim's height relative to the player (an older neighbour, a little shorter than the wife).</summary>
-        public const float SevimHeightRatio = 0.9f;
+        /// <summary>NPC idle sets: id (HotspotSpec.Idle), folder and height relative to the player.</summary>
+        public static readonly (string Id, string Folder, float HeightRatio)[] NpcIdles =
+        {
+            ("sevim", CharRoot + "/SEVIM_IDLE", 0.9f),   // an older neighbour, a little shorter than the wife
+            ("hasan", CharRoot + "/HASAN_IDLE", 0.95f),
+            ("cemil", CharRoot + "/CEMIL_IDLE", 1f),
+            ("robber", CharRoot + "/ROBBER_IDLE", 1f),
+            ("dog", CharRoot + "/DOG_IDLE", 0.45f)
+        };
+
+        /// <summary>Height ratio of an NPC idle id (1 when unknown).</summary>
+        public static float NpcHeightRatio(string id)
+        {
+            foreach (var npc in NpcIdles)
+            {
+                if (npc.Id == id) return npc.HeightRatio;
+            }
+
+            return 1f;
+        }
 
         /// <summary>Shared pixels-per-unit (source pixels) for all three characters.</summary>
         public const float PixelsPerUnit = 1690f;
@@ -89,14 +107,27 @@ namespace SixtyOne.Editor
                 Debug.Log($"[CharacterArt] {Prefix(member)}: {frames.Sprites.Length} frames, visible height {frames.VisibleHeight:0.00}u, body scale {frames.BodyScale:0.000}.");
             }
 
-            Frames sevim = ImportSevim();
-            Debug.Log($"[CharacterArt] sevim idle: {sevim.Sprites.Length} frames, visible height {sevim.VisibleHeight:0.00}u, body scale {sevim.BodyScale:0.000}.");
+            foreach (var npc in NpcIdles)
+            {
+                Frames idle = ImportIdle(npc.Id);
+                Debug.Log(idle.Sprites.Length > 0
+                    ? $"[CharacterArt] {npc.Id} idle: {idle.Sprites.Length} frames, visible height {idle.VisibleHeight:0.00}u, body scale {idle.BodyScale:0.000}."
+                    : $"[CharacterArt] {npc.Id} idle: no frames in {npc.Folder} (neutral silhouette).");
+            }
         }
 
-        /// <summary>Imports Sevim Teyze's idle frames (any count) with the family's PPU and foot pivot.</summary>
-        public static Frames ImportSevim()
+        /// <summary>
+        /// Imports an NPC's idle frames (any count, auto-detected when the folder exists) with the family's PPU and
+        /// foot pivot. No folder or no frames = an empty set (the scene builder uses the neutral silhouette).
+        /// </summary>
+        public static Frames ImportIdle(string id)
         {
-            return ImportPaths(SortedFramePaths(SevimFolder, "frame"), SevimHeightRatio, MemberType.Player);
+            foreach (var npc in NpcIdles)
+            {
+                if (npc.Id == id) return ImportPaths(SortedFramePaths(npc.Folder, "frame"), npc.HeightRatio, MemberType.Player);
+            }
+
+            return new Frames();
         }
 
         /// <summary>Imports (or re-imports) one character's frames and returns them in numeric order.</summary>

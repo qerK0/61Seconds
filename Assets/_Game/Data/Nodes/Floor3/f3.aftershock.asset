@@ -45,6 +45,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: death.kitchen_fire
@@ -66,3 +70,4 @@ MonoBehaviour:
   quakeSeconds: 3
   magnitude: 5.4
   shakeScale: 0.8
+  quakeNumber: 2

@@ -51,7 +51,7 @@ TextureImporter:
   spriteMeshType: 1
   alignment: 0
   spritePivot: {x: 0.5, y: 0.5}
-  spritePixelsToUnits: 100
+  spritePixelsToUnits: 161.81818
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
   alphaUsage: 1
@@ -77,7 +77,7 @@ TextureImporter:
     maxTextureSize: 2048
     resizeAlgorithm: 0
     textureFormat: -1
-    textureCompression: 1
+    textureCompression: 2
     compressionQuality: 50
     crunchedCompression: 0
     allowsAlphaSplitting: 0
@@ -115,23 +115,23 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: bokkshelf_0
+      name: bokkshelf_prop
       rect:
         serializedVersion: 2
-        x: 702
-        y: 923
-        width: 132
-        height: 180
-      alignment: 0
-      pivot: {x: 0, y: 0}
+        x: 703
+        y: 924
+        width: 130
+        height: 178
+      alignment: 7
+      pivot: {x: 0.5, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: e1a2657b46f27f3e0800000000000000
-      internalID: -2020093798233265634
+      spriteID: 55be826e45c991f40b34354d51cd1c46
+      internalID: -709284696
       vertices: []
       indices: 
       edges: []
@@ -140,7 +140,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 993d104ccba27124389265eac662a949
     internalID: 0
     vertices: []
     indices: 
@@ -150,7 +150,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      bokkshelf_0: -2020093798233265634
+      bokkshelf_prop: -709284696
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

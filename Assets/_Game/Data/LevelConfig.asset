@@ -82,3 +82,17 @@ MonoBehaviour:
   panicFromPoison: 0.6
   aftershockPanic: 0.45
   panicCalmPerSecond: 0.04
+  debrisDensityPerQuake:
+  - 0
+  - 0.06
+  - 0.1
+  - 0.15
+  - 0.2
+  debrisDepthBonus: 0.03
+  crackChancePerQuake:
+  - 0
+  - 0.15
+  - 0.35
+  - 0.55
+  - 0.7
+  crackDepthBonus: 0.05

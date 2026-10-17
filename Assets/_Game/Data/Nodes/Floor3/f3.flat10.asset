@@ -67,6 +67,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: death.lighter_explosion
@@ -119,6 +123,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -178,6 +186,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 
@@ -205,13 +217,27 @@ MonoBehaviour:
       member: 0
       health: 0
       room: flat10_living
-    conditions: []
-    failBehaviour: 0
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    - type: 0
+      item: {fileID: 11400000, guid: 48838efbe712b134b896f19053a5c45c, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 2
     lockedReasonKey:
-      key: 
-    missingItem: {fileID: 0}
+      key: f3.flat10.c_hole.locked
+    missingItem: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
     missingItemTextKey:
-      key: 
+      key: death.descent_no_gear
     missingItemRewind: 1
     timeCost: 10
     staminaCost: 20
@@ -220,6 +246,20 @@ MonoBehaviour:
     duringDialogue: 0
     timeoutOnly: 0
     outcomes:
+    - type: 4
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: feebeebcbc62ec54cb82bc47cfeb6ab0, type: 2}
       flag: 
@@ -230,10 +270,14 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
-        key: 
-      tip: {fileID: 0}
+        key: death.descent_no_gear
+      tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
       cue: {fileID: 0}
       victim: 0
       rewindTarget: 0
@@ -268,6 +312,10 @@ MonoBehaviour:
         key: 
       member: 0
       health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     death:
       textKey:
         key: 

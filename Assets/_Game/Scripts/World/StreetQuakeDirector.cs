@@ -74,9 +74,12 @@ namespace SixtyOne.World
         [Tooltip("Hazard for members under a façade drop (player death, wife cut to black, child trapped).")]
         [SerializeField] private Hazard facadeHazard;
 
+        /// <summary>Hazard used for façade drops (the validator counts it as linked).</summary>
+        public Hazard FacadeHazard => facadeHazard;
+
         [Header("Deaths")]
         [Tooltip("Not in the open at the peak.")]
-        [SerializeField] private string openDeathKey = "death.street_glass";
+        [SerializeField] private string openDeathKey = UiKeys.StreetGlassDeath;
 
         [Tooltip("Tip for the street deaths.")]
         [SerializeField] private string streetTipId = "tip.street";
@@ -208,7 +211,7 @@ namespace SixtyOne.World
             // The cut end of the line: walking into its sparks electrocutes.
             if (StreetLayout.IsSpark(cell))
             {
-                gm.Die(powerLine != null ? powerLine.Death() : new DeathInfo { TextKey = "death.street_power", TipId = "tip.electric", RewindTarget = RewindTarget.Checkpoint });
+                gm.Die(powerLine != null ? powerLine.Death() : new DeathInfo { TextKey = UiKeys.StreetPowerDeath, TipId = "tip.electric", RewindTarget = RewindTarget.Checkpoint });
                 return;
             }
 

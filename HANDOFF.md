@@ -4,6 +4,85 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 00:05] LOCAL — Task 08 (partial): Bora's 4 playtest fixes + cloud task 02 wiring; play checks stopped early
+### Done
+- **Wiring:** compiled with 0 errors and ran these menus: Import Team Audio (34 cues), Import Prop Art (11 props, 6 chandelier frames, 2 debris), Generate Tile Sets (Rocky street set), Import Character Frames, Generate Building Levels, Build Test Scene (24 rooms).
+- **Validators:** Validate Content: 30 nodes, 0 problems. Text > Validate: 413 referenced, 0 missing / empty / unused. No TODO in the CSV.
+- **EditMode tests:** 194 / 194 pass, including the new `DescentRuleTests`.
+- **Fix 1 + 3: the NPC placeholder.**
+  - The scene had no extra object under Sevim, so the "white bean" was the pale placeholder capsule of the NPC next to her (Hasan).
+  - NPCs with idle art now play it with no capsule. NPCs without art (Hasan, Cemil, the dog, the robber) are a dark neutral silhouette with a soft shadow, at their height relative to the player: dog 0.45, Hasan 0.95, Cemil 1.0, robber 1.0, Sevim 0.9.
+  - `CharacterArt.NpcIdles` picks up `Art/char/{SEVIM,HASAN,CEMIL,ROBBER,DOG}_IDLE/frame*.png` automatically when the folder exists, with any number of frames. The scene builder uses it, so a rebuild keeps this.
+  - The dog is now an NPC object (decorative) instead of a coloured prop.
+- **Fix 2: the rope rule.**
+  - The Flat 10 collapsed floor had no requirement at all, and the Flat 9 cables needed only the harness.
+  - Both now go through `NeedsDescentGear`: they need the bedsheet rope (used up) and the child harness. Without them the choice is ShowLockedFatal: `death.descent_no_gear` names the missing item and rewinds to the F3 checkpoint.
+  - The balcony rope already refused without the rope and harness.
+  - Doors: the only floor-skipping door is the F4→F3 stairs. Doors into another zone always play the node's move choice (`RoomLinkRules`).
+  - To avoid a soft-lock (bedsheets existed only on F4), F3 now has 3 borrowable bedsheets: on the Flat 9 sofa, in the Flat 9 bookshelf and in the Flat 10 bookshelf. Bora approved this.
+  - New `Tests/EditMode/DescentRuleTests.cs`:
+    - every GoTo into a lower floor (except `f4.corridor.c_down`) requires `bedsheet_rope` + `child_harness` and is ShowLockedFatal or Hide;
+    - no door skips a floor except the stairs;
+    - the balcony's `CanDescend` rule.
+  - Verified in Play Mode: the collapsed floor without gear → death card "Eksik: Çarşaf halatı" plus the new line.
+- **Fix 4: Panik.**
+  - New `UI/PanicMeter.cs` under the timer: label `Panik`, amber → red fill, a tick at `PanicDelayThreshold`, pulses above it (steady with Reduce Effects).
+  - The stamina label is now `Enerji`. New key: `ui.panic.label`.
+- **Validator fixes:**
+  - `hz.street_facade` counts as linked through `StreetQuakeDirector.FacadeHazard`.
+  - The street death keys moved to `UiKeys` (`StreetGlassDeath` / `StreetPowerDeath`).
+  - Removed the dead `room.street` key (there is no door into the street).
+- **Play checks done:**
+  - F4 corridor NPCs (screenshot);
+  - F3 descents locked-fatal;
+  - the F2 dog silhouette;
+  - a micro rewind (LOOP + Notlar went up);
+  - the robber with 2 food + 1 water + the flashlight: he took both food, kept the water and the key item, `RobbedAtExit` was set and the game moved to the street automatically;
+  - the street quake 4 ran (QuakeCount 4, `StreetQuakeDone`).
+- Interaction Mode set to No Throttling for Play Mode, then restored (0).
+
+### Files created / changed
+- `Scripts/Editor/Art/CharacterArt.cs`: NPC idle table and `ImportIdle(id)`; replaces the Sevim-only import.
+- `Scripts/Editor/SceneBuild/SceneKit.cs`: NPC idle art or a dark silhouette; spark key via UiKeys.
+- `Scripts/Editor/SceneBuild/BuildingLayout.cs`: NPC idle ids, the dog as an NPC, F3 bedsheets.
+- `Scripts/Editor/SceneBuild/TestSceneUi.cs`: `BuildPanicMeter`.
+- `Scripts/Editor/Content/BuildingLevelsGenerator.Floor3.cs`: `NeedsDescentGear` on the cables and the collapsed floor.
+- `Scripts/Editor/Content/ContentValidator.cs`: the street façade hazard counts as linked.
+- `Scripts/UI/PanicMeter.cs` (new).
+- `Scripts/Text/UiKeys.cs`: `PanicLabel`, street death keys.
+- `Scripts/World/StreetQuakeDirector.cs`, `StreetPowerLine.cs`: `FacadeHazard` accessor; keys via UiKeys.
+- `Tests/EditMode/DescentRuleTests.cs` (new).
+- `Content/Text/strings_tr.csv`: `ui.panic.label`, `ui.stamina.label` = Enerji, `death.descent_no_gear`, `f3.flat10.c_hole.locked`, new `f3.flat9.c_cables.locked`; removed `room.street`.
+- Regenerated data (nodes, robber / street nodes, cues, tile sets, `PropArtSet`), `Scenes/Test_Building.unity`, and Unity-generated `.meta` files for the cloud task 02 scripts.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] **Bug (found, not fixed): street → sign death.** On the street after quake 4, `f2.street.c_sign` (the run to the sign) killed the player with `death.street_power`. Check `StreetQuakeDirector` line ~211 (`StreetLayout.IsSpark(cell)`):
+  - Is the player's cell computed correctly? `PlayerMover.transform.position` read (0,0,0) in world space.
+  - Does the `GridNav` path to the sign go through a spark cell (9,5) / (11,5)? Spark cells are walkable, so A* may route through them; they should be blocked for auto paths.
+- [ ] The street is very dark: the façade drop warnings are hard to read. Raise the street ambient light / Act-3 darkness on the street.
+- [ ] Remaining task-08 play checks (stopped at Bora's request):
+  - prop height tuning against the family + screenshots of every room;
+  - doors (`kapi.png` flush / flipped);
+  - the chandelier swing / frame 5;
+  - placement runs when the timer ends mid-run;
+  - the family running in from the door;
+  - debris after quakes 1–3 (corridor screenshots) + cracks;
+  - every loot container (search ring, take / take all / bag full / free second visit / Ödünç al / rewind);
+  - the robber's Yalvar / Ağla-kısa kes / Bağır replies one by one + the toasts;
+  - the street camera follow, the quake feel, "Açık alana çök!", the collapse-behind beat near / far;
+  - a full playthrough from the main menu.
+
+### Not verified / risks
+- Play checks were done by jumping to nodes with code (`NodePlayer.Enter`), not a real playthrough. The prep and building timers were not running in those checks.
+- The robber choices were clicked through quickly; which reply played was not checked.
+- `Build Test Scene` once blocked the editor (most likely a modal dialog) and dropped the MCP socket; it worked after Bora cleared it.
+- The uncommitted TMP font assets, `ProjectSettings/VersionControlSettings.asset`, `61s_local.bat` and the `Art/Fonts` OTF / WOFF folders were left out of the commit.
+
+### Next suggested step
+- Fix the street spark / path bug (block spark cells for auto paths), brighten the street, then run the remaining play checks above and one full playthrough.
+
+---
+
 ## [2026-10-17 19:56] CLOUD — Task 02: running members, grid paths, debris/cracks, loot containers, prop art, robber + street finale
 ### Done
 One commit per part (A–F), so a partial pick-up works.

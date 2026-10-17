@@ -116,7 +116,7 @@ namespace SixtyOne.Editor
             public Color Color = Color.white;
             /// <summary>Disappears once its choice is gone (the neighbour left).</summary>
             public bool HideWhenGone;
-            /// <summary>Idle frame set ("sevim") looped on the body instead of the placeholder; null = placeholder.</summary>
+            /// <summary>NPC idle id (CharacterArt.NpcIdles: sevim, hasan, cemil, robber, dog): loops its frames when delivered, else a dark silhouette at its height.</summary>
             public string Idle;
             /// <summary>Prop art name (PropArtSet) for objects, e.g. "Valve"; null = tinted block.</summary>
             public string Art;
@@ -232,9 +232,9 @@ namespace SixtyOne.Editor
             if (IsWallEdge(edge) && !from.Gaps.Contains(edge)) from.Gaps.Add(edge);
         }
 
-        private static HotspotSpec Person(string name, string choiceKey, float gx, float gy, Color color, bool hideWhenGone = true)
+        private static HotspotSpec Person(string name, string choiceKey, float gx, float gy, Color color, bool hideWhenGone = true, string idle = null)
         {
-            return new HotspotSpec { Name = name, ChoiceKey = choiceKey, Gx = gx, Gy = gy, Person = true, Color = color, HideWhenGone = hideWhenGone };
+            return new HotspotSpec { Name = name, ChoiceKey = choiceKey, Gx = gx, Gy = gy, Person = true, Color = color, HideWhenGone = hideWhenGone, Idle = idle };
         }
 
         private static HotspotSpec Thing(string name, string choiceKey, float gx, float gy, float sx, float sy, Color color)
@@ -484,7 +484,7 @@ namespace SixtyOne.Editor
             corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 7.0f, 1.5f, 1.0f, 1.6f, Metal));
             WallLamp(corridor, 2.5f, "CorridorWallLampA");
             WallLamp(corridor, 5.5f, "CorridorWallLampB");
-            corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f)));
+            corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f), idle: "hasan"));
             // Sevim Teyze: decorative (her dialogue starts on the way out of Flat 11), idle-animated.
             corridor.Hotspots.Add(new HotspotSpec { Name = "Sevim", Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim" });
 
@@ -533,7 +533,7 @@ namespace SixtyOne.Editor
             corridor.Props.Add(P("corridor_window", "CorridorWindow", 5.5f, 2.95f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             corridor.Props.Add(P("stair_edge", "StairEdge", 6.8f, 1.0f, 0f, 0.9f, 0.35f, new Color(0.45f, 0.45f, 0.5f, 1f), drop: 0.7f));
             corridor.Props.Add(P("ceiling_debris", "CeilingDebris", 3.0f, 0.8f, 1.8f, 0.6f, 0.25f, new Color(0.6f, 0.58f, 0.55f, 1f), drop: 1.6f));
-            corridor.Hotspots.Add(Person("Cemil", "f3.corridor.c_trader", 4.7f, 0.7f, new Color(0.75f, 0.6f, 0.35f, 1f)));
+            corridor.Hotspots.Add(Person("Cemil", "f3.corridor.c_trader", 4.7f, 0.7f, new Color(0.75f, 0.6f, 0.35f, 1f), idle: "cemil"));
             WallLamp(corridor, 0.5f, "F3WallLamp");
 
             // Flat 9: fuse box in the hall, balcony (bedsheet rope) off the living room, hanging cables in the kitchen.
@@ -543,7 +543,9 @@ namespace SixtyOne.Editor
             f9Living.ExtraTiles.Add(new Vector2(4.5f, 0.5f));
             f9Living.ExtraTiles.Add(new Vector2(4.5f, 1.5f));
             f9Living.Props.Add(P(null, "Sofa", 1.4f, 3.3f, -0.05f, 1.5f, 0.5f, new Color(0.35f, 0.4f, 0.5f, 1f)));
-            f9Living.Containers.Add(Lent(Box("flat9_bookshelf", "bookshelf", 3.1f, 3.7f, Wood, "food")));
+            // F3 bedsheets (borrowed): the rope can still be made after the F3 checkpoint (every descent needs it).
+            f9Living.Items.Add(I("bedsheet", 1.4f, 3.3f, new Color(0.92f, 0.92f, 1f, 1f), borrowed: true, id: "flat9_sofa_sheet"));
+            f9Living.Containers.Add(Lent(Box("flat9_bookshelf", "bookshelf", 3.1f, 3.7f, Wood, "food", "bedsheet")));
             f9Living.Props.Add(P(null, "BalconyRail", 4.95f, 0.6f, 0f, 1.0f, 0.5f, Metal));
             f9Living.Ropes.Add(new RopeSpec { Id = "flat9_balcony_rope", Gx = 4.5f, Gy = 0.6f, TargetNodeId = BuildingLevelsGenerator.F2Aftershock });
             RoomSpec f9Kitchen = Art(Room(BuildingLevelsGenerator.Flat9Kitchen, 3, 3, new Color(0.6f, 0.62f, 0.6f, 1f), BuildingLevelsGenerator.Flat9), RoomArt.Home, windows: "R0");
@@ -558,7 +560,7 @@ namespace SixtyOne.Editor
             RoomSpec f10Living = Art(Room(BuildingLevelsGenerator.Flat10Living, 4, 4, new Color(0.4f, 0.4f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
             f10Living.Props.Add(P(null, "CollapsedFloor", 2.0f, 2.2f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
             f10Living.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
-            f10Living.Containers.Add(Lent(Box("flat10_bookshelf", "bookshelf", 2.6f, 3.7f, Wood, "cloth")));
+            f10Living.Containers.Add(Lent(Box("flat10_bookshelf", "bookshelf", 2.6f, 3.7f, Wood, "cloth", "bedsheet")));
 
             Link(corridor, "L1", f9Hall, "R1");
             Link(f9Hall, "L0", f9Kitchen, "R1");
@@ -594,7 +596,8 @@ namespace SixtyOne.Editor
 
             // Corridor: the frightened dog blocks the stairs (front-left exit).
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
-            corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
+            // The dog: decorative NPC (its choices are in the panel); idle art from Art/char/DOG_IDLE when delivered.
+            corridor.Hotspots.Add(new HotspotSpec { Name = "Dog", Gx = 1.0f, Gy = 1.0f, Person = true, Color = new Color(0.55f, 0.4f, 0.25f, 1f), Idle = "dog" });
             WallLamp(corridor, 2.5f, "F2WallLamp");
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             // Elevators sit flush on the back-right wall line, centred on a wall segment (DoorArt fits them to it).
@@ -615,7 +618,7 @@ namespace SixtyOne.Editor
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
             stairs.Hotspots.Add(Thing("StairsDown", BuildingLevelsGenerator.F2Exit + ".c_out", 1.5f, 4.3f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 3.0f, 1.5f, 0.6f, 1.6f, Metal));
-            stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f) });
+            stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f), Idle = "robber" });
 
             RoomSpec street = Street();
 
