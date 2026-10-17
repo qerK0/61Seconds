@@ -19,3 +19,9 @@ MonoBehaviour:
   afadAlert: {fileID: 11400000, guid: 9ef67c54e3781a64dbf9a770896f926d, type: 2}
   denied: {fileID: 11400000, guid: 68d36f1f1d526c345ab0705a072f0b41, type: 2}
   choiceClick: {fileID: 11400000, guid: ecd35d12abf414241b93d1147f36fda6, type: 2}
+  quakeByAct:
+  - {fileID: 11400000, guid: 7be76cfcdc56be444b1138c63d99e23c, type: 2}
+  - {fileID: 11400000, guid: 6103b9176f62e3b4da3c08d807bb570e, type: 2}
+  - {fileID: 11400000, guid: 61d6c0b35f125694c9c78df658cc33fe, type: 2}
+  preQuake: {fileID: 11400000, guid: d27277433c8758c44913060cebccecbb, type: 2}
+  craft: {fileID: 11400000, guid: 938efbc02f8b7394198772db7883e0a4, type: 2}

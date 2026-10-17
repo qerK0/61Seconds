@@ -62,7 +62,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Which RoomTileSet a room uses.</summary>
-        public enum RoomArt { Home, Corridor }
+        public enum RoomArt { Home, Corridor, DamagedCorridor }
 
         /// <summary>A window/balcony where the bedsheet rope lowers the family to another node.</summary>
         public sealed class RopeSpec
@@ -95,6 +95,8 @@ namespace SixtyOne.Editor
             public Color Color = Color.white;
             /// <summary>Disappears once its choice is gone (the neighbour left).</summary>
             public bool HideWhenGone;
+            /// <summary>Idle frame set ("sevim") looped on the body instead of the placeholder; null = placeholder.</summary>
+            public string Idle;
         }
 
         public sealed class RoomSpec
@@ -305,6 +307,8 @@ namespace SixtyOne.Editor
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 6.6f, 1.0f, 1.0f, 1.6f, Metal));
             corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f)));
+            // Sevim Teyze: decorative (her dialogue starts on the way out of Flat 11), idle-animated.
+            corridor.Hotspots.Add(new HotspotSpec { Name = "Sevim", Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim" });
 
             // Flat 12: the neighbours' open flat. Everything here is borrowed ("ödünç al").
             RoomSpec f12Hall = Art(Room(BuildingLevelsGenerator.Flat12, 3, 3, new Color(0.7f, 0.66f, 0.74f, 1f)), RoomArt.Home);
@@ -336,7 +340,7 @@ namespace SixtyOne.Editor
         private static IEnumerable<RoomSpec> Floor3(List<RoomSpec> floor2)
         {
             // Floor 3 corridor: aftershock placement on arrival; Cemil the trader; the stairs below collapsed (R1).
-            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F3Corridor, 7, 3, new Color(0.55f, 0.55f, 0.6f, 1f)), RoomArt.Corridor, gaps: "R1", windows: "L5");
+            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F3Corridor, 7, 3, new Color(0.55f, 0.55f, 0.6f, 1f)), RoomArt.DamagedCorridor, gaps: "R1", windows: "L5");
             corridor.PlayerSpawn = new Vector2(0.6f, 0.6f);
             corridor.WifeSpawn = new Vector2(1.2f, 0.4f);
             corridor.ChildSpawn = new Vector2(0.4f, 1.2f);
@@ -403,7 +407,7 @@ namespace SixtyOne.Editor
             f7Kitchen.Props.Add(P(null, "Stove", 1.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
 
             // Corridor: the frightened dog blocks the stairs (front-left exit).
-            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.Corridor);
+            RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
             corridor.Props.Add(P(null, "Dog", 1.0f, 1.0f, 0f, 0.6f, 0.45f, new Color(0.55f, 0.4f, 0.25f, 1f)));
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Props.Add(P(null, "Elevator", 6.6f, 1.0f, 0f, 1.0f, 1.6f, Metal));
@@ -417,7 +421,7 @@ namespace SixtyOne.Editor
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
 
             // Stairs down to the street (L1) and the elevator trap.
-            RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.Corridor);
+            RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.DamagedCorridor);
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
             stairs.Props.Add(P(null, "StairsDown", 1.5f, 4.3f, 0f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 2.7f, 1.5f, 0.6f, 1.6f, Metal));

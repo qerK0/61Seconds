@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: cue_door
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_door
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: bf6fa1194db8748428e4b5854a2be668, type: 3}
   volume: 0.7
   pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}

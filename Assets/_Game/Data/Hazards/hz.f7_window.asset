@@ -24,6 +24,6 @@ MonoBehaviour:
   childTextKey:
     key: death.child.window
   tip: {fileID: 11400000, guid: 2f3d574b645897a47b757f3305bc1a9e, type: 2}
-  cue: {fileID: 0}
+  cue: {fileID: 11400000, guid: 04d0d67042b64414b851ff8f0cf4cbd3, type: 2}
   motion: 3
   targetPropId: f7_window

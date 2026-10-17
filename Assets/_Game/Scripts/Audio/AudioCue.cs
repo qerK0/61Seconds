@@ -67,6 +67,12 @@ namespace SixtyOne.Audio
             return Random.Range(Mathf.Min(pitchRange.x, pitchRange.y), Mathf.Max(pitchRange.x, pitchRange.y));
         }
 
+        /// <summary>Authoring helper: replaces the clips (the audio import menu).</summary>
+        public void SetClips(params AudioClip[] newClips)
+        {
+            clips = newClips ?? new AudioClip[0];
+        }
+
         /// <summary>Authoring helper for generators.</summary>
         public void Configure(string cueId, float cueVolume = 1f, bool cueLoop = false, float pitchMin = 1f, float pitchMax = 1f)
         {

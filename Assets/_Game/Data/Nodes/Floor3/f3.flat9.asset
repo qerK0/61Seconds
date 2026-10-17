@@ -87,7 +87,7 @@ MonoBehaviour:
       textKey:
         key: death.electrocuted
       tip: {fileID: 11400000, guid: c630e389d0298224c837d67ad2f26313, type: 2}
-      cue: {fileID: 0}
+      cue: {fileID: 11400000, guid: 3e0071d4ab6d3b047951995b048e7ea7, type: 2}
       victim: 0
       rewindTarget: 0
       rewindTo: {fileID: 0}

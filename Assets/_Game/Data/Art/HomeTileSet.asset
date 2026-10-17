@@ -18,7 +18,7 @@ MonoBehaviour:
   - {fileID: -9044549264028159849, guid: a127f190c401b2a45af60d3b7182db1f, type: 3}
   rightWallSprites:
   - {fileID: -677654047843125890, guid: a127f190c401b2a45af60d3b7182db1f, type: 3}
-  leftWindowSprite: {fileID: -5585442693113832241, guid: 51bba831ec1bc9b40ae09c0d4802159b, type: 3}
-  rightWindowSprite: {fileID: 4712799232623252367, guid: 51bba831ec1bc9b40ae09c0d4802159b, type: 3}
+  leftWindowSprite: {fileID: 497581650, guid: 47ac819317771c245802abebda3d775a, type: 3}
+  rightWindowSprite: {fileID: 705683360, guid: 47ac819317771c245802abebda3d775a, type: 3}
   floorTint: {r: 1, g: 1, b: 1, a: 1}
   wallTint: {r: 1, g: 1, b: 1, a: 1}

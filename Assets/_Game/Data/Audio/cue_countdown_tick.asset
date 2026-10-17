@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_countdown_tick
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_countdown_tick
-  clips: []
-  volume: 0.8
-  pitchRange: {x: 1, y: 1}
+  clips:
+  - {fileID: 8300000, guid: 39fea48fab7e60c40a4e4d7f2aed9b6f, type: 3}
+  volume: 0.4
+  pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

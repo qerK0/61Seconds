@@ -123,7 +123,7 @@ MonoBehaviour:
       textKey:
         key: death.lighter_explosion
       tip: {fileID: 11400000, guid: bf1c0e7548de60b45819bdbf646b02b4, type: 2}
-      cue: {fileID: 0}
+      cue: {fileID: 11400000, guid: 9cc098823089f7248b8ba26ceb3bd612, type: 2}
       victim: 0
       rewindTarget: 0
       rewindTo: {fileID: 0}

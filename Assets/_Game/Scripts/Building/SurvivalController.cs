@@ -55,6 +55,7 @@ namespace SixtyOne.Building
         public float Total => Timer.Total;
 
         private GameState State => gameManager.State;
+        private bool alarmPlaying;
 
         private void Awake()
         {
@@ -89,19 +90,25 @@ namespace SixtyOne.Building
         {
             GameEvents.Rewound += OnRewound;
             GameEvents.QuakeStarted += OnQuakeStarted;
+            GameEvents.Died += OnDied;
         }
 
         private void OnDisable()
         {
             GameEvents.Rewound -= OnRewound;
             GameEvents.QuakeStarted -= OnQuakeStarted;
+            GameEvents.Died -= OnDied;
         }
 
         private void Update()
         {
             if (config == null || gameManager == null || gameManager.IsDead) return;
             // Out on the street: the run is won, the building can no longer kill.
-            if (nodePlayer != null && nodePlayer.Current is EpilogueNode) return;
+            if (nodePlayer != null && nodePlayer.Current is EpilogueNode)
+            {
+                StopAlarm();
+                return;
+            }
 
             // Room transitions (tile rise/drop) never cost building time.
             float dt = NavigationEvents.TimerDelta(Time.deltaTime);
@@ -121,6 +128,8 @@ namespace SixtyOne.Building
 
             if (gameManager.IsDead) return;
             UpdatePoison(dt);
+            if (gameManager.IsDead) return;
+            if (!paused) UpdateExhaustion(dt);
             if (gameManager.IsDead) return;
             Panic01 = SurvivalModel.StepPanic(Panic01, PanicBaseline(), config.PanicCalmPerSecond, dt);
         }
@@ -154,10 +163,24 @@ namespace SixtyOne.Building
             }
         }
 
+        private void UpdateExhaustion(float dt)
+        {
+            State.Exhaustion = SurvivalModel.StepExhaustion(State.Exhaustion, State.Stamina, config.ExhaustionPerSecond,
+                config.ExhaustionDecayPerSecond, dt);
+            if (State.Exhaustion < 1f) return;
+            gameManager.Die(new DeathInfo
+            {
+                Victim = MemberType.Player,
+                TextKey = config.ExhaustionTextKey.Key,
+                TipId = config.ExhaustionTip != null ? config.ExhaustionTip.Id : null,
+                RewindTarget = RewindTarget.Checkpoint
+            });
+        }
+
         private float PanicBaseline()
         {
             float timerPanic = config.EvaluateTimerPanic(Timer.ElapsedFraction(State.BuildingTime));
-            return SurvivalModel.PanicBaseline(timerPanic, State.Poison, config.PanicFromPoison);
+            return SurvivalModel.PanicBaseline(timerPanic, Mathf.Max(State.Poison, State.Exhaustion), config.PanicFromPoison);
         }
 
         private void OnQuakeStarted(QuakeInfo info)
@@ -192,8 +215,25 @@ namespace SixtyOne.Building
         private void OnAlarm()
         {
             GameEvents.RaiseBuildingAlarm();
+            StartAlarm();
+        }
+
+        /// <summary>The alarm loops for the last seconds; started once (a rewind inside the window restarts it).</summary>
+        private void StartAlarm()
+        {
+            if (alarmPlaying || config.AlarmCue == null) return;
+            alarmPlaying = true;
             AudioService.PlayCue(config.AlarmCue);
         }
+
+        private void StopAlarm()
+        {
+            if (!alarmPlaying) return;
+            alarmPlaying = false;
+            AudioService.FadeOutCue(config.AlarmCue, 0.4f);
+        }
+
+        private void OnDied(DeathInfo info) => StopAlarm();
 
         private void OnAlarmTick(int secondsLeft)
         {
@@ -216,7 +256,10 @@ namespace SixtyOne.Building
         private void OnRewound(string nodeId)
         {
             Timer.Sync(State.BuildingTime);
-            if (config != null) Panic01 = PanicBaseline();
+            if (config == null) return;
+            Panic01 = PanicBaseline();
+            if (State.BuildingTimerStarted && State.BuildingTime <= config.AlarmAtSeconds) StartAlarm();
+            else StopAlarm();
         }
     }
 }

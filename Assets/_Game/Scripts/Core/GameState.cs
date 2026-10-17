@@ -55,6 +55,9 @@ namespace SixtyOne.Core
         /// <summary>Gas poisoning 0..1 (1 = death). Restored by snapshots.</summary>
         public float Poison { get; set; }
 
+        /// <summary>Hunger/thirst exhaustion 0..1 (rises at 0 stamina; 1 = death). Restored by snapshots.</summary>
+        public float Exhaustion { get; set; }
+
         /// <summary>Items borrowed from neighbours' flats. Restored by snapshots (reset by checkpoint rewinds).</summary>
         public BorrowLedger Borrowed { get; private set; } = new BorrowLedger();
 
@@ -96,6 +99,7 @@ namespace SixtyOne.Core
                 BuildingTimerStarted = BuildingTimerStarted,
                 Stamina = Stamina,
                 Poison = Poison,
+                Exhaustion = Exhaustion,
                 Borrowed = Borrowed.Clone(),
                 CollectedTips = new HashSet<string>(CollectedTips, StringComparer.Ordinal),
                 RevealedAnchors = new HashSet<string>(RevealedAnchors, StringComparer.Ordinal),

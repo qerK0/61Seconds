@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_qte_miss
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_qte_miss
-  clips: []
-  volume: 0.9
-  pitchRange: {x: 1, y: 1}
+  clips:
+  - {fileID: 8300000, guid: 08f3211f652c6b3448dbd81089aa473c, type: 3}
+  volume: 0.8
+  pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

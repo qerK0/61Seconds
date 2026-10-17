@@ -78,6 +78,19 @@ namespace SixtyOne.Editor
             AudioEventHooks hooks = systems.AddComponent<AudioEventHooks>();
             SerializedWire.Set(hooks, "map", data.AudioMap);
             SerializedWire.Set(hooks, "service", audio);
+            MusicService music = systems.AddComponent<MusicService>();
+            SerializedWire.Set(music, "gameManager", gameManager);
+            SerializedWire.Set(music, "prepMusic", data.MusicPrep);
+            SerializedWire.Set(music, "tensionMusic", data.MusicTension);
+            SerializedWire.Set(music, "outroMusic", data.MusicOutro);
+            AmbienceService ambience = systems.AddComponent<AmbienceService>();
+            SerializedWire.Set(ambience, "gameManager", gameManager);
+            SerializedWire.Set(ambience, "damagedBuilding", data.DripCue);
+            SerializedWire.Set(ambience, "dogGrowl", data.DogGrowlCue);
+            SerializedWire.Set(ambience, "dogBark", data.DogBarkCue);
+            SerializedWire.Set(ambience, "heartbeat", data.HeartbeatCue);
+            SerializedWire.SetString(ambience, "dogRoomId", BuildingLevelsGenerator.F2CorridorRoom);
+            SerializedWire.SetString(ambience, "dogGoneFlag", BuildingLevelsGenerator.DogGone);
 
             IsoPicker picker = systems.AddComponent<IsoPicker>();
             SerializedWire.Set(picker, "worldCamera", camera);
@@ -132,6 +145,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(mover, "player", family[0].GetComponent<CharacterMotor>());
             SerializedWire.Set(mover, "rooms", switcher);
             SerializedWire.Set(mover, "config", data.Movement);
+            FootstepsAudio steps = systems.AddComponent<FootstepsAudio>();
+            SerializedWire.Set(steps, "player", family[0].GetComponent<CharacterMotor>());
+            SerializedWire.Set(steps, "footsteps", data.Cues.Find(c => c != null && c.Id == "cue_footsteps"));
             for (int i = 1; i < family.Count; i++)
             {
                 FamilyFollower follower = family[i].gameObject.AddComponent<FamilyFollower>();
@@ -164,6 +180,14 @@ namespace SixtyOne.Editor
 
             ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
                 data.Level.MaxInventorySlots, KeyItems(data), theme, out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
+            SixtyOne.UI.TypewriterText typewriter = choicePanel.GetComponentInChildren<SixtyOne.UI.TypewriterText>(true);
+            if (typewriter != null)
+            {
+                DialogueVoice voice = typewriter.gameObject.AddComponent<DialogueVoice>();
+                SerializedWire.Set(voice, "typewriter", typewriter);
+                SerializedWire.Set(voice, "profile", data.Voices);
+            }
+
             SerializedWire.Set(qte, "gameManager", gameManager);
             SerializedWire.Set(qte, "view", qteView);
             SerializedWire.Set(qte, "cameraShake", camera.GetComponent<CameraShake>());
@@ -237,7 +261,8 @@ namespace SixtyOne.Editor
             foreach (Vector2 extra in spec.ExtraTiles) extraCells.Add(new Vector2Int(Mathf.FloorToInt(extra.x), Mathf.FloorToInt(extra.y)));
             room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells));
 
-            RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor : tileSets.Home;
+            RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.DamagedCorridor ? tileSets.DamagedCorridor
+                : spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor : tileSets.Home;
             if (tileSet != null && tileSet.FloorTile != null)
             {
                 RoomTiles.Floor(t, spec, tileSet);

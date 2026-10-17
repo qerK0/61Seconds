@@ -157,7 +157,7 @@ namespace SixtyOne.Editor
         {
             arrival.AddBombCheck(new BombCheck()
                 .When(Condition.FlagFalse(GasOffF4))
-                .Kills(new DeathData("death.kitchen_fire", Tip("tip.gas_off"), MemberType.Player, null, null, RewindTarget.Checkpoint)));
+                .Kills(new DeathData("death.kitchen_fire", Tip("tip.gas_off"), MemberType.Player, null, result.FireCue, RewindTarget.Checkpoint)));
         }
     }
 }

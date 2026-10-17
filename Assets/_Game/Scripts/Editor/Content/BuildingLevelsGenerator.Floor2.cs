@@ -115,7 +115,7 @@ namespace SixtyOne.Editor
                 .Then(Outcome.RemoveItem(Item("food")))
                 .Then(Outcome.SetFlag(DogGone))
                 .Then(Outcome.Message($"{F2CorridorNode}.msg_fed")));
-            corridor.AddChoice(C(F2CorridorNode, "whistle").Costs(2f)
+            corridor.AddChoice(C(F2CorridorNode, "whistle").Costs(2f).WithCue(result.WhistleCue)
                 .ShowWhen(Condition.FlagFalse(DogGone))
                 .Require(Condition.HasItem(Item("whistle")))
                 .WhenLocked(FailBehaviour.ShowLocked, Locked(F2CorridorNode, "whistle"))

@@ -24,6 +24,6 @@ MonoBehaviour:
   childTextKey:
     key: death.child.open_room
   tip: {fileID: 11400000, guid: 643b2d67efc04ad409b3c711259a0f4f, type: 2}
-  cue: {fileID: 0}
+  cue: {fileID: 11400000, guid: 9bde3d74722af2048b1540ce2f4d22f2, type: 2}
   motion: 2
   targetPropId: f7_ceiling

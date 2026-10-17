@@ -4,6 +4,79 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-17 16:39] LOCAL — Exhaustion death + darkening, team audio wired (music/ambience/voice blips), item icons, Sevim idle, window/cracked walls
+### Done
+- **Exhaustion (task 1):**
+  - `GameState.Exhaustion` (0..1) is restored by snapshots. `SurvivalModel.StepExhaustion` rises only at 0 stamina and decays once stamina is above 0. At 1 the player dies: `death.exhaustion` + `tip.supplies`, Checkpoint rewind.
+  - **Final numbers:** stamina max 100, drain **0.42/s** (was 0.15). With no food or water, stamina hits 0 at ~165s (~240s with no heavy actions at all; the F3 cable/hole climbs cost 20–25). Food +35 buys ~83s, water +25 ~60s. At 0, exhaustion rises **0.03/s** (~33s to death) and falls **0.2/s**. Set in `ConfigureStamina` (generator).
+  - `PoisonOverlay` is driven by max(poison, exhaustion): gas keeps its green tint and wobble; exhaustion is black with a lub-dub heartbeat pulse. Reduce Effects drops the pulse and keeps the fade.
+  - CinematicDirector and the panic baseline also use max(poison, exhaustion).
+  - The stamina bar background flashes red at 0 (solid red with Reduce Effects).
+  - New `ExhaustionTests` (4 tests).
+- **Audio (task 2):**
+  - **Import:** `SixtyOne > Audio > Import Team Audio` moves Voice/ → Audio/ through AssetDatabase (the Voice folder is gone), sets import settings (SFX: Decompress On Load ADPCM; music/ambience/long loops: Streaming Vorbis), puts clips on cues and fills `DialogueVoices.asset`.
+  - **New cues:** quake_f4/f3/f2 (7.1/6.2/6.9 recordings, looped while shaking, faded at the end), craft, whistle, dog_bark, dog_growl, electric, heartbeat, amb_drip, music_prep/tension/outro.
+  - **Code:**
+    - `MusicService`: 2-source crossfade. Prep = calm, quake = silence, after a quake = tension, epilogue = outro. A rewind restarts the stage's track.
+    - `AmbienceService`: drip after the quake indoors; dog growl in f2_corridor until DogGone, plus one bark on entry; heartbeat follows panic above the threshold, exhaustion and poison.
+    - `FootstepsAudio`: loops while the player runs; the transition no longer plays footsteps.
+    - `DialogueVoice` + `DialogueVoiceProfile`: animalese blips every 2–3 letters, 0.08–0.15s random slices. Sevim 1.15, Hasan 0.85, Cemil 1.0.
+  - **Hooks:** the pre-quake growl (`cue_placement_alarm`) plays in the last 8 prep seconds and during placement countdowns. Macro rewinds play the rewind louder and lower (longer). The building alarm now loops and stops on death, rewind out of the window, and the epilogue. The AFAD alert never stacks twice.
+  - **Wiring:** hazards → crash/glass by motion; lighter/stove/kitchen-fire deaths → fire; electrocution death and breaker QTE misses → electric; dog QTE misses → bark; the dog whistle choice → whistle; craft/rope → craft.
+  - **Mix:** music 0.35–0.5, ambience 0.15, growl 0.3, click 0.35, tick 0.4, death/fire/quakes 1.0. Pitch ±5% on clicks, ticks and QTE blips.
+  - New `MusicRulesTests`.
+- **Art (task 3):**
+  - **Item icons:** 13 icons, imported by `ItemIconArt` (sprite, PPU so the long side is 0.42u). They show in the bag, the key-item HUD (preserveAspect, slightly larger), surface pickups and dropped items. Items without art keep the placeholder.
+  - **Sevim idle:** `Import Character Frames` also imports SEVIM_IDLE (9 frames, same PPU and foot pivot, 0.9× player height). A decorative animated Sevim (`SpriteLoopAnimator`, 9 fps) stands in the F4 corridor. She is not clickable: her dialogue still starts from the Flat 11 exit choice, because a hotspot would pull "thanks" out of the panel.
+  - **Walls:** the corner-pair PNGs (128px faces, same format as the sheet cells) are sliced into `_L`/`_R`. Window segments use `pencereler 1` (home) and `pencereler 222` (corridor). New `DamagedCorridorTileSet` mixes the two cracked walls into the F3 corridor and the F2 corridor/stairs.
+  - `parke.png` is **not used**: it has a burn stain and notched edges and is not 2:1 (332×152), so it does not tile.
+- **Verify:** 0 compile errors. EditMode **143/143**. Validate Content: 25 nodes, 0 problems. Text > Validate: 338 referenced, 0 missing/empty/unused.
+- **Play Mode (partly; stopped at the user's request):**
+  - Confirmed: prep music → growl at 7s → 7.1 quake (music faded) → glass + death sting → tension music + drip.
+  - Sevim blips: female @1.15. Hasan blips: male @0.85. F3 aftershock: 6.2. Kitchen-fire bomb fires. The macro rewind is louder.
+  - Screenshots in `Temp/Screens/t06/`: prep_salon, bag_icons, sevim, f3_corridor_cracked-1.
+### Files created / changed
+- Core/Building: `GameState`, `Snapshot`, `SurvivalModel`, `SurvivalController` (exhaustion, alarm loop), `LevelConfig` (exhaustion fields, `ConfigureStamina`).
+- UI: `PoisonOverlay`, `StaminaBar`, `TypewriterText` (CharRevealed/RevealEnded); `Dialogue/DialogueController` (SpeakerChanged); `CinematicDirector`.
+- Audio: new `MusicService`, `MusicRules`, `AmbienceService`, `AudioLoopLayer`, `FootstepsAudio`, `DialogueVoice`, `DialogueVoiceProfile`; changed `AudioService` (IsPlaying/FadeOut/scaled Play), `AudioCue` (SetClips), `AudioEventMap` (per-floor quakes, preQuake, craft), `AudioEventHooks`.
+- Placement/World: `SpriteLoopAnimator` (new), `RoomTransitionController` (no footsteps), `DroppedItemsPresenter` (icons), `Prep/PrepPhase` (alert dedupe).
+- Editor:
+  - `TeamAudioImporter` and `ItemIconArt` (new);
+  - `CharacterArt` (Sevim);
+  - `TileArt` (corner-pair slicing, DamagedCorridor set);
+  - `BuildingLevelsGenerator` (+Floor2/3: cues, death/hazard cues, stamina, tip.supplies);
+  - `BuildingLayout`, `SceneKit`, `TestSceneBuilder`, `TestSceneUi`.
+- Tests: `ExhaustionTests`, `MusicRulesTests`. Content: `strings_tr.csv` (death.exhaustion, tip.supplies(.title)).
+- Assets:
+  - Audio/ (moved clips, `Trimmed/craft_short.wav` + `Trimmed/electric_short.wav` cut with ffmpeg, regenerated `Generated/sfx_rewind.wav` + `sfx_building_alarm_loop.wav`);
+  - new cue assets, `DialogueVoices.asset`, `DamagedCorridorTileSet.asset`, `tip.supplies.asset`;
+  - regenerated scene and data.
+- `.gitignore`: the 95 MB `Audio/elektrik kacagı.wav` (329s) stays local; the cue uses the 2.5s trim.
+### Needs local wiring (checklist for the MCP session)
+- [ ] After pulling: run SixtyOne > Generate Building Levels → Audio > Import Team Audio → Art > Import Character Frames → Build Test Scene (in that order; the importer needs the cues).
+- [ ] Play the full route by ear (not finished this session):
+  - the dog corridor (growl, bark, whistle);
+  - the F2 6.9 aftershock;
+  - the epilogue outro;
+  - eating/drinking mid-exhaustion;
+  - a full stamina-0 → exhaustion death → checkpoint rewind.
+- [ ] Listen to the mix levels and the looped quake recordings; tune volumes on the cue assets.
+- [ ] Screenshot a home window wall close up (the salon right wall) and check the seams of the new window and cracked faces.
+### Not verified / risks
+- **Play Mode testing was stopped at the user's request ("testi sal").** Not checked:
+  - the exhaustion death in play, plus the overlay heartbeat and the stamina flash visuals;
+  - the dog growl/bark/whistle, the F2 quake, the outro, footsteps while running, and heartbeat levels.
+- **File changes during the session:** `afad.mp3` was renamed to `Audio/Generated/alarm.mp3`, and `sfx_rewind` / `sfx_building_alarm_loop` were deleted while I worked.
+  - Per the user: alarm.mp3 = the AFAD alert, and the other two were regenerated with `tools/gen_sfx.py`.
+  - The regenerated WAVs differ in bytes from the old ones (the script changed since).
+- **Extra clips:** `Audio/loop.mp3` and the original `craft sesi.wav` (12.5s) are not on any cue.
+- **Editor timing:** the Play Mode loop was slow under MCP (about 10 fps). `TypewriterText` now also raises the remaining characters on the final step, so voice blips survive long frames.
+- **Placement after a micro rewind:** the quake recording only restarts with the main shock, not during the window.
+### Next suggested step
+- Finish the by-ear playthrough above, then tune the cue volumes and the stamina numbers if the exhaustion timing feels off.
+
+---
+
 ## [2026-10-17 11:20] LOCAL — Verified the world scale + tile transition merge; transitions no longer cost time; framing and shake tuned (visual/playthrough tests skipped at the user's request)
 ### Done
 - **Compile:** the cloud code (world scale 1.5, tile rise/drop transition, animator rules) compiled with **0 errors** in Unity 6000.6. No asmdef changes needed; all the first-time APIs (Tilemap per-tile access, sprite proxies, RoomVisualConfig, lossyScale helpers) were fine.

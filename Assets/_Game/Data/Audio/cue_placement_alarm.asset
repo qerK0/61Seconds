@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_placement_alarm
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_placement_alarm
-  clips: []
-  volume: 1
+  clips:
+  - {fileID: 8300000, guid: 04cbcb12b85cbb54fac961a7b3a28170, type: 3}
+  volume: 0.65
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}
   loop: 0

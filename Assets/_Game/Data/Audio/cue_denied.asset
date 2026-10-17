@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_denied
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_denied
-  clips: []
-  volume: 0.6
-  pitchRange: {x: 1, y: 1}
+  clips:
+  - {fileID: 8300000, guid: 4418720088951614883a3ff527eb2baf, type: 3}
+  volume: 0.5
+  pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

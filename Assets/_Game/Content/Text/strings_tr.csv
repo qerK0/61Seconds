@@ -25,6 +25,7 @@ death.doorway,Kapı kasası seni korumadı. Hiç korumaz.,
 death.electrocuted,Çıplak elle akımlı kabloya dokundun.,fuse box without insulated gloves/grip + tape
 death.elevator,Asansör kat arasında durdu. Sonsuza dek.,"player, comic allowed"
 death.gas_poison,Gözlerin karardı. Gaz seni yere indirdi.,
+death.exhaustion,"Dizlerinin bağı çözüldü. Aç ve susuz, enkazın içinde bir adım daha atamadın.",stamina 0 too long (hunger/thirst)
 death.kitchen_fire,Yukarıda açık kalan gaz alev aldı. Merdivenler duman içinde.,delayed bomb from act 1 gas valve
 death.lamp_fall,Koridor lambası tam tepene indi.,player
 death.lighter_explosion,Çakmağı çaktın. Mutfak gazla doluydu.,Flat 10 lighter before closing the valve
@@ -250,6 +251,8 @@ tip.no_flame,"Deprem sonrası kibrit, çakmak ve ocak yakma; gaz kaçağı olabi
 tip.no_flame.title,Ateş yakma,
 tip.no_switch_gas,"Gaz kokusu varsa elektrik düğmelerine dokunma, çakmak yakma; önce gaz vanasını kapat.",AFAD
 tip.no_switch_gas.title,Gaz kokusunda düğmeye dokunma,
+tip.supplies,Deprem çantanda kişi başı en az 3 günlük su ve bozulmayan yiyecek bulunsun.,AFAD
+tip.supplies.title,Su ve yiyecek hazır olsun,
 tip.no_window,Cam kırıkları ciddi yaralanmalara yol açar. Pencere ve camlardan uzak dur.,AFAD
 tip.no_window.title,Pencerelerden uzak dur,
 tip.wardrobe,Devrilebilecek dolap ve rafların yanında durma; onları duvara sabitle.,AFAD

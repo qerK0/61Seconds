@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_building_alarm
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_building_alarm
-  clips: []
-  volume: 1
+  clips:
+  - {fileID: 8300000, guid: f441326b7511c4a46bb240849ffb173d, type: 3}
+  volume: 0.55
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}
-  loop: 0
+  loop: 1

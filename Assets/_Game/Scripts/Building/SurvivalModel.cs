@@ -52,6 +52,16 @@ namespace SixtyOne.Building
             return Mathf.Clamp01(poison + rate * dt);
         }
 
+        /// <summary>
+        /// Exhaustion (hunger/thirst) after dt: rises at gainPerSecond only while stamina is 0, otherwise decays
+        /// at decayPerSecond. Clamped 0..1 (1 = death).
+        /// </summary>
+        public static float StepExhaustion(float exhaustion, float stamina, float gainPerSecond, float decayPerSecond, float dt)
+        {
+            float rate = stamina <= 0f ? Mathf.Max(0f, gainPerSecond) : -Mathf.Max(0f, decayPerSecond);
+            return Mathf.Clamp01(exhaustion + rate * dt);
+        }
+
         /// <summary>Panic baseline: timer curve value plus poison contribution (0..1).</summary>
         public static float PanicBaseline(float timerPanic, float poison, float panicPerPoison)
         {

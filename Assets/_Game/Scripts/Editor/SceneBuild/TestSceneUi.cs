@@ -322,7 +322,8 @@ namespace SixtyOne.Editor
                 Button slotButton = slot.gameObject.AddComponent<Button>();
                 slotButton.targetGraphic = slot;
                 buttons[i] = slotButton;
-                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.04f, 0.15f), new Vector2(0.28f, 0.85f), Color.white, sprite: art.Dot);
+                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.03f, 0.06f), new Vector2(0.3f, 0.94f), Color.white, sprite: art.Dot);
+                icon.preserveAspect = true;
                 icon.enabled = false;
                 TextMeshProUGUI name = UiFactory.MakeLabel("Name", slot.transform, new Vector2(0.3f, 0f), new Vector2(0.97f, 1f), TextRole.Small, TextAlignmentOptions.MidlineLeft);
                 name.enableAutoSizing = true;
@@ -368,7 +369,8 @@ namespace SixtyOne.Editor
                 float x0 = 0.06f + i * (0.88f / Mathf.Max(1, count));
                 float x1 = x0 + 0.88f / Mathf.Max(1, count) - 0.04f;
                 Image frame = UiFactory.MakePanel("Frame_" + keyItems[i].Id, rect, new Vector2(x0, 0.04f), new Vector2(x1, 0.7f), new Color(1f, 1f, 1f, 0.12f));
-                Image icon = UiFactory.MakeImage("Icon", frame.transform, new Vector2(0.2f, 0.4f), new Vector2(0.8f, 0.94f), Color.white, raycast: true, sprite: art.Dot);
+                Image icon = UiFactory.MakeImage("Icon", frame.transform, new Vector2(0.15f, 0.38f), new Vector2(0.85f, 0.96f), Color.white, raycast: true, sprite: art.Dot);
+                icon.preserveAspect = true;
                 TextMeshProUGUI name = UiFactory.MakeLabel("Name", frame.transform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.4f), TextRole.Small, TextAlignmentOptions.Center);
                 name.enableAutoSizing = true;
                 name.fontSizeMin = 16f;

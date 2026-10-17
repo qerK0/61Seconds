@@ -157,7 +157,7 @@ MonoBehaviour:
       victim: 0
       rewindTarget: 0
       rewindTo: {fileID: 0}
-    cue: {fileID: 0}
+    cue: {fileID: 11400000, guid: 7f177785cba79504ca37cc4863b54124, type: 2}
   - labelKey:
       key: f2.corridor.c_pass
     type: 0

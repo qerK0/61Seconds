@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_afad_alert
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_afad_alert
-  clips: []
-  volume: 1
+  clips:
+  - {fileID: 8300000, guid: 0bebe15cc31eb2d498370061b238a8fc, type: 3}
+  volume: 0.9
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}
   loop: 0

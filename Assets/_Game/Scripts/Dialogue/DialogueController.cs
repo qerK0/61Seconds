@@ -18,6 +18,9 @@ namespace SixtyOne.Dialogue
         [Tooltip("Component implementing IChoicePresenter (ChoicePanel).")]
         [SerializeField] private MonoBehaviour presenter;
 
+        /// <summary>Speaker key of the line now shown, or null when no line is shown (dialogue voice blips).</summary>
+        public static event Action<string> SpeakerChanged;
+
         private DialogueNode node;
         private int lineIndex;
 
@@ -47,6 +50,7 @@ namespace SixtyOne.Dialogue
         public void Cancel()
         {
             node = null;
+            SpeakerChanged?.Invoke(null);
         }
 
         public void RefreshChoices()
@@ -75,6 +79,7 @@ namespace SixtyOne.Dialogue
         private void ShowLine()
         {
             DialogueLine line = node.Lines[lineIndex];
+            SpeakerChanged?.Invoke(line.SpeakerKey.IsEmpty ? null : line.SpeakerKey.Key);
             Presenter?.PresentText(
                 line.SpeakerKey.IsEmpty ? string.Empty : line.SpeakerKey.Display,
                 line.TextKey.Display,
@@ -86,6 +91,7 @@ namespace SixtyOne.Dialogue
 
         private void ShowEnding()
         {
+            SpeakerChanged?.Invoke(null);
             Presenter?.Present(node, ChoiceView.Build(node, gameManager.State, DialogueFilter.AfterDialogue), Choose);
         }
 

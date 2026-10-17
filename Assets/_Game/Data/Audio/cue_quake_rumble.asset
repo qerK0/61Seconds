@@ -13,7 +13,8 @@ MonoBehaviour:
   m_Name: cue_quake_rumble
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_quake_rumble
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: c01cd35b16a1f9a45838bb5e91670400, type: 3}
   volume: 0.9
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}

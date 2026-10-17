@@ -68,6 +68,16 @@ namespace SixtyOne.Building
         [Tooltip("Time multiplier for every action while stamina is 0.")]
         [SerializeField] private float staminaZeroTimeMultiplier = 1.5f;
 
+        [Header("Exhaustion (hunger/thirst)")]
+        [Tooltip("Exhaustion gained per second while stamina is 0 (1 = death; 0.03 = ~35s).")]
+        [SerializeField] private float exhaustionPerSecond = 0.03f;
+        [Tooltip("Exhaustion lost per second once stamina is above 0 (after eating or drinking).")]
+        [SerializeField] private float exhaustionDecayPerSecond = 0.2f;
+        [Tooltip("Exhaustion death line.")]
+        [SerializeField] private TextKey exhaustionTextKey;
+        [Tooltip("Exhaustion death tip.")]
+        [SerializeField] private Tip exhaustionTip;
+
         [Header("Poison (gas)")]
         [Tooltip("Rooms with a gas leak and the valve flag that stops it.")]
         [SerializeField] private List<GasZone> gasZones = new List<GasZone>();
@@ -113,6 +123,10 @@ namespace SixtyOne.Building
         public float StaminaMax => staminaMax;
         public float StaminaDrainPerSecond => staminaDrainPerSecond;
         public float StaminaZeroTimeMultiplier => staminaZeroTimeMultiplier;
+        public float ExhaustionPerSecond => exhaustionPerSecond;
+        public float ExhaustionDecayPerSecond => exhaustionDecayPerSecond;
+        public TextKey ExhaustionTextKey => exhaustionTextKey;
+        public Tip ExhaustionTip => exhaustionTip;
         public IReadOnlyList<GasZone> GasZones => gasZones;
         public float PoisonDecayPerSecond => poisonDecayPerSecond;
         public Item WetClothItem => wetClothItem;
@@ -170,6 +184,18 @@ namespace SixtyOne.Building
             requiredBedsheetsForRope = sheetsForRope;
             ropeCraftSeconds = ropeSeconds;
             ropeCraftStamina = ropeStamina;
+        }
+
+        /// <summary>Authoring helper: stamina and the exhaustion death it leads to.</summary>
+        public void ConfigureStamina(float max, float drainPerSecond, float zeroTimeMultiplier, float exhaustionGain, float exhaustionDecay, TextKey deathText, Tip tip)
+        {
+            staminaMax = max;
+            staminaDrainPerSecond = drainPerSecond;
+            staminaZeroTimeMultiplier = zeroTimeMultiplier;
+            exhaustionPerSecond = exhaustionGain;
+            exhaustionDecayPerSecond = exhaustionDecay;
+            exhaustionTextKey = deathText;
+            exhaustionTip = tip;
         }
 
         /// <summary>Authoring helper for generators.</summary>

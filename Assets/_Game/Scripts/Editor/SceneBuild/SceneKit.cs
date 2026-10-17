@@ -144,7 +144,14 @@ namespace SixtyOne.Editor
 
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
             r.color = color;
-            if (surface)
+            if (surface && grants != null && grants.Icon != null)
+            {
+                // Real item art lying on the surface (white = no tint), clickable over the whole icon.
+                r.sprite = grants.Icon;
+                r.color = Color.white;
+                go.AddComponent<CircleCollider2D>().radius = ItemIconArt.WorldSize * 0.5f;
+            }
+            else if (surface)
             {
                 r.sprite = Art.Dot;
                 go.AddComponent<CircleCollider2D>().radius = 0.19f;
@@ -263,6 +270,13 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>A person (capsule) or object (block) that plays a node choice; hover shows the choice label.</summary>
+        private static CharacterArt.Frames sevimFrames;
+
+        /// <summary>Sevim's idle frames, imported once per scene build.</summary>
+        private static CharacterArt.Frames SevimFrames => sevimFrames != null && sevimFrames.Sprites.Length > 0 && sevimFrames.Sprites[0] != null
+            ? sevimFrames
+            : sevimFrames = CharacterArt.ImportSevim();
+
         public static ChoiceHotspot Hotspot(Transform room, BuildingLayout.HotspotSpec spec, RoomNavigator navigator)
         {
             var go = new GameObject("Hotspot_" + spec.Name);
@@ -277,10 +291,18 @@ namespace SixtyOne.Editor
             Material lit = RoomTiles.LitMaterial;
             if (lit != null) r.sharedMaterial = lit;
             float height;
+            CharacterArt.Frames idle = spec.Idle == "sevim" ? SevimFrames : null;
             if (spec.Person)
             {
                 body.transform.localScale = new Vector3(1.1f, 1.1f, 1f);
                 height = 0.8f;
+                if (idle != null && idle.Sprites.Length > 0)
+                {
+                    body.transform.localScale = Vector3.one * idle.BodyScale;
+                    height = CharacterArt.PlayerHeight * CharacterArt.SevimHeightRatio;
+                    body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, 9f);
+                }
+
                 var shadow = new GameObject("Shadow");
                 shadow.transform.SetParent(go.transform, false);
                 shadow.transform.localScale = new Vector3(0.45f, 0.45f, 1f);
@@ -293,6 +315,16 @@ namespace SixtyOne.Editor
             {
                 body.transform.localScale = new Vector3(spec.Scale.x, spec.Scale.y, 1f);
                 height = spec.Scale.y;
+            }
+
+            if (string.IsNullOrEmpty(spec.ChoiceKey))
+            {
+                // Decorative person: no click, no hover, no choice.
+                IsoSorter decor = go.AddComponent<IsoSorter>();
+                decor.Mode = IsoSortMode.Static;
+                SerializedWire.SetBool(decor, "includeChildren", true);
+                decor.Apply();
+                return null;
             }
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();

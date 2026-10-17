@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_fire
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_fire
-  clips: []
-  volume: 0.9
+  clips:
+  - {fileID: 8300000, guid: fc60fa831cb702b4193191fbb72f0cae, type: 3}
+  volume: 1
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}
   loop: 0

@@ -83,11 +83,8 @@ namespace SixtyOne.Placement
             locked = true;
             NavigationEvents.RaiseTransitionStart(from != null ? from.RoomId : null, toId);
             if (kind == TransitionKind.Descend) AudioService.PlayCue(config.DescendCue);
-            else
-            {
-                AudioService.PlayCue(config.DoorCue);
-                AudioService.PlayCue(config.FootstepsCue);
-            }
+            // Footsteps loop while the player runs (FootstepsAudio), not per transition.
+            else AudioService.PlayCue(config.DoorCue);
 
             GameManager gm = GameManager.Instance;
             bool reduce = gm != null && gm.Settings != null && gm.Settings.ReduceEffects;

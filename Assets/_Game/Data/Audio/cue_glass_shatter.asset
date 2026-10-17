@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_glass_shatter
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_glass_shatter
-  clips: []
-  volume: 0.9
-  pitchRange: {x: 1, y: 1}
+  clips:
+  - {fileID: 8300000, guid: 26d8eff5482a2ae42aa8de2269045331, type: 3}
+  volume: 0.85
+  pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

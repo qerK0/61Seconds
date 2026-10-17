@@ -21,6 +21,9 @@ namespace SixtyOne.Editor
         public LevelConfig Level;
         public AudioEventMap AudioMap;
         public List<AudioCue> Cues = new List<AudioCue>();
+        public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue;
+        public AudioCue MusicPrep, MusicTension, MusicOutro;
+        public DialogueVoiceProfile Voices;
         public Dictionary<string, Hazard> Hazards = new Dictionary<string, Hazard>();
         public Dictionary<string, Item> Items = new Dictionary<string, Item>();
         public Dictionary<string, Tip> Tips = new Dictionary<string, Tip>();
@@ -87,7 +90,7 @@ namespace SixtyOne.Editor
         {
             "tip.drop_cover_hold", "tip.no_elevator", "tip.no_balcony", "tip.wardrobe", "tip.no_window", "tip.no_doorway",
             "tip.keep_child_close", "tip.no_switch_gas", "tip.no_flame", "tip.gas_off", "tip.emergency_bag",
-            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock"
+            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock", "tip.supplies"
         };
 
         /// <summary>Entering these nodes blends the cinematic look to "we got out".</summary>
@@ -114,26 +117,44 @@ namespace SixtyOne.Editor
             result.TextSettings.Configure(AssetDatabase.LoadAssetAtPath<TextAsset>(TextDB.DefaultCsvPath));
             result.Settings = Asset<GameSettings>(DataRoot + "/GameSettings.asset");
 
+            // Mix: music ~0.3-0.4 under SFX, ambience lowest (~0.15), quakes/death/explosion loudest, clicks and ticks quiet.
             AudioCue rumble = Cue("cue_quake_rumble", 0.9f, loop: true);
             AudioCue death = Cue("cue_death_sting", 1f);
-            AudioCue rewind = Cue("cue_rewind", 0.8f);
+            AudioCue rewind = Cue("cue_rewind", 0.75f);
             AudioCue pickup = Cue("cue_pickup", 0.7f, 0.95f, 1.05f);
-            AudioCue alert = Cue("cue_afad_alert", 1f);
-            AudioCue denied = Cue("cue_denied", 0.6f);
-            AudioCue click = Cue("cue_choice_click", 0.5f, 0.97f, 1.03f);
-            Cue("cue_glass_shatter", 0.9f);
-            Cue("cue_furniture_crash", 0.9f);
-            Cue("cue_fire", 0.9f);
-            AudioCue tick = Cue("cue_countdown_tick", 0.8f);
-            AudioCue alarm = Cue("cue_building_alarm", 1f);
+            AudioCue alert = Cue("cue_afad_alert", 0.9f);
+            AudioCue denied = Cue("cue_denied", 0.5f, 0.95f, 1.05f);
+            AudioCue click = Cue("cue_choice_click", 0.35f, 0.95f, 1.05f);
+            result.GlassCue = Cue("cue_glass_shatter", 0.85f, 0.95f, 1.05f);
+            result.CrashCue = Cue("cue_furniture_crash", 0.9f, 0.92f, 1.05f);
+            result.FireCue = Cue("cue_fire", 1f);
+            AudioCue tick = Cue("cue_countdown_tick", 0.4f, 0.95f, 1.05f);
+            AudioCue alarm = Cue("cue_building_alarm", 0.55f, loop: true);
             AudioCue door = Cue("cue_door", 0.7f, 0.95f, 1.05f);
-            AudioCue footsteps = Cue("cue_footsteps", 0.6f, 0.95f, 1.05f);
+            AudioCue footsteps = Cue("cue_footsteps", 0.45f, 0.97f, 1.03f, loop: true);
             AudioCue descend = Cue("cue_descend", 0.8f);
-            AudioCue qteHit = Cue("cue_qte_hit", 0.6f, 0.97f, 1.08f);
-            AudioCue qteMiss = Cue("cue_qte_miss", 0.9f);
-            AudioCue qteSuccess = Cue("cue_qte_success", 0.9f);
+            AudioCue qteHit = Cue("cue_qte_hit", 0.55f, 0.95f, 1.05f);
+            AudioCue qteMiss = Cue("cue_qte_miss", 0.8f, 0.95f, 1.05f);
+            AudioCue qteSuccess = Cue("cue_qte_success", 0.85f);
+            AudioCue preQuake = Cue("cue_placement_alarm", 0.65f);
+            AudioCue craft = Cue("cue_craft", 0.7f, 0.97f, 1.03f);
+            result.WhistleCue = Cue("cue_whistle", 0.8f);
+            result.ElectricCue = Cue("cue_electric", 0.85f, 0.95f, 1.05f);
+            result.DogBarkCue = Cue("cue_dog_bark", 0.85f, 0.95f, 1.05f);
+            result.DogGrowlCue = Cue("cue_dog_growl", 0.3f, loop: true);
+            result.HeartbeatCue = Cue("cue_heartbeat", 0.7f, loop: true);
+            result.DripCue = Cue("cue_amb_drip", 0.15f, loop: true);
+            result.MusicPrep = Cue("cue_music_prep", 0.4f, loop: true);
+            result.MusicTension = Cue("cue_music_tension", 0.35f, loop: true);
+            result.MusicOutro = Cue("cue_music_outro", 0.5f, loop: true);
+            AudioCue[] quakes =
+            {
+                Cue("cue_quake_f4", 1f, loop: true), Cue("cue_quake_f3", 0.9f, loop: true), Cue("cue_quake_f2", 1f, loop: true)
+            };
             result.AudioMap = Asset<AudioEventMap>(AudioDir + "/AudioEventMap.asset");
             result.AudioMap.Configure(rumble, death, rewind, pickup, alert, denied, click);
+            result.AudioMap.ConfigureExtras(quakes, preQuake, craft);
+            result.Voices = Asset<DialogueVoiceProfile>(AudioDir + "/DialogueVoices.asset");
 
             foreach (string tipId in TipIds)
             {
@@ -151,6 +172,9 @@ namespace SixtyOne.Editor
             result.Level = Asset<LevelConfig>(DataRoot + "/LevelConfig.asset");
             result.Level.ConfigureTimer(300f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
             result.Level.ConfigurePoison(GasZones(), Item("wet_cloth"), "death.gas_poison", Tip("tip.gas_poison"));
+            // Stamina 100, 0.42/s: no food or water = 0 at ~165s with the usual heavy climbs (~30); food +35 (~83s),
+            // water +25 (~60s). At 0 exhaustion rises 0.03/s (~33s to death) and falls 0.2/s after eating.
+            result.Level.ConfigureStamina(100f, 0.42f, 1.5f, 0.03f, 0.2f, "death.exhaustion", Tip("tip.supplies"));
             result.Level.ConfigurePrep(PrepSeconds, 10);
             result.Level.ConfigureBag(6, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
 
@@ -169,9 +193,10 @@ namespace SixtyOne.Editor
             // Tuned for ~60-70% first-try success (Monte Carlo: ~0.62s median 4-choice reaction, +0.35s to orient on
             // the first key, 2.5% wrong keys). Breaker ~65%; dog ~64% with longer sequences and a higher penalty.
             result.QteBreaker = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.breaker.asset");
-            result.QteBreaker.Configure(4, 6, 1.15f, 7f, 5f, qteHit, qteMiss, qteSuccess);
+            // Breaker misses spark (electric); dog misses bark at the player.
+            result.QteBreaker.Configure(4, 6, 1.15f, 7f, 5f, qteHit, result.ElectricCue, qteSuccess);
             result.QteDog = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.dog.asset");
-            result.QteDog.Configure(5, 6, 1.15f, 6.5f, 6f, qteHit, qteMiss, qteSuccess);
+            result.QteDog.Configure(5, 6, 1.15f, 6.5f, 6f, qteHit, result.DogBarkCue, qteSuccess);
 
             BuildFloor4();
             BuildFloor3();
@@ -198,7 +223,7 @@ namespace SixtyOne.Editor
             foreach (string id in ItemIds)
             {
                 Item item = Asset<Item>($"{ItemsDir}/item.{id}.asset");
-                item.Configure(id, $"item.{id}.name", $"item.{id}.desc");
+                item.Configure(id, $"item.{id}.name", $"item.{id}.desc", ItemIconArt.For(id));
                 result.Items[id] = item;
             }
 
@@ -248,7 +273,8 @@ namespace SixtyOne.Editor
         {
             Hazard hazard = Asset<Hazard>($"{HazardsDir}/{id}.asset");
             hazard.Configure(id, ActMask.All, player, wife, HazardEffect.Trapped, motion, propId);
-            hazard.ConfigureText($"death.{textSuffix}", $"death.wife.{textSuffix}", $"death.child.{textSuffix}", Tip(tipId));
+            AudioCue cue = motion == HazardMotion.Shatter ? result.GlassCue : motion == HazardMotion.None ? null : result.CrashCue;
+            hazard.ConfigureText($"death.{textSuffix}", $"death.wife.{textSuffix}", $"death.child.{textSuffix}", Tip(tipId), cue);
             result.Hazards[id] = hazard;
         }
 
@@ -277,7 +303,14 @@ namespace SixtyOne.Editor
 
         private static DeathData Death(string textKey, string tipId, SceneNode rewindTo = null)
         {
-            return new DeathData(textKey, Tip(tipId), MemberType.Player, rewindTo);
+            return new DeathData(textKey, Tip(tipId), MemberType.Player, rewindTo, DeathCue(textKey));
+        }
+
+        /// <summary>Fire and electric deaths get their own sound instead of the default sting.</summary>
+        private static AudioCue DeathCue(string textKey)
+        {
+            if (textKey == "death.lighter_explosion" || textKey == "death.stove" || textKey == "death.kitchen_fire") return result.FireCue;
+            return textKey == "death.electrocuted" ? result.ElectricCue : null;
         }
 
         private static DialogueLine Line(string speakerKey, string nodeId, int n, float seconds)

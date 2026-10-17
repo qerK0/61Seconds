@@ -17,6 +17,12 @@ namespace SixtyOne.Editor
     {
         public const string Folder = "Assets/_Game/Art/char/RUN";
 
+        /// <summary>Sevim Teyze's idle loop (frame0000.png ...), imported the same way as the family.</summary>
+        public const string SevimFolder = "Assets/_Game/Art/char/SEVIM_IDLE";
+
+        /// <summary>Sevim's height relative to the player (an older neighbour, a little shorter than the wife).</summary>
+        public const float SevimHeightRatio = 0.9f;
+
         /// <summary>Shared pixels-per-unit (source pixels) for all three characters.</summary>
         public const float PixelsPerUnit = 1690f;
 
@@ -82,13 +88,26 @@ namespace SixtyOne.Editor
                 Frames frames = Import(member);
                 Debug.Log($"[CharacterArt] {Prefix(member)}: {frames.Sprites.Length} frames, visible height {frames.VisibleHeight:0.00}u, body scale {frames.BodyScale:0.000}.");
             }
+
+            Frames sevim = ImportSevim();
+            Debug.Log($"[CharacterArt] sevim idle: {sevim.Sprites.Length} frames, visible height {sevim.VisibleHeight:0.00}u, body scale {sevim.BodyScale:0.000}.");
+        }
+
+        /// <summary>Imports Sevim Teyze's idle frames (any count) with the family's PPU and foot pivot.</summary>
+        public static Frames ImportSevim()
+        {
+            return ImportPaths(SortedFramePaths(SevimFolder, "frame"), SevimHeightRatio, MemberType.Player);
         }
 
         /// <summary>Imports (or re-imports) one character's frames and returns them in numeric order.</summary>
         public static Frames Import(MemberType member)
         {
+            return ImportPaths(SortedFramePaths(Prefix(member)), TargetHeightRatio(member), member);
+        }
+
+        private static Frames ImportPaths(List<string> paths, float heightRatio, MemberType member)
+        {
             var result = new Frames { Member = member };
-            List<string> paths = SortedFramePaths(Prefix(member));
             if (paths.Count == 0) return result;
 
             // Measure from the source PNGs (full resolution, never modified).
@@ -114,17 +133,20 @@ namespace SixtyOne.Editor
 
             result.Sprites = sprites.ToArray();
             result.VisibleHeight = (maxY - minY) / PixelsPerUnit;
-            float target = PlayerHeight * TargetHeightRatio(member);
+            float target = PlayerHeight * heightRatio;
             result.BodyScale = result.VisibleHeight > 0f ? target / result.VisibleHeight : 1f;
             return result;
         }
 
         /// <summary>Frame paths for a prefix, sorted by the number in parentheses ("x (2)" before "x (10)").</summary>
-        public static List<string> SortedFramePaths(string prefix)
+        public static List<string> SortedFramePaths(string prefix) => SortedFramePaths(Folder, prefix);
+
+        /// <summary>Frame paths in a folder for a prefix, numeric order ("x (2)" before "x (10)", zero-padded names in order).</summary>
+        public static List<string> SortedFramePaths(string folder, string prefix)
         {
             var paths = new List<string>();
-            if (!Directory.Exists(Folder)) return paths;
-            foreach (string file in Directory.GetFiles(Folder, prefix + "*.png"))
+            if (!Directory.Exists(folder)) return paths;
+            foreach (string file in Directory.GetFiles(folder, prefix + "*.png"))
             {
                 paths.Add(file.Replace('\\', '/'));
             }

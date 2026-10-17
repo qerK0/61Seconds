@@ -220,7 +220,8 @@ namespace SixtyOne.Cinematic
             if (inPrep) state.Prep = 1f - Mathf.Clamp01(gs.PrepTime / survival.Config.PrepSeconds);
             else state.Prep = survival != null ? survival.Timer.ElapsedFraction(survival.Remaining) : 0f;
             bool prepTicking = inPrep && gs.PrepTime > 0f && gs.PrepTime <= survival.Config.PrepTickFrom;
-            state.Poison = gameManager != null ? gameManager.State.Poison : 0f;
+            // Gas and exhaustion darken the same way (the stronger one wins).
+            state.Poison = gameManager != null ? Mathf.Max(gameManager.State.Poison, gameManager.State.Exhaustion) : 0f;
 
             bool inWindow = nodePlayer != null && nodePlayer.Current is PlacementNode && nodePlayer.Timer.Running;
             if (inWindow)

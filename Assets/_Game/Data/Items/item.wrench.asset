@@ -17,7 +17,7 @@ MonoBehaviour:
     key: item.wrench.name
   descriptionKey:
     key: item.wrench.desc
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 8d628faa95aa79a448e40c0545435377, type: 3}
   isTrap: 0
   isKeyItem: 0
   staminaRestore: 0

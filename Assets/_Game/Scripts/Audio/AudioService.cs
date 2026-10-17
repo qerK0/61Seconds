@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -107,6 +108,63 @@ namespace SixtyOne.Audio
             }
 
             return Play(cue);
+        }
+
+        /// <summary>Plays a cue with its volume and pitch scaled (e.g. a longer, louder macro rewind).</summary>
+        public AudioSource Play(AudioCue cue, float volumeScale, float pitchScale)
+        {
+            AudioSource source = Play(cue);
+            if (source == null) return null;
+            source.volume = Mathf.Clamp01(cue.Volume * volumeScale);
+            source.pitch *= pitchScale;
+            return source;
+        }
+
+        /// <summary>True while any pooled source plays the cue.</summary>
+        public bool IsPlaying(AudioCue cue)
+        {
+            if (cue == null) return false;
+            foreach (AudioSource source in pool)
+            {
+                if (source.isPlaying && playing.TryGetValue(source, out AudioCue current) && current == cue) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>Fades out and stops every source playing the cue (unscaled time).</summary>
+        public void FadeOut(AudioCue cue, float seconds)
+        {
+            if (cue == null) return;
+            foreach (AudioSource source in pool)
+            {
+                if (source.isPlaying && playing.TryGetValue(source, out AudioCue current) && current == cue)
+                {
+                    playing.Remove(source);
+                    StartCoroutine(FadeRoutine(source, seconds));
+                }
+            }
+        }
+
+        /// <summary>Fades a cue out if an AudioService exists.</summary>
+        public static void FadeOutCue(AudioCue cue, float seconds)
+        {
+            if (Instance != null && cue != null) Instance.FadeOut(cue, seconds);
+        }
+
+        /// <summary>True if an AudioService exists and plays the cue.</summary>
+        public static bool IsCuePlaying(AudioCue cue) => Instance != null && Instance.IsPlaying(cue);
+
+        private static IEnumerator FadeRoutine(AudioSource source, float seconds)
+        {
+            float start = source.volume;
+            for (float t = 0f; t < seconds && source.isPlaying; t += Time.unscaledDeltaTime)
+            {
+                source.volume = Mathf.Lerp(start, 0f, t / Mathf.Max(0.01f, seconds));
+                yield return null;
+            }
+
+            source.Stop();
         }
 
         /// <summary>Stops every source currently playing the cue.</summary>

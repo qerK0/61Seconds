@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_choice_click
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_choice_click
-  clips: []
-  volume: 0.5
-  pitchRange: {x: 0.97, y: 1.03}
+  clips:
+  - {fileID: 8300000, guid: 995a13e758d0b8c4a9f341f2fd64088a, type: 3}
+  volume: 0.35
+  pitchRange: {x: 0.95, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

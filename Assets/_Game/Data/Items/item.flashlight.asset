@@ -17,7 +17,7 @@ MonoBehaviour:
     key: item.flashlight.name
   descriptionKey:
     key: item.flashlight.desc
-  icon: {fileID: 0}
+  icon: {fileID: 21300000, guid: 33ad4beb7063bea4aae09e0141d27149, type: 3}
   isTrap: 0
   isKeyItem: 1
   staminaRestore: 0

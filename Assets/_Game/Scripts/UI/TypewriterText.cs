@@ -21,10 +21,17 @@ namespace SixtyOne.UI
 
         public bool IsRevealing { get; private set; }
 
+        /// <summary>Raised for each character as it appears (dialogue voice blips).</summary>
+        public event System.Action<char> CharRevealed;
+
+        /// <summary>Raised when a reveal ends (finished or skipped).</summary>
+        public event System.Action RevealEnded;
+
         /// <summary>Sets the text and starts revealing it (instant when reveal is false).</summary>
         public void Play(string text, bool reveal = true)
         {
             if (label == null) return;
+            if (IsRevealing) RevealEnded?.Invoke();
             label.text = text ?? string.Empty;
             label.ForceMeshUpdate();
             total = label.textInfo.characterCount;
@@ -35,15 +42,24 @@ namespace SixtyOne.UI
 
         public void Complete()
         {
+            bool was = IsRevealing;
             IsRevealing = false;
             if (label != null) label.maxVisibleCharacters = 99999;
+            if (was) RevealEnded?.Invoke();
         }
 
         private void Update()
         {
             if (!IsRevealing) return;
             shown += Time.unscaledDeltaTime * charsPerSecond;
-            int visible = Mathf.FloorToInt(shown);
+            int visible = Mathf.Min(Mathf.FloorToInt(shown), total);
+            if (CharRevealed != null)
+            {
+                // Also on the last step, so a long frame that finishes the line still voices it.
+                TMP_CharacterInfo[] chars = label.textInfo.characterInfo;
+                for (int i = Mathf.Max(0, label.maxVisibleCharacters); i < visible && i < chars.Length; i++) CharRevealed(chars[i].character);
+            }
+
             if (visible >= total)
             {
                 Complete();

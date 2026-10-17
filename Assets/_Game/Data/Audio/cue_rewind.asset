@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_rewind
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_rewind
-  clips: []
-  volume: 0.8
+  clips:
+  - {fileID: 8300000, guid: b69e04de18b84ba418578f7a97ca821e, type: 3}
+  volume: 0.75
   pitchRange: {x: 1, y: 1}
   mixerGroup: {fileID: 0}
   loop: 0

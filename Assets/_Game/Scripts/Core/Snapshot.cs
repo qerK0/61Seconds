@@ -43,6 +43,7 @@ namespace SixtyOne.Core
             live.BuildingTimerStarted = saved.BuildingTimerStarted;
             live.Stamina = saved.Stamina;
             live.Poison = saved.Poison;
+            live.Exhaustion = saved.Exhaustion;
             live.Borrowed.CopyFrom(saved.Borrowed);
 
             foreach (FamilyMemberState member in live.Members)

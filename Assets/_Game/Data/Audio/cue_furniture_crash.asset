@@ -13,8 +13,9 @@ MonoBehaviour:
   m_Name: cue_furniture_crash
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Audio.AudioCue
   id: cue_furniture_crash
-  clips: []
+  clips:
+  - {fileID: 8300000, guid: cdd73565964432448b6dc9d36ec04faa, type: 3}
   volume: 0.9
-  pitchRange: {x: 1, y: 1}
+  pitchRange: {x: 0.92, y: 1.05}
   mixerGroup: {fileID: 0}
   loop: 0

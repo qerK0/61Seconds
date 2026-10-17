@@ -32,8 +32,13 @@ MonoBehaviour:
   ropeCraftStamina: 3
   injuredMoveExtraPerMember: 0.25
   staminaMax: 100
-  staminaDrainPerSecond: 0.15
+  staminaDrainPerSecond: 0.42
   staminaZeroTimeMultiplier: 1.5
+  exhaustionPerSecond: 0.03
+  exhaustionDecayPerSecond: 0.2
+  exhaustionTextKey:
+    key: death.exhaustion
+  exhaustionTip: {fileID: 11400000, guid: aa4d5eb86f477fa4685427903e12470c, type: 2}
   gasZones:
   - roomId: flat11_kitchen
     valveFlag: GasOff

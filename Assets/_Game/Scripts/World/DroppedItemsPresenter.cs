@@ -89,10 +89,12 @@ namespace SixtyOne.World
 
             Item item = content != null ? content.FindItem(itemId) : null;
             SpriteRenderer r = go.AddComponent<SpriteRenderer>();
-            r.sprite = item != null && item.Icon != null ? item.Icon : fallbackSprite;
-            r.color = tint;
-            go.transform.localScale = new Vector3(0.45f, 0.45f, 1f);
-            go.AddComponent<CircleCollider2D>().radius = 0.45f;
+            bool hasIcon = item != null && item.Icon != null;
+            r.sprite = hasIcon ? item.Icon : fallbackSprite;
+            r.color = hasIcon ? Color.white : tint;
+            // Icons are sized in their import (~0.42u); the placeholder dot is scaled down.
+            go.transform.localScale = hasIcon ? Vector3.one : new Vector3(0.45f, 0.45f, 1f);
+            go.AddComponent<CircleCollider2D>().radius = hasIcon ? 0.21f : 0.45f;
 
             IsoSorter sorter = go.AddComponent<IsoSorter>();
             sorter.Mode = IsoSortMode.Static;

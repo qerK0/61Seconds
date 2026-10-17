@@ -20,5 +20,5 @@ MonoBehaviour:
   hitStopSeconds: 0.15
   failShake: 0.08
   hitCue: {fileID: 11400000, guid: dce2bcfabdfbf9743b4b0ee9254301f6, type: 2}
-  missCue: {fileID: 11400000, guid: 49fe14e3fae25b44aada4528f4ef3fbb, type: 2}
+  missCue: {fileID: 11400000, guid: aee9f62ead2e7ce46930c4f9d2955e6e, type: 2}
   successCue: {fileID: 11400000, guid: b53d27856b865ee459b42c22dc3e7f50, type: 2}

@@ -90,7 +90,7 @@ namespace SixtyOne.Prep
             if (room != null) room.ResetProps();
             if (!prep.ShowAlertOnEnter) return;
             GameEvents.RaiseAlert(prep.AlertTitleKey.Key, prep.AlertBodyKey.Key, Mathf.CeilToInt(State.PrepTime).ToString());
-            AudioService.PlayCue(alertCue);
+            if (!AudioService.IsCuePlaying(alertCue)) AudioService.PlayCue(alertCue);
         }
 
         private void OnRewound(string nodeId)
