@@ -4,6 +4,88 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 20:30] LOCAL — local-task-17 (repeating info fix, Craft Defteri, ending slot, night street) + the earlier final pass (collision, gas valves, items)
+### Done
+- **Final pass (earlier today, no entry was written then):**
+  - **Collision:** solid props block the cells under their sprite base (`PropFootprint`):
+    - the base is the opaque width of the bottom half of the sprite × the saved scale;
+    - the footprint's front corner sits on the pivot;
+    - wall and ceiling fixtures and signs never block.
+  - **Keeping rooms playable:** required cells (spawns, anchors, doors, hotspots, ropes, NPCs) are carved out. A prop that still cuts a path shrinks to its centre cell, and walled-in pockets are blocked.
+  - **Shrunk props:** `hall_nightstand` (Flat 11 hall) no longer blocks; `floorhole_23a77` (Flat 9 living) was shrunk to its centre cell.
+  - **Container approach:** if a container's approach cell is blocked, the player uses the nearest reachable free cell.
+  - **Gas valves:** `GasValveView` runs on all 3 valves:
+    - closing turns the handle 90° and plays a creak;
+    - the hiss loop stops and the green haze fades;
+    - everything is driven by the valve flag, so rewinds restore it;
+    - a valve is moved next to its stove when the stove was moved by hand.
+  - **Items:** `ItemPlan` fills every container (generous), and a Flat 7 kitchen cabinet was added. Validate Content checks progression (3 bedsheets, harness, gloves or cloth + tape, flashlight, whistle, wrench, ≥3 food, ≥3 water). Floating world labels on items and containers were removed.
+- **Part 1, repeating info bug:**
+  - **Root cause:** a rewind restored a snapshot that was already close to a death (no stamina or high exhaustion, high poison, or a nearly empty building timer at a checkpoint). The same death fired again seconds later, with its death card and macro info card, again and again.
+  - **Fix:** `RewindRecovery` after every rewind:
+    - poison and exhaustion → 0 (macro) or ≤ 0.35 (micro);
+    - stamina ≥ 40 %;
+    - building time ≥ 60 s (`minSecondsAfterRewind`).
+  - The macro info card shows once per checkpoint and death cause (`RewindCardGate`). The toast queue is cleared on rewind.
+  - Regression test `RepeatingInfoTests` (3 deaths: gas, trap, timer).
+- **Part 2, Craft Defteri (`CraftNotebook`):**
+  - Look: a spiral-bound lined page (#F3EEDF, blue rules, red margin, 10 rings over punched holes, −1.5°, shadow) in Caveat SDF (`UITheme.Hand` / `HandBold`).
+  - Content: one line per recipe plus the bedsheet rope line. Undiscovered results show `???` under a scribble. Discovery = crafted, or all inputs held at once; it is stored in the KnowledgeSet as `recipe:<output>`.
+  - Crafting: two taped slots (a bag click fills them while the notebook is open) and a `Birleştir` button with the same costs as the bag combine. Two bedsheets in the slots tie the rope.
+  - Open with the `Defter` button by the bag header or `C`. Esc closes it before the pause menu. A paper rustle plays and timers keep running.
+- **Part 3, ending slot:**
+  - `EndingCinematic` plays at the sign before the epilogue. Frames come from `Data/Cinematic/EndingCinematicConfig` (12 fps, `cue_ending`, else the outro music) and can be skipped after 1 s.
+  - Fallback (no frames): fade to black, then `Acil toplanma alanına ulaştınız.` in IBM Plex Mono for 3 s.
+  - No deaths while it plays.
+  - Menu `SixtyOne > Art > Import Ending Frames` (folder `Art/anim/ENDING`).
+- **Part 4, the street (`StreetDressing` + `StreetAmbience`):**
+  - **Ruins and rubble:** `enkaz son 2/3` façades along the back edge (alternating, flipped, scaled, darker further back), `enkaz son 1` mounds (also the façade-drop rubble at 0.55 scale), small debris, broken low walls.
+  - **Street props:**
+    - thrown furniture;
+    - a sinkhole (solid FloorHole);
+    - door art on our building;
+    - dark cars with a blinking orange alarm light;
+    - 3 lamps (dead / flicker / swing).
+  - **Atmosphere:**
+    - fire glow with sparks and smoke;
+    - 2 fog layers and falling ash;
+    - red / blue emergency lights pulsing from the left;
+    - a green ACİL TOPLANMA ALANI board on the sign post, with a warm light and 4 survivors in blankets;
+    - a lighter walkway band on the darkened floor.
+  - **Sound:** wind loop, distant sirens, an ambulance that gets louder toward the sign, and a distant dog bark or metal groan every 10–20 s.
+  - **Grade:** new `CinematicStreet.asset`, used while the street is shown. It is colder and stronger-vignetted than floor 2; exposure was tuned up so the walkway stays readable.
+### Files created / changed
+- Scripts:
+  - `Core/RewindRecovery.cs` (+ `RewindCardGate`), `Building/SurvivalController.cs`, `UI/Menu/InfoCardScreen.cs`, `UI/MessageToast.cs`;
+  - `UI/CraftNotebook.cs`, `UI/BagUI.cs`, `UI/PauseMenu.cs`, `UI/UITheme.cs`, `Text/UiKeys.cs`;
+  - `Cinematic/EndingCinematic.cs`, `EndingCinematicConfig.cs`, `CinematicDirector.cs`, `CinematicProfile.cs`, `Building/EpilogueController.cs`, `Core/GameManager.cs`;
+  - `World/StreetAmbience.cs`, `World/StreetQuakeDirector.cs` (rubble scale), `World/GasValveView.cs`.
+- Editor:
+  - `Layout/PropFootprint.cs`, `Layout/ItemPlan.cs`, `Layout/LayoutOverrides.cs`;
+  - `SceneBuild/StreetDressing.cs`, `TestSceneCraftNotebook.cs`, `TestSceneEnding.cs`, `GasValves.cs`, `TestSceneBuilder.cs`, `TestSceneUi.cs`, `TestSceneCinematic.cs`, `BuildingLayout.cs`, `SceneKit.cs`, `PlaceholderArt.cs`;
+  - `Art/EndingArt.cs`, `Art/PropArt.cs`, `Text/FontAssetsGenerator.cs`, `Cinematic/CinematicAssetsGenerator.cs`, `Content/BuildingLevelsGenerator.cs`, `Content/TeamAudioImporter.cs`.
+- Tests: `RepeatingInfoTests.cs`, `PropCollisionTests.cs`, `LayoutOverrideTests.cs` (carve-out), `LayoutV2Tests.cs` (stairs art).
+- Data / art:
+  - `strings_tr.csv` (`ui.craft.*`, `ui.ending.fallback`);
+  - Caveat SDF assets, `CinematicStreet.asset`, `StreetHaze.mat`, `EndingCinematicConfig.asset`, new cues;
+  - `Audio/Generated` sfx (gas hiss, valve creak, paper rustle, wind, siren, metal groan; all from `tools/gen_sfx.py`);
+  - `Test_Building.unity` (rebuilt).
+### Needs local wiring (checklist for the MCP session)
+- [ ] When the ending frames arrive: drop `frame0000.png…` into `Assets/_Game/Art/anim/ENDING/`, then run `SixtyOne > Art > Import Ending Frames`. No rebuild is needed. Set the fps on `EndingCinematicConfig` (default 12) and an optional clip on `cue_ending`.
+### Not verified / risks
+- **Not done end to end:** the full menu-to-end playthrough. Instead, these were tested with Play Mode code:
+  - street → quake → sign → ending fallback → epilogue;
+  - 2 street deaths (1 info card, then none);
+  - macro and micro rewinds;
+  - a notebook craft (cloth + water → wet cloth).
+- **Never launched:** the Windows exe from the earlier final pass was not run for 2 minutes. The zip was made only in this session.
+- **Street look was tuned by screenshot only.** The grade is brighter than floor 2 so it stays readable. The fire, emergency and lamp glows are subtle under the exposure, and the thrown-furniture and lamp positions were set by numbers. Check it in-game.
+- The street lamp head reuses `lamba.png` (a wall lamp), so it reads small.
+- The previous debris planner still scatters `enkaz 1/2` over the street walkway after the quakes (existing behaviour).
+### Next suggested step
+- Play the whole run from the main menu once and check the street by eye.
+- Drop the ending frames in when they are ready.
+
 ## [2026-10-18 15:10] LOCAL — New furniture art (gardrop, komidin, sandalye) + stairs art (merdiven)
 ### Done
 - **Props** (`PropArt`: bottom-centre pivot on the opaque pixels, PPU from the target height):
