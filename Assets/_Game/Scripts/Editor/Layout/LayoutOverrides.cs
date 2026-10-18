@@ -177,23 +177,18 @@ namespace SixtyOne.Editor
             }
         }
 
-        /// <summary>Cells blocked by furniture that blocks nav (its scaled footprint), with the blocking object's id.</summary>
-        public static Dictionary<Vector2Int, string> BlockerCells(BuildingLayout.RoomSpec room)
+        /// <summary>
+        /// Cells blocked by solid furniture (PropFootprint: sprite-base footprint × saved scale, required cells
+        /// carved out, shrunk where it would cut a path), with the blocking object's id.
+        /// </summary>
+        public static Dictionary<Vector2Int, string> BlockerCells(BuildingLayout.RoomSpec room) => PropFootprint.Resolve(room);
+
+        /// <summary>Every prop the resolver had to shrink so a required path stays open (for the handoff / console).</summary>
+        public static List<string> ShrinkNotes(List<BuildingLayout.RoomSpec> rooms)
         {
-            var cells = new Dictionary<Vector2Int, string>();
-            foreach (BuildingLayout.PropSpec p in room.Props)
-            {
-                if (!p.BlocksNav) continue;
-                foreach (Vector2Int cell in BuildingLayout.Footprint(p.Gx, p.Gy, p.ObjScale)) cells[cell] = p.Id;
-            }
-
-            foreach (BuildingLayout.ContainerSpec c in room.Containers)
-            {
-                if (!c.BlocksNav) continue;
-                foreach (Vector2Int cell in BuildingLayout.Footprint(c.Gx, c.Gy, c.ObjScale)) cells[cell] = c.Id;
-            }
-
-            return cells;
+            var notes = new List<string>();
+            foreach (BuildingLayout.RoomSpec room in rooms) PropFootprint.Resolve(room, notes);
+            return notes;
         }
 
         /// <summary>Door problems: an edge outside the room's walls, or two doors in one wall gap.</summary>
@@ -246,61 +241,13 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>
-        /// Problems in one room after the overrides: hand-placed furniture on a required cell, or cutting a required
-        /// cell off from the others (same rules as DebrisPlanner). Messages name the room and the object id.
+        /// Problems in one room after the overrides: doors, solid furniture on a required cell, or cutting a required
+        /// cell / container / pickup off from the player spawn. Messages name the room and the object id.
         /// </summary>
         public static List<string> Check(BuildingLayout.RoomSpec room)
         {
-            // Doors first (a moved door brings its approach cell along; the reachability check below covers it).
             List<string> problems = CheckDoors(room);
-            Dictionary<Vector2Int, string> blockers = BlockerCells(room);
-            if (blockers.Count == 0) return problems;
-
-            List<KeyValuePair<Vector2Int, string>> required = RequiredPoints(room);
-            foreach (KeyValuePair<Vector2Int, string> r in required)
-            {
-                // A container standing on its own approach cell is fine: the player uses the nearest free neighbour.
-                if (blockers.TryGetValue(r.Key, out string id) && r.Value != "container approach " + id)
-                {
-                    problems.Add($"room '{room.Id}': '{id}' blocks the {r.Value} cell {r.Key}.");
-                }
-            }
-
-            // Reachability: compare against the room without the hand-placed blockers.
-            GridNav before = BuildingLayout.NavFor(room);
-            foreach (Vector2Int cell in blockers.Keys) before.SetBlocked(cell, false);
-            GridNav after = BuildingLayout.NavFor(room);
-            var cells = new List<Vector2Int>();
-            foreach (KeyValuePair<Vector2Int, string> r in required)
-            {
-                if (!blockers.ContainsKey(r.Key)) cells.Add(r.Key);
-                else if (blockers[r.Key] != null && r.Value == "container approach " + blockers[r.Key])
-                {
-                    // Its own approach: some free neighbour of it must stay reachable instead.
-                    foreach (Vector2Int n in new[] { r.Key + Vector2Int.left, r.Key + Vector2Int.down, r.Key + Vector2Int.right, r.Key + Vector2Int.up })
-                    {
-                        if (after.IsWalkable(n))
-                        {
-                            cells.Add(n);
-                            break;
-                        }
-                    }
-                }
-            }
-
-            string ids = string.Join(", ", new List<string>(blockers.Values));
-            foreach (List<Vector2Int> group in DebrisPlanner.ConnectedGroups(before, cells))
-            {
-                if (group.Count < 2) continue;
-                HashSet<Vector2Int> reach = after.ReachableFrom(group[0]);
-                foreach (Vector2Int cell in group)
-                {
-                    if (reach.Contains(cell)) continue;
-                    string label = required.Find(r => r.Key == cell).Value;
-                    problems.Add($"room '{room.Id}': hand-placed furniture ({ids}) cuts off the {label} cell {cell}.");
-                }
-            }
-
+            problems.AddRange(PropFootprint.Problems(room, BlockerCells(room), PropFootprint.HardCells(room)));
             return problems;
         }
 

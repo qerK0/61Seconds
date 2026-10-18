@@ -60,7 +60,7 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void FurnitureOnADoorApproachIsReported()
+        public void FurnitureOnADoorApproachIsCarvedOut()
         {
             List<BuildingLayout.RoomSpec> rooms = BuildingLayout.Rooms();
             BuildingLayout.RoomSpec salon = Room(rooms, BuildingLevelsGenerator.Flat11Salon);
@@ -68,14 +68,13 @@ namespace SixtyOne.Tests
             Vector2Int cell = GridNav.CellOf(door);
             overrides.SetRoom(salon.Id, new List<PlacedObject>
             {
-                new PlacedObject { id = "wardrobe_block", kind = LayoutKind.Prop, propName = "Wardrobe", gx = cell.x + 0.5f, gy = cell.y + 0.5f, blocksNav = true }
+                new PlacedObject { id = "wardrobe_block", kind = LayoutKind.Prop, propName = "Wardrobe", gx = cell.x + 0.2f, gy = cell.y + 0.2f, blocksNav = true }
             });
 
             LayoutOverrides.Apply(rooms, overrides);
-            List<string> problems = LayoutOverrides.Check(salon);
 
-            Assert.IsTrue(problems.Exists(p => p.Contains("wardrobe_block") && p.Contains("door approach")), string.Join("\n", problems));
-            Assert.Contains(cell, salon.Blocked);
+            CollectionAssert.IsEmpty(LayoutOverrides.Check(salon));
+            CollectionAssert.DoesNotContain(salon.Blocked, cell);
         }
 
         [Test]

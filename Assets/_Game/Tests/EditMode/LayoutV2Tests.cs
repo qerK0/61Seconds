@@ -65,8 +65,8 @@ namespace SixtyOne.Tests
                 foreach (BuildingLayout.DoorSpec d in room.Doors) Assert.IsTrue(BuildingLayout.IsWallEdge(d.Edge), room.Id + " " + d.Edge);
             }
 
-            Assert.AreEqual(BuildingLayout.DoorArtKind.Stairwell, rooms.Find(r => r.Id == BuildingLevelsGenerator.F4Corridor).Doors.Find(d => d.TargetRoom == BuildingLevelsGenerator.F3Corridor).Art);
-            Assert.IsTrue(rooms.Find(r => r.Id == BuildingLevelsGenerator.F2Stairs).Hotspots.Exists(h => h.Art == BuildingLayout.StairwellArt && h.Edge != null));
+            Assert.AreEqual(BuildingLayout.DoorArtKind.Stairs, rooms.Find(r => r.Id == BuildingLevelsGenerator.F4Corridor).Doors.Find(d => d.TargetRoom == BuildingLevelsGenerator.F3Corridor).Art);
+            Assert.IsTrue(rooms.Find(r => r.Id == BuildingLevelsGenerator.F2Stairs).Hotspots.Exists(h => h.Art == BuildingLayout.StairsArt && h.Edge != null));
         }
 
         [Test]

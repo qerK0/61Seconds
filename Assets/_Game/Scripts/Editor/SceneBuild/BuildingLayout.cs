@@ -524,7 +524,13 @@ namespace SixtyOne.Editor
         /// <summary>Where the player stands to search a container: in front of it (camera side), on the floor.</summary>
         public static Vector2 ContainerApproach(RoomSpec room, ContainerSpec c)
         {
-            return new Vector2(Mathf.Clamp(c.Gx - 0.45f, 0.3f, room.Width - 0.3f), Mathf.Clamp(c.Gy - 0.45f, 0.3f, room.Height - 0.3f));
+            var front = new Vector2(Mathf.Clamp(c.Gx - 0.45f, 0.3f, room.Width - 0.3f), Mathf.Clamp(c.Gy - 0.45f, 0.3f, room.Height - 0.3f));
+            // Solid furniture on that cell (hand placement): the nearest free cell the player can reach instead.
+            Vector2Int cell = GridNav.CellOf(front);
+            if (!room.Blocked.Contains(cell)) return front;
+            GridNav nav = NavFor(room);
+            Vector2Int free = nav.NearestReachable(nav.NearestFree(GridNav.CellOf(room.PlayerSpawn)), cell);
+            return GridNav.Center(free);
         }
 
         /// <summary>
