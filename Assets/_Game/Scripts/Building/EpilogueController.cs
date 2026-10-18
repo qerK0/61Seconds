@@ -25,6 +25,9 @@ namespace SixtyOne.Building
         [Tooltip("Seconds after which the end screen comes anyway (unscaled).")]
         [SerializeField] private float maxReadSeconds = 20f;
 
+        [Tooltip("Ending cinematic played before the epilogue (optional).")]
+        [SerializeField] private SixtyOne.Cinematic.EndingCinematic ending;
+
         private Coroutine waiting;
 
         private void Awake()
@@ -35,6 +38,13 @@ namespace SixtyOne.Building
         public bool CanHandle(SceneNode node) => node is EpilogueNode;
 
         public void Begin(SceneNode node, Action<SceneNode> done)
+        {
+            // The sign was reached: the ending cinematic first (frames or its text fallback), then the epilogue.
+            if (ending != null) ending.Play(() => ShowEpilogue(node));
+            else ShowEpilogue(node);
+        }
+
+        private void ShowEpilogue(SceneNode node)
         {
             var epilogue = (EpilogueNode)node;
             string title = epilogue.TitleKey.IsEmpty ? string.Empty : epilogue.TitleKey.Display;

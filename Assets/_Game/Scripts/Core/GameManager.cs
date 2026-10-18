@@ -64,6 +64,8 @@ namespace SixtyOne.Core
         /// <summary>Kills (or traps) someone and starts the death flow.</summary>
         public void Die(DeathInfo info)
         {
+            // The ending is playing: the run is over, nothing can kill (and no rewind can start).
+            if (SixtyOne.Cinematic.EndingCinematic.IsPlaying) return;
             if (!Session.Die(info))
             {
                 return;

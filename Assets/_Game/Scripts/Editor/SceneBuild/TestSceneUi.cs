@@ -81,6 +81,7 @@ namespace SixtyOne.Editor
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
             // The end screen ("Simülasyon sona erdi") covers the HUD once the epilogue was read.
+            TestSceneEnding.Build(root, theme);
             TestSceneEndScreen.Build(root, content);
             // The floor-transition info card, then the intro briefing (up from the first frame of a new run).
             TestSceneIntroCards.BuildInfoCards(root, nodePlayer);

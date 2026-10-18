@@ -75,6 +75,8 @@ namespace SixtyOne.Editor
             SceneKit.Props = PropArt.Generate();
             SceneKit.DogBark = data.DogBarkCue;
             TestSceneCraftNotebook.RustleCue = data.PaperCue;
+            TestSceneEnding.Outro = data.MusicOutro;
+            TestSceneEnding.EndingCue = data.EndingCue;
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
@@ -256,6 +258,7 @@ namespace SixtyOne.Editor
 
             SerializedWire.Set(epilogue, "gameManager", gameManager);
             SerializedWire.Set(epilogue, "presenter", choicePanel);
+            if (TestSceneEnding.Last != null) SerializedWire.Set(epilogue, "ending", TestSceneEnding.Last);
 
             SerializedWire.Set(nodePlayer, "gameManager", gameManager);
             SerializedWire.Set(nodePlayer, "content", data.Content);

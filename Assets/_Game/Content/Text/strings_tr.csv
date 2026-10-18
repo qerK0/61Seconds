@@ -267,6 +267,7 @@ ui.craft.unknown,???,notebook: result not discovered yet
 ui.craft.slot_empty,boş,notebook slot without an item
 ui.craft.hint,Çantadan iki eşya seç (C = defter),notebook footer
 ui.craft.open,Defter,notebook button next to the bag header (C)
+ui.ending.fallback,Acil toplanma alanına ulaştınız.,ending cinematic fallback (no frames yet)
 ui.death.missing_item,Eksik: {0},"{0} = item name, death card"
 ui.dialogue.continue,Devam,dialogue continue button
 ui.journal.close,Kapat,

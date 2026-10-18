@@ -21,7 +21,7 @@ namespace SixtyOne.Editor
         public LevelConfig Level;
         public AudioEventMap AudioMap;
         public List<AudioCue> Cues = new List<AudioCue>();
-        public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue, GasHissCue, ValveCreakCue, PaperCue;
+        public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue, GasHissCue, ValveCreakCue, PaperCue, EndingCue;
         public AudioCue SearchCue, CarAlarmCue, StreetQuakeCue;
         public AudioCue MusicPrep, MusicTension, MusicOutro;
         public DialogueVoiceProfile Voices;
@@ -147,6 +147,8 @@ namespace SixtyOne.Editor
             result.GasHissCue = Cue("cue_gas_hiss", 0.3f, loop: true);
             result.ValveCreakCue = Cue("cue_valve_creak", 0.8f, 0.95f, 1.05f);
             result.PaperCue = Cue("cue_paper_rustle", 0.6f, 0.95f, 1.08f);
+            // The ending cinematic audio (no clip yet: the outro music plays instead).
+            result.EndingCue = Cue("cue_ending", 0.8f);
             result.MusicPrep = Cue("cue_music_prep", 0.4f, loop: true);
             result.MusicTension = Cue("cue_music_tension", 0.35f, loop: true);
             result.MusicOutro = Cue("cue_music_outro", 0.5f, loop: true);
