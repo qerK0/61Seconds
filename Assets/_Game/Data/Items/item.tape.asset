@@ -18,6 +18,7 @@ MonoBehaviour:
   descriptionKey:
     key: item.tape.desc
   icon: {fileID: 21300000, guid: 5a6da10fe90c1bf4c8d8f5b23eb9ba53, type: 3}
+  uiIcon: {fileID: 21300000, guid: f9833cb612ee0854d9c862a35d436822, type: 3}
   isTrap: 0
   isKeyItem: 0
   staminaRestore: 0

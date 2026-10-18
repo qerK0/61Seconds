@@ -70,8 +70,6 @@ namespace SixtyOne.Editor
         public const string GasOffF4 = FlagNames.GasOff;
         public const string KnowsFlat12 = "KnowsFlat12";
         public const string IntroCutShort = "IntroCutShort";
-        public const string GiftDone = "GiftDone";
-        public const string NeighborGone = "NeighborGone";
         public const string SevimDone = "SevimDone";
 
         /// <summary>Every item id in the game. No firearms anywhere.</summary>
@@ -233,6 +231,7 @@ namespace SixtyOne.Editor
             {
                 Item item = Asset<Item>($"{ItemsDir}/item.{id}.asset");
                 item.Configure(id, $"item.{id}.name", $"item.{id}.desc", ItemIconArt.For(id));
+                item.ConfigureUiIcon(ItemIconArt.UiFor(id));
                 result.Items[id] = item;
             }
 

@@ -59,6 +59,13 @@ namespace SixtyOne.Nodes
                         Item given = SixtyOne.Items.TraderLogic.Pick(o.Trader, state);
                         if (given != null) StateOps.TryAddItem(state, given.Id, given.IsKeyItem);
                         break;
+                    case OutcomeType.GiveItem:
+                        if (o.Item == null) break;
+                        bool received = StateOps.GiveOrDrop(state, o.Item.Id, o.Item.IsKeyItem, state.CurrentRoomId);
+                        string giver = o.MessageKey.IsEmpty ? string.Empty : o.MessageKey.Display;
+                        GameEvents.RaiseQueuedMessage(SixtyOne.Text.TextDB.Format(received ? SixtyOne.Text.UiKeys.GiftReceived : SixtyOne.Text.UiKeys.GiftDropped,
+                            giver, o.Item.NameKey.Display));
+                        break;
                     case OutcomeType.ShowMessage:
                         if (!o.MessageKey.IsEmpty) GameEvents.RaiseMessage(o.MessageKey.Key);
                         break;

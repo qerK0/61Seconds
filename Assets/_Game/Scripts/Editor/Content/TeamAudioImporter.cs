@@ -159,7 +159,6 @@ namespace SixtyOne.Editor
             profile.Configure(new[]
             {
                 new DialogueVoiceProfile.Voice { speakerKey = "npc.sevim.name", clip = female, pitch = 1.15f },
-                new DialogueVoiceProfile.Voice { speakerKey = "npc.hasan.name", clip = male, pitch = 0.85f },
                 new DialogueVoiceProfile.Voice { speakerKey = "npc.cemil.name", clip = male, pitch = 1f }
             }, 0.8f);
             EditorUtility.SetDirty(profile);

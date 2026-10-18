@@ -19,7 +19,6 @@ namespace SixtyOne.Editor
         public const string F4Sevim = "f4.sevim";
         public const string F4Bedroom = "f4.bedroom";
         public const string F4CorridorNode = "f4.corridor";
-        public const string F4Neighbor = "f4.neighbor";
         public const string F4Flat12 = "f4.flat12";
 
         /// <summary>Prep seconds between the AFAD early warning and the quake (LevelConfig).</summary>
@@ -31,7 +30,7 @@ namespace SixtyOne.Editor
         ///    of the prep countdown, the building timer is not running yet.
         /// 2. Prep zero = quake: the building timer starts. 3. Opening quake placement in the salon.
         /// 4. Post-quake flat (gas valve needs the wrench, breaker, bedroom with bedsheets for the rope, exit) → corridor:
-        ///    Sevim Teyze's dialogue on the way out ("Kısa kes" = no whistle, no Flat 12 info) → Hasan's gift, Flat 12
+        ///    Sevim Teyze's dialogue on the way out (her gift: food + water + whistle; "Kısa kes" = one water only) → Flat 12
         ///    borrow + "Not bırak", stairs down.
         /// </summary>
         private static void BuildFloor4()
@@ -47,7 +46,6 @@ namespace SixtyOne.Editor
             DialogueNode sevim = Node<DialogueNode>(floor, F4Sevim);
             SceneNode bedroom = Node<SceneNode>(floor, F4Bedroom);
             SceneNode corridor = Node<SceneNode>(floor, F4CorridorNode);
-            DialogueNode neighbor = Node<DialogueNode>(floor, F4Neighbor);
             SceneNode flat12 = Node<SceneNode>(floor, F4Flat12);
             SceneNode f3Arrival = Floor3Arrival();
 
@@ -104,22 +102,27 @@ namespace SixtyOne.Editor
                 .ShowWhen(Condition.FlagTrue(SevimDone))
                 .Then(Outcome.GoTo(corridor)));
 
-            // 4. Sevim Teyze meets us in the corridor on the way out. Every line costs building time;
-            // "Kısa kes" skips the Flat 12 info and the whistle.
+            // 4. Sevim Teyze meets us in the corridor on the way out and gives the gift. Every line costs building
+            // time. "Sağ ol teyzeciğim": food + water + the whistle (key pocket) and the Flat 12 info. "Kısa kes": she
+            // presses one water into your hand, nothing else. A full bag drops the rest at her feet (GiveItem).
+            const string sevimName = "npc.sevim.name";
             Setup(sevim, F4Sevim, F4Corridor, 1);
             sevim.SetLines(new[]
             {
-                Line("npc.sevim.name", F4Sevim, 1, 4f),
-                Line("npc.sevim.name", F4Sevim, 2, 4f),
-                Line("npc.sevim.name", F4Sevim, 3, 3f),
-                Line("npc.sevim.name", F4Sevim, 4, 3f)
+                Line(sevimName, F4Sevim, 1, 4f),
+                Line(sevimName, F4Sevim, 2, 4f),
+                Line(sevimName, F4Sevim, 3, 3f),
+                Line(sevimName, F4Sevim, 4, 3f)
             });
             sevim.AddChoice(C(F4Sevim, "hurry").AsDuringDialogue()
+                .Then(Outcome.GiveItem(Item("water"), sevimName))
                 .Then(Outcome.SetFlag(IntroCutShort))
                 .Then(Outcome.SetFlag(SevimDone))
                 .Then(Outcome.GoTo(corridor)));
             sevim.AddChoice(C(F4Sevim, "thanks")
-                .Then(Outcome.AddItem(Item("whistle")))
+                .Then(Outcome.GiveItem(Item("food"), sevimName))
+                .Then(Outcome.GiveItem(Item("water"), sevimName))
+                .Then(Outcome.GiveItem(Item("whistle"), sevimName))
                 .Then(Outcome.SetFlag(KnowsFlat12))
                 .Then(Outcome.SetFlag(SevimDone))
                 .Then(Outcome.GoTo(corridor)));
@@ -133,10 +136,6 @@ namespace SixtyOne.Editor
             corridor.AddChoice(C(F4CorridorNode, "sevim")
                 .ShowWhen(Condition.FlagTrue(SevimDone))
                 .Then(Outcome.Message($"{F4CorridorNode}.msg_sevim")));
-            corridor.AddChoice(C(F4CorridorNode, "talk")
-                .ShowWhen(Condition.FlagFalse(GiftDone))
-                .ShowWhen(Condition.FlagFalse(NeighborGone))
-                .Then(Outcome.GoTo(neighbor)));
             corridor.AddChoice(C(F4CorridorNode, "search").Costs(8f)
                 .ShowWhen(Condition.FlagFalse(KnowsFlat12))
                 .Then(Outcome.SetFlag(KnowsFlat12))
@@ -148,22 +147,6 @@ namespace SixtyOne.Editor
                 .Kills(Death("death.elevator", "tip.no_elevator")));
             corridor.AddChoice(C(F4CorridorNode, "home").Move(3f).Then(Outcome.GoTo(hall)));
             corridor.AddChoice(C(F4CorridorNode, "down").Move(6f).Then(Outcome.GoTo(f3Arrival)));
-
-            // Kind neighbour: food + water (bag permitting). Hurrying = no gift.
-            Setup(neighbor, F4Neighbor, F4Corridor, 1);
-            neighbor.SetLines(new[]
-            {
-                Line("npc.hasan.name", F4Neighbor, 1, 3f),
-                Line("npc.hasan.name", F4Neighbor, 2, 3f)
-            });
-            neighbor.AddChoice(C(F4Neighbor, "hurry").AsDuringDialogue()
-                .Then(Outcome.SetFlag(NeighborGone))
-                .Then(Outcome.GoTo(corridor)));
-            neighbor.AddChoice(C(F4Neighbor, "thanks")
-                .Then(Outcome.AddItem(Item("food")))
-                .Then(Outcome.AddItem(Item("water")))
-                .Then(Outcome.SetFlag(GiftDone))
-                .Then(Outcome.GoTo(corridor)));
 
             // Flat 12: the neighbours are away and the door is open. Supplies are borrowed (world pickups).
             Setup(flat12, F4Flat12, Flat12, 1);

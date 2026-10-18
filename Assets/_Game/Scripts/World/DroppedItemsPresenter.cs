@@ -74,7 +74,11 @@ namespace SixtyOne.World
 
             IReadOnlyList<string> items = gm.State.Dropped.ItemsIn(room.RoomId);
             // Offsets are room-local (tuned at world scale 1), so they follow RoomVisualConfig.WorldScale.
-            Vector3 origin = room.transform.InverseTransformPoint(room.GetSpawn(MemberType.Player)) + (Vector3)firstOffset;
+            // A DropAnchor in the room (Sevim's feet) wins over the player spawn.
+            DropAnchor anchor = room.GetComponentInChildren<DropAnchor>();
+            Vector3 origin = anchor != null
+                ? room.transform.InverseTransformPoint(anchor.transform.position)
+                : room.transform.InverseTransformPoint(room.GetSpawn(MemberType.Player)) + (Vector3)firstOffset;
             for (int i = 0; i < items.Count; i++)
             {
                 spawned.Add(Spawn(room, items[i], origin + (Vector3)(spacing * i)));

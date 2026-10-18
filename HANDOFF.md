@@ -4,6 +4,60 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 04:30] LOCAL — Bag icon fix (UI icons) + Hasan removed, Sevim gives the gift
+### Done
+- **Bag icons, root cause:**
+  - the slots showed the world sprites (bottom pivot, big transparent padding);
+  - every slot icon started with the `art.Dot` placeholder (the "tiny dot");
+  - a refresh only set the sprite when the item had one, so an item without art kept the previous sprite.
+- **Fix:**
+  - `ItemIconArt.UiFor(id)` writes `Art/items/ui/<id>_ui.png`: the art cropped to its opaque pixels, padded to a square (aspect kept), 256 px, centre pivot. Items without art get a shared `placeholder_ui.png` (outlined box). World sprites are untouched.
+  - `Item.UiIcon` (falls back to `Icon`) is set by the generator.
+  - New `UI/SlotIcon`, used by BagUI (stretched, 12% inset), LootWindow (the area above the name, 12% inset) and KeyItemPocket (its authored spot restored). On every refresh it resets anchors, pivot, position, size, scale and rotation, with preserveAspect = true and useSpriteMesh = false.
+  - The builder no longer seeds slot icons with `art.Dot`. No slot pop tween exists, so none needed fixing.
+- **Hasan removed:**
+  - the `f4.neighbor` node (asset deleted by the generator), the corridor "talk" choice, the GiftDone / NeighborGone flags;
+  - his hotspot, the HASAN_IDLE slot, his speaker colour and voice (DialogueVoices rewired);
+  - his CSV keys and his test. Validate Content: 29 nodes, 0 problems.
+- **Sevim gives the gift (`f4.sevim`, new `Outcome.GiveItem` → `StateOps.GiveOrDrop`):**
+  - "Sağ ol teyzeciğim" gives food + water + whistle (key pocket) and the Flat 12 info.
+  - "Kısa kes" gives only one water.
+  - With a full bag, what doesn't fit is dropped in the room at her feet (`DropAnchor` "DropSpot" in front of her; DroppedItemsPresenter uses it). Key items never drop (already owned = nothing to add).
+  - One queued toast per item: "Sevim Teyze: Ekmek verdi", or "…Çantan dolu evladım, Su şuraya, yere bırakıyorum."
+  - New l3 / l4 (l4: "Al evladım, ekmekle su koydum, bu düdük de sende dursun; enkaz altında kalırsan öttür, sesin duyulsun.").
+  - Her start (hall → corridor door with SevimDone = false) and her click are unchanged.
+- **Tests:** thanks = food + water + whistle; Kısa kes = water only; a full bag drops food + water (a key item never drops); `HasanIsGone`; `ItemUiIconTests` (every item: square, centre pivot). EditMode **217 / 217**. Text > Validate 0 / 0 / 0. 0 compile errors.
+- **Play Mode (F4 corridor):**
+  - thanks: bag 2/8 with bread + water centred, the whistle in its pocket, 3 toasts;
+  - Kısa kes: only water ("Sevim Teyze: Su verdi");
+  - full bag: bread + water lying in front of her, whistle in the pocket;
+  - the Flat 12 loot window icon is centred.
+  - Screenshots: `Screenshots/t13_bag_empty.png`, `t13_bag_4.png`, `t13_bag_full.png` (incl. 2 placeholders), `t13_loot_window.png`, `t13_sevim_gift_choice.png`, `t13_sevim_thanks_bag-1.png`, `t13_fullbag_drop.png`.
+
+### Files created / changed
+- New:
+  - `Scripts/UI/SlotIcon.cs`, `Scripts/World/DropAnchor.cs`;
+  - `Tests/EditMode/ItemUiIconTests.cs`;
+  - `Art/items/ui/*_ui.png` + `placeholder_ui.png` (generated).
+- Changed:
+  - `Nodes/Item.cs` (UiIcon), `Nodes/Outcome.cs` + `OutcomeExecutor.cs` (GiveItem), `Core/StateOps.cs` (GiveOrDrop);
+  - `UI/BagUI.cs`, `LootWindow.cs`, `KeyItemPocket.cs`, `World/DroppedItemsPresenter.cs`, `Text/UiKeys.cs` (gift keys);
+  - editor: `ItemIconArt.cs`, `BuildingLevelsGenerator(.Floor4).cs`, `CharacterArt.cs`, `TeamAudioImporter.cs`, `BuildingLayout.cs`, `SceneKit.cs`, `TestSceneUi.cs`;
+  - `Tests/EditMode/NpcDialogueFlowTests.cs`, `strings_tr.csv`;
+  - generated items / nodes / `DialogueVoices` / `GameContent`; `Test_Building.unity` (rebuilt).
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] None. Optional: Bora checks the whistle's size in the right side pocket (it uses the pocket's authored spot, which is small).
+
+### Not verified / risks
+- I didn't do a real rewind between the thanks and Kısa kes runs: each run re-entered `f4.sevim` with a reset state.
+- The prep → quake → corridor part was not replayed this time (the flow from the earlier sessions is unchanged).
+
+### Next suggested step
+- If more NPCs give things, reuse `Outcome.GiveItem` (one toast per item, drop at their feet).
+
+---
+
 ## [2026-10-18 03:55] LOCAL — Drop-Cover-Hold (Çök-Kapan-Tutun) crouch animation for the family during quakes
 ### Done
 - **Art:** `cro all/mehmet crouch`, `anne crouch` and `velet crouch` moved (AssetDatabase.MoveAsset, .meta kept) to `Art/char/CROUCH_MEHMET`, `CROUCH_ANNE` and `CROUCH_CHILD`; the empty `cro all` folder was removed.

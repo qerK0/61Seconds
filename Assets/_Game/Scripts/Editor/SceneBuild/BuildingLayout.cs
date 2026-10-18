@@ -124,7 +124,7 @@ namespace SixtyOne.Editor
             public Color Color = Color.white;
             /// <summary>Disappears once its choice is gone (the neighbour left).</summary>
             public bool HideWhenGone;
-            /// <summary>NPC idle id (CharacterArt.NpcIdles: sevim, hasan, cemil, robber, dog): loops its frames when delivered, else a dark silhouette at its height.</summary>
+            /// <summary>NPC idle id (CharacterArt.NpcIdles: sevim, cemil, robber, dog): loops its frames when delivered, else a dark silhouette at its height.</summary>
             public string Idle;
             /// <summary>Grid point the NPC looks toward (flips its idle art); null = as drawn.</summary>
             public Vector2? Face;
@@ -516,13 +516,12 @@ namespace SixtyOne.Editor
             bedroom.Containers.Add(Box("bedroom_wardrobe_sheet", "wardrobe", 3.6f, 3.3f, Wood, "bedsheet"));
             bedroom.Lights.Add(L("BedLamp", 0.6f, 3.4f, 0.8f, 2.4f));
 
-            // Corridor: one door per flat, the stairs down (front-left exit), the elevator (trap) and Hasan Amca.
+            // Corridor: one door per flat, the stairs down (front-left exit), the elevator (trap) and Sevim Teyze.
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor);
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 7.0f, 1.5f, 1.0f, 1.6f, Metal));
             WallLamp(corridor, 2.5f, "CorridorWallLampA");
             WallLamp(corridor, 5.5f, "CorridorWallLampB");
-            corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f), idle: "hasan"));
             // Sevim Teyze: her dialogue starts on the way out of Flat 11; a click talks to her (or, after that, one
             // short line). She never disappears.
             corridor.Hotspots.Add(new HotspotSpec

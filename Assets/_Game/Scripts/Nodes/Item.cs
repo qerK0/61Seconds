@@ -23,6 +23,9 @@ namespace SixtyOne.Nodes
         [Tooltip("Bag icon (artist).")]
         [SerializeField] private Sprite icon;
 
+        [Tooltip("UI icon: tight-cropped, centre pivot, square (bag, loot window, pockets). Falls back to the world icon.")]
+        [SerializeField] private Sprite uiIcon;
+
         [Tooltip("A valuable that is useless in an earthquake (wastes a bag slot and time).")]
         [SerializeField] private bool isTrap;
 
@@ -47,12 +50,21 @@ namespace SixtyOne.Nodes
         public TextKey NameKey => nameKey;
         public TextKey DescriptionKey => descriptionKey;
         public Sprite Icon => icon;
+
+        /// <summary>The sprite every UI slot shows: the UI icon, else the world icon.</summary>
+        public Sprite UiIcon => uiIcon != null ? uiIcon : icon;
         public bool IsTrap => isTrap;
         public bool IsKeyItem => isKeyItem;
         public float StaminaRestore => staminaRestore;
         public bool HealsInjury => healsInjury;
         public bool ConsumedOnUse => consumedOnUse;
         public float UseSeconds => useSeconds;
+
+        /// <summary>Authoring helper: the generated UI icon (ItemIconArt).</summary>
+        public void ConfigureUiIcon(Sprite sprite)
+        {
+            uiIcon = sprite;
+        }
 
         /// <summary>True if selecting the slot twice does something.</summary>
         public bool IsUsable => staminaRestore > 0f || healsInjury;

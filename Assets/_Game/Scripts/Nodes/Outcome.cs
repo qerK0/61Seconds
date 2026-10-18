@@ -21,7 +21,13 @@ namespace SixtyOne.Nodes
         /// Someone takes items from the bag: every item in takeItems, else fallbackCount of the fallback item; key
         /// items optionally never (the robber on the F2 stairs). The taken ids come back in OutcomeResult.Taken.
         /// </summary>
-        TakeItems
+        TakeItems,
+
+        /// <summary>
+        /// A neighbour gives an item (messageKey = the giver's name key): into the bag or key pocket, else (bag full)
+        /// dropped in the current room at the giver's feet. One queued toast per item either way.
+        /// </summary>
+        GiveItem
     }
 
     /// <summary>One effect of a choice, bomb check or node entry.</summary>
@@ -90,6 +96,7 @@ namespace SixtyOne.Nodes
         public static Outcome Death() => new Outcome { type = OutcomeType.Death };
         public static Outcome SetFlag(string flag, bool value = true) => new Outcome { type = OutcomeType.SetFlag, flag = flag, flagValue = value };
         public static Outcome AddItem(Item item) => new Outcome { type = OutcomeType.AddItem, item = item };
+        public static Outcome GiveItem(Item item, SixtyOne.Text.TextKey giverName) => new Outcome { type = OutcomeType.GiveItem, item = item, messageKey = giverName };
         public static Outcome RemoveItem(Item item) => new Outcome { type = OutcomeType.RemoveItem, item = item };
         public static Outcome GiveFromTrader(SixtyOne.Items.TraderProfile profile) => new Outcome { type = OutcomeType.TraderGive, trader = profile };
         public static Outcome Message(SixtyOne.Text.TextKey key) => new Outcome { type = OutcomeType.ShowMessage, messageKey = key };

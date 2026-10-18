@@ -10,7 +10,7 @@ namespace SixtyOne.Tests
 {
     /// <summary>
     /// The generated NPC flows end to end on the real node assets: Sevim on the way out of Flat 11 (door → dialogue →
-    /// whistle), her corridor hotspot, Hasan's gift, Cemil's trade and the robber on the F2 stairs.
+    /// whistle + food + water, or one water), her corridor hotspot, the full-bag drop, Cemil's trade and the robber on the F2 stairs.
     /// </summary>
     public class NpcDialogueFlowTests
     {
@@ -62,6 +62,9 @@ namespace SixtyOne.Tests
             OutcomeExecutor.Execute(ChoiceByKey(sevim, state, BuildingLevelsGenerator.F4Sevim + ".c_thanks").Outcomes, state);
             Assert.IsTrue(state.KeyItems.Has("whistle"), "the whistle goes to the key-item pocket");
             Assert.IsFalse(state.Inventory.Has("whistle"), "no bag slot");
+            Assert.IsTrue(state.Inventory.Has("food"), "her gift: food");
+            Assert.IsTrue(state.Inventory.Has("water"), "her gift: water");
+            Assert.AreEqual(2, state.Inventory.Count);
             Assert.IsTrue(state.Flags.Get(BuildingLevelsGenerator.KnowsFlat12));
             Assert.IsTrue(state.Flags.Get(BuildingLevelsGenerator.SevimDone));
 
@@ -70,11 +73,14 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void HurryingSevimSkipsTheWhistleAndTheInfo()
+        public void HurryingSevimGivesOnlyOneWater()
         {
             var sevim = (DialogueNode)Node("Floor4", BuildingLevelsGenerator.F4Sevim);
             var state = new GameState();
             OutcomeExecutor.Execute(ChoiceByKey(sevim, state, BuildingLevelsGenerator.F4Sevim + ".c_hurry").Outcomes, state);
+            Assert.IsTrue(state.Inventory.Has("water"), "she presses one water into your hand");
+            Assert.AreEqual(1, state.Inventory.Count, "only the water");
+            Assert.IsFalse(StateOps.HasItem(state, "food"));
             Assert.IsFalse(StateOps.HasItem(state, "whistle"));
             Assert.IsFalse(state.Flags.Get(BuildingLevelsGenerator.KnowsFlat12));
             Assert.IsTrue(state.Flags.Get(BuildingLevelsGenerator.SevimDone));
@@ -100,18 +106,36 @@ namespace SixtyOne.Tests
         }
 
         [Test]
-        public void HasanGivesFoodAndWater()
+        public void FullBagDropsSevimsGiftAtHerFeet()
         {
-            SceneNode corridor = Node("Floor4", BuildingLevelsGenerator.F4CorridorNode);
-            var state = new GameState();
-            LinkDecision talk = RoomLinkRules.DecideHotspot(corridor, state, BuildingLevelsGenerator.F4CorridorNode + ".c_talk");
-            Assert.AreEqual(LinkAction.Choose, talk.Action);
-            SceneNode hasan = Target(corridor.Choices[talk.ChoiceIndex]);
-            Assert.AreEqual(BuildingLevelsGenerator.F4Neighbor, hasan.Id);
-            OutcomeExecutor.Execute(ChoiceByKey(hasan, state, BuildingLevelsGenerator.F4Neighbor + ".c_thanks").Outcomes, state);
-            Assert.IsTrue(state.Inventory.Has("food"));
-            Assert.IsTrue(state.Inventory.Has("water"));
-            Assert.IsTrue(state.Flags.Get(BuildingLevelsGenerator.GiftDone));
+            var sevim = (DialogueNode)Node("Floor4", BuildingLevelsGenerator.F4Sevim);
+            var state = new GameState { CurrentRoomId = BuildingLevelsGenerator.F4Corridor };
+            while (!state.Inventory.IsFull) state.Inventory.TryAdd("cloth");
+            OutcomeExecutor.Execute(ChoiceByKey(sevim, state, BuildingLevelsGenerator.F4Sevim + ".c_thanks").Outcomes, state);
+            CollectionAssert.AreEquivalent(new[] { "food", "water" }, state.Dropped.ItemsIn(BuildingLevelsGenerator.F4Corridor), "nothing lost: both lie in the corridor");
+            Assert.IsTrue(state.KeyItems.Has("whistle"), "the whistle needs no slot");
+            Assert.IsFalse(state.Inventory.Has("food"));
+
+            // A second gift of a key item already in its pocket never lands on the floor.
+            OutcomeExecutor.Execute(ChoiceByKey(sevim, state, BuildingLevelsGenerator.F4Sevim + ".c_thanks").Outcomes, state);
+            CollectionAssert.DoesNotContain(state.Dropped.ItemsIn(BuildingLevelsGenerator.F4Corridor), "whistle");
+        }
+
+        [Test]
+        public void HasanIsGone()
+        {
+            foreach (string guid in AssetDatabase.FindAssets("t:SceneNode", new[] { BuildingLevelsGenerator.NodesDir }))
+            {
+                var node = AssetDatabase.LoadAssetAtPath<SceneNode>(AssetDatabase.GUIDToAssetPath(guid));
+                if (node == null) continue;
+                Assert.AreNotEqual("f4.neighbor", node.Id, "Hasan's gift node is removed");
+                if (node is DialogueNode dialogue)
+                {
+                    foreach (DialogueLine line in dialogue.Lines) Assert.AreNotEqual("npc.hasan.name", line.SpeakerKey.Key, node.Id);
+                }
+
+                foreach (Choice choice in node.Choices) Assert.AreNotEqual("f4.corridor.c_talk", choice.LabelKey.Key, node.Id);
+            }
         }
 
         [Test]

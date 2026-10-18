@@ -244,9 +244,8 @@ namespace SixtyOne.UI
 
                 if (i < slotIcons.Length && slotIcons[i] != null)
                 {
-                    Image icon = slotIcons[i];
-                    icon.enabled = itemId != null;
-                    if (item != null && item.Icon != null) icon.sprite = item.Icon;
+                    // Always rewrite sprite + transform: an empty or recycled slot never keeps the old icon.
+                    SlotIcon.Apply(slotIcons[i], itemId != null ? item : null);
                 }
 
                 if (i < slotLabels.Length && slotLabels[i] != null)

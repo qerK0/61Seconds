@@ -165,8 +165,8 @@ namespace SixtyOne.UI
                 if (slotButtons[i] != null) slotButtons[i].interactable = itemId != null;
                 if (i < slotIcons.Length && slotIcons[i] != null)
                 {
-                    slotIcons[i].enabled = itemId != null;
-                    if (item != null && item.Icon != null) slotIcons[i].sprite = item.Icon;
+                    // The area above the name label, with the fixed 12% inset.
+                    SlotIcon.Apply(slotIcons[i], itemId != null ? item : null, new Vector2(SlotIcon.Inset, 0.32f), new Vector2(1f - SlotIcon.Inset, 0.92f));
                 }
 
                 if (i < slotLabels.Length && slotLabels[i] != null)

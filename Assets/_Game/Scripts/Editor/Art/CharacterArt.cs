@@ -25,7 +25,6 @@ namespace SixtyOne.Editor
         public static readonly (string Id, string Folder, float HeightRatio)[] NpcIdles =
         {
             ("sevim", CharRoot + "/SEVIM_IDLE", 0.9f),   // an older neighbour, a little shorter than the wife
-            ("hasan", CharRoot + "/HASAN_IDLE", 0.95f),
             ("cemil", CharRoot + "/CEMIL_IDLE", 1f),
             ("robber", CharRoot + "/ROBBER_IDLE", 1f),
             ("dog", CharRoot + "/DOG_IDLE", 0.55f)       // a big rabid dog, not a puppy

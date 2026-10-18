@@ -87,6 +87,20 @@ namespace SixtyOne.Core
             return true;
         }
 
+        /// <summary>
+        /// Someone hands the player an item: into the bag (or the key pocket); when the bag is full it lands in the
+        /// room instead (a WorldDroppedItem), so nothing is lost silently. True if the player received it.
+        /// </summary>
+        public static bool GiveOrDrop(GameState state, string itemId, bool isKeyItem, string roomId)
+        {
+            // Key items never need a slot (already owned = nothing to add), so they are never dropped.
+            if (TryAddItem(state, itemId, isKeyItem) || isKeyItem) return true;
+            state.Dropped.Add(roomId, itemId);
+            InventoryEvents.RaiseItemDropped(itemId, roomId);
+            InventoryEvents.RaiseInventoryChanged();
+            return false;
+        }
+
         /// <summary>Puts a dropped item from the room back into the bag. False if the bag is full or the item is gone.</summary>
         public static bool PickUpDropped(GameState state, string itemId, string roomId)
         {

@@ -100,7 +100,6 @@ namespace SixtyOne.Editor
             switch (id)
             {
                 case "sevim": return Hex(0xB0479B);
-                case "hasan": return Hex(0x3E8E41);
                 case "cemil": return Hex(0xB07A12);
                 case "robber": return Hex(0xB23A2E);
                 case "wife": return Hex(0x2F6DB5);
@@ -114,7 +113,6 @@ namespace SixtyOne.Editor
             switch (idle)
             {
                 case "sevim":
-                case "hasan":
                 case "cemil":
                 case "robber":
                     return "npc." + idle + ".name";
@@ -531,6 +529,15 @@ namespace SixtyOne.Editor
                     r.color = Silhouette(spec.Color);
                     float sy = height / 0.75f;
                     body.transform.localScale = new Vector3(small ? sy * 2.2f : 1.1f, sy, 1f);
+                }
+
+                // Gifts that do not fit in the bag land at Sevim's feet (front, camera side).
+                if (spec.Idle == "sevim")
+                {
+                    var drop = new GameObject("DropSpot");
+                    drop.transform.SetParent(go.transform, false);
+                    drop.transform.localPosition = IsoMath.GridToWorld(0.35f, -0.45f);
+                    drop.AddComponent<DropAnchor>();
                 }
 
                 // Speech bubbles attach to this NPC's head.

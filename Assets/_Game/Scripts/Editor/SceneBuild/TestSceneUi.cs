@@ -367,7 +367,7 @@ namespace SixtyOne.Editor
                 slotButton.colors = colors;
                 buttons[i] = slotButton;
 
-                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.1f, 0.1f), new Vector2(0.9f, 0.9f), Color.white, sprite: art.Dot);
+                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.1f, 0.1f), new Vector2(0.9f, 0.9f), Color.white, sprite: null);
                 icon.preserveAspect = true;
                 icon.enabled = false;
 
@@ -437,7 +437,7 @@ namespace SixtyOne.Editor
             button.transition = Selectable.Transition.None;
 
             float iconSize = UiSkinArt.CellSize * scale * 0.8f;
-            Image icon = UiFactory.MakeImage("Icon", frame, new Vector2(0f, 1f), new Vector2(0f, 1f), Color.white, sprite: item.Icon != null ? item.Icon : null);
+            Image icon = UiFactory.MakeImage("Icon", frame, new Vector2(0f, 1f), new Vector2(0f, 1f), Color.white, sprite: item.UiIcon);
             icon.rectTransform.pivot = new Vector2(0.5f, 0.5f);
             icon.rectTransform.anchoredPosition = new Vector2(iconCentre.x * scale, -iconCentre.y * scale);
             icon.rectTransform.sizeDelta = new Vector2(iconSize, iconSize);
@@ -548,7 +548,7 @@ namespace SixtyOne.Editor
 
                 Button button = slot.gameObject.AddComponent<Button>();
                 button.targetGraphic = slot;
-                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.95f), Color.white, sprite: art.Dot);
+                Image icon = UiFactory.MakeImage("Icon", slot.transform, new Vector2(0.08f, 0.3f), new Vector2(0.92f, 0.95f), Color.white, sprite: null);
                 icon.preserveAspect = true;
                 icon.enabled = false;
                 TextMeshProUGUI name = UiFactory.MakeLabel("Name", slot.transform, new Vector2(0.02f, 0f), new Vector2(0.98f, 0.3f), TextRole.Small, TextAlignmentOptions.Center);

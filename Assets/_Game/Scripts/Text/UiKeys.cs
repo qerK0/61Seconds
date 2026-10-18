@@ -104,6 +104,12 @@ namespace SixtyOne.Text
         public const string StreetSafe = "ui.street.safe";
         public const string StreetCollapseBehind = "ui.street.collapse_behind";
 
+        /// <summary>A neighbour gave an item: {0} = giver, {1} = item ("Sevim Teyze: Ekmek verdi").</summary>
+        public const string GiftReceived = "ui.gift.received";
+
+        /// <summary>A gift that did not fit in the bag was left at the giver's feet: {0} = giver, {1} = item.</summary>
+        public const string GiftDropped = "ui.gift.dropped";
+
         /// <summary>Cost chip of a heavy choice (locked at 0 stamina).</summary>
         public const string ChoiceHeavy = "ui.choice.heavy";
 

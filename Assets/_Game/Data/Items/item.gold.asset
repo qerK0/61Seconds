@@ -18,6 +18,7 @@ MonoBehaviour:
   descriptionKey:
     key: item.gold.desc
   icon: {fileID: 21300000, guid: d864b813d0b57f741b81f9b52ba8d2f9, type: 3}
+  uiIcon: {fileID: 21300000, guid: 260baccb2fa38e047a223b19026e51ef, type: 3}
   isTrap: 0
   isKeyItem: 0
   staminaRestore: 0

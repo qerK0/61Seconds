@@ -128,7 +128,6 @@ f4.corridor.c_elevator,Asansörü çağır,trap
 f4.corridor.c_flat12,12 numaraya gir,
 f4.corridor.c_home,Daireye dön,
 f4.corridor.c_search,Kapıları yokla,"8s, finds Flat 12"
-f4.corridor.c_talk,Hasan Amca'yla konuş,
 f4.corridor.msg_found,12 numaranın kapısı açık!,
 f4.corridor.title,4. Kat koridoru,
 f4.flat12.body,Komşular evde yok. Lazım olanı ödünç alabilirsin.,"use ödünç al, never yağma/çalmak"
@@ -149,12 +148,6 @@ f4.kitchen.c_tea,"Sinirler bozuk, bir çay demle",trap
 f4.kitchen.c_valve,Gaz vanasını kapat,
 f4.kitchen.c_valve.locked,Vana sıkışmış: İngiliz anahtarı lazım.,
 f4.kitchen.title,Mutfak,
-f4.neighbor.body,"Yaşlı komşun kapısının önünde, elinde bir poşet.",
-f4.neighbor.c_hurry,Acelemiz var amca,
-f4.neighbor.c_thanks,Allah razı olsun,
-f4.neighbor.l1,Evladım iyi misiniz? Çocuk iyi mi?,
-f4.neighbor.l2,"Al şunları, yolda lazım olur. Bir ekmek, bir su.",gives food + water
-f4.neighbor.title,Hasan Amca,
 f4.prep.hall.body,Sigorta kutusu kapının yanında. Komodin ve alet kutusu burada.,
 f4.prep.hall.c_back,Salona dön,
 f4.prep.hall.c_breaker,Ana sigortayı indir,4 s
@@ -176,12 +169,12 @@ f4.salon.c_hall,Antreye geç,
 f4.salon.c_kitchen,Mutfağa geç,
 f4.salon.title,Salon,
 f4.sevim.body,Koridorda Sevim Teyze karşına çıkıyor; elleri titriyor.,
-f4.sevim.c_hurry,Kısa kes,"consequence: no info, no whistle"
-f4.sevim.c_thanks,Sağ ol Sevim Teyze,
+f4.sevim.c_hurry,Kısa kes,"consequence: she presses one water into your hand; no food, no whistle, no Flat 12 info"
+f4.sevim.c_thanks,Sağ ol teyzeciğim,"gift: food + water + whistle (key pocket), Flat 12 info"
 f4.sevim.l1,Kızım iyi misiniz? Çocuk iyi mi? Ne sallandı ama!,each line costs building time
 f4.sevim.l2,"12 numaradakiler tatilde, kapıyı açık bırakmışlar. Her şeyleri içeride.",info: Flat 12
-f4.sevim.l3,"Bak, bu düdüğü deprem çantamdan aldım. Siz de bir tane bulundurun.",gives whistle
-f4.sevim.l4,"Neyse, ben gideyim de...",
+f4.sevim.l3,"Ah, şu çocuk üşümüş! Durun bakayım, size deprem çantamdan bir şeyler ayırdım.",fussy lead-in to the gift
+f4.sevim.l4,"Al evladım, ekmekle su koydum, bu düdük de sende dursun; enkaz altında kalırsan öttür, sesin duyulsun.",hands over food + water + whistle (AFAD: whistle to signal under debris)
 f4.sevim.title,Sevim Teyze,
 item.bedsheet.desc,Üç tanesi bağlanınca sağlam bir halat olur.,
 item.bedsheet.name,Çarşaf,
@@ -222,7 +215,6 @@ item.whistle.name,Düdük,
 item.wrench.desc,Sıkışan gaz vanası için.,
 item.wrench.name,İngiliz anahtarı,
 npc.cemil.name,Cemil Bey,Floor 3 trader neighbour
-npc.hasan.name,Hasan Amca,kind corridor neighbour
 npc.sevim.name,Sevim Teyze,intro neighbour
 prep.alert.body,"Deprem 1 dakika sonra! ({0} sn) Gerekli olanı al, ailenle güvenli yere geç.",{0} = seconds
 prep.alert.title,AFAD ERKEN UYARI,prep start popup
@@ -424,3 +416,5 @@ f4.corridor.c_sevim_talk,Sevim Teyze'yle konuş,hotspot hover before her dialogu
 f4.corridor.msg_sevim,"Hadi evladım, çabuk olun!",Sevim Teyze's short line after her dialogue
 ui.choice.heavy,+ağır,cost chip of a heavy choice (stamina)
 npc.mehmet.name,Mehmet,the player (thought bubble name)
+ui.gift.received,{0}: {1} verdi,"{0} = giver name, {1} = item name (queued toast, one per item)"
+ui.gift.dropped,"{0}: Çantan dolu evladım, {1} şuraya, yere bırakıyorum.","{0} = giver, {1} = item; the bag was full, the item lies at her feet"

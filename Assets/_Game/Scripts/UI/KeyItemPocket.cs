@@ -70,13 +70,27 @@ namespace SixtyOne.UI
             if (flag == FlagNames.FlashlightOff) Refresh();
         }
 
+        private Vector2 authoredPosition;
+        private Vector2 authoredSize;
+        private bool authoredCached;
+
         private void Refresh()
         {
             if (icon == null || item == null) return;
             GameState state = GameManager.Instance != null ? GameManager.Instance.State : null;
             bool owned = state != null && StateOps.HasItem(state, item.Id);
-            if (item.Icon != null) icon.sprite = item.Icon;
-            icon.enabled = icon.sprite != null;
+            // The pocket icon has an authored spot in the backpack art: restore it, then the UI sprite.
+            RectTransform rect = icon.rectTransform;
+            if (!authoredCached)
+            {
+                authoredPosition = rect.anchoredPosition;
+                authoredSize = rect.sizeDelta;
+                authoredCached = true;
+            }
+
+            rect.anchoredPosition = authoredPosition;
+            rect.sizeDelta = authoredSize;
+            SlotIcon.SetSprite(icon, item);
             bool off = owned && item.Id == KeyItemPocketRules.FlashlightId && !KeyItemPocketRules.FlashlightOn(state);
             icon.color = !owned ? missingColor : off ? offColor : ownedColor;
         }

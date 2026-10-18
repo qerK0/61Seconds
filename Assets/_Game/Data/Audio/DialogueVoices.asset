@@ -16,9 +16,6 @@ MonoBehaviour:
   - speakerKey: npc.sevim.name
     clip: {fileID: 8300000, guid: 0912584da277f7d499791c5dd793ec54, type: 3}
     pitch: 1.15
-  - speakerKey: npc.hasan.name
-    clip: {fileID: 8300000, guid: 5a20449cf41c9fb4a8d43670bd7100bb, type: 3}
-    pitch: 0.85
   - speakerKey: npc.cemil.name
     clip: {fileID: 8300000, guid: 5a20449cf41c9fb4a8d43670bd7100bb, type: 3}
     pitch: 1

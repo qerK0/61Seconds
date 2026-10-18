@@ -18,6 +18,7 @@ MonoBehaviour:
   descriptionKey:
     key: item.console.desc
   icon: {fileID: 0}
+  uiIcon: {fileID: 21300000, guid: 74300ac11734102438537502fb1a9c28, type: 3}
   isTrap: 0
   isKeyItem: 0
   staminaRestore: 0

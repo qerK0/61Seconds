@@ -18,6 +18,7 @@ MonoBehaviour:
   descriptionKey:
     key: item.lighter.desc
   icon: {fileID: 21300000, guid: 8b37744e6fa94974b9be2e393844634d, type: 3}
+  uiIcon: {fileID: 21300000, guid: 8b8ec2345b45f804b84f67c46477839e, type: 3}
   isTrap: 0
   isKeyItem: 0
   staminaRestore: 0
