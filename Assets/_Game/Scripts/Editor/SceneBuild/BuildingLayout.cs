@@ -286,7 +286,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Container kinds the Layout Editor palette offers (container.&lt;kind&gt; name keys).</summary>
-        public static readonly string[] ContainerKinds = { "wardrobe", "cabinet", "bookshelf", "drawer", "medicine", "toolbox", "nightstand", "jewelry" };
+        public static readonly string[] ContainerKinds = { "wardrobe", "wardrobe_v2", "cabinet", "kitchen_cabinet", "bookshelf", "drawer", "toolbox", "nightstand" };
 
         /// <summary>A container of a kind with its art name and block size (position and contents left empty).</summary>
         public static ContainerSpec ContainerPreset(string id, string kind)
@@ -295,9 +295,12 @@ namespace SixtyOne.Editor
             switch (kind)
             {
                 case "wardrobe": spec.Art = "Wardrobe"; spec.Scale = new Vector2(1.0f, 1.7f); break;
+                // The newer wardrobe art: still a "Gardırop" (container.wardrobe).
+                case "wardrobe_v2": spec.NameKey = "container.wardrobe"; spec.Art = "WardrobeV2"; spec.Scale = new Vector2(1.0f, 1.7f); break;
                 case "bookshelf": spec.Art = "Bookshelf"; spec.Scale = new Vector2(1.0f, 1.7f); break;
                 case "cabinet": spec.Art = "Cabinet"; spec.Scale = new Vector2(0.9f, 1.2f); break;
-                case "medicine": spec.Scale = new Vector2(0.6f, 0.7f); break;
+                case "kitchen_cabinet": spec.Art = "KitchenCabinet"; spec.Scale = new Vector2(0.9f, 0.9f); break;
+                case "toolbox": spec.Art = "Toolbox"; spec.Scale = new Vector2(0.55f, 0.35f); break;
                 case "drawer": spec.Scale = new Vector2(0.8f, 0.5f); break;
                 case "nightstand": spec.Scale = new Vector2(0.55f, 0.55f); break;
                 default: spec.Scale = new Vector2(0.55f, 0.35f); break;
@@ -602,7 +605,9 @@ namespace SixtyOne.Editor
             f10Kitchen.Props.Add(P(null, "Stove", 2.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             f10Kitchen.Hotspots.Add(Valve(1.7f, 3.6f, BuildingLevelsGenerator.F3Flat10 + ".c_valve"));
             RoomSpec f10Living = Art(Room(BuildingLevelsGenerator.Flat10Living, 4, 4, new Color(0.4f, 0.4f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
-            f10Living.Props.Add(P(null, "CollapsedFloor", 2.0f, 2.2f, -0.05f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
+            // The collapsed floor: a hole decal on the floor layer (the way down still needs the rope + harness).
+            f10Living.Props.Add(P(null, "FloorHole", 2.0f, 2.2f, 0f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
+            f10Living.Props[f10Living.Props.Count - 1].BlocksNav = true;
             f10Living.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
             f10Living.Containers.Add(Lent(Box("flat10_bookshelf", "bookshelf", 2.6f, 3.7f, Wood, "cloth", "bedsheet")));
 

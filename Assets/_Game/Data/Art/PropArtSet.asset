@@ -35,6 +35,20 @@ MonoBehaviour:
     Sprite: {fileID: 1492948420, guid: 06c99296fea62db4eb82a79003a50527, type: 3}
   - Name: WallLamp
     Sprite: {fileID: 2074405820, guid: c66570860f3404a4fb76e6828d98354d, type: 3}
+  - Name: WardrobeV2
+    Sprite: {fileID: -1440843807, guid: 738f22f9a5f9165449293ad5feaddb8f, type: 3}
+  - Name: KitchenCabinet
+    Sprite: {fileID: -1016469758, guid: 2a2d182685bb29d47b304426ae289e11, type: 3}
+  - Name: Toolbox
+    Sprite: {fileID: -412551308, guid: 470ba51a22be48d42a9ee4b41771fc8b, type: 3}
+  - Name: Armchair
+    Sprite: {fileID: 302882618, guid: 77bceee8ce828084fb78feaabdf31cf6, type: 3}
+  - Name: Sofa
+    Sprite: {fileID: 302882618, guid: 77bceee8ce828084fb78feaabdf31cf6, type: 3}
+  - Name: Bed
+    Sprite: {fileID: 1910851895, guid: 0a3e96f3a31747d4bbdcac1e768a4b6f, type: 3}
+  - Name: FloorHole
+    Sprite: {fileID: -745071331, guid: a7ea55dcc92539747bad44a261b32443, type: 3}
   chandelierFrames:
   - {fileID: 1855002605, guid: b4356de72168d0441ac364a158ab1e34, type: 3}
   - {fileID: -76074062, guid: 34d65166234f25241b56a5ea69a9970a, type: 3}

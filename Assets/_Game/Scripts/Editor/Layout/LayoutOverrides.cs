@@ -46,12 +46,19 @@ namespace SixtyOne.Editor
         /// <summary>Applies every room entry to its room spec; unknown room ids are ignored (reported by Check).</summary>
         public static void Apply(List<BuildingLayout.RoomSpec> rooms, RoomLayoutOverrides overrides)
         {
-            if (overrides == null) return;
-            foreach (RoomLayoutOverrides.RoomEntry entry in overrides.Rooms)
+            if (overrides != null)
             {
-                BuildingLayout.RoomSpec room = rooms.Find(r => r.Id == entry.roomId);
-                if (room == null) continue;
-                foreach (PlacedObject o in entry.objects) ApplyOne(room, o);
+                foreach (RoomLayoutOverrides.RoomEntry entry in overrides.Rooms)
+                {
+                    BuildingLayout.RoomSpec room = rooms.Find(r => r.Id == entry.roomId);
+                    if (room == null) continue;
+                    foreach (PlacedObject o in entry.objects) ApplyOne(room, o);
+                }
+            }
+
+            // Code props can block too (the Flat 10 floor hole), so every room gets its blockers.
+            foreach (BuildingLayout.RoomSpec room in rooms)
+            {
                 foreach (Vector2Int cell in BlockerCells(room).Keys)
                 {
                     if (!room.Blocked.Contains(cell)) room.Blocked.Add(cell);
@@ -250,10 +257,9 @@ namespace SixtyOne.Editor
         {
             var problems = new List<string>();
             RoomLayoutOverrides overrides = Load();
-            if (overrides == null) return problems;
             List<BuildingLayout.RoomSpec> rooms = BuildingLayout.Rooms();
             var itemIds = new HashSet<string>(BuildingLevelsGenerator.ItemIds);
-            foreach (RoomLayoutOverrides.RoomEntry entry in overrides.Rooms)
+            foreach (RoomLayoutOverrides.RoomEntry entry in overrides != null ? overrides.Rooms : new List<RoomLayoutOverrides.RoomEntry>())
             {
                 if (rooms.Find(r => r.Id == entry.roomId) == null) problems.Add($"room '{entry.roomId}': no such room in BuildingLayout.");
                 foreach (PlacedObject o in entry.objects)

@@ -11,7 +11,8 @@ namespace SixtyOne.Editor
     /// SixtyOne > Art > Import Prop Art. Imports the furniture / fixture art in Art/Concept as sprites with a
     /// bottom-centre pivot on the opaque pixels, and a PPU that puts each prop at its target size in room-local
     /// world units (before RoomVisualConfig.WorldScale): table ~0.45 high, wardrobe / bookshelf ~1.1, stove ~0.5,
-    /// chair ~0.55, valve / fuse box ~0.25, wall lamp ~0.2, debris ~0.35 wide. The chandelier frames keep their
+    /// chair ~0.55, valve / fuse box ~0.25, wall lamp ~0.2, debris ~0.35 wide; from Art/items: wardrobe v2 ~1.1, kitchen cabinet ~0.6, toolbox ~0.25,
+    /// armchair / sofa ~0.5, bed ~0.45, floor hole ~1.4 wide (centre-pivot floor decal). The chandelier frames keep their
     /// whole (shared) canvas so the swing and the fallen frame line up. Writes Data/Art/PropArtSet.asset
     /// (prop name → sprite). Safe to re-run; local tunes the targets by eye.
     /// </summary>
@@ -28,9 +29,29 @@ namespace SixtyOne.Editor
             public float Target;
             public Measure By;
             public string[] Names;
+            /// <summary>Folder of the file (Art/Concept by default; the newer furniture lives in Art/items).</summary>
+            public string Dir = ConceptDir;
         }
 
+        public const string ItemsDir = "Assets/_Game/Art/items";
+
         private static Entry E(string file, float target, Measure by, params string[] names) => new Entry { File = file, Target = target, By = by, Names = names };
+
+        private static Entry I(string file, float target, Measure by, params string[] names) => new Entry { File = file, Target = target, By = by, Names = names, Dir = ItemsDir };
+
+        /// <summary>Floor decals: centre pivot, sorted on the floor layer (under characters).</summary>
+        public static bool IsFloorDecal(string name) => name == "FloorHole";
+
+        /// <summary>Target height (room-local units) of a prop name from the table, or 0 when it is not sized by height.</summary>
+        public static float TargetHeight(string name)
+        {
+            foreach (Entry e in Entries)
+            {
+                if (e.By == Measure.Height && System.Array.IndexOf(e.Names, name) >= 0) return e.Target;
+            }
+
+            return 0f;
+        }
 
         /// <summary>Target sizes (tune by eye locally). ComfyUI_00045_ / _00053_ are flat textures: never used in the world.</summary>
         private static readonly Entry[] Entries =
@@ -43,7 +64,13 @@ namespace SixtyOne.Editor
             E("ocak", 0.5f, Measure.Height, "Stove"),
             E("vana", 0.25f, Measure.Height, "Valve"),
             E("sigorta", 0.25f, Measure.Height, "FuseBox"),
-            E("lamba", 0.2f, Measure.Height, "WallLamp")
+            E("lamba", 0.2f, Measure.Height, "WallLamp"),
+            I("dolapv2", 1.1f, Measure.Height, "WardrobeV2"),
+            I("mutfak dolabi", 0.6f, Measure.Height, "KitchenCabinet"),
+            I("alet canta", 0.25f, Measure.Height, "Toolbox"),
+            I("koltuk", 0.5f, Measure.Height, "Armchair", "Sofa"),
+            I("yatak", 0.45f, Measure.Height, "Bed"),
+            I("zemin delik", 1.4f, Measure.Width, "FloorHole")
         };
 
         private static readonly string[] ChandelierFiles = { "frame0000", "frame0001", "frame0002", "frame0003", "frame0004", "frame0005" };
@@ -77,7 +104,7 @@ namespace SixtyOne.Editor
             var mapped = new List<PropArtSet.Entry>();
             foreach (Entry e in Entries)
             {
-                Sprite sprite = Import(e.File, e.Target, e.By);
+                Sprite sprite = Import(e.File, e.Target, e.By, e.Dir, System.Array.Exists(e.Names, IsFloorDecal));
                 if (sprite == null)
                 {
                     Debug.LogWarning($"[PropArt] {e.File}.png missing; {string.Join("/", e.Names)} keep the coloured block.");
@@ -113,9 +140,9 @@ namespace SixtyOne.Editor
         /// One sprite per file: the opaque pixels (alpha &gt; 20) as the sprite rect (or the whole canvas), pivot
         /// bottom-centre, PPU = measured pixels / target units.
         /// </summary>
-        private static Sprite Import(string file, float target, Measure by)
+        private static Sprite Import(string file, float target, Measure by, string dir = ConceptDir, bool centre = false)
         {
-            string path = $"{ConceptDir}/{file}.png";
+            string path = $"{dir}/{file}.png";
             if (!File.Exists(path) || !(AssetImporter.GetAtPath(path) is TextureImporter importer)) return null;
 
             var texture = new Texture2D(2, 2);
@@ -148,8 +175,8 @@ namespace SixtyOne.Editor
             var existing = new List<SpriteRect>(provider.GetSpriteRects());
             SpriteRect sprite = existing.Find(r => r.name == spriteName) ?? new SpriteRect { name = spriteName, spriteID = GUID.Generate() };
             sprite.rect = new Rect(rect.x, rect.y, rect.width, rect.height);
-            sprite.alignment = SpriteAlignment.BottomCenter;
-            sprite.pivot = new Vector2(0.5f, 0f);
+            sprite.alignment = centre ? SpriteAlignment.Center : SpriteAlignment.BottomCenter;
+            sprite.pivot = centre ? new Vector2(0.5f, 0.5f) : new Vector2(0.5f, 0f);
             provider.SetSpriteRects(new[] { sprite });
             var names = provider.GetDataProvider<ISpriteNameFileIdDataProvider>();
             if (names != null) names.SetNameFileIdPairs(new[] { new SpriteNameFileIdPair(sprite.name, sprite.spriteID) });

@@ -135,6 +135,18 @@ namespace SixtyOne.Building
             Panic01 = SurvivalModel.StepPanic(Panic01, PanicBaseline(), config.PanicCalmPerSecond, dt);
         }
 
+        /// <summary>True while the player is in a room with leaking gas and carries the wet cloth (worn as a mask).</summary>
+        public bool MaskWorn
+        {
+            get
+            {
+                if (config == null || gameManager == null || config.WetClothItem == null || !StateOps.HasItem(State, config.WetClothItem.Id)) return false;
+                SceneNode node = nodePlayer != null ? nodePlayer.Current : null;
+                GasZone zone = config.ZoneFor(node != null ? node.RoomId : null);
+                return zone != null && !State.Flags.Get(zone.ValveFlag);
+            }
+        }
+
         private void UpdatePoison(float dt)
         {
             SceneNode node = nodePlayer != null ? nodePlayer.Current : null;

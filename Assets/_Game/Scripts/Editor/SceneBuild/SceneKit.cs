@@ -177,10 +177,18 @@ namespace SixtyOne.Editor
                 if (lit != null) r.sharedMaterial = lit;
             }
 
-            IsoSorter sorter = go.AddComponent<IsoSorter>();
-            sorter.Mode = IsoSortMode.Static;
-            SerializedWire.SetInt(sorter, "offset", Mathf.RoundToInt(lift * 100f));
-            sorter.Apply();
+            if (mapped != null && PropArt.IsFloorDecal(objectName))
+            {
+                // Floor decal (the Flat 10 hole): on the floor layer, under anchors, characters and props.
+                r.sortingOrder = DecalOrder - 100;
+            }
+            else
+            {
+                IsoSorter sorter = go.AddComponent<IsoSorter>();
+                sorter.Mode = IsoSortMode.Static;
+                SerializedWire.SetInt(sorter, "offset", Mathf.RoundToInt(lift * 100f));
+                sorter.Apply();
+            }
 
             if (!string.IsNullOrEmpty(propId))
             {

@@ -22,10 +22,16 @@ namespace SixtyOne.Editor
         private static readonly Dictionary<string, string> Files = new Dictionary<string, string>
         {
             { "food", "bread" }, { "water", "water bottle" }, { "flashlight", "flashlight" }, { "gloves", "gloves" },
-            { "bedsheet", "sheet" }, { "tape", "bant" }, { "gold", "golds" }, { "lighter", "lighter" },
+            { "bedsheet", "sheet" }, { "tape", "bant" }, { "lighter", "lighter" },
             { "first_aid", "medkit" }, { "rope", "rope" }, { "bedsheet_rope", "sheet rope" }, { "whistle", "whsitle" },
-            { "wrench", "wrench" }
+            { "wrench", "wrench" }, { "cloth", "bez kuru" }, { "wet_cloth", "bez islak" }
         };
+
+        /// <summary>Items whose bag/UI icon differs from the world sprite: the wet cloth is shown worn, as a mask.</summary>
+        private static readonly Dictionary<string, string> UiFiles = new Dictionary<string, string> { { "wet_cloth", "bez maske" } };
+
+        /// <summary>The worn wet-cloth mask (UI icon of wet_cloth), for the "maske takılı" indicator.</summary>
+        public static Sprite MaskIcon() => UiFor("wet_cloth");
 
         /// <summary>Imports (if needed) and returns the icon of an item, or null.</summary>
         public static Sprite For(string itemId)
@@ -64,7 +70,7 @@ namespace SixtyOne.Editor
         /// </summary>
         public static Sprite UiFor(string itemId)
         {
-            string source = Files.TryGetValue(itemId, out string file) ? $"{Folder}/{file}.png" : null;
+            string source = UiFiles.TryGetValue(itemId, out string file) || Files.TryGetValue(itemId, out file) ? $"{Folder}/{file}.png" : null;
             if (source == null || !File.Exists(source)) return Placeholder();
             return WriteSprite($"{UiFolder}/{itemId}_ui.png", SquareCrop(source));
         }

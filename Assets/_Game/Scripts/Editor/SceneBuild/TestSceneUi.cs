@@ -75,7 +75,7 @@ namespace SixtyOne.Editor
             // After the QTE panel so miss / timeout messages draw on top of it.
             BuildToast(root);
             BuildDeathCard(root, gameManager, content, art);
-            BuildPoisonOverlay(root);
+            BuildPoisonOverlay(root, survival);
             transitionOverlay = BuildTransitionOverlay(root);
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
@@ -505,11 +505,21 @@ namespace SixtyOne.Editor
             }
         }
 
-        private static void BuildPoisonOverlay(Transform root)
+        private static void BuildPoisonOverlay(Transform root, SurvivalController survival)
         {
             Image overlay = UiFactory.MakeImage("PoisonOverlay", root, Vector2.zero, Vector2.one, new Color(0.02f, 0.05f, 0.02f, 0f));
             PoisonOverlay poison = overlay.gameObject.AddComponent<PoisonOverlay>();
             SerializedWire.Set(poison, "overlay", overlay);
+
+            // "Maske takılı": the worn wet-cloth icon left of the panic meter, drawn over the gas darkening.
+            Image chip = UiFactory.MakePanel("MaskIndicator", root, new Vector2(0.325f, 0.842f), new Vector2(0.415f, 0.886f), Panel);
+            CanvasGroup group = UiFactory.MakeGroup(chip.gameObject);
+            UiFactory.MakeImage("Icon", chip.transform, new Vector2(0.03f, 0.08f), new Vector2(0.3f, 0.92f), Color.white, sprite: ItemIconArt.MaskIcon());
+            TextMeshProUGUI label = UiFactory.MakeLabel("Label", chip.transform, new Vector2(0.32f, 0f), new Vector2(0.98f, 1f), TextRole.Label, TextAlignmentOptions.MidlineLeft);
+            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.MaskWorn);
+            MaskIndicator indicator = chip.gameObject.AddComponent<MaskIndicator>();
+            SerializedWire.Set(indicator, "survival", survival);
+            SerializedWire.Set(indicator, "group", group);
         }
 
         /// <summary>

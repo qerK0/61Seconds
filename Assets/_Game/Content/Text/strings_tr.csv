@@ -285,6 +285,7 @@ ui.placement.invalid,Oraya geçilemez.,
 ui.placement.no_room,Orada yer kalmadı.,
 ui.placement.player_last,Önce eşini ve çocuğunu yerleştir.,
 ui.poison.warning,Gaz kokusu! Başın dönüyor.,
+ui.mask.worn,Maske takılı,"chip next to the gas darkening while the wet cloth is carried in a gas room"
 ui.prep.label,Depreme kalan,caption under the prep countdown
 ui.qte.breaker,Sigorta kutusu,QTE title
 ui.qte.dog,Köpekten kaç!,QTE title
@@ -359,10 +360,9 @@ container.wardrobe,Gardırop,container name
 container.cabinet,Dolap,container name
 container.bookshelf,Kitaplık,container name
 container.drawer,Çekmece,container name
-container.medicine,Ecza dolabı,container name
-container.toolbox,Alet kutusu,container name
+container.kitchen_cabinet,Mutfak dolabı,container name
+container.toolbox,Alet çantası,container name
 container.nightstand,Komodin,container name
-container.jewelry,Mücevher kutusu,container name
 npc.robber.name,Telaşlı Adam,"injured, panicked man on the F2 stairs; desperate, not evil"
 f2.robber.title,Merdivende biri var,
 f2.robber.body,"Kolunu tutan, yüzü tozdan bembeyaz bir adam merdiveni kapatıyor.",

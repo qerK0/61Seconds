@@ -41,6 +41,7 @@ namespace SixtyOne.Text
         public const string ItemUsed = "ui.bag.used";
         public const string ItemNotUsable = "ui.bag.not_usable";
         public const string PoisonWarning = "ui.poison.warning";
+        public const string MaskWorn = "ui.mask.worn";
         public const string Borrowed = "ui.borrowed";
 
         // Bag: drop, dropped items, bedsheet rope, key items.
