@@ -39,6 +39,7 @@ namespace SixtyOne.UI
             GameEvents.QueuedMessage += OnQueued;
             GameEvents.QuakeStarted += OnQuake;
             GameEvents.Died += OnDied;
+            GameEvents.Rewound += OnRewound;
         }
 
         private void OnDisable()
@@ -47,6 +48,7 @@ namespace SixtyOne.UI
             GameEvents.QueuedMessage -= OnQueued;
             GameEvents.QuakeStarted -= OnQuake;
             GameEvents.Died -= OnDied;
+            GameEvents.Rewound -= OnRewound;
         }
 
         /// <summary>Shows already-resolved text.</summary>
@@ -90,6 +92,9 @@ namespace SixtyOne.UI
             Show(TextDB.GetDisplay(key));
         }
         private void OnQuake(QuakeInfo info) => Show(TextDB.Format(UiKeys.Quake, info.Magnitude.ToString("0.0")));
+
+        // A rewind starts clean: nothing queued before the death plays afterwards.
+        private void OnRewound(string nodeId) => OnDied(null);
 
         private void OnDied(DeathInfo info)
         {

@@ -38,6 +38,7 @@ namespace SixtyOne.UI
         [Tooltip("Played when a card appears.")]
         [SerializeField] private AudioCue showCue;
 
+        private readonly RewindCardGate rewindGate = new RewindCardGate();
         private int lastStage;
         private bool showing;
         private bool holding;
@@ -77,9 +78,12 @@ namespace SixtyOne.UI
         {
             GameSession session = GameManager.Instance != null ? GameManager.Instance.Session : null;
             if (session == null || !session.LastRewindWasMacro) return;
+            // One card per checkpoint and death cause: dying the same way again never brings a card back.
+            string cause = session.LastDeath != null ? session.LastDeath.TipId : null;
+            if (!rewindGate.Allow(session.Checkpoint != null ? session.Checkpoint.NodeId : nodeId, cause)) return;
             SceneNode node = nodePlayer != null ? nodePlayer.Current : null;
             int stage = node != null ? InfoCardRules.StageFor(node.Act, node.RoomId) : lastStage;
-            Show(stage, InfoCardRules.PreferredForDeath(session.LastDeath != null ? session.LastDeath.TipId : null));
+            Show(stage, InfoCardRules.PreferredForDeath(cause));
         }
 
         /// <summary>Shows the card for arriving on a stage (1..4); preferred 0 = the next unseen.</summary>

@@ -31,6 +31,9 @@ namespace SixtyOne.Building
         [Tooltip("Dialogue driver (the real-time tick pauses while lines play).")]
         [SerializeField] private DialogueController dialogue;
 
+        [Tooltip("Building seconds a rewind always leaves (a checkpoint saved with less would collapse again at once).")]
+        [SerializeField] private float minSecondsAfterRewind = 60f;
+
         /// <summary>Poison at which the warning toast appears.</summary>
         private const float PoisonWarningLevel = 0.2f;
 
@@ -282,6 +285,13 @@ namespace SixtyOne.Building
 
         private void OnRewound(string nodeId)
         {
+            // A snapshot taken close to a death (no stamina, deep exhaustion / poison, the timer nearly out) must not
+            // kill again on its own and loop the same death card and info card.
+            if (config != null && gameManager != null)
+            {
+                RewindRecovery.Apply(State, gameManager.Session.LastRewindWasMacro, config.StaminaMax, minSecondsAfterRewind);
+            }
+
             Timer.Sync(State.BuildingTime);
             if (config == null) return;
             Panic01 = PanicBaseline();
