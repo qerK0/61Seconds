@@ -102,6 +102,9 @@ namespace SixtyOne.Editor
             public string TargetNodeId;
         }
 
+        /// <summary>Art in a door's wall gap.</summary>
+        public enum DoorArtKind { Door, Elevator, Stairwell }
+
         /// <summary>A door on an edge of this room leading to another room (arrival = just inside it there).</summary>
         public sealed class DoorSpec
         {
@@ -110,6 +113,12 @@ namespace SixtyOne.Editor
             public string TargetRoom;
             /// <summary>Grid point in the target room where the player appears.</summary>
             public Vector2 Arrival;
+            /// <summary>Two-way door: the target room has a door back, and the arrival follows that door when it moves.</summary>
+            public bool TwoWay;
+            /// <summary>Door, elevator or stairwell door (the door art + a "MERDİVEN ↓" sign).</summary>
+            public DoorArtKind Art;
+            /// <summary>Stable id inside the room (layout overrides key on it): "door_" + target room.</summary>
+            public string Id => "door_" + TargetRoom;
         }
 
         /// <summary>A person or object that plays a node choice (by label key).</summary>
@@ -132,6 +141,8 @@ namespace SixtyOne.Editor
             public string Art;
             /// <summary>More choice keys the same object plays in other nodes (prep / post-quake valve).</summary>
             public string[] AlsoKeys = new string[0];
+            /// <summary>Wall-gap edge code for a stairwell-door hotspot (Art = "Stairwell"): sits in the gap, approached from inside.</summary>
+            public string Edge;
         }
 
         public sealed class RoomSpec
@@ -231,15 +242,52 @@ namespace SixtyOne.Editor
         /// <summary>Two-way door: a's edge ⇄ b's edge (wall gaps opened on both sides).</summary>
         private static void Link(RoomSpec a, string edgeA, RoomSpec b, string edgeB)
         {
-            OneWay(a, edgeA, b, EdgeInside(b, edgeB));
-            OneWay(b, edgeB, a, EdgeInside(a, edgeA));
+            OneWay(a, edgeA, b, EdgeInside(b, edgeB)).TwoWay = true;
+            OneWay(b, edgeB, a, EdgeInside(a, edgeA)).TwoWay = true;
         }
 
-        /// <summary>One-way exit (stairs down): no door back.</summary>
-        private static void OneWay(RoomSpec from, string edge, RoomSpec to, Vector2 arrival)
+        /// <summary>One-way exit: no door back.</summary>
+        private static DoorSpec OneWay(RoomSpec from, string edge, RoomSpec to, Vector2 arrival)
         {
-            from.Doors.Add(new DoorSpec { Edge = edge, TargetRoom = to.Id, Arrival = arrival });
+            var door = new DoorSpec { Edge = edge, TargetRoom = to.Id, Arrival = arrival };
+            from.Doors.Add(door);
             if (IsWallEdge(edge) && !from.Gaps.Contains(edge)) from.Gaps.Add(edge);
+            return door;
+        }
+
+        /// <summary>
+        /// The way down: a stairwell door (door art + "MERDİVEN ↓" sign) on a back-wall gap. There is no stairs art;
+        /// clicking it plays the node's stairs move choice like any door into another zone.
+        /// </summary>
+        private static void StairwellDoor(RoomSpec from, string edge, RoomSpec to, Vector2 arrival)
+        {
+            OneWay(from, edge, to, arrival).Art = DoorArtKind.Stairwell;
+        }
+
+        /// <summary>
+        /// Moves a door to another edge of its room (Layout Editor): the wall gap follows it and, for a two-way door,
+        /// the arrival of the door back (in the target room) moves with it.
+        /// </summary>
+        public static void MoveDoor(List<RoomSpec> rooms, RoomSpec room, DoorSpec door, string edge)
+        {
+            if (door.Edge == edge) return;
+            string old = door.Edge;
+            door.Edge = edge;
+            if (IsWallEdge(old) && !room.Doors.Exists(d => d.Edge == old) && !room.Hotspots.Exists(h => h.Edge == old)) room.Gaps.Remove(old);
+            if (IsWallEdge(edge) && !room.Gaps.Contains(edge)) room.Gaps.Add(edge);
+            if (!door.TwoWay) return;
+            RoomSpec target = rooms.Find(r => r.Id == door.TargetRoom);
+            DoorSpec back = target?.Doors.Find(d => d.TargetRoom == room.Id);
+            if (back != null) back.Arrival = EdgeInside(room, edge);
+        }
+
+        /// <summary>Wall-gap edge codes of a room (L0..L(w-1), R0..R(h-1)).</summary>
+        public static List<string> WallEdges(RoomSpec room)
+        {
+            var edges = new List<string>();
+            for (int x = 0; x < room.Width; x++) edges.Add("L" + x);
+            for (int y = 0; y < room.Height; y++) edges.Add("R" + y);
+            return edges;
         }
 
         private static HotspotSpec Person(string name, string choiceKey, float gx, float gy, Color color, bool hideWhenGone = true, string idle = null)
@@ -250,6 +298,23 @@ namespace SixtyOne.Editor
         private static HotspotSpec Thing(string name, string choiceKey, float gx, float gy, float sx, float sy, Color color)
         {
             return new HotspotSpec { Name = name, ChoiceKey = choiceKey, Gx = gx, Gy = gy, Scale = new Vector2(sx, sy), Color = color };
+        }
+
+        /// <summary>A stairwell door in a back-wall gap that plays a choice (the F2 stairs down to the street).</summary>
+        private static HotspotSpec StairwellHotspot(RoomSpec room, string edge, string choiceKey)
+        {
+            Vector2 c = EdgeCenter(room, edge);
+            if (!room.Gaps.Contains(edge)) room.Gaps.Add(edge);
+            return new HotspotSpec { Name = "Stairwell", ChoiceKey = choiceKey, Gx = c.x, Gy = c.y, Art = StairwellArt, Edge = edge };
+        }
+
+        /// <summary>Hotspot art name of a stairwell door.</summary>
+        public const string StairwellArt = "Stairwell";
+
+        /// <summary>Where the player stands to use a hotspot: inside its wall gap, else in front of it (camera side).</summary>
+        public static Vector2 HotspotApproach(RoomSpec room, HotspotSpec h)
+        {
+            return !string.IsNullOrEmpty(h.Edge) ? EdgeInside(room, h.Edge) : new Vector2(h.Gx - 0.5f, h.Gy - 0.5f);
         }
 
         private static AnchorSpec A(string id, float gx, float gy, AnchorTag tag, int cap, string hazard, string label, params string[] adjacent)
@@ -451,7 +516,7 @@ namespace SixtyOne.Editor
             var points = new List<Vector2> { room.PlayerSpawn, room.WifeSpawn, room.ChildSpawn };
             foreach (AnchorSpec a in room.Anchors) points.Add(new Vector2(a.Gx, a.Gy));
             foreach (DoorSpec d in room.Doors) points.Add(EdgeInside(room, d.Edge));
-            foreach (HotspotSpec h in room.Hotspots) if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(new Vector2(h.Gx - 0.5f, h.Gy - 0.5f));
+            foreach (HotspotSpec h in room.Hotspots) if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(HotspotApproach(room, h));
             foreach (ItemSpec i in room.Items) points.Add(new Vector2(i.Gx, i.Gy));
             foreach (RopeSpec r in room.Ropes) points.Add(new Vector2(r.Gx, r.Gy));
             foreach (ContainerSpec c in room.Containers) points.Add(ContainerApproach(room, c));
@@ -516,9 +581,8 @@ namespace SixtyOne.Editor
             bedroom.Containers.Add(Box("bedroom_wardrobe_sheet", "wardrobe", 3.6f, 3.3f, Wood, "bedsheet"));
             bedroom.Lights.Add(L("BedLamp", 0.6f, 3.4f, 0.8f, 2.4f));
 
-            // Corridor: one door per flat, the stairs down (front-left exit), the elevator (trap) and Sevim Teyze.
+            // Corridor: one door per flat, the stairwell door (L0), the elevator (trap) and Sevim Teyze.
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F4Corridor, 7, 2, new Color(0.6f, 0.6f, 0.62f, 1f)), RoomArt.Corridor);
-            corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             corridor.Hotspots.Add(Thing("Elevator", "f4.corridor.c_elevator", 7.0f, 1.5f, 1.0f, 1.6f, Metal));
             WallLamp(corridor, 2.5f, "CorridorWallLampA");
             WallLamp(corridor, 5.5f, "CorridorWallLampB");
@@ -554,7 +618,7 @@ namespace SixtyOne.Editor
             Link(f12Hall, "L1", f12Living, "R1");
             Link(f12Living, "L2", f12Bedroom, "R1");
             RoomSpec f3Corridor = Find(floor3, BuildingLevelsGenerator.F3Corridor);
-            OneWay(corridor, "G1", f3Corridor, f3Corridor.PlayerSpawn);
+            StairwellDoor(corridor, "L0", f3Corridor, f3Corridor.PlayerSpawn);
 
             return new[] { salon, kitchen, hall, bedroom, corridor, f12Hall, f12Living, f12Bedroom };
         }
@@ -640,12 +704,11 @@ namespace SixtyOne.Editor
             f7Kitchen.Props.Add(P(null, "Stove", 1.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             f7Kitchen.Hotspots.Add(Valve(2.3f, 3.6f, BuildingLevelsGenerator.F2Flat7 + ".c_valve"));
 
-            // Corridor: the rabid dog blocks the stairs (front-left exit).
+            // Corridor: the rabid dog blocks the stairwell door (L0).
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
             // The rabid dog: decorative NPC (its choices are in the panel), facing the player's arrival door (L1).
             corridor.Hotspots.Add(new HotspotSpec { Name = "Dog", Gx = 1.0f, Gy = 1.0f, Person = true, Color = new Color(0.55f, 0.4f, 0.25f, 1f), Idle = "dog", Face = EdgeInside(corridor, "L1") });
             WallLamp(corridor, 2.5f, "F2WallLamp");
-            corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             // Elevators sit flush on the back-right wall line, centred on a wall segment (DoorArt fits them to it).
             corridor.Props.Add(P(null, "Elevator", 7.0f, 1.5f, 0f, 1.0f, 1.6f, Metal));
 
@@ -658,11 +721,11 @@ namespace SixtyOne.Editor
             RoomSpec f8Bedroom = Art(Room(BuildingLevelsGenerator.Flat8Bedroom, 4, 4, new Color(0.7f, 0.64f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
 
-            // Stairs down to the street (click the stairs) and the elevator trap. The frightened man (Telaşlı Adam)
-            // stands in front of the stairs: going down starts the scripted robbery, then the street.
+            // The stairwell door down to the street (L1) and the elevator trap. The frightened man (Telaşlı Adam)
+            // stands in front of it: going down starts the scripted robbery, then the street.
             RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.DamagedCorridor);
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
-            stairs.Hotspots.Add(Thing("StairsDown", BuildingLevelsGenerator.F2Exit + ".c_out", 1.5f, 4.3f, 1.6f, 0.5f, new Color(0.45f, 0.45f, 0.5f, 1f)));
+            stairs.Hotspots.Add(StairwellHotspot(stairs, "L1", BuildingLevelsGenerator.F2Exit + ".c_out"));
             stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 3.0f, 1.5f, 0.6f, 1.6f, Metal));
             stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f), Idle = "robber" });
 
@@ -674,7 +737,7 @@ namespace SixtyOne.Editor
             Link(corridor, "L4", f8Hall, "R1");
             Link(f8Hall, "L1", f8Living, "R1");
             Link(f8Living, "L2", f8Bedroom, "R1");
-            OneWay(corridor, "G1", stairs, stairs.PlayerSpawn);
+            StairwellDoor(corridor, "L0", stairs, stairs.PlayerSpawn);
 
             return new[] { flat7, f7Hall, f7Kitchen, corridor, f8Hall, f8Living, f8Bedroom, stairs, street };
         }

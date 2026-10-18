@@ -183,7 +183,7 @@ namespace SixtyOne.Editor
             foreach (BuildingLayout.DoorSpec d in room.Doors) points.Add(new KeyValuePair<Vector2, string>(BuildingLayout.EdgeInside(room, d.Edge), "door approach → " + d.TargetRoom));
             foreach (BuildingLayout.HotspotSpec h in room.Hotspots)
             {
-                if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(new KeyValuePair<Vector2, string>(new Vector2(h.Gx - 0.5f, h.Gy - 0.5f), "hotspot " + h.Name));
+                if (!string.IsNullOrEmpty(h.ChoiceKey)) points.Add(new KeyValuePair<Vector2, string>(BuildingLayout.HotspotApproach(room, h), "hotspot " + h.Name));
             }
 
             foreach (BuildingLayout.ItemSpec i in room.Items) points.Add(new KeyValuePair<Vector2, string>(new Vector2(i.Gx, i.Gy), "item " + i.Id));

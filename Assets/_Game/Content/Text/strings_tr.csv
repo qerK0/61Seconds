@@ -280,6 +280,7 @@ ui.placement.no_room,Orada yer kalmadı.,
 ui.placement.player_last,Önce eşini ve çocuğunu yerleştir.,
 ui.poison.warning,Gaz kokusu! Başın dönüyor.,
 ui.mask.worn,Maske takılı,"chip next to the gas darkening while the wet cloth is carried in a gas room"
+ui.sign.stairs,MERDİVEN ↓,"plate above every stairwell door (there is no stairs art)"
 ui.prep.label,Depreme kalan,caption under the prep countdown
 ui.qte.breaker,Sigorta kutusu,QTE title
 ui.qte.dog,Köpekten kaç!,QTE title

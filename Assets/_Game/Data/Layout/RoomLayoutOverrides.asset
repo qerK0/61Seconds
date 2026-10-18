@@ -150,35 +150,6 @@ MonoBehaviour:
       lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
       scale: {x: 1, y: 1}
       tint: {r: 1, g: 1, b: 1, a: 1}
-  - roomId: f4_corridor
-    objects:
-    - id: StairsDown
-      kind: 0
-      removed: 0
-      gx: 0.5
-      gy: 1.5
-      lift: 0
-      flipX: 0
-      propName: StairsDown
-      blocksNav: 0
-      itemId: 
-      cost: 1
-      borrowed: 0
-      surface: 1
-      prepOnly: 0
-      containerType: 
-      contents: []
-      hiddenContents: []
-      searchSeconds: 1.5
-      buildingCost: 3
-      hazardProp: 0
-      hazardPropId: 
-      topple: -80
-      drop: 0.8
-      radius: 2.4
-      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
-      scale: {x: 0.9, y: 0.4}
-      tint: {r: 0.45, g: 0.45, b: 0.5, a: 1}
   - roomId: flat10_kitchen
     objects:
     - id: Stove

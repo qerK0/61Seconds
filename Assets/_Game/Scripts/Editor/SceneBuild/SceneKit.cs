@@ -154,10 +154,13 @@ namespace SixtyOne.Editor
             Sprite mapped = Props != null ? Props.Find(objectName) : null;
             bool chandelier = objectName == "CeilingLamp" && Props != null && Props.ChandelierFrames.Length > 0;
             if (chandelier) mapped = Props.ChandelierFrames[0];
+            // The F3 broken stair edge has no stairs art: a pile of debris (twice the usual debris size) marks it.
+            bool stairEdge = mapped == null && objectName == "StairEdge" && Props != null && Props.Debris.Length > 0;
+            if (stairEdge) mapped = Props.Debris[Props.Debris.Length - 1];
             if (mapped != null)
             {
                 if (!WallMounted(objectName)) lift = 0f;
-                scale = Vector2.one;
+                scale = stairEdge ? Vector2.one * 2f : Vector2.one;
             }
 
             var go = new GameObject(objectName);
@@ -431,11 +434,13 @@ namespace SixtyOne.Editor
                 var art = new GameObject("Art");
                 art.transform.SetParent(go.transform, false);
                 SpriteRenderer artRenderer = art.AddComponent<SpriteRenderer>();
-                if (DoorArt.Apply(artRenderer, DoorArt.Door, door.Edge.StartsWith("R")))
+                Sprite doorSprite = door.Art == BuildingLayout.DoorArtKind.Elevator ? DoorArt.Elevator : DoorArt.Door;
+                if (DoorArt.Apply(artRenderer, doorSprite, door.Edge.StartsWith("R")))
                 {
                     artRenderer.sortingOrder = RoomTiles.WallOrder + 1;
                     Material litDoor = RoomTiles.LitMaterial;
                     if (litDoor != null) artRenderer.sharedMaterial = litDoor;
+                    if (door.Art == BuildingLayout.DoorArtKind.Stairwell) StairwellSign(go.transform);
                 }
                 else
                 {
@@ -475,6 +480,33 @@ namespace SixtyOne.Editor
             return component;
         }
 
+        /// <summary>
+        /// The stairwell sign above a door's lintel: a dark plate with white "MERDİVEN ↓" (ui.sign.stairs), sorted with
+        /// the wall layers (over the wall tiles, below decals, characters and props).
+        /// </summary>
+        public static GameObject StairwellSign(Transform door)
+        {
+            var sign = new GameObject("StairwellSign");
+            sign.transform.SetParent(door, false);
+            // Across the upper door (the door fills 90% of the wall, so there is no room for it above the lintel).
+            sign.transform.localPosition = new Vector3(0f, DoorArt.Height * 0.72f, 0f);
+
+            var plate = new GameObject("Plate");
+            plate.transform.SetParent(sign.transform, false);
+            plate.transform.localScale = new Vector3(1.6f, 0.22f, 1f);
+            SpriteRenderer p = plate.AddComponent<SpriteRenderer>();
+            p.sprite = Art.Block;
+            p.color = new Color(0.1f, 0.11f, 0.13f, 1f);
+            p.sortingOrder = DecalOrder - 2;
+
+            TextMeshPro label = WorldLabel(sign.transform, new Vector3(0f, 0.11f, 0f), 0.72f, Color.white, bold: true);
+            label.rectTransform.sizeDelta = new Vector2(0.78f, 0.22f);
+            label.textWrappingMode = TextWrappingModes.NoWrap;
+            label.sortingOrder = DecalOrder - 1;
+            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", UiKeys.StairsSign);
+            return sign;
+        }
+
         private static readonly Dictionary<string, CharacterArt.Frames> idleFrames = new Dictionary<string, CharacterArt.Frames>();
 
         /// <summary>An NPC's idle frames (imported once per editor session), or null when it has no art yet.</summary>
@@ -497,7 +529,7 @@ namespace SixtyOne.Editor
         /// A person or object (block) that plays a node choice; hover shows the choice label. A person with idle art
         /// loops it; without art it is a dark neutral silhouette with a soft shadow.
         /// </summary>
-        public static ChoiceHotspot Hotspot(Transform room, BuildingLayout.HotspotSpec spec, RoomNavigator navigator)
+        public static ChoiceHotspot Hotspot(Transform room, BuildingLayout.RoomSpec roomSpec, BuildingLayout.HotspotSpec spec, RoomNavigator navigator)
         {
             var go = new GameObject("Hotspot_" + spec.Name);
             go.transform.SetParent(room, false);
@@ -573,6 +605,17 @@ namespace SixtyOne.Editor
                 // flipped, wall-fitted elevator door art.
                 height = DoorArt.Height + DoorArt.Rise;
             }
+            else if (spec.Art == BuildingLayout.StairwellArt && DoorArt.Apply(r, DoorArt.Door, spec.Edge != null && spec.Edge.StartsWith("R")))
+            {
+                // Stairwell door in its wall gap (no stairs art): the door art + the "MERDİVEN ↓" sign. A sorting
+                // group keeps the plate and its text over the door while the whole door sorts by its Y.
+                height = DoorArt.Height + DoorArt.Rise;
+                go.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                GameObject sign = StairwellSign(go.transform);
+                r.sortingOrder = 0;
+                sign.GetComponentInChildren<SpriteRenderer>().sortingOrder = 1;
+                sign.GetComponentInChildren<TextMeshPro>().sortingOrder = 2;
+            }
             else
             {
                 body.transform.localScale = new Vector3(spec.Scale.x, spec.Scale.y, 1f);
@@ -592,7 +635,7 @@ namespace SixtyOne.Editor
             }
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();
-            float boxWidth = spec.Person ? (small ? 0.6f : 0.45f) : r.sprite == DoorArt.Elevator ? DoorArt.Width : spec.Art != null && r.sprite != Art.Block ? Mathf.Max(0.3f, r.sprite.bounds.size.x) : spec.Scale.x * 0.5f;
+            float boxWidth = spec.Person ? (small ? 0.6f : 0.45f) : r.sprite == DoorArt.Elevator || r.sprite == DoorArt.Door ? DoorArt.Width : spec.Art != null && r.sprite != Art.Block ? Mathf.Max(0.3f, r.sprite.bounds.size.x) : spec.Scale.x * 0.5f;
             box.size = new Vector2(boxWidth, height);
             box.offset = new Vector2(0f, height * 0.5f);
 
@@ -606,7 +649,8 @@ namespace SixtyOne.Editor
             // Stand in front of (camera side of) the person or object, not inside it.
             var approach = new GameObject("Approach").transform;
             approach.SetParent(room, false);
-            approach.localPosition = IsoMath.GridToWorld(spec.Gx - 0.5f, spec.Gy - 0.5f);
+            Vector2 stand = BuildingLayout.HotspotApproach(roomSpec, spec);
+            approach.localPosition = IsoMath.GridToWorld(stand.x, stand.y);
             approach.SetParent(go.transform, true);
 
             ChoiceHotspot hotspot = go.AddComponent<ChoiceHotspot>();

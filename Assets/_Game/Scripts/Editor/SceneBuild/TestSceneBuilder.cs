@@ -400,7 +400,7 @@ namespace SixtyOne.Editor
 
             foreach (BuildingLayout.HotspotSpec h in spec.Hotspots)
             {
-                SceneKit.Hotspot(t, h, navigator);
+                SceneKit.Hotspot(t, spec, h, navigator);
             }
 
             // The street's downed power line (blocked cells, click = electrocution) and the assembly-area sign label.
