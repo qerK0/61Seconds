@@ -4,6 +4,86 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 09:10] LOCAL — Task 14: new props/items, cut items, stairwell doors, Layout Editor v2, varnish pass
+### Done
+- **1. New art** (Art/items):
+  - PropArt now also imports from Art/items: WardrobeV2 (1.1), KitchenCabinet (0.6), Toolbox (0.25), Armchair + Sofa (0.5), Bed (0.45), FloorHole (1.4 wide, centre pivot).
+  - The coloured sofas and beds became art by name. The Flat 11 hall toolbox uses the tool-bag art. The Flat 10 collapsed floor is a FloorHole decal: floor layer, under characters, blocks its nav cell; the way down still needs rope + harness.
+  - Container presets: `wardrobe_v2` (still "Gardırop"), `kitchen_cabinet` ("Mutfak dolabı"), `toolbox` ("Alet çantası").
+  - Item art: `cloth` = bez kuru; `wet_cloth` world = bez islak; bag/UI icon = bez maske.
+  - New `UI/MaskIndicator`: a "Maske takılı" chip (mask icon), left of the panic meter and drawn over the gas darkening. It shows while the player has `wet_cloth` in a room with leaking gas (`SurvivalController.MaskWorn`). No new mechanic.
+- **2. Cuts:**
+  - Removed `gold`, `laptop`, `console`: item assets, pickups, the jewelry box, `Item.isTrap`, CSV keys; tests now use other ids.
+  - Removed the medicine cabinet (salon_cabinet / container.medicine).
+  - `first_aid` moved to a new Flat 11 kitchen cabinet (`kitchen_cabinet`). Flat 12's cabinet still has one.
+  - The stale laptop / console / StairsDown override entries were pruned from RoomLayoutOverrides.
+  - New Validate Content rule `CheckProgressionItems`: at least 3 bedsheets (LevelConfig count), bedsheet_rope, rope, gloves or grip+tape, flashlight, child_harness, whistle, food, water and first_aid must each come from somewhere: rooms (overrides applied), outcomes, traders, or recipes (fixpoint).
+- **3. Stairwell doors** (there is no stairs art):
+  - F4 corridor L0 → F3 and F2 corridor L0 → stairs are `DoorSpec.Art = Stairwell` (was the G1 floor exit + StairsDown prop).
+  - The F2 stairs room has a wall hotspot at L1 that plays `f2.exit.c_out`.
+  - Each has the kapi art plus a dark plate with "MERDİVEN ↓" (`ui.sign.stairs`).
+  - The F3 stair edge is now marked by debris art (2x debris sprite); its hazard anchor is unchanged.
+- **4. Layout Editor v2:**
+  - Per-object uniform `objectScale` (slider 0.5–2 or the Scale tool, kept uniform on release; Reset scale; Match prop height from the PropArt table) and `sortNudge`.
+  - The builder applies scale + nudge; "Approach" children keep their world position. Nav blocking uses the scaled footprint (scale 2 = 2x2 cells).
+  - Doors and the stairwell hotspot are `LayoutKind.Door`: drag along the wall (snaps to the nearest L/R gap) or pick the edge. Flip and art (Door / Elevator / Stairwell) are editable; the target, choice and costs are read-only.
+  - A moved two-way door moves the arrival point on the other side; gaps follow it.
+  - Check reports doors off-wall or two doors in one gap, then reachability as before.
+  - Container palette labels are Turkish (Ecza dolabı gone). Old entries load as scale 1 (`Scale1`). `docs/layout-editor.md` updated.
+  - Persistence test: salon wardrobe scaled 1.3 and the Flat 12 door dragged to L5, saved, rebuilt: both persisted, 0 layout problems. **The overrides asset was then restored from a backup**, so Bora's layout is unchanged.
+- **5. Varnish:**
+  - `CinematicProfile.lut` + `lutContribution` (0.6). Every act gets LUT_61s_Dust_32 from the generator; CinematicDirector drives a URP ColorLookup, and the base volume has one.
+  - Film grain is Thin1 (act 1/2/3: 0.12 / 0.14 / 0.16, response 0.8). The mixer zeroes grain under Reduce Effects, rewind spike included; the LUT stays.
+  - Vignette defaults and assets: act 1 0.28, act 2 0.33, act 3 0.38.
+  - Contact shadows (ph_shadow, alpha 0.35, footprint width, own sorting group on the floor layer) under floor-standing mapped props and all containers. Characters and NPCs already had them.
+  - The HUD stays on the Screen Space Overlay canvas, so it is not graded: the LED timer is still orange in the shots.
+- **6. Verify:**
+  - 0 compile errors.
+  - EditMode **224 / 224**. New tests: `LayoutV2Tests` (6), plus grain-off-under-Reduce-Effects and the act vignette order in CinematicMixerTests.
+  - Validate Content: 29 nodes, 0 problems. Text > Validate: 414 / 0 / 0 / 0.
+  - Play (driven from code):
+    - The Flat 11 kitchen cabinet search opens "Mutfak dolabı" with İlk yardım çantası.
+    - The F4 stairwell door → `f3.aftershock`; the F2 corridor stairwell door (DogGone) → `f2.exit`; the F2 stairwell hotspot → `f2.robber`.
+    - The wet cloth in Flat 10 gas shows the mask chip and the mask bag icon.
+  - Screenshots, all `Screenshots/t14_*.png`:
+    - before/after salon, F3 corridor, Flat 10 and street (1920x1080 game view; saved full size);
+    - the three stairwell doors, the kitchen cabinet loot, the mask in gas, the hall toolbox, the bedroom bed;
+    - the LUT checks.
+
+### Files created / changed
+- New:
+  - `Scripts/UI/MaskIndicator.cs`;
+  - `Tests/EditMode/LayoutV2Tests.cs`;
+  - `Art/items/ui/cloth_ui.png`, `wet_cloth_ui.png`;
+  - the LUT pngs + metas and the new item pngs + metas, now tracked.
+- Changed:
+  - Editor: `PropArt.cs`, `ItemIconArt.cs`, `BuildingLayout.cs` (door kinds, MoveDoor / MoveHotspot, Footprint, presets, stairwells), `SceneKit.cs` (stairwell sign, floor decal, contact shadows, door art / flip, layout tags), `TestSceneBuilder.cs`, `TestSceneUi.cs`, `LayoutOverrides.cs`, `RoomLayoutOverrides.cs`, `LayoutEditorWindow.cs`, `ContentValidator.cs`, `BuildingLevelsGenerator.cs`, `CinematicAssetsGenerator.cs`.
+  - Runtime: `SurvivalController.cs` (MaskWorn), `Item.cs` (isTrap removed), `LayoutObject.cs` (Door kind, scale / nudge / door fields), `LootContainer.cs` (docs), `CinematicProfile.cs`, `CinematicDirector.cs`, `CinematicMixer.cs`, `UiKeys.cs`.
+  - `strings_tr.csv`:
+    - added `ui.mask.worn`, `ui.sign.stairs`, `container.kitchen_cabinet`;
+    - toolbox is now "Alet çantası";
+    - removed gold / laptop / console / medicine / jewelry.
+  - Tests: Loot, Snapshot, RewindTarget, DelayedBomb, CinematicMixer.
+  - Generated: items, GameContent, PropArtSet, CinematicAct1-3, CinematicBaseVolume, RoomLayoutOverrides (pruned), `Test_Building.unity`; `docs/layout-editor.md`.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] None required. Optional: Bora tunes the LUT contribution by eye on CinematicAct1-3 (0.6 now).
+
+### Not verified / risks
+- **LUT import: sRGB is OFF, not on as the task said.** URP's `ColorLookup.ValidateLUT()` rejects sRGB formats (both LUTs were "invalid" with sRGB on). Proof with sRGB off:
+  - the neutral LUT at contribution 1 vs none differs by only 0.22 / 255 on average (0.4 % of pixels > 6, animated sprites), so the image is unchanged;
+  - the dust LUT at 1 changes it by 6.6 / 255 on average.
+- **LUT tuning:** 0.6 reads subtle and fine in the lit rooms (lifted blacks, slightly muted). In the dark rooms (Flat 10, street) the prep-end vignette dominates. The before/after shots are taken a few prep-seconds apart, so the vignette build-up differs a bit. No change recommended now; try 0.5–0.7 by eye if the street feels too grey.
+- **No full click-through F4 → street.** The play check entered nodes from code and clicked the doors/hotspots directly. The robbery → street dialogue still waits for line clicks (unchanged from earlier tasks). The street was only viewed via room jump.
+- **The game ran only with `Application.runInBackground = true`** (set at runtime for the checks). With the editor unfocused it otherwise stays on frame 1.
+- **The stairwell sign is screen-aligned** (not skewed to the wall) and sits across the top of the door: there is no wall above the lintel.
+- **The Flat 10 floor hole sits in the room middle, just behind the family's spawn.**
+
+### Next suggested step
+- A real click-through F4 → street with the new art, and a look at the prop sizes (Match prop height where art looks off).
+
+---
+
 ## [2026-10-18 04:30] LOCAL — Bag icon fix (UI icons) + Hasan removed, Sevim gives the gift
 ### Done
 - **Bag icons, root cause:**
