@@ -4,6 +4,30 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 22:30] LOCAL — Flat 11 salon balcony removed
+### Done
+- Removed from the Flat 11 salon:
+  - the balcony trap anchor `lr_balcony` (hz.balcony);
+  - the `balcony_rail` / BalconyRail prop;
+  - the two extra balcony floor tiles (6.5, 0.5) and (6.5, 1.5).
+- `lr_window` no longer lists `lr_balcony` as adjacent.
+- Removed the `hz.balcony` hazard from the generator, deleted its asset, and removed the keys `death.balcony`, `death.child.balcony`, `death.wife.balcony` and `anchor.balcony` (now unused).
+- Kept: the AFAD info card 2 text, `tip.no_balcony` (InfoCardRules / tip list) and the Flat 9 balcony rope.
+- The earlier item-contents commit (e82d811) was dropped by Bora's reset and was NOT redone. `RoomLayoutOverrides.asset` has Bora's own uncommitted changes; this session did not touch or commit it.
+### Files created / changed
+- `Scripts/Editor/SceneBuild/BuildingLayout.cs`, `Scripts/Editor/Content/BuildingLevelsGenerator.cs`, `Content/Text/strings_tr.csv`, `Scripts/World/LayoutObject.cs` (tooltip example).
+- Deleted `Data/Hazards/hz.balcony.asset` (+ .meta).
+### Needs local wiring (checklist for the MCP session)
+- [ ] Run SixtyOne > Generate Building Levels, then SixtyOne > Build Test Scene (the open scene still has the balcony anchor until it is rebuilt).
+- [ ] Run SixtyOne > Validate Content, SixtyOne > Text > Validate and the EditMode tests.
+### Not verified / risks
+- **Not compiled or rebuilt:** the Unity MCP connection dropped. The code change only deletes lines, but nothing has been checked in the Editor.
+- `tip.no_balcony` can no longer be collected from a death, so the tip gallery may never reach its full count.
+### Next suggested step
+- Rebuild and check the salon placement: lr_table, lr_inner_wall, lr_doorway, lr_wardrobe and lr_window remain.
+
+---
+
 ## [2026-10-18 21:30] LOCAL — TV unit art, slightly darker grade, experimental foreground wind dust
 ### Done
 - **TV art:** tv1.png is a flat-screen TV panel and tv2.png is an old CRT on its stand. So the mapping is the other way round from the guess: **TvUnit = tv2** (~0.45u) and **Tv = tv1** (~0.35u). Both have a bottom-centre pivot on the opaque pixels.

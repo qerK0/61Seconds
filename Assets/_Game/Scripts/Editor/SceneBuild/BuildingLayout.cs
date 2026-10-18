@@ -614,8 +614,6 @@ namespace SixtyOne.Editor
         {
             // Flat 11 salon: the opening-quake placement room. Doorway (L3) to the hall is also a placement trap.
             RoomSpec salon = Art(Room(BuildingLevelsGenerator.Flat11Salon, 6, 6, new Color(0.78f, 0.74f, 0.66f, 1f)), RoomArt.Home, gaps: "R0", windows: "R1");
-            salon.ExtraTiles.Add(new Vector2(6.5f, 0.5f));
-            salon.ExtraTiles.Add(new Vector2(6.5f, 1.5f));
             salon.PlayerSpawn = new Vector2(0.9f, 0.9f);
             salon.WifeSpawn = new Vector2(1.5f, 0.5f);
             salon.ChildSpawn = new Vector2(0.5f, 1.5f);
@@ -623,15 +621,13 @@ namespace SixtyOne.Editor
             salon.Anchors.Add(A("lr_inner_wall", 1.0f, 5.3f, AnchorTag.Safe, 1, null, "anchor.inner_wall", "lr_table", "lr_doorway"));
             salon.Anchors.Add(A("lr_doorway", 3.5f, 5.4f, AnchorTag.Trap, 1, "hz.doorway", "anchor.doorway", "lr_inner_wall", "lr_table"));
             salon.Anchors.Add(A("lr_wardrobe", 5.3f, 4.0f, AnchorTag.Trap, 1, "hz.wardrobe", "anchor.wardrobe", "lr_table", "lr_window"));
-            salon.Anchors.Add(A("lr_window", 5.3f, 1.5f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_balcony", "lr_table"));
-            salon.Anchors.Add(A("lr_balcony", 6.5f, 1.0f, AnchorTag.Trap, 1, "hz.balcony", "anchor.balcony", "lr_window"));
+            salon.Anchors.Add(A("lr_window", 5.3f, 1.5f, AnchorTag.Trap, 1, "hz.window", "anchor.window", "lr_wardrobe", "lr_table"));
             salon.Props.Add(P(null, "Table", 2.5f, 2.5f, -0.12f, 1.5f, 0.45f, Wood));
             salon.Props.Add(P(null, "Chair", 1.7f, 2.9f, 0f, 0.45f, 0.55f, Wood));
             salon.Props.Add(P(null, "Chair", 3.3f, 2.1f, 0f, 0.45f, 0.55f, Wood));
             salon.Props.Add(P("wardrobe", "Wardrobe", 5.85f, 4.0f, 0f, 1.3f, 1.9f, new Color(0.4f, 0.25f, 0.15f, 1f), topple: 80f));
             salon.Props.Add(P("window", "Window", 5.95f, 1.5f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             salon.Props.Add(P("door_frame", "DoorLintel", 3.5f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
-            salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, Metal, drop: 0.6f));
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
             // Our flat (pre-quake loot only): a hidden food tin. Prep tension comes from time and bag slots only.
             salon.Items.Add(Own(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food")));

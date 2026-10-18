@@ -83,7 +83,7 @@ namespace SixtyOne.World
         [Tooltip("Animated by a hazard (topple / drop) with this prop id.")]
         public bool HazardProp;
 
-        [Tooltip("Prop id the hazard looks for (e.g. balcony_rail).")]
+        [Tooltip("Prop id the hazard looks for (e.g. wardrobe).")]
         public string HazardPropId;
 
         public float Topple = -80f;

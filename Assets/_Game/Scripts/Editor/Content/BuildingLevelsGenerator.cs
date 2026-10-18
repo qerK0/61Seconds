@@ -255,7 +255,6 @@ namespace SixtyOne.Editor
             Hazard("hz.wardrobe", HazardEffect.Death, HazardEffect.Death, HazardMotion.Topple, "wardrobe", "wardrobe", "tip.wardrobe");
             Hazard("hz.window", HazardEffect.Death, HazardEffect.Injured, HazardMotion.Shatter, "window", "window", "tip.no_window");
             Hazard("hz.doorway", HazardEffect.Death, HazardEffect.Injured, HazardMotion.Drop, "door_frame", "doorway", "tip.no_doorway");
-            Hazard("hz.balcony", HazardEffect.Death, HazardEffect.Death, HazardMotion.Drop, "balcony_rail", "balcony", "tip.no_balcony");
             Hazard("hz.open_room", HazardEffect.Death, HazardEffect.Injured, HazardMotion.Drop, "ceiling_lamp", "open_room", "tip.drop_cover_hold");
         }
 

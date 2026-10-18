@@ -1,5 +1,4 @@
 key,text,notes
-anchor.balcony,Balkon,
 anchor.bookshelf,Kitaplığın önü,
 anchor.doorway,Kapı eşiği,
 anchor.inner_wall,İç duvar dibi,
@@ -9,9 +8,7 @@ anchor.stair_edge,Merdiven boşluğu,
 anchor.table,Sağlam masa,
 anchor.wardrobe,Dolap önü,
 anchor.window,Pencere kenarı,
-death.balcony,"Balkon aşağı, sen de onunla.",
 death.bookshelf,Kitaplık üstüne devrildi.,
-death.child.balcony,Çocuk balkonda mahsur kaldı!,
 death.child.bookshelf,Kitaplık çocuğunun üstüne devrildi.,
 death.child.doorway,"Kapı çöktü, çocuk arkada mahsur kaldı!",
 death.child.lamp_fall,Düşen lambanın altında çocuk mahsur kaldı!,child trapped
@@ -35,7 +32,6 @@ death.stair_edge,Merdiven boşluğunun kenarı seninle birlikte çöktü.,player
 death.stove,Çay demlenmedi. Bina demlendi.,
 death.switch_gas,Bir kıvılcım. Ve gaz.,
 death.wardrobe,Dolap sana sarılmaya karar verdi.,
-death.wife.balcony,Balkon çöktü. Eşin orada duruyordu.,"wife: cut to black, one line, no comedy"
 death.wife.bookshelf,Kitaplık eşinin üstüne devrildi.,
 death.wife.doorway,Kapı kasası çöktü. Eşin yaralandı.,wife injured line (not fatal)
 death.wife.lamp_fall,Lamba düştü. Eşin yaralandı.,wife injured line
