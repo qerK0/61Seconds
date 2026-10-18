@@ -243,3 +243,30 @@ for at, ln in ((0.0, 0.16), (0.14, 0.24)):
     crinkle = bp(noise(ln), 1800, 7000, 2) * (rng.uniform(0, 1, n) > 0.55) * np.hanning(n)
     place(buf, crinkle + 0.4 * bp(noise(ln), 400, 1500) * np.hanning(n), at)
 save('sfx_paper_rustle', buf, 0.6)
+
+# Street wind loop (8 s): low howling band-passed noise with slow gusts; the ends crossfade
+D = 8.0; n = int(SR*D)
+raw = bp(noise(D + 1.0), 180, 900, 2) * (0.55 + 0.45 * np.sin(2*np.pi*t(D + 1.0)/5.3) ** 2)
+raw += 0.4 * bp(noise(D + 1.0), 900, 2400, 2) * (0.5 + 0.5 * np.sin(2*np.pi*t(D + 1.0)/3.1 + 1.0))
+xf = int(SR*1.0)
+loop = raw[:n].copy()
+loop[:xf] = loop[:xf] * np.linspace(0, 1, xf) + raw[n:n+xf] * np.linspace(1, 0, xf)
+if wanted('sfx_wind_loop'):
+    loop = loop / (np.max(np.abs(loop)) + 1e-9) * 0.55
+    wavfile.write(os.path.join(OUT, 'sfx_wind_loop.wav'), SR, (loop * 32767).astype(np.int16)); print('sfx_wind_loop 8.0 s')
+
+# Ambulance / emergency siren loop (6 s): a two-tone wail, low-passed so it can sound distant
+D = 6.0; n = int(SR*D)
+f = 700 + 260 * (np.sin(2*np.pi*t(D)/1.5) > 0)
+x = np.sin(2*np.pi*np.cumsum(f)/SR) + 0.35 * np.sin(2*np.pi*2*np.cumsum(f)/SR)
+x = lp(x, 2600, 2)
+if wanted('sfx_siren_loop'):
+    x = x / (np.max(np.abs(x)) + 1e-9) * 0.6
+    wavfile.write(os.path.join(OUT, 'sfx_siren_loop.wav'), SR, (x * 32767).astype(np.int16)); print('sfx_siren_loop 6.0 s')
+
+# Distant metal groan / drip: a slow bending creak with a ring
+d = 1.6
+f = 160 + 60 * np.sin(2*np.pi*0.6*t(d)) + 40 * (t(d) / d)
+x = bp(np.sign(np.sin(2*np.pi*np.cumsum(f)/SR)) * 0.4, 200, 1800) * np.hanning(int(SR*d))
+x += 0.3 * np.sin(2*np.pi*1180*t(d)) * env(int(SR*d), 0.002, 0.5)
+save('sfx_metal_groan', x, 0.6)

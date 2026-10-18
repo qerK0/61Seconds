@@ -549,17 +549,13 @@ namespace SixtyOne.Editor
             street.ChildSpawn = new Vector2(door.x + 0.3f, door.y - 0.4f);
             street.Blocked.AddRange(StreetLayout.StaticBlocked());
 
-            Color facade = new Color(0.16f, 0.17f, 0.21f, 1f);
             for (int x = 0; x < StreetLayout.Width; x += 2)
             {
                 street.Props.Add(P(null, "Kerb", x + 1f, StreetLayout.Height + 0.05f, 0f, 1.1f, 0.1f, new Color(0.55f, 0.55f, 0.57f, 1f)));
             }
 
-            for (int x = 0; x < StreetLayout.Width; x += 3)
-            {
-                float shade = 0.85f + 0.15f * ((x * 7) % 3);
-                street.Props.Add(P(null, "Facade", x + 1.5f, StreetLayout.Height + 0.9f, 0f, 1.6f, 2.6f + 0.4f * ((x / 3) % 3), facade * shade));
-            }
+            // The façades are collapsed ruins now (StreetDressing); a sinkhole cracks the asphalt off the walkway.
+            street.Props.Add(P(null, "FloorHole", 13.4f, 0.55f, 0f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
 
             // Our building at the right end, its door where the family comes out.
             street.Props.Add(P(null, "OurBuilding", StreetLayout.Width + 0.9f, door.y + 0.5f, 0f, 2.2f, 3.4f, new Color(0.24f, 0.22f, 0.24f, 1f)));
@@ -577,9 +573,7 @@ namespace SixtyOne.Editor
             street.Props.Add(P(null, "FallenPole", StreetLayout.LineX + 0.5f, StreetLayout.Height - 0.3f, 0f, 0.25f, 1.4f, new Color(0.35f, 0.28f, 0.2f, 1f)));
 
             Vector2Int sign = StreetLayout.SignCell;
-            street.Hotspots.Add(Thing("Sign", BuildingLevelsGenerator.F2Street + ".c_sign", sign.x + 1.0f, sign.y + 1.0f, 0.5f, 1.4f, new Color(0.15f, 0.55f, 0.3f, 1f)));
-            street.Lights.Add(L("StreetLampA", 5.0f, StreetLayout.Height - 0.5f, 2.0f, 4.5f, new Color(0.8f, 0.85f, 1f, 1f)));
-            street.Lights.Add(L("StreetLampB", 15.0f, StreetLayout.Height - 0.5f, 2.0f, 4.5f, new Color(0.8f, 0.85f, 1f, 1f)));
+            street.Hotspots.Add(Thing("Sign", BuildingLevelsGenerator.F2Street + ".c_sign", sign.x + 1.0f, sign.y + 1.0f, 0.5f, 1.4f, new Color(0.2f, 0.21f, 0.22f, 1f)));
             return street;
         }
 

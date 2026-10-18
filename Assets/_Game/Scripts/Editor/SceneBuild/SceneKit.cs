@@ -395,10 +395,6 @@ namespace SixtyOne.Editor
             line.Configure(UiKeys.StreetPowerDeath, "tip.electric", sparks.ToArray());
             EditorUtility.SetDirty(line);
 
-            Vector2Int sign = StreetLayout.SignCell;
-            TextMeshPro label = WorldLabel(street, IsoMath.GridToWorld(sign.x + 1.0f, sign.y + 1.0f) + new Vector3(0f, 1.75f, 0f), 1.8f, new Color(0.6f, 1f, 0.7f, 1f), bold: true);
-            label.rectTransform.sizeDelta = new Vector2(3.2f, 0.4f);
-            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", "street.sign");
             return line;
         }
 

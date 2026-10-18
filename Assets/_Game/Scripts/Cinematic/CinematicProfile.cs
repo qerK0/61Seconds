@@ -257,5 +257,26 @@ namespace SixtyOne.Cinematic
             dustBurstCount = 80 + 60 * a;
             dutchTiltDegrees = a == 2 ? 2.5f : 0f;
         }
+
+        /// <summary>
+        /// The street finale (act 4): night after the last quake, colder and more desaturated than floor 2 with a
+        /// stronger vignette; its exposure stays readable because the open street has no walls to bounce light.
+        /// </summary>
+        public void ApplyStreetDefaults()
+        {
+            ApplyActDefaults(3);
+            postExposure = 0.15f;
+            contrast = 30f;
+            saturation = -30f;
+            colorFilter = new Color(0.74f, 0.84f, 1f, 1f);
+            vignette = 0.46f;
+            grainIntensity = 0.2f;
+            globalLightIntensity = 0.5f;
+            globalLightColor = new Color(0.62f, 0.72f, 0.95f, 1f);
+            prepSaturationEnd = -60f;
+            postQuakeSaturation = -28f;
+            postQuakeVignette = 0.52f;
+            postQuakeGlobalLight = 0.45f;
+        }
     }
 }

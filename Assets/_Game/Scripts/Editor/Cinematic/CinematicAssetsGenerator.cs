@@ -11,6 +11,8 @@ namespace SixtyOne.Editor
     public sealed class CinematicAssets
     {
         public CinematicProfile[] ActProfiles;
+        /// <summary>The street finale grade (CinematicStreet.asset): darker and colder than floor 2.</summary>
+        public CinematicProfile StreetProfile;
         public VolumeProfile BaseVolume;
         public Material DustMaterial;
     }
@@ -67,10 +69,21 @@ namespace SixtyOne.Editor
                 result.ActProfiles[act - 1] = profile;
             }
 
+            string streetPath = $"{Folder}/CinematicStreet.asset";
+            CinematicProfile street = AssetDatabase.LoadAssetAtPath<CinematicProfile>(streetPath);
+            if (street == null)
+            {
+                street = AssetUtil.LoadOrCreate<CinematicProfile>(streetPath);
+                street.ApplyStreetDefaults();
+                EditorUtility.SetDirty(street);
+            }
+
+            result.StreetProfile = street;
+
             // The shared dust LUT under every act (profiles that already have a LUT keep theirs).
             Texture dust = ImportLut(DustLutPath);
             ImportLut(NeutralLutPath);
-            foreach (CinematicProfile profile in result.ActProfiles)
+            foreach (CinematicProfile profile in new List<CinematicProfile>(result.ActProfiles) { result.StreetProfile })
             {
                 if (profile.Lut != null || dust == null) continue;
                 profile.ConfigureLut(dust, DefaultLutContribution);

@@ -55,6 +55,12 @@ MonoBehaviour:
     Sprite: {fileID: 1910851895, guid: 0a3e96f3a31747d4bbdcac1e768a4b6f, type: 3}
   - Name: FloorHole
     Sprite: {fileID: -745071331, guid: a7ea55dcc92539747bad44a261b32443, type: 3}
+  - Name: RubbleMound
+    Sprite: {fileID: -1501099593, guid: 7f984b80c2334cb4988fc66c724b6da4, type: 3}
+  - Name: FacadeRuinA
+    Sprite: {fileID: -103576, guid: 421312736b39cfe4bab17729e0e3c724, type: 3}
+  - Name: FacadeRuinB
+    Sprite: {fileID: 736093139, guid: 6734a903de150bc4cb3d36b8a6484faf, type: 3}
   chandelierFrames:
   - {fileID: 1855002605, guid: b4356de72168d0441ac364a158ab1e34, type: 3}
   - {fileID: -76074062, guid: 34d65166234f25241b56a5ea69a9970a, type: 3}

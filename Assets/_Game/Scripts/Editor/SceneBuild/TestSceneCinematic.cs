@@ -66,6 +66,7 @@ namespace SixtyOne.Editor
 
             CinematicDirector director = root.AddComponent<CinematicDirector>();
             SerializedWire.SetArray(director, "actProfiles", assets.ActProfiles);
+            if (assets.StreetProfile != null) SerializedWire.Set(director, "streetProfile", assets.StreetProfile);
             SerializedWire.Set(director, "volume", volume);
             SerializedWire.Set(director, "targetCamera", camera);
             SerializedWire.Set(director, "gameManager", gameManager);

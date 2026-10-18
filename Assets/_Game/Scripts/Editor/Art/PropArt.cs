@@ -87,7 +87,11 @@ namespace SixtyOne.Editor
             I("alet canta", 0.25f, Measure.Height, "Toolbox"),
             I("koltuk", 0.5f, Measure.Height, "Armchair", "Sofa"),
             I("yatak", 0.45f, Measure.Height, "Bed"),
-            I("zemin delik", 1.4f, Measure.Width, "FloorHole")
+            I("zemin delik", 1.4f, Measure.Width, "FloorHole"),
+            // The street finale: a large rubble mound and two collapsed façades (tall ruins along the back edge).
+            I("enkaz son 1", 1.2f, Measure.Width, "RubbleMound"),
+            I("enkaz son 2", 3.3f, Measure.Height, "FacadeRuinA"),
+            I("enkaz son 3", 3.2f, Measure.Height, "FacadeRuinB")
         };
 
         private static readonly string[] ChandelierFiles = { "frame0000", "frame0001", "frame0002", "frame0003", "frame0004", "frame0005" };

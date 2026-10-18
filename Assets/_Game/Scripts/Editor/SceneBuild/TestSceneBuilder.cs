@@ -157,6 +157,8 @@ namespace SixtyOne.Editor
 
             BuildDoors(specs, rooms, navigator);
             GasValves.Build(specs, rooms, data);
+            int streetIndex = specs.FindIndex(s => s.Id == BuildingLevelsGenerator.Street);
+            if (streetIndex >= 0) StreetDressing.Build(rooms[streetIndex], specs[streetIndex], data, family[0].transform, switcher, gameManager);
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
 
@@ -273,7 +275,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(robber, "content", data.Content);
 
             streetQuake.Configure(gameManager, switcher, debris, camera.GetComponent<CameraShake>(), BuildingLevelsGenerator.Street, BuildingLevelsGenerator.F2Street,
-                data.Hazards["hz.street_facade"], streetLine, SceneKit.Art.Tile, DebrisSprites(), SceneKit.Art.Dot, RoomTiles.LitMaterial, data.GlassCue, data.CrashCue,
+                data.Hazards["hz.street_facade"], streetLine, SceneKit.Art.Tile, RubbleSprites(), SceneKit.Art.Dot, RoomTiles.LitMaterial, data.GlassCue, data.CrashCue,
                 data.CarAlarmCue);
             EditorUtility.SetDirty(streetQuake);
 
@@ -313,6 +315,13 @@ namespace SixtyOne.Editor
         /// <summary>Debris sprites (enkaz 1 / 2) from the prop art set; empty = tinted blocks.</summary>
         private static Sprite[] DebrisSprites() => SceneKit.Props != null ? SceneKit.Props.Debris : new Sprite[0];
 
+        /// <summary>The façade-drop rubble: the large mound (enkaz son 1, scaled down by the director), else the small debris.</summary>
+        private static Sprite[] RubbleSprites()
+        {
+            Sprite mound = SceneKit.Props != null ? SceneKit.Props.Find("RubbleMound") : null;
+            return mound != null ? new[] { mound } : DebrisSprites();
+        }
+
         private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
 
         private static StreetPowerLine streetLine;
@@ -334,7 +343,8 @@ namespace SixtyOne.Editor
             {
                 RoomTiles.Floor(t, spec, tileSet);
                 if (spec.Walls) RoomTiles.Walls(t, spec, tileSet, WallRows(data));
-                RoomTiles.AmbientFill(t, spec, AmbientFillIntensity);
+                // The open street has no walls to bounce light: a stronger fill keeps the walkway readable at night.
+                RoomTiles.AmbientFill(t, spec, spec.Id == BuildingLevelsGenerator.Street ? AmbientFillIntensity * 1.5f : AmbientFillIntensity);
             }
             else
             {

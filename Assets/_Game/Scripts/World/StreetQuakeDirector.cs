@@ -94,6 +94,9 @@ namespace SixtyOne.World
         [Tooltip("Rubble sprites for the façade drops.")]
         [SerializeField] private Sprite[] rubbleSprites = new Sprite[0];
 
+        [Tooltip("Scale of each landed rubble sprite (the big mound art is shrunk to about one cell).")]
+        [SerializeField] private float rubbleScale = 0.55f;
+
         [Tooltip("Small soft sprite for glass shards and dust.")]
         [SerializeField] private Sprite shardSprite;
 
@@ -295,6 +298,7 @@ namespace SixtyOne.World
             {
                 Sprite art = rubbleSprites != null && rubbleSprites.Length > 0 ? rubbleSprites[(origin.x + c.y + i++) % rubbleSprites.Length] : warningSprite;
                 SpriteRenderer r = MakeSprite(room, "Rubble", art, IsoMath.GridToWorld(c.x + 0.5f, c.y + 0.5f), rubbleSprites != null && rubbleSprites.Length > 0 ? Color.white : new Color(0.45f, 0.42f, 0.38f, 1f));
+                if (rubbleSprites != null && rubbleSprites.Length > 0) r.transform.localScale = Vector3.one * rubbleScale;
                 IsoSorter sorter = r.gameObject.AddComponent<IsoSorter>();
                 sorter.Mode = IsoSortMode.Static;
                 sorter.Apply();

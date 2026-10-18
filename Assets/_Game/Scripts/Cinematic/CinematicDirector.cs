@@ -22,6 +22,12 @@ namespace SixtyOne.Cinematic
         [Tooltip("Profiles for act 1, 2 and 3 (index 0 = act 1).")]
         [SerializeField] private CinematicProfile[] actProfiles = new CinematicProfile[3];
 
+        [Tooltip("Grade of the street finale (act 4), used while the street room is shown.")]
+        [SerializeField] private CinematicProfile streetProfile;
+
+        [Tooltip("Room id of the street.")]
+        [SerializeField] private string streetRoomId = "street";
+
         [Tooltip("Global volume to drive. Its shared profile is copied at runtime.")]
         [SerializeField] private Volume volume;
 
@@ -95,6 +101,7 @@ namespace SixtyOne.Cinematic
         {
             get
             {
+                if (streetProfile != null && gameManager != null && gameManager.State.CurrentRoomId == streetRoomId) return streetProfile;
                 int act = gameManager != null ? gameManager.State.Act : 1;
                 int index = Mathf.Clamp(act - 1, 0, actProfiles.Length - 1);
                 return actProfiles.Length > 0 ? actProfiles[index] : null;

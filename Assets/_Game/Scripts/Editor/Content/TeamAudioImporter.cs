@@ -57,7 +57,11 @@ namespace SixtyOne.Editor
             { "cue_car_alarm", "Generated/sfx_car_alarm_loop.wav" },
             { "cue_gas_hiss", "Generated/sfx_gas_hiss_loop.wav" },
             { "cue_valve_creak", "Generated/sfx_valve_creak.wav" },
-            { "cue_paper_rustle", "Generated/sfx_paper_rustle.wav" }
+            { "cue_paper_rustle", "Generated/sfx_paper_rustle.wav" },
+            { "cue_street_wind", "Generated/sfx_wind_loop.wav" },
+            { "cue_sirens_far", "Generated/sfx_siren_loop.wav" },
+            { "cue_ambulance", "Generated/sfx_siren_loop.wav" },
+            { "cue_metal_groan", "Generated/sfx_metal_groan.wav" }
         };
 
         /// <summary>Music, ambience and long loops: streamed (Vorbis). Everything else decompresses on load.</summary>
