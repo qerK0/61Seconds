@@ -4,6 +4,50 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 21:30] LOCAL — TV unit art, slightly darker grade, experimental foreground wind dust
+### Done
+- **TV art:** tv1.png is a flat-screen TV panel and tv2.png is an old CRT on its stand. So the mapping is the other way round from the guess: **TvUnit = tv2** (~0.45u) and **Tv = tv1** (~0.35u). Both have a bottom-centre pivot on the opaque pixels.
+  - Both are in the Layout Editor prop palette ("TV ünitesi" / "TV").
+  - TvUnit is solid. Tv is not solid and spawns with a lift equal to the unit's height (`PropArt.TvUnitHeight` = 0.45). Like wall fixtures, the Tv keeps its lift at build time.
+  - New container preset "TV ünitesi" (`tv_unit`, `container.tv_unit`, registered as `UiKeys.ContainerTvUnit`), empty by default.
+  - Nothing was placed. `RoomLayoutOverrides.asset` was not touched (same sha1 before and after: 16d835…).
+- **Darker grade:** postExposure −0.18 on every act asset. Act 1 −0.33, act 2 −0.48, act 3 −0.63, street −0.03. The code defaults moved by the same step. UI is unaffected.
+  - Flat 10 was checked by screenshot: the stove, cabinets, valve, floor and gas haze are still readable, so no practical lights were raised.
+  - The street's exposure number stays above act 3's (set in task 17 so the walkway stays readable). It still reads darkest because of its colder, desaturated grade and vignette.
+- **Wind dust (EXPERIMENTAL):** `Cinematic/WindDustOverlay.cs` on `FX_WindDust` under the CameraRig.
+  - Two self-built particle systems: 170 fine specks and 30 soft, out-of-focus motes, in warm grey at alpha 0.12–0.32.
+  - They drift left → right with a slight fall, with gusts every 4–8 s for 1.5 s.
+  - Camera space, sorted above the world and below the UI.
+  - Denser in the street (×1.7); Reduce Effects cuts it to 40 %.
+  - Uses unscaled time and pauses with the pause menu. No colliders.
+### Files created / changed
+- `Scripts/Cinematic/WindDustOverlay.cs` (new).
+- `Editor/SceneBuild/TestSceneBuilder.cs`: `WindDust` flag + FX_WindDust creation.
+- `Editor/Art/PropArt.cs`: TvUnit / Tv entries and labels.
+- `Editor/SceneBuild/SceneKit.cs`: the Tv keeps its lift.
+- `Editor/Layout/PropFootprint.cs`: Tv is not solid.
+- `Editor/Layout/LayoutEditorWindow.cs`: Tv spawn lift, solid flag from PropFootprint, "TV ünitesi" label.
+- `Editor/SceneBuild/BuildingLayout.cs`: `tv_unit` preset.
+- `Text/UiKeys.cs`: `ContainerTvUnit`.
+- `strings_tr.csv`: `container.tv_unit`.
+- `Cinematic/CinematicProfile.cs`: default exposures.
+- `Data/Cinematic/CinematicAct1-3.asset`, `CinematicStreet.asset`.
+- `Data/Art/PropArtSet.asset`, tv1/tv2 import settings, `Test_Building.unity` (rebuilt).
+- Screenshots: `Screenshots/t18_salon_dust.png`, `t18_flat10_dust.png`, `t18_street_dust.png`.
+### Removing the wind dust (one step, either way)
+- **Turn it off:** set `WindDust` to false in `TestSceneBuilder.cs` (next to `AmbientFillIntensity`), then run Build Test Scene.
+- **Delete it:** remove the `if (WindDust) { … FX_WindDust … }` block and the `WindDust` field in `TestSceneBuilder.cs`, delete `Assets/_Game/Scripts/Cinematic/WindDustOverlay.cs` (+ .meta), then run Build Test Scene. Nothing else references it.
+### Needs local wiring (checklist for the MCP session)
+- [ ] None. Bora places the TV unit / TV in the Layout Editor.
+### Not verified / risks
+- The dust was checked by screenshot and particle counts only (197 max, pauses, no colliders). Gust feel and density were not judged in motion.
+- The TvUnit art already has a CRT on it, so a flat Tv on top may look doubled. Use either one, or put the Tv on another surface.
+- 0 compile errors, EditMode 236/236, Validate Content 0 problems, Text Validate 0 missing / 0 unused.
+### Next suggested step
+- Watch the dust in motion. Tune or switch it off with the `WindDust` flag.
+
+---
+
 ## [2026-10-18 20:30] LOCAL — local-task-17 (repeating info fix, Craft Defteri, ending slot, night street) + the earlier final pass (collision, gas valves, items)
 ### Done
 - **Final pass (earlier today, no entry was written then):**
