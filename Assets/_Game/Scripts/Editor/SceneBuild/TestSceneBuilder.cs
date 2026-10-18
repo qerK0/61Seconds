@@ -153,6 +153,7 @@ namespace SixtyOne.Editor
             }
 
             BuildDoors(specs, rooms, navigator);
+            GasValves.Build(specs, rooms, data);
 
             for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
 

@@ -215,3 +215,22 @@ loop[:xf] = loop[:xf] * np.linspace(0, 1, xf) + raw[n:n+xf] * np.linspace(1, 0, 
 if wanted('sfx_menu_rumble_loop'):
     loop = loop / (np.max(np.abs(loop)) + 1e-9) * 0.7
     wavfile.write(os.path.join(OUT, 'sfx_menu_rumble_loop.wav'), SR, (loop * 32767).astype(np.int16)); print('sfx_menu_rumble_loop 8.0 s')
+
+# Gas leak hiss loop (4 s): bright filtered noise with a slow flutter; the ends crossfade so it loops cleanly
+D = 4.0; n = int(SR*D)
+raw = bp(noise(D + 0.5), 2500, 9000, 3) * (0.85 + 0.15 * np.sin(2*np.pi*t(D + 0.5)*0.7))
+xf = int(SR*0.5)
+loop = raw[:n].copy()
+loop[:xf] = loop[:xf] * np.linspace(0, 1, xf) + raw[n:n+xf] * np.linspace(1, 0, xf)
+if wanted('sfx_gas_hiss_loop'):
+    loop = loop / (np.max(np.abs(loop)) + 1e-9) * 0.5
+    wavfile.write(os.path.join(OUT, 'sfx_gas_hiss_loop.wav'), SR, (loop * 32767).astype(np.int16)); print('sfx_gas_hiss_loop 4.0 s')
+
+# Valve closing: a short metal creak (rising squeal) and a dull clunk at the stop
+d = 0.55
+f = 520 + 340 * (t(d) / d) ** 1.5 + 25 * np.sin(2*np.pi*11*t(d))
+x = bp(np.sign(np.sin(2*np.pi*np.cumsum(f)/SR)) * 0.3, 400, 3200) * np.hanning(int(SR*d))
+buf = np.zeros(int(SR*0.8))
+place(buf, x, 0.0)
+place(buf, lp(noise(0.12), 600, 3) * env(int(SR*0.12), 0.001, 0.03) * 2.5 + 0.6 * np.sin(2*np.pi*140*t(0.12)) * env(int(SR*0.12), 0.001, 0.05), 0.5)
+save('sfx_valve_creak', buf, 0.8)

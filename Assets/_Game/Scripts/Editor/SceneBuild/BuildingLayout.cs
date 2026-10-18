@@ -798,6 +798,7 @@ namespace SixtyOne.Editor
             RoomSpec f7Kitchen = Art(Room(BuildingLevelsGenerator.Flat7Kitchen, 3, 4, new Color(0.62f, 0.66f, 0.64f, 1f), BuildingLevelsGenerator.Flat7), RoomArt.Home, windows: "R1");
             f7Kitchen.Props.Add(P(null, "Stove", 1.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             f7Kitchen.Hotspots.Add(Valve(2.3f, 3.6f, BuildingLevelsGenerator.F2Flat7 + ".c_valve"));
+            f7Kitchen.Containers.Add(Lent(Box("flat7_kitchen_cabinet", "kitchen_cabinet", 1.6f, 3.5f, Wood)));
 
             // Corridor: the rabid dog blocks the stairwell door (L0).
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);

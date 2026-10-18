@@ -21,7 +21,7 @@ namespace SixtyOne.Editor
         public LevelConfig Level;
         public AudioEventMap AudioMap;
         public List<AudioCue> Cues = new List<AudioCue>();
-        public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue;
+        public AudioCue GlassCue, CrashCue, FireCue, WhistleCue, ElectricCue, DogBarkCue, DogGrowlCue, HeartbeatCue, DripCue, GasHissCue, ValveCreakCue;
         public AudioCue SearchCue, CarAlarmCue, StreetQuakeCue;
         public AudioCue MusicPrep, MusicTension, MusicOutro;
         public DialogueVoiceProfile Voices;
@@ -144,6 +144,8 @@ namespace SixtyOne.Editor
             result.DripCue = Cue("cue_amb_drip", 0.15f, loop: true);
             result.SearchCue = Cue("cue_search", 0.55f, 0.95f, 1.05f);
             result.CarAlarmCue = Cue("cue_car_alarm", 0.45f, loop: true);
+            result.GasHissCue = Cue("cue_gas_hiss", 0.3f, loop: true);
+            result.ValveCreakCue = Cue("cue_valve_creak", 0.8f, 0.95f, 1.05f);
             result.MusicPrep = Cue("cue_music_prep", 0.4f, loop: true);
             result.MusicTension = Cue("cue_music_tension", 0.35f, loop: true);
             result.MusicOutro = Cue("cue_music_outro", 0.5f, loop: true);

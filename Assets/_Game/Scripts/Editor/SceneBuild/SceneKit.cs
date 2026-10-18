@@ -281,6 +281,8 @@ namespace SixtyOne.Editor
             LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
             string labelKey = grants != null ? grants.NameKey.Key : "world." + id;
             SerializedWire.SetTextKey(localized, "key", labelKey);
+            // No floating names in the world: the item is recognised by its icon (and named in the bag).
+            label.gameObject.SetActive(false);
 
             IsoSorter sorter = go.AddComponent<IsoSorter>();
             sorter.Mode = IsoSortMode.Static;
@@ -334,8 +336,6 @@ namespace SixtyOne.Editor
             box.size = new Vector2(Mathf.Max(0.35f, width * 0.8f), Mathf.Max(0.3f, height));
             box.offset = new Vector2(0f, box.size.y * 0.5f);
 
-            TextMeshPro label = WorldLabel(go.transform, new Vector3(0f, height + 0.15f, 0f), 1.4f, Color.white);
-            SerializedWire.SetTextKey(label.gameObject.AddComponent<LocalizedText>(), "key", spec.NameKey);
 
             IsoSorter sorter = go.AddComponent<IsoSorter>();
             sorter.Mode = IsoSortMode.Static;
@@ -771,6 +771,8 @@ namespace SixtyOne.Editor
             label.rectTransform.sizeDelta = new Vector2(3f, 0.4f);
             LocalizedText localized = label.gameObject.AddComponent<LocalizedText>();
             SerializedWire.SetTextKey(localized, "key", labelKey);
+            // No floating names in the world: the item is recognised by its icon (and named in the bag).
+            label.gameObject.SetActive(false);
             hover.SetActive(false);
             return hover;
         }

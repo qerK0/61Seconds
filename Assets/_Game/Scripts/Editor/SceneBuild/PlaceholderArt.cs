@@ -17,6 +17,8 @@ namespace SixtyOne.Editor
         public Sprite Lock;
         /// <summary>Soft ellipse under characters' feet.</summary>
         public Sprite Shadow;
+        /// <summary>Soft white ellipse (tinted hazes).</summary>
+        public Sprite Glow;
         /// <summary>Rounded rectangle, 9-sliced (UI panels and buttons).</summary>
         public Sprite Rounded;
         /// <summary>Upward chevron (door hover).</summary>
@@ -42,6 +44,7 @@ namespace SixtyOne.Editor
                 Dot = Make("ph_dot", 48, 48, new Vector2(0.5f, 0.5f), Dot),
                 Lock = Make("ph_lock", 32, 32, new Vector2(0.5f, 0.5f), Lock),
                 Shadow = Make("ph_shadow", 128, 64, new Vector2(0.5f, 0.5f), Shadow),
+                Glow = Make("ph_glow", 128, 64, new Vector2(0.5f, 0.5f), Glow),
                 Rounded = Make("ph_rounded", 64, 64, new Vector2(0.5f, 0.5f), Rounded, new Vector4(22f, 22f, 22f, 22f)),
                 Arrow = Make("ph_arrow", 48, 48, new Vector2(0.5f, 0.5f), Arrow)
             };
@@ -127,6 +130,12 @@ namespace SixtyOne.Editor
             float d = Mathf.Sqrt(Mathf.Pow((u - 0.5f) * 2f, 2f) + Mathf.Pow((v - 0.5f) * 2f, 2f));
             if (d > 1f) return Color.clear;
             return d > 0.82f ? new Color(0.2f, 0.2f, 0.2f, 1f) : Color.white;
+        }
+
+        private static Color Glow(float u, float v, float w, float h)
+        {
+            Color c = Shadow(u, v, w, h);
+            return new Color(1f, 1f, 1f, c.a);
         }
 
         private static Color Shadow(float u, float v, float w, float h)

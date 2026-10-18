@@ -56,14 +56,27 @@ namespace SixtyOne.Editor
                 }
             }
 
+            ItemPlan.Apply(rooms);
             // Code props can block too (the Flat 10 floor hole), so every room gets its blockers.
             foreach (BuildingLayout.RoomSpec room in rooms)
             {
+                ValveBesideStove(room);
                 foreach (Vector2Int cell in BlockerCells(room).Keys)
                 {
                     if (!room.Blocked.Contains(cell)) room.Blocked.Add(cell);
                 }
             }
+        }
+
+        /// <summary>The gas valve always stands next to its stove (the stove may have been moved by hand).</summary>
+        private static void ValveBesideStove(BuildingLayout.RoomSpec room)
+        {
+            BuildingLayout.HotspotSpec valve = room.Hotspots.Find(h => h.Art == "Valve");
+            BuildingLayout.PropSpec stove = room.Props.Find(p => p.Name == "Stove");
+            if (valve == null || stove == null) return;
+            if (Vector2.Distance(new Vector2(valve.Gx, valve.Gy), new Vector2(stove.Gx, stove.Gy)) <= 1.1f) return;
+            valve.Gx = Mathf.Clamp(stove.Gx + 0.55f, 0.3f, room.Width - 0.2f);
+            valve.Gy = Mathf.Clamp(stove.Gy - 0.35f, 0.6f, room.Height - 0.2f);
         }
 
         private static void ApplyOne(List<BuildingLayout.RoomSpec> rooms, BuildingLayout.RoomSpec room, PlacedObject o)
@@ -280,6 +293,7 @@ namespace SixtyOne.Editor
             }
 
             Apply(rooms, overrides);
+            problems.AddRange(ItemPlan.Check(rooms));
             foreach (BuildingLayout.RoomSpec room in rooms) problems.AddRange(Check(room));
             return problems;
         }
