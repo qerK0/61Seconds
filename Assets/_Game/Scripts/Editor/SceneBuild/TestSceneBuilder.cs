@@ -73,6 +73,7 @@ namespace SixtyOne.Editor
             SceneKit.Art = PlaceholderArt.Generate();
             // Furniture / fixture art (coloured blocks stay for anything unmapped).
             SceneKit.Props = PropArt.Generate();
+            SceneKit.DogBark = data.DogBarkCue;
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
@@ -206,13 +207,11 @@ namespace SixtyOne.Editor
             SerializedWire.Set(prepPhase, "rooms", switcher);
             SerializedWire.Set(prepPhase, "alertCue", data.Cues.Find(c => c != null && c.Id == "cue_afad_alert"));
 
-            ChoicePanel choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
+            SixtyOne.UI.DialoguePresenter choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
                 data.Level.MaxInventorySlots, KeyItems(data), theme, out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
-            // Voice blips follow the subtitle line (dialogue text lives there); the panel's own typewriter is the fallback.
-            SixtyOne.UI.SubtitleView subtitles = choicePanel.transform.parent.GetComponentInChildren<SixtyOne.UI.SubtitleView>(true);
-            SixtyOne.UI.TypewriterText typewriter = subtitles != null && subtitles.Typewriter != null
-                ? subtitles.Typewriter
-                : choicePanel.GetComponentInChildren<SixtyOne.UI.TypewriterText>(true);
+            // Voice blips follow the speech bubble's line.
+            SixtyOne.UI.SpeechBubble bubble = choicePanel.GetComponentInChildren<SixtyOne.UI.SpeechBubble>(true);
+            SixtyOne.UI.TypewriterText typewriter = bubble != null ? bubble.Typewriter : null;
             if (typewriter != null)
             {
                 DialogueVoice voice = typewriter.gameObject.AddComponent<DialogueVoice>();
@@ -237,6 +236,9 @@ namespace SixtyOne.Editor
             SerializedWire.Set(framing, "director", director);
             SerializedWire.Set(framing, "followTarget", family[0].transform);
             SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
+            // Mehmet speaks his thoughts / decisions; the wife can speak too.
+            family[0].gameObject.AddComponent<SixtyOne.UI.SpeakerAnchor>().Configure(SixtyOne.UI.SpeakerAnchor.PlayerKey, SceneKit.SpeakerColor("player"));
+            if (family.Count > 1) family[1].gameObject.AddComponent<SixtyOne.UI.SpeakerAnchor>().Configure("npc.wife.name", SceneKit.SpeakerColor("wife"));
             LootWindow lootWindow = choicePanel.transform.parent.GetComponentInChildren<LootWindow>(true);
             if (lootWindow != null) SerializedWire.Set(lootWindow, "runner", family[0].GetComponent<CharacterMotor>());
             // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 97% of it (RoomCameraFraming.fill).

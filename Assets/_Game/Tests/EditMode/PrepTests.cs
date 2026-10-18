@@ -9,6 +9,19 @@ namespace SixtyOne.Tests
     /// <summary>Floor 4 pre-quake prep: countdown thresholds, cost routing, the quake hand-over and checkpoint restores.</summary>
     public sealed class PrepTests
     {
+        [Test]
+        public void AfadAlertOnlyAtThePrepStart()
+        {
+            var state = new GameState();
+            PrepRules.ResetForPrep(state, 60f, 300f);
+            Assert.IsTrue(PrepRules.ShowsStartAlert(state, 60f), "prep start");
+            state.PrepTime = 41f;
+            Assert.IsFalse(PrepRules.ShowsStartAlert(state, 60f), "back in the salon later in the prep");
+            PrepRules.StartBuildingTimer(state);
+            state.PrepTime = 60f;
+            Assert.IsFalse(PrepRules.ShowsStartAlert(state, 60f), "never after the quake");
+        }
+
         private static PrepTimer Timer(List<int> ticks, int[] zeros, float total = 60f, int tickFrom = 10)
         {
             var timer = new PrepTimer();

@@ -57,6 +57,20 @@ MonoBehaviour:
       fallbackItem: {fileID: 0}
       fallbackCount: 1
       excludeKeyItems: 1
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f3.trader.msg_grumble
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
       flag: 
@@ -127,6 +141,20 @@ MonoBehaviour:
       fallbackItem: {fileID: 0}
       fallbackCount: 1
       excludeKeyItems: 1
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f3.trader.msg_thanks
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
     - type: 0
       targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
       flag: 
@@ -168,3 +196,9 @@ MonoBehaviour:
     textKey:
       key: f3.trader.l3
     timeCost: 2
+  - speakerKey:
+      key: npc.cemil.name
+    textKey:
+      key: f3.trader.l4
+    timeCost: 2
+  choicesAsThought: 0

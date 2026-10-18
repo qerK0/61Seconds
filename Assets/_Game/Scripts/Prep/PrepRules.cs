@@ -8,6 +8,15 @@ namespace SixtyOne.Prep
         /// <summary>Before the quake, action costs come out of the prep countdown, not the building timer.</summary>
         public static bool SpendsPrep(GameState state) => state != null && !state.BuildingTimerStarted;
 
+        /// <summary>
+        /// The AFAD early warning belongs to the START of the prep only: not when walking back into the salon later
+        /// in the prep, and never after the quake.
+        /// </summary>
+        public static bool ShowsStartAlert(GameState state, float prepSeconds)
+        {
+            return state != null && !state.BuildingTimerStarted && prepSeconds > 0f && state.PrepTime >= prepSeconds - 0.5f;
+        }
+
         /// <summary>Prep zero = the quake: the prep is over and the building timer starts now.</summary>
         public static void StartBuildingTimer(GameState state)
         {

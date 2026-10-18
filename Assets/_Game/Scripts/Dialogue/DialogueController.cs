@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using SixtyOne.Core;
 using SixtyOne.Nodes;
 using SixtyOne.Text;
@@ -15,7 +16,7 @@ namespace SixtyOne.Dialogue
         [Tooltip("Routes choices back into the node flow.")]
         [SerializeField] private NodePlayer nodePlayer;
 
-        [Tooltip("Component implementing IChoicePresenter (ChoicePanel).")]
+        [Tooltip("Component implementing IDialoguePresenter (DialoguePresenter).")]
         [SerializeField] private MonoBehaviour presenter;
 
         /// <summary>Speaker key of the line now shown, or null when no line is shown (dialogue voice blips).</summary>
@@ -27,7 +28,7 @@ namespace SixtyOne.Dialogue
         /// <summary>True while lines are still being shown (the building timer's real-time tick may pause).</summary>
         public bool IsPlayingLines => node != null && lineIndex < node.Lines.Count;
 
-        private IChoicePresenter Presenter => presenter as IChoicePresenter;
+        private IDialoguePresenter Presenter => presenter as IDialoguePresenter;
 
         private void Awake()
         {
@@ -80,10 +81,10 @@ namespace SixtyOne.Dialogue
         {
             DialogueLine line = node.Lines[lineIndex];
             SpeakerChanged?.Invoke(line.SpeakerKey.IsEmpty ? null : line.SpeakerKey.Key);
-            Presenter?.PresentText(
-                line.SpeakerKey.IsEmpty ? string.Empty : line.SpeakerKey.Display,
+            Presenter?.ShowLine(
+                line.SpeakerKey.IsEmpty ? null : line.SpeakerKey.Key,
                 line.TextKey.Display,
-                TextDB.GetDisplay(UiKeys.DialogueContinue),
+                line.TimeCost,
                 Advance,
                 ChoiceView.Build(node, gameManager.State, DialogueFilter.DuringDialogue),
                 Choose);
@@ -92,7 +93,21 @@ namespace SixtyOne.Dialogue
         private void ShowEnding()
         {
             SpeakerChanged?.Invoke(null);
-            Presenter?.Present(node, ChoiceView.Build(node, gameManager.State, DialogueFilter.AfterDialogue), Choose);
+            List<ChoiceView> choices = ChoiceView.Build(node, gameManager.State, DialogueFilter.AfterDialogue);
+            if (Presenter == null) return;
+            if (node.ChoicesAsThought || LastSpeakerKey() == null) Presenter.ShowThought(string.Empty, choices, Choose);
+            else Presenter.ShowChoices(LastSpeakerKey(), choices, Choose);
+        }
+
+        /// <summary>The last line's speaker: the after-dialogue rows hang under that bubble.</summary>
+        private string LastSpeakerKey()
+        {
+            for (int i = node.Lines.Count - 1; i >= 0; i--)
+            {
+                if (!node.Lines[i].SpeakerKey.IsEmpty) return node.Lines[i].SpeakerKey.Key;
+            }
+
+            return null;
         }
 
         private void Choose(int index)

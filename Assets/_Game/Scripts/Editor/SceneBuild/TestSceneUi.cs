@@ -30,8 +30,8 @@ namespace SixtyOne.Editor
         /// <summary>Left edge (viewport x) of the right HUD column; RoomCameraFraming keeps rooms left of it.</summary>
         public const float ColumnLeft = 0.835f;
 
-        /// <summary>Builds the canvas and returns the ChoicePanel (the NodePlayer presenter).</summary>
-        public static ChoicePanel Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
+        /// <summary>Builds the canvas and returns the DialoguePresenter (speech bubbles + narration card).</summary>
+        public static DialoguePresenter Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
             SurvivalController survival, RecipeBook recipes, SixtyOne.Prep.PrepPhase prep, int bagSlots, Item[] keyItems, UITheme uiTheme,
             out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay)
         {
@@ -67,9 +67,8 @@ namespace SixtyOne.Editor
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
             BuildLootWindow(root, gameManager, content, art);
             BuildSearchRing(root, camera, art);
-            SubtitleView subtitles = BuildSubtitles(root);
-            ChoicePanel choicePanel = BuildChoicePanel(root, art);
-            SerializedWire.Set(choicePanel, "subtitles", subtitles);
+            // Speech bubbles + the top narration card (after the HUD so it reads the panic meter / bag column rects).
+            DialoguePresenter presenter = TestSceneDialogueUi.Build(root, art, theme, survival);
             BuildAfadPopup(root);
             BuildJournal(root, gameManager, content);
             qteView = BuildQteView(root, art);
@@ -84,7 +83,7 @@ namespace SixtyOne.Editor
             BuildPauseMenu(root);
             EnforceReadableText(canvasGo);
             UiFactory.Theme = null;
-            return choicePanel;
+            return presenter;
         }
 
         /// <summary>Nothing below 16 px at 1080p, auto-sized labels included; faux bold becomes the real Bold weight.</summary>
@@ -100,102 +99,6 @@ namespace SixtyOne.Editor
                     label.font = theme.Bold;
                 }
             }
-        }
-
-        private static ChoicePanel BuildChoicePanel(Transform root, PlaceholderSprites art)
-        {
-            // Bottom overlay, 66% wide, slides (anchoredPosition.y) in from below the screen.
-            Image bg = UiFactory.MakePanel("ChoicePanel", root, new Vector2(0.17f, 0f), new Vector2(0.83f, 0f), Panel, raycast: true);
-            RectTransform panelRect = bg.rectTransform;
-            panelRect.pivot = new Vector2(0.5f, 0f);
-            panelRect.sizeDelta = new Vector2(0f, 330f);
-            panelRect.anchoredPosition = new Vector2(0f, -400f);
-            CanvasGroup group = UiFactory.MakeGroup(bg.gameObject);
-
-            // Accent hairline on top of the panel.
-            Image line = UiFactory.MakeImage("AccentLine", bg.transform, new Vector2(0.03f, 1f), new Vector2(0.97f, 1f), new Color(Accent.r, Accent.g, Accent.b, 0.55f));
-            line.rectTransform.sizeDelta = new Vector2(0f, 2f);
-            line.rectTransform.anchoredPosition = new Vector2(0f, -1f);
-
-            TextMeshProUGUI title = UiFactory.MakeLabel("Title", bg.transform, new Vector2(0f, 1f), new Vector2(1f, 1f), TextRole.Speaker, TextAlignmentOptions.MidlineLeft);
-            Inset(title.rectTransform, 28f, 10f, 28f, 46f);
-            TextMeshProUGUI body = UiFactory.MakeLabel("Body", bg.transform, new Vector2(0f, 1f), new Vector2(1f, 1f), TextRole.Body, TextAlignmentOptions.TopLeft);
-            Inset(body.rectTransform, 28f, 58f, 28f, 96f);
-            body.enableAutoSizing = true;
-            body.fontSizeMin = 18f;
-            body.fontSizeMax = theme != null ? theme.BodySize : 25f;
-            TypewriterText typewriter = body.gameObject.AddComponent<TypewriterText>();
-            typewriter.Configure(body, theme != null ? theme.TypewriterCharsPerSecond : 90f);
-
-            RectTransform container = UiFactory.MakeRect("Choices", bg.transform, Vector2.zero, Vector2.one);
-            container.offsetMin = new Vector2(24f, 16f);
-            container.offsetMax = new Vector2(-24f, -164f);
-            GridLayoutGroup grid = container.gameObject.AddComponent<GridLayoutGroup>();
-            grid.cellSize = new Vector2(604f, theme != null ? theme.ChoiceHeight : 56f);
-            grid.spacing = new Vector2(theme != null ? theme.Gap : 10f, theme != null ? theme.Gap : 10f);
-            grid.constraint = GridLayoutGroup.Constraint.FixedColumnCount;
-            grid.constraintCount = 2;
-            grid.childAlignment = TextAnchor.UpperLeft;
-
-            Button button = UiFactory.MakeButton("ChoiceButtonTemplate", container, Vector2.zero, Vector2.one, ButtonColor, 23f, out TextMeshProUGUI label);
-            if (theme != null) theme.Apply(label, TextRole.Choice);
-            RectTransform labelRect = label.rectTransform;
-            labelRect.anchorMin = new Vector2(0f, 0f);
-            labelRect.anchorMax = new Vector2(0.72f, 1f);
-            labelRect.offsetMin = new Vector2(26f, 0f);
-            labelRect.offsetMax = Vector2.zero;
-            label.alignment = TextAlignmentOptions.MidlineLeft;
-            label.enableAutoSizing = true;
-            label.fontSizeMin = 16f;
-            label.fontSizeMax = theme != null ? theme.ChoiceSize : 23f;
-
-            Image accentBar = UiFactory.MakeImage("AccentBar", button.transform, new Vector2(0f, 0.2f), new Vector2(0f, 0.8f), Accent);
-            accentBar.rectTransform.sizeDelta = new Vector2(theme != null ? theme.AccentBarWidth : 5f, 0f);
-            accentBar.rectTransform.anchoredPosition = new Vector2(12f, 0f);
-
-            // Locked: label on the top line (ChoiceButton), lock + reason on a full-width bottom line.
-            Image lockIcon = UiFactory.MakeImage("Lock", button.transform, new Vector2(0f, 0.08f), new Vector2(0f, 0.44f), Muted, sprite: art.Lock);
-            lockIcon.rectTransform.sizeDelta = new Vector2(16f, 0f);
-            lockIcon.rectTransform.anchoredPosition = new Vector2(34f, 0f);
-            TextMeshProUGUI reason = UiFactory.MakeLabel("Reason", button.transform, new Vector2(0f, 0f), new Vector2(1f, 0.5f), TextRole.Small, TextAlignmentOptions.MidlineLeft);
-            reason.color = new Color(1f, 0.72f, 0.45f, 1f);
-            reason.rectTransform.offsetMin = new Vector2(48f, 0f);
-            reason.rectTransform.offsetMax = new Vector2(-12f, 0f);
-            reason.fontSize = 16f;
-            reason.textWrappingMode = TextWrappingModes.NoWrap;
-            reason.overflowMode = TextOverflowModes.Ellipsis;
-            TextMeshProUGUI cost = UiFactory.MakeLabel("Cost", button.transform, new Vector2(0.72f, 0.45f), new Vector2(1f, 1f), TextRole.Small, TextAlignmentOptions.MidlineRight);
-            cost.color = Danger;
-            cost.rectTransform.offsetMax = new Vector2(-12f, 0f);
-
-            ChoiceButton choiceButton = button.gameObject.AddComponent<ChoiceButton>();
-            SerializedWire.Set(choiceButton, "button", button);
-            SerializedWire.Set(choiceButton, "label", label);
-            SerializedWire.Set(choiceButton, "lockIcon", lockIcon.gameObject);
-            SerializedWire.Set(choiceButton, "reasonText", reason);
-            SerializedWire.Set(choiceButton, "costText", cost);
-            SerializedWire.Set(choiceButton, "accentBar", accentBar);
-            SerializedWire.SetColor(choiceButton, "accentColor", Accent);
-            button.gameObject.SetActive(false);
-
-            ChoicePanel panel = bg.gameObject.AddComponent<ChoicePanel>();
-            SerializedWire.Set(panel, "group", group);
-            SerializedWire.Set(panel, "panel", panelRect);
-            SerializedWire.Set(panel, "titleText", title);
-            SerializedWire.Set(panel, "bodyText", body);
-            SerializedWire.Set(panel, "typewriter", typewriter);
-            SerializedWire.Set(panel, "buttonContainer", container);
-            SerializedWire.Set(panel, "buttonTemplate", choiceButton);
-            if (theme != null) SerializedWire.SetFloat(panel, "slideSeconds", theme.SlideSeconds);
-            return panel;
-        }
-
-        /// <summary>Top-anchored strip inside a panel: left / top / right insets and a fixed height (px).</summary>
-        private static void Inset(RectTransform rect, float left, float top, float right, float height)
-        {
-            rect.pivot = new Vector2(0.5f, 1f);
-            rect.offsetMin = new Vector2(left, -top - height);
-            rect.offsetMax = new Vector2(-right, -top);
         }
 
         private static void BuildTimerBar(Transform root, NodePlayer nodePlayer)
@@ -308,117 +211,6 @@ namespace SixtyOne.Editor
             SerializedWire.Set(clock, "digits", digits);
             SerializedWire.Set(clock, "ghost", ghost);
             return clock;
-        }
-
-        private const string SubtitleGradientPath = "Assets/_Game/Art/UI/subtitle_gradient.png";
-        private const string SubtitleShadowPath = "Assets/_Game/Art/Fonts/EBGaramond/EBGaramond-Regular SDF Subtitle.mat";
-
-        /// <summary>
-        /// Cinematic subtitle band: full width, bottom 22%, transparent → 85% black gradient (no box), a text column
-        /// from 24% of the width (max 55%), EB Garamond SemiBold name (34 px, #F2EDE4) over the Regular line (26 px,
-        /// #E8E4DC, 1.15 spacing, 1 px dark shadow, 3 lines) and a ▼ continue mark.
-        /// </summary>
-        private static SubtitleView BuildSubtitles(Transform root)
-        {
-            Image band = UiFactory.MakeImage("Subtitles", root, Vector2.zero, new Vector2(1f, 0.22f), Color.white, raycast: true);
-            band.sprite = SubtitleGradient();
-            band.preserveAspect = false;
-            if (band.sprite == null) band.color = new Color(0f, 0f, 0f, 0.6f);
-            CanvasGroup group = band.gameObject.AddComponent<CanvasGroup>();
-            group.alpha = 0f;
-            group.blocksRaycasts = false;
-
-            TMP_FontAsset serif = theme != null ? theme.SerifRegular : null;
-            TMP_FontAsset serifBold = theme != null ? theme.SerifSemiBold : null;
-            TextMeshProUGUI speaker = UiFactory.MakeLabel("Speaker", band.transform, new Vector2(0.24f, 0.64f), new Vector2(0.79f, 0.9f), 34f, TextAlignmentOptions.BottomLeft, new Color(0.949f, 0.929f, 0.894f, 1f));
-            if (serifBold != null) speaker.font = serifBold;
-            TextMeshProUGUI line = UiFactory.MakeLabel("Line", band.transform, new Vector2(0.24f, 0.06f), new Vector2(0.79f, 0.62f), 26f, TextAlignmentOptions.TopLeft, new Color(0.91f, 0.894f, 0.863f, 1f));
-            if (serif != null)
-            {
-                line.font = serif;
-                Material shadow = SubtitleShadow(serif);
-                if (shadow != null) line.fontSharedMaterial = shadow;
-            }
-
-            line.lineSpacing = 15f;
-            line.enableAutoSizing = true;
-            line.fontSizeMin = 20f;
-            line.fontSizeMax = 26f;
-            line.maxVisibleLines = 3;
-            TypewriterText typewriter = line.gameObject.AddComponent<TypewriterText>();
-            typewriter.Configure(line, theme != null ? theme.TypewriterCharsPerSecond : 90f);
-
-            TextMeshProUGUI mark = UiFactory.MakeLabel("Continue", band.transform, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), 18f, TextAlignmentOptions.Center, new Color(0.949f, 0.929f, 0.894f, 0.9f));
-            if (serif != null) mark.font = serif;
-            mark.text = "\u25BC";
-            mark.rectTransform.sizeDelta = new Vector2(30f, 30f);
-
-            SubtitleView view = band.gameObject.AddComponent<SubtitleView>();
-            SerializedWire.Set(view, "group", group);
-            SerializedWire.Set(view, "speaker", speaker);
-            SerializedWire.Set(view, "line", line);
-            SerializedWire.Set(view, "typewriter", typewriter);
-            SerializedWire.Set(view, "continueMark", mark.rectTransform);
-            return view;
-        }
-
-        /// <summary>4x128 vertical gradient (alpha 0 at the top, 0.85 at the bottom), generated once.</summary>
-        private static Sprite SubtitleGradient()
-        {
-            if (!System.IO.File.Exists(SubtitleGradientPath))
-            {
-                AssetUtil.EnsureFolder("Assets/_Game/Art/UI");
-                var tex = new Texture2D(4, 128, TextureFormat.RGBA32, false);
-                for (int y = 0; y < 128; y++)
-                {
-                    float k = 1f - y / 127f; // 1 at the bottom row
-                    float a = 0.85f * Mathf.SmoothStep(0f, 1f, k);
-                    for (int x = 0; x < 4; x++) tex.SetPixel(x, y, new Color(0f, 0f, 0f, a));
-                }
-
-                System.IO.File.WriteAllBytes(SubtitleGradientPath, tex.EncodeToPNG());
-                Object.DestroyImmediate(tex);
-                UnityEditor.AssetDatabase.ImportAsset(SubtitleGradientPath);
-            }
-
-            var importer = UnityEditor.AssetImporter.GetAtPath(SubtitleGradientPath) as UnityEditor.TextureImporter;
-            if (importer != null && (importer.textureType != UnityEditor.TextureImporterType.Sprite || importer.spriteImportMode != UnityEditor.SpriteImportMode.Single))
-            {
-                importer.textureType = UnityEditor.TextureImporterType.Sprite;
-                importer.spriteImportMode = UnityEditor.SpriteImportMode.Single;
-                importer.alphaIsTransparency = true;
-                importer.mipmapEnabled = false;
-                importer.wrapMode = TextureWrapMode.Clamp;
-                importer.textureCompression = UnityEditor.TextureImporterCompression.Uncompressed;
-                importer.SaveAndReimport();
-            }
-
-            return UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>(SubtitleGradientPath);
-        }
-
-        /// <summary>EB Garamond material with a subtle dark underlay (the 1 px shadow), saved as an asset.</summary>
-        private static Material SubtitleShadow(TMP_FontAsset font)
-        {
-            if (font == null || font.material == null) return null;
-            Material m = UnityEditor.AssetDatabase.LoadAssetAtPath<Material>(SubtitleShadowPath);
-            if (m == null)
-            {
-                m = new Material(font.material);
-                UnityEditor.AssetDatabase.CreateAsset(m, SubtitleShadowPath);
-            }
-            else
-            {
-                m.shader = font.material.shader;
-                m.CopyPropertiesFromMaterial(font.material);
-            }
-
-            m.EnableKeyword(ShaderUtilities.Keyword_Underlay);
-            m.SetColor(ShaderUtilities.ID_UnderlayColor, new Color(0f, 0f, 0f, 0.75f));
-            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetX, 0.18f);
-            m.SetFloat(ShaderUtilities.ID_UnderlayOffsetY, -0.18f);
-            m.SetFloat(ShaderUtilities.ID_UnderlaySoftness, 0.15f);
-            UnityEditor.EditorUtility.SetDirty(m);
-            return m;
         }
 
         /// <summary>ESC pause: dim overlay, centred serif panel (Devam Et / Ayarlar / Ana Menü / Oyundan Çık), settings, confirm.</summary>

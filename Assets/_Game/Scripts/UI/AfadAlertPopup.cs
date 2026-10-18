@@ -7,7 +7,7 @@ using UnityEngine.UI;
 
 namespace SixtyOne.UI
 {
-    /// <summary>Flashing AFAD early-warning popup. Tap to dismiss; hides itself after a few seconds.</summary>
+    /// <summary>Flashing AFAD early-warning popup: hides after ~4s, on the first click or tap anywhere, and on any rewind or death. While hidden it blocks no clicks.</summary>
     public sealed class AfadAlertPopup : MonoBehaviour
     {
         [Tooltip("Popup group.")]
@@ -26,7 +26,13 @@ namespace SixtyOne.UI
         [SerializeField] private Button dismissButton;
 
         [Tooltip("Seconds before it hides itself.")]
-        [SerializeField] private float showSeconds = 3.5f;
+        [SerializeField] private float showSeconds = 4f;
+
+        [Tooltip("A click anywhere after this many seconds hides it (the click that caused it does not).")]
+        [SerializeField] private float clickGraceSeconds = 0.25f;
+
+        private bool visible;
+        private float shownAt;
 
         [Tooltip("Flash colors.")]
         [SerializeField] private Color flashA = new Color(0.85f, 0.05f, 0.05f, 0.95f);
@@ -45,6 +51,7 @@ namespace SixtyOne.UI
             GameEvents.AfadAlert += OnAlert;
             GameEvents.Alert += OnKeyedAlert;
             GameEvents.Died += OnDied;
+            GameEvents.Rewound += OnRewound;
         }
 
         private void OnDisable()
@@ -52,6 +59,7 @@ namespace SixtyOne.UI
             GameEvents.AfadAlert -= OnAlert;
             GameEvents.Alert -= OnKeyedAlert;
             GameEvents.Died -= OnDied;
+            GameEvents.Rewound -= OnRewound;
         }
 
         private void OnAlert(float magnitude)
@@ -76,6 +84,8 @@ namespace SixtyOne.UI
             }
 
             UIVisibility.Set(group, true);
+            visible = true;
+            shownAt = Time.unscaledTime;
 
             float time = 0f;
             while (time < showSeconds)
@@ -92,9 +102,20 @@ namespace SixtyOne.UI
         public void Hide()
         {
             StopAllCoroutines();
+            visible = false;
             UIVisibility.Set(group, false);
         }
 
         private void OnDied(DeathInfo info) => Hide();
+
+        private void OnRewound(string nodeId) => Hide();
+
+        private void Update()
+        {
+            // The first click or tap anywhere (world or UI) dismisses it.
+            if (!visible || Time.unscaledTime - shownAt < clickGraceSeconds) return;
+            UnityEngine.InputSystem.Pointer pointer = UnityEngine.InputSystem.Pointer.current;
+            if (pointer != null && pointer.press.wasPressedThisFrame) Hide();
+        }
     }
 }

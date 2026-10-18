@@ -104,6 +104,38 @@ namespace SixtyOne.Tests
             Assert.AreEqual(2, failures);
         }
 
+        [Test]
+        public void ThirdDogFailureKills()
+        {
+            Assert.IsFalse(QTENode.FailuresKill(2, 3));
+            Assert.IsTrue(QTENode.FailuresKill(3, 3), "the 3rd failure is the bite");
+            Assert.IsFalse(QTENode.FailuresKill(50, 0), "0 = unlimited (the breaker)");
+        }
+
+        [Test]
+        public void WhistleSwitchesToTheEasyConfig()
+        {
+            var normal = UnityEngine.ScriptableObject.CreateInstance<QTEConfig>();
+            var easy = UnityEngine.ScriptableObject.CreateInstance<QTEConfig>();
+            var node = UnityEngine.ScriptableObject.CreateInstance<QTENode>();
+            try
+            {
+                node.ConfigureQte(QTEContext.DogEvasion, normal, new SixtyOne.Nodes.Outcome[0], null, null);
+                node.ConfigureEasy("DogScared", easy);
+                var flags = new SixtyOne.Core.Flags();
+                Assert.AreSame(normal, node.ConfigFor(flags));
+                flags.Set("DogScared", true);
+                Assert.AreSame(easy, node.ConfigFor(flags));
+                Assert.AreSame(normal, node.ConfigFor(null));
+            }
+            finally
+            {
+                UnityEngine.Object.DestroyImmediate(node);
+                UnityEngine.Object.DestroyImmediate(easy);
+                UnityEngine.Object.DestroyImmediate(normal);
+            }
+        }
+
         private static QTEKey Wrong(QTEKey target) => target == QTEKey.W ? QTEKey.A : QTEKey.W;
     }
 }

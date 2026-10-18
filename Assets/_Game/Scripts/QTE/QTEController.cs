@@ -33,6 +33,8 @@ namespace SixtyOne.QTE
         private QTESession session;
         private Action<SceneNode> onFinished;
         private float hitStopLeft;
+        private QTEConfig config;
+        private int failures;
 
         private IQTEView View => view as IQTEView;
 
@@ -68,7 +70,8 @@ namespace SixtyOne.QTE
             Cancel();
             node = (QTENode)sceneNode;
             onFinished = done;
-            QTEConfig config = node.Config;
+            config = node.ConfigFor(gameManager != null ? gameManager.State.Flags : null);
+            failures = 0;
             if (config == null)
             {
                 Debug.LogError($"[QTE] Node '{node.Id}' has no QTEConfig.", this);
@@ -133,7 +136,7 @@ namespace SixtyOne.QTE
 
         private void OnHit(QTESession s, int keysDone)
         {
-            if (node != null) AudioService.PlayCue(node.Config.HitCue);
+            if (config != null) AudioService.PlayCue(config.HitCue);
             View?.FlashHit(keysDone);
         }
 
@@ -141,7 +144,6 @@ namespace SixtyOne.QTE
         {
             QTENode current = node;
             if (current == null) return;
-            QTEConfig config = current.Config;
             AudioService.PlayCue(config.MissCue);
             View?.FlashMiss(reason);
             Shake(config);
@@ -154,6 +156,15 @@ namespace SixtyOne.QTE
                 return;
             }
 
+            // Too many misses (the rabid dog): this failure kills instead of re-rolling.
+            failures++;
+            if (gameManager != null && QTENode.FailuresKill(failures, current.MaxFailures))
+            {
+                Cancel();
+                gameManager.Die(current.FailDeath.ToInfo());
+                return;
+            }
+
             if (gameManager != null) OutcomeExecutor.Execute(current.FailOutcomes, gameManager.State);
             GameEvents.RaiseMessage(reason == QTEFailReason.WrongKey ? (current.FailKey.IsEmpty ? UiKeys.QteMiss : current.FailKey.Key) : UiKeys.QteTimeout);
             View?.Refresh(s.Current);
@@ -163,7 +174,7 @@ namespace SixtyOne.QTE
         {
             QTENode current = node;
             if (current == null) return;
-            AudioService.PlayCue(current.Config.SuccessCue);
+            AudioService.PlayCue(config.SuccessCue);
             if (gameManager != null) OutcomeExecutor.Execute(current.SuccessOutcomes, gameManager.State);
             if (!current.SuccessKey.IsEmpty) GameEvents.RaiseMessage(current.SuccessKey.Key);
 

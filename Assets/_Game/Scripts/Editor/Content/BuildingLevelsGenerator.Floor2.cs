@@ -33,6 +33,10 @@ namespace SixtyOne.Editor
 
         public const string GasOffF2 = "GasOff_F2_7";
         public const string DogGone = "DogGone";
+        /// <summary>The whistle scared the dog back (easier QTE).</summary>
+        public const string DogScared = "DogScared";
+        /// <summary>The thrown food lured the dog away (it ran off-screen).</summary>
+        public const string DogLured = "DogLured";
 
         public const string RecipesDir = DataRoot + "/Recipes";
 
@@ -117,24 +121,31 @@ namespace SixtyOne.Editor
                 .Kills(Death("death.lighter_explosion", "tip.no_flame")));
             flat7.AddChoice(C(F2Flat7, "corridor").Move(2f).Then(Outcome.GoTo(corridor)));
 
-            // Corridor: the frightened dog blocks the stairs. No weapons; feed it or call it away.
+            // Corridor: a RABID dog blocks the stairs. No weapons and never touch it: lure it away with food, scare it
+            // back with the whistle (easier QTE), or slip past (3 failures = bite). Petting it is the trap.
+            DeathData bite = new DeathData("death.dog_bite", Tip("tip.rabies"), MemberType.Player, corridor, result.DogBarkCue);
             Setup(corridor, F2CorridorNode, F2CorridorRoom, 3);
             corridor.AddChoice(C(F2CorridorNode, "food").Costs(2f)
                 .ShowWhen(Condition.FlagFalse(DogGone))
                 .Require(Condition.HasItem(Item("food")))
                 .WhenLocked(FailBehaviour.ShowLocked, Locked(F2CorridorNode, "food"))
                 .Then(Outcome.RemoveItem(Item("food")))
+                .Then(Outcome.SetFlag(DogLured))
                 .Then(Outcome.SetFlag(DogGone))
                 .Then(Outcome.Message($"{F2CorridorNode}.msg_fed")));
             corridor.AddChoice(C(F2CorridorNode, "whistle").Costs(2f).WithCue(result.WhistleCue)
                 .ShowWhen(Condition.FlagFalse(DogGone))
+                .ShowWhen(Condition.FlagFalse(DogScared))
                 .Require(Condition.HasItem(Item("whistle")))
                 .WhenLocked(FailBehaviour.ShowLocked, Locked(F2CorridorNode, "whistle"))
-                .Then(Outcome.SetFlag(DogGone))
+                .Then(Outcome.SetFlag(DogScared))
                 .Then(Outcome.Message($"{F2CorridorNode}.msg_whistle")));
             corridor.AddChoice(C(F2CorridorNode, "pass")
                 .ShowWhen(Condition.FlagFalse(DogGone))
                 .Then(Outcome.GoTo(dog)));
+            corridor.AddChoice(C(F2CorridorNode, "pet", ChoiceType.Trap)
+                .ShowWhen(Condition.FlagFalse(DogGone))
+                .Kills(new DeathData("death.dog_bite", Tip("tip.rabies"), MemberType.Player, null, result.DogBarkCue)));
             corridor.AddChoice(C(F2CorridorNode, "stairs").Move(4f)
                 .ShowWhen(Condition.FlagTrue(DogGone))
                 .Then(Outcome.GoTo(exit)));
@@ -142,8 +153,12 @@ namespace SixtyOne.Editor
             corridor.AddChoice(C(F2CorridorNode, "flat7").Move(2f).Then(Outcome.GoTo(flat7)));
 
             // Dog evasion: randomized WASD QTE. Each failure costs building time and re-rolls; success = past the dog.
-            Setup(dog, F2Dog, F2CorridorRoom, 3);
+            // The title is the dog's name (npc.dog.name). The 3rd failure is a bite (rewinds to the corridor); after the
+            // whistle the sequences are shorter and slower.
+            dog.Configure(F2Dog, "npc.dog.name", F2Dog + ".body", F2CorridorRoom, 3, 0f);
             dog.ConfigureQte(QTEContext.DogEvasion, result.QteDog, new[] { Outcome.SetFlag(DogGone) }, null, corridor);
+            dog.ConfigureFailLimit(3, bite);
+            dog.ConfigureEasy(DogScared, result.QteDogEasy);
             dog.AddChoice(C(F2Dog, "back").Then(Outcome.GoTo(corridor)));
 
             // Flat 8: empty placeholder flat (one hidden item at most).
@@ -157,6 +172,8 @@ namespace SixtyOne.Editor
             exit.AddChoice(C(F2Exit, "elevator", ChoiceType.Trap).Kills(Death("death.elevator", "tip.no_elevator")));
 
             Setup(robber, F2Robber, F2Stairs, 3);
+            // Yalvar / Kısa kes / Ona bağır are Mehmet's replies: his thought bubble, not rows under the robber.
+            robber.SetChoicesAsThought(true);
             robber.SetLines(new[]
             {
                 Line(RobberSetup.SpeakerKey, F2Robber, 1, 3f),

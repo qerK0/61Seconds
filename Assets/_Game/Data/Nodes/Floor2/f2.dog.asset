@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.QTE.QTENode
   id: f2.dog
   titleKey:
-    key: f2.dog.title
+    key: npc.dog.name
   bodyKey:
     key: f2.dog.body
   roomId: f2_corridor
@@ -93,3 +93,14 @@ MonoBehaviour:
     excludeKeyItems: 1
   failOutcomes: []
   nextNode: {fileID: 11400000, guid: aa7e86076762ce540934d60aa80fcf47, type: 2}
+  maxFailures: 3
+  failDeath:
+    textKey:
+      key: death.dog_bite
+    tip: {fileID: 11400000, guid: 88a149a0a82371946bdbf0c8b00e6822, type: 2}
+    cue: {fileID: 11400000, guid: aee9f62ead2e7ce46930c4f9d2955e6e, type: 2}
+    victim: 0
+    rewindTarget: 0
+    rewindTo: {fileID: 11400000, guid: aa7e86076762ce540934d60aa80fcf47, type: 2}
+  easyFlag: DogScared
+  easyConfig: {fileID: 11400000, guid: c2bb36477baf2424682903225aed58a4, type: 2}

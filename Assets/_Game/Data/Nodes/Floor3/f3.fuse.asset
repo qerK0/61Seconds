@@ -93,3 +93,14 @@ MonoBehaviour:
     excludeKeyItems: 1
   failOutcomes: []
   nextNode: {fileID: 11400000, guid: 220345c6998b0c64e9d869de015bee5f, type: 2}
+  maxFailures: 0
+  failDeath:
+    textKey:
+      key: 
+    tip: {fileID: 0}
+    cue: {fileID: 0}
+    victim: 0
+    rewindTarget: 0
+    rewindTo: {fileID: 0}
+  easyFlag: 
+  easyConfig: {fileID: 0}

@@ -37,6 +37,19 @@ namespace SixtyOne.QTE
         [Tooltip("Node after success.")]
         [SerializeField] private SceneNode nextNode;
 
+        [Tooltip("Failed attempts that kill (0 = unlimited; every failure only costs time).")]
+        [Min(0)]
+        [SerializeField] private int maxFailures;
+
+        [Tooltip("Death when maxFailures is reached (e.g. the dog bite).")]
+        [SerializeField] private DeathData failDeath = new DeathData();
+
+        [Tooltip("Flag that switches to the easier config (e.g. DogScared after the whistle). Optional.")]
+        [SerializeField] private string easyFlag;
+
+        [Tooltip("Shorter / slower sequence used while easyFlag is set. Optional.")]
+        [SerializeField] private QTEConfig easyConfig;
+
         public QTEContext Context => context;
         public QTEConfig Config => config;
         public TextKey PromptKey => promptKey;
@@ -45,6 +58,34 @@ namespace SixtyOne.QTE
         public IReadOnlyList<Outcome> SuccessOutcomes => successOutcomes;
         public IReadOnlyList<Outcome> FailOutcomes => failOutcomes;
         public SceneNode NextNode => nextNode;
+        public int MaxFailures => maxFailures;
+        public DeathData FailDeath => failDeath;
+        public string EasyFlag => easyFlag;
+        public QTEConfig EasyConfig => easyConfig;
+
+        /// <summary>The config for this state: the easy one while its flag is set, else the normal one.</summary>
+        public QTEConfig ConfigFor(SixtyOne.Core.Flags flags)
+        {
+            bool easy = easyConfig != null && !string.IsNullOrEmpty(easyFlag) && flags != null && flags.Get(easyFlag);
+            return easy ? easyConfig : config;
+        }
+
+        /// <summary>True when this many failed attempts kill (pure rule; maxFailures 0 never kills).</summary>
+        public static bool FailuresKill(int failures, int maxFailures) => maxFailures > 0 && failures >= maxFailures;
+
+        /// <summary>Authoring helper: the Nth failure kills with this death.</summary>
+        public void ConfigureFailLimit(int failures, DeathData death)
+        {
+            maxFailures = Mathf.Max(0, failures);
+            failDeath = death ?? new DeathData();
+        }
+
+        /// <summary>Authoring helper: an easier config while a flag is set.</summary>
+        public void ConfigureEasy(string flag, QTEConfig easy)
+        {
+            easyFlag = flag;
+            easyConfig = easy;
+        }
 
         /// <summary>Authoring helper (call after Configure). Keys follow id.prompt / id.success / id.fail.</summary>
         public void ConfigureQte(QTEContext qteContext, QTEConfig qteConfig, IEnumerable<Outcome> onSuccess, IEnumerable<Outcome> onFail, SceneNode next)

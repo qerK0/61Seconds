@@ -104,6 +104,21 @@ namespace SixtyOne.Text
         public const string StreetSafe = "ui.street.safe";
         public const string StreetCollapseBehind = "ui.street.collapse_behind";
 
+        /// <summary>Cost chip of a heavy choice (locked at 0 stamina).</summary>
+        public const string ChoiceHeavy = "ui.choice.heavy";
+
+        /// <summary>Mehmet's name (his thought bubble / name tab).</summary>
+        public const string PlayerName = "npc.mehmet.name";
+
+        /// <summary>
+        /// Messages that are narration (placement instructions, the street hints): they go to the top narration card,
+        /// not the toast in the middle of the scene.
+        /// </summary>
+        public static bool IsNarration(string key)
+        {
+            return key == PlacementHint || key == PlacementPlayerLast || key == StreetDropOpen || key == StreetSafe || key == StreetCollapseBehind;
+        }
+
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;
     }

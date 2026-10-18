@@ -126,6 +126,13 @@ namespace SixtyOne.Editor
 
             // Corridor hub.
             Setup(corridor, F4CorridorNode, F4Corridor, 1);
+            // Sevim herself (world hotspot, hidden from the panel): talks if she has not yet, else one short line.
+            corridor.AddChoice(C(F4CorridorNode, "sevim_talk")
+                .ShowWhen(Condition.FlagFalse(SevimDone))
+                .Then(Outcome.GoTo(sevim)));
+            corridor.AddChoice(C(F4CorridorNode, "sevim")
+                .ShowWhen(Condition.FlagTrue(SevimDone))
+                .Then(Outcome.Message($"{F4CorridorNode}.msg_sevim")));
             corridor.AddChoice(C(F4CorridorNode, "talk")
                 .ShowWhen(Condition.FlagFalse(GiftDone))
                 .ShowWhen(Condition.FlagFalse(NeighborGone))

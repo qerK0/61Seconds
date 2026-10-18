@@ -5,6 +5,7 @@ using SixtyOne.Iso;
 using SixtyOne.Nodes;
 using SixtyOne.Placement;
 using SixtyOne.Text;
+using SixtyOne.UI;
 using SixtyOne.World;
 using TMPro;
 using UnityEditor;
@@ -92,6 +93,40 @@ namespace SixtyOne.Editor
 
         /// <summary>Prop art (SixtyOne > Art > Import Prop Art) used by Prop and the containers; null = coloured blocks.</summary>
         public static PropArtSet Props { get; set; }
+
+        /// <summary>Speech-bubble accent per speaker id (name tab, row hover).</summary>
+        public static Color SpeakerColor(string id)
+        {
+            switch (id)
+            {
+                case "sevim": return Hex(0xB0479B);
+                case "hasan": return Hex(0x3E8E41);
+                case "cemil": return Hex(0xB07A12);
+                case "robber": return Hex(0xB23A2E);
+                case "wife": return Hex(0x2F6DB5);
+                default: return Hex(0x333333);
+            }
+        }
+
+        /// <summary>Speaker name key of an NPC idle id (null = it never talks, e.g. the dog).</summary>
+        private static string SpeakerKey(string idle)
+        {
+            switch (idle)
+            {
+                case "sevim":
+                case "hasan":
+                case "cemil":
+                case "robber":
+                    return "npc." + idle + ".name";
+                default:
+                    return null;
+            }
+        }
+
+        private static Color Hex(int rgb) => new Color(((rgb >> 16) & 255) / 255f, ((rgb >> 8) & 255) / 255f, (rgb & 255) / 255f, 1f);
+
+        /// <summary>Bark played by the rabid dog when its QTE starts.</summary>
+        public static AudioCue DogBark { get; set; }
 
         /// <summary>Fixtures that hang on a wall and keep their authored lift when they get real art.</summary>
         private static bool WallMounted(string objectName) => objectName == "FuseBox" || objectName == "WallLamp" || objectName == "Valve";
@@ -481,7 +516,13 @@ namespace SixtyOne.Editor
                 {
                     r.color = Color.white;
                     body.transform.localScale = Vector3.one * idle.BodyScale;
-                    body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, 9f);
+                    body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, CharacterArt.NpcIdleFps);
+                    if (spec.Face.HasValue)
+                    {
+                        // Face a grid point (the player's arrival, the corridor centre); flip art that looks the other way.
+                        float dx = IsoMath.GridToWorld(spec.Face.Value.x, spec.Face.Value.y).x - IsoMath.GridToWorld(spec.Gx, spec.Gy).x;
+                        if (Mathf.Abs(dx) > 0.01f) r.flipX = dx > 0f != CharacterArt.NpcFacesRight(spec.Idle);
+                    }
                 }
                 else
                 {
@@ -491,6 +532,10 @@ namespace SixtyOne.Editor
                     float sy = height / 0.75f;
                     body.transform.localScale = new Vector3(small ? sy * 2.2f : 1.1f, sy, 1f);
                 }
+
+                // Speech bubbles attach to this NPC's head.
+                string speaker = SpeakerKey(spec.Idle);
+                if (speaker != null) go.AddComponent<SpeakerAnchor>().Configure(speaker, SpeakerColor(spec.Idle));
 
                 var shadow = new GameObject("Shadow");
                 shadow.transform.SetParent(go.transform, false);
@@ -526,6 +571,8 @@ namespace SixtyOne.Editor
                 decor.Mode = IsoSortMode.Static;
                 SerializedWire.SetBool(decor, "includeChildren", true);
                 decor.Apply();
+                // The rabid dog trembles in its QTE, backs off from the whistle and runs after the thrown food.
+                if (spec.Idle == "dog") go.AddComponent<RabidDogPresenter>().Configure(body.transform, DogBark);
                 return null;
             }
 

@@ -18,7 +18,7 @@ namespace SixtyOne.Nodes
         [Tooltip("Node registry and start node.")]
         [SerializeField] private GameContent content;
 
-        [Tooltip("Component implementing IChoicePresenter (ChoicePanel).")]
+        [Tooltip("Component implementing IDialoguePresenter (DialoguePresenter).")]
         [SerializeField] private MonoBehaviour presenter;
 
         [Tooltip("Component implementing IRoomPresenter (RoomSwitcher).")]
@@ -33,7 +33,7 @@ namespace SixtyOne.Nodes
         [Tooltip("Component implementing IChoiceFilter (RoomNavigator): hides choices doors and hotspots offer. Optional.")]
         [SerializeField] private MonoBehaviour choiceFilter;
 
-        private IChoicePresenter choicePresenter;
+        private IDialoguePresenter choicePresenter;
         private IRoomPresenter rooms;
         private IChoiceFilter filter;
         private INodeHandler activeHandler;
@@ -49,12 +49,12 @@ namespace SixtyOne.Nodes
         private void Awake()
         {
             if (gameManager == null) gameManager = GameManager.Instance;
-            choicePresenter = presenter as IChoicePresenter;
+            choicePresenter = presenter as IDialoguePresenter;
             rooms = roomPresenter as IRoomPresenter;
             filter = choiceFilter as IChoiceFilter;
             if (choicePresenter == null)
             {
-                Debug.LogWarning("[NodePlayer] No IChoicePresenter assigned; choices will not show.", this);
+                Debug.LogWarning("[NodePlayer] No IDialoguePresenter assigned; choices will not show.", this);
             }
         }
 
@@ -137,7 +137,7 @@ namespace SixtyOne.Nodes
                 BombCheck bomb = BombCheckRunner.Run(node.BombChecks, State);
                 if (bomb != null)
                 {
-                    choicePresenter?.Present(node, new List<ChoiceView>(), null);
+                    choicePresenter?.ShowNarration(node.BodyKey.IsEmpty ? string.Empty : node.BodyKey.Display);
                     gameManager.Die(bomb.Death.ToInfo());
                     return;
                 }
@@ -242,7 +242,19 @@ namespace SixtyOne.Nodes
         {
             List<ChoiceView> views = ChoiceView.Build(Current, State);
             if (filter != null) views.RemoveAll(v => filter.Hides(Current, v.Choice));
-            choicePresenter?.Present(Current, views, Choose);
+            PresentNode(Current, views);
+        }
+
+        /// <summary>
+        /// A node with choices the world does not offer = a decision: Mehmet's thought bubble (the body) + rows.
+        /// Without such choices the body is narration (top card) and the room is explored freely.
+        /// </summary>
+        private void PresentNode(SceneNode node, List<ChoiceView> views)
+        {
+            if (choicePresenter == null) return;
+            string body = node.BodyKey.IsEmpty ? string.Empty : node.BodyKey.Display;
+            if (views.Count > 0) choicePresenter.ShowThought(body, views, Choose);
+            else choicePresenter.ShowNarration(body);
         }
 
         private void OnHandlerFinished(SceneNode next)

@@ -83,7 +83,12 @@ namespace SixtyOne.UI
             yield return Tween.Fade(group, 0f, 0.3f);
         }
 
-        private void OnMessage(string key) => Show(TextDB.GetDisplay(key));
+        private void OnMessage(string key)
+        {
+            // Placement / street instructions are narration (top card), never the toast in the middle.
+            if (UiKeys.IsNarration(key)) return;
+            Show(TextDB.GetDisplay(key));
+        }
         private void OnQuake(QuakeInfo info) => Show(TextDB.Format(UiKeys.Quake, info.Magnitude.ToString("0.0")));
 
         private void OnDied(DeathInfo info)

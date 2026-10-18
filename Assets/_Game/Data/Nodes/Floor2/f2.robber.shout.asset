@@ -32,6 +32,7 @@ MonoBehaviour:
     textKey:
       key: f2.robber.shout.l1
     timeCost: 2
+  choicesAsThought: 0
   takeOutcomes:
   - type: 8
     targetNode: {fileID: 0}

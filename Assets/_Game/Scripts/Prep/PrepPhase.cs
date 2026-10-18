@@ -88,7 +88,7 @@ namespace SixtyOne.Prep
             // The node's own room: during a room transition rooms.Current is still the previous room.
             SixtyOne.Placement.Room room = rooms != null ? rooms.FindRoom(prep.RoomId) : null;
             if (room != null) room.ResetProps();
-            if (!prep.ShowAlertOnEnter) return;
+            if (!prep.ShowAlertOnEnter || !PrepRules.ShowsStartAlert(State, config != null ? config.PrepSeconds : State.PrepTime)) return;
             GameEvents.RaiseAlert(prep.AlertTitleKey.Key, prep.AlertBodyKey.Key, Mathf.CeilToInt(State.PrepTime).ToString());
             if (!AudioService.IsCuePlaying(alertCue)) AudioService.PlayCue(alertCue);
         }

@@ -3,6 +3,7 @@ using System.IO;
 using SixtyOne.Core;
 using SixtyOne.Placement;
 using UnityEditor;
+using UnityEditor.U2D.Sprites;
 using UnityEngine;
 
 namespace SixtyOne.Editor
@@ -27,8 +28,17 @@ namespace SixtyOne.Editor
             ("hasan", CharRoot + "/HASAN_IDLE", 0.95f),
             ("cemil", CharRoot + "/CEMIL_IDLE", 1f),
             ("robber", CharRoot + "/ROBBER_IDLE", 1f),
-            ("dog", CharRoot + "/DOG_IDLE", 0.45f)
+            ("dog", CharRoot + "/DOG_IDLE", 0.55f)       // a big rabid dog, not a puppy
         };
+
+        /// <summary>Idle loop speed for every NPC (frames per second).</summary>
+        public const float NpcIdleFps = 9f;
+
+        /// <summary>True if an NPC's idle art faces right (checked visually: Cemil looks left).</summary>
+        public static bool NpcFacesRight(string id) => id != "cemil";
+
+        /// <summary>Max texture size of NPC idle frames (1080x1920 canvases; the trimmed sprite keeps its detail).</summary>
+        private const int NpcMaxTextureSize = 1024;
 
         /// <summary>Height ratio of an NPC idle id (1 when unknown).</summary>
         public static float NpcHeightRatio(string id)
@@ -124,10 +134,115 @@ namespace SixtyOne.Editor
         {
             foreach (var npc in NpcIdles)
             {
-                if (npc.Id == id) return ImportPaths(SortedFramePaths(npc.Folder, "frame"), npc.HeightRatio, MemberType.Player);
+                if (npc.Id == id) return ImportTrimmed(SortedFramePaths(npc.Folder, "frame"), npc.HeightRatio);
             }
 
             return new Frames();
+        }
+
+        /// <summary>
+        /// NPC idle import: every frame becomes one sprite trimmed to the opaque bounds shared by ALL frames (so the
+        /// loop never jitters), pivot bottom-centre = the lowest opaque row (the feet). Shared PPU with the family.
+        /// </summary>
+        private static Frames ImportTrimmed(List<string> paths, float heightRatio)
+        {
+            var result = new Frames { Member = MemberType.Player };
+            if (paths.Count == 0) return result;
+
+            RectInt union = new RectInt(0, 0, 0, 0);
+            bool any = false;
+            foreach (string path in paths)
+            {
+                RectInt r = OpaqueBounds(path);
+                if (r.width <= 0) continue;
+                if (!any) union = r;
+                else
+                {
+                    int xMin = Mathf.Min(union.xMin, r.xMin), yMin = Mathf.Min(union.yMin, r.yMin);
+                    int xMax = Mathf.Max(union.xMax, r.xMax), yMax = Mathf.Max(union.yMax, r.yMax);
+                    union = new RectInt(xMin, yMin, xMax - xMin, yMax - yMin);
+                }
+
+                any = true;
+            }
+
+            if (!any) return result;
+
+            var sprites = new List<Sprite>();
+            foreach (string path in paths)
+            {
+                Sprite sprite = ApplyTrimmedImport(path, union);
+                if (sprite != null) sprites.Add(sprite);
+            }
+
+            result.Sprites = sprites.ToArray();
+            result.VisibleHeight = union.height / PixelsPerUnit;
+            float target = PlayerHeight * heightRatio;
+            result.BodyScale = result.VisibleHeight > 0f ? target / result.VisibleHeight : 1f;
+            return result;
+        }
+
+        /// <summary>Opaque pixel bounds (alpha &gt; 20, bottom-left origin) of a source PNG; empty when fully clear.</summary>
+        private static RectInt OpaqueBounds(string path)
+        {
+            var texture = new Texture2D(2, 2);
+            texture.LoadImage(File.ReadAllBytes(path));
+            int w = texture.width, h = texture.height;
+            Color32[] pixels = texture.GetPixels32();
+            Object.DestroyImmediate(texture);
+            int minX = w, minY = h, maxX = -1, maxY = -1;
+            for (int y = 0; y < h; y++)
+            {
+                int row = y * w;
+                for (int x = 0; x < w; x++)
+                {
+                    if (pixels[row + x].a <= 20) continue;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+
+            return maxX < minX ? new RectInt(0, 0, 0, 0) : new RectInt(minX, minY, maxX - minX + 1, maxY - minY + 1);
+        }
+
+        private static Sprite ApplyTrimmedImport(string path, RectInt rect)
+        {
+            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+            if (importer == null) return null;
+            string spriteName = Path.GetFileNameWithoutExtension(path) + "_idle";
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritePixelsPerUnit = PixelsPerUnit;
+            importer.maxTextureSize = NpcMaxTextureSize;
+            importer.textureCompression = TextureImporterCompression.Compressed;
+            importer.mipmapEnabled = false;
+            importer.alphaIsTransparency = true;
+            importer.filterMode = FilterMode.Bilinear;
+            importer.SaveAndReimport();
+
+            var factory = new SpriteDataProviderFactories();
+            factory.Init();
+            ISpriteEditorDataProvider provider = factory.GetSpriteEditorDataProviderFromObject(importer);
+            provider.InitSpriteEditorDataProvider();
+            var existing = new List<SpriteRect>(provider.GetSpriteRects());
+            SpriteRect sprite = existing.Find(r => r.name == spriteName) ?? new SpriteRect { name = spriteName, spriteID = GUID.Generate() };
+            sprite.rect = new Rect(rect.x, rect.y, rect.width, rect.height);
+            sprite.alignment = SpriteAlignment.BottomCenter;
+            sprite.pivot = new Vector2(0.5f, 0f);
+            provider.SetSpriteRects(new[] { sprite });
+            var names = provider.GetDataProvider<ISpriteNameFileIdDataProvider>();
+            if (names != null) names.SetNameFileIdPairs(new[] { new SpriteNameFileIdPair(sprite.name, sprite.spriteID) });
+            provider.Apply();
+            importer.SaveAndReimport();
+
+            foreach (Object o in AssetDatabase.LoadAllAssetRepresentationsAtPath(path))
+            {
+                if (o is Sprite s && s.name == spriteName) return s;
+            }
+
+            return null;
         }
 
         /// <summary>Imports (or re-imports) one character's frames and returns them in numeric order.</summary>

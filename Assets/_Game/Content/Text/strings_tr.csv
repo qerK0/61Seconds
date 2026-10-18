@@ -46,24 +46,23 @@ death.wife.window,Cam kırıkları... Eşin yaralandı.,wife injured line (not f
 death.window,Pencere sana doğru patladı.,
 f2.aftershock.body,2. kata indiğiniz anda güçlü bir artçı! Aileni hemen güvenli yere yerleştir.,"strong aftershock placement, floor checkpoint"
 f2.aftershock.title,Güçlü artçı!,
-f2.corridor.body,Merdivenin başında korkmuş bir köpek havlıyor. Geçmene izin vermiyor.,dog gate; no weapons
+f2.corridor.body,"Merdivenin başında ağzı köpüklü bir köpek hırlıyor. Gözleri kan çanağı, dişleri dışarıda; merdiveni kesmiş, kimseyi geçirmiyor.",rabid dog gate; never touch it; no weapons
 f2.corridor.c_flat7,7 numaraya dön,
 f2.corridor.c_flat8,8 numaraya bak,
-f2.corridor.c_food,Köpeğe yiyecek ver,food is consumed
-f2.corridor.c_food.locked,Verecek yiyeceğin yok.,
-f2.corridor.c_pass,Köpeğin yanından sıyrılmayı dene,WASD QTE
+f2.corridor.c_food,Yemeği uzağa fırlat,food is consumed; the dog runs after it (no QTE)
+f2.corridor.c_food.locked,Fırlatacak yiyeceğin yok.,
+f2.corridor.c_pass,Yanından sıyrılmayı dene,WASD QTE; the 3rd failure is a bite
 f2.corridor.c_stairs,Merdivenden aşağı in,
-f2.corridor.c_whistle,Düdükle köpeği uzağa çağır,whistle is kept
+f2.corridor.c_whistle,Düdüğü öttür,whistle is kept; scares the dog back: shorter and easier QTE
 f2.corridor.c_whistle.locked,Düdüğün yok.,
-f2.corridor.msg_fed,Köpek yiyeceği kapıp bir köşeye çekildi.,
-f2.corridor.msg_whistle,"Düdük sesine kulak kabarttı, koşup uzaklaştı.",
+f2.corridor.msg_fed,"Yemeği koridorun ucuna fırlattın. Köpek salyalar saçarak peşinden koştu, merdiven boş!",
+f2.corridor.msg_whistle,"Tiz ses köpeği ürküttü, birkaç adım geri çekildi. Şimdi yanından sıyrılmak daha kolay.",
 f2.corridor.title,2. Kat koridoru,
-f2.dog.body,Köpek dişlerini gösteriyor. Doğru anda doğru yöne kaç!,WASD QTE: each failure costs building time and rolls a new sequence
+f2.dog.body,"Köpek hırlıyor, ağzından köpük damlıyor. Sakın dokunma; doğru anda doğru yöne kaç!",WASD QTE: each failure costs building time and rolls a new sequence; the 3rd failure is a bite
 f2.dog.c_back,Geri çekil,
-f2.dog.fail,Köpek önünü kesti! Zaman kaybettin.,after the time penalty
-f2.dog.prompt,Köpeğin yanından sıyrıl!,QTE prompt
+f2.dog.fail,"Köpek atıldı, son anda geri sıçradın! Zaman kaybettin.",after the time penalty
+f2.dog.prompt,Kuduz köpeğin yanından sıyrıl!,QTE prompt
 f2.dog.success,"Köpeği atlattın, merdiven açık!",
-f2.dog.title,Köpek,
 f2.epilogue.body,Toplanma alanına yürüyorsunuz.,
 f2.epilogue.borrow_no_note,Komşulardan {0} eşya ödünç aldınız. Geri vermek için onları bulmanız gerekecek.,{0} = borrowed count; never judgemental
 f2.epilogue.borrow_none,Kimseden bir şey ödünç almadan çıktınız.,
@@ -113,12 +112,12 @@ f3.fuse.fail,"Kıvılcım! Kablolar koptu, baştan başla.",after the time penal
 f3.fuse.prompt,Kabloları sırayla bağla!,QTE prompt; each correct key connects one wire
 f3.fuse.success,"Kablolar bağlandı, akım kesildi.",
 f3.fuse.title,Sigorta kutusu,
-f3.trader.body,"Elinde dolu bir çanta, koridorda bekliyor.",
-f3.trader.c_hurry,Vaktimiz yok,consequence: no item
-f3.trader.c_take,Bir şey verebilir misiniz?,gives the first missing upcoming item
-f3.trader.l1,Siz de mi mahsur kaldınız? Merdiven gitti.,
-f3.trader.l2,"Benim çantada bir sürü şey var, ihtiyacınız olanı alın.",
-f3.trader.l3,"Çocuk için dikkat edin, aşağısı karanlık.",
+f3.trader.body,"Koridorda dolu bir deprem çantasına sarılmış, kaşları çatık bir ihtiyar dikiliyor.",Cemil Bey: grumpy sarcastic old man; gruff but fair
+f3.trader.c_hurry,"Vaktimiz yok, sağ olun",consequence: no item
+f3.trader.c_take,Ne verebilirsiniz?,gives the first missing upcoming item
+f3.trader.l1,"Ne o, siz de mi kaldınız? Merdiven çöktü. Kırk yıldır yönetime söylüyorum, dinleyen kim!",greeting
+f3.trader.l2,"Çantama öyle bakma. Otuz yıldır hazır bu deprem çantası. Siz hazırlamadınız tabii, gençler...",
+f3.trader.l3,"Neyse. Çocuk var, gönlüm el vermez. İşinize yarayacak bir şey vereyim, ama geri isterim ha!",offer
 f3.trader.title,Cemil Bey,
 f4.bedroom.body,"Yatak dağılmış, dolabın kapağı açık. Çarşaflar işe yarayabilir.",bedsheets for the rope
 f4.bedroom.c_back,Salona dön,
@@ -412,3 +411,16 @@ tip.street.title,Dışarıda binalardan uzaklaş,
 f2.epilogue.robbed,Merdivendeki adam yiyeceklerinizi aldı. Umarım oğluna yetmiştir.,RobbedAtExit
 f2.epilogue.collapsed_behind,Siz uzaklaşırken bina arkanızda çöktü. Birkaç saniye daha oyalansaydınız…,building timer hit 0 while you were on the street
 f2.epilogue.time_left,Siz çıktığınızda binanın {0} saniyesi kalmıştı.,{0} = building seconds left
+f2.corridor.c_pet,Sakinleştirmeye çalış / sev,TRAP: instant bite death (comic for the player only)
+npc.dog.name,Kuduz köpek,F2 corridor rabid dog (QTE title)
+death.dog_bite,"Köpek elini değil, bacağını tercih etti. Kuduz şakaya gelmez.","player, comic allowed"
+tip.rabies,"Saldırgan ya da ağzı köpüklü hayvanlara yaklaşma, dokunma; ısırılırsan yarayı bol suyla yıka ve hemen sağlık kuruluşuna başvur.",health guidance
+tip.rabies.title,Kuduz hayvana yaklaşma,
+f3.trader.l4,"Aşağısı karanlık, gaz kokuyor. Çakmak yakayım deme, seni ben de kurtaramam.",safety: no flame
+f3.trader.msg_thanks,"Cemil Bey: ""Teşekkür etme, sağ çık yeter. Çıkarken de ayağını sürüme!""",after the trade
+f3.trader.msg_grumble,"Cemil Bey homurdandı: ""Acele işe şeytan karışır. Hadi bakalım, eli boş gidin.""",after hurry
+f4.corridor.c_sevim,Sevim Teyze,hotspot hover after her dialogue; plays msg_sevim
+f4.corridor.c_sevim_talk,Sevim Teyze'yle konuş,hotspot hover before her dialogue
+f4.corridor.msg_sevim,"Hadi evladım, çabuk olun!",Sevim Teyze's short line after her dialogue
+ui.choice.heavy,+ağır,cost chip of a heavy choice (stamina)
+npc.mehmet.name,Mehmet,the player (thought bubble name)

@@ -36,6 +36,7 @@ namespace SixtyOne.Editor
         public SixtyOne.Placement.RoomVisualConfig Visual;
         public SixtyOne.QTE.QTEConfig QteBreaker;
         public SixtyOne.QTE.QTEConfig QteDog;
+        public SixtyOne.QTE.QTEConfig QteDogEasy;
         public List<SixtyOne.Items.Recipe> Recipes = new List<SixtyOne.Items.Recipe>();
     }
 
@@ -91,7 +92,7 @@ namespace SixtyOne.Editor
         {
             "tip.drop_cover_hold", "tip.no_elevator", "tip.no_balcony", "tip.wardrobe", "tip.no_window", "tip.no_doorway",
             "tip.keep_child_close", "tip.no_switch_gas", "tip.no_flame", "tip.gas_off", "tip.emergency_bag",
-            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock", "tip.supplies", "tip.street"
+            "tip.collapse", "tip.gas_poison", "tip.electric", "tip.aftershock", "tip.supplies", "tip.street", "tip.rabies"
         };
 
         /// <summary>Entering these nodes blends the cinematic look to "we got out".</summary>
@@ -202,6 +203,9 @@ namespace SixtyOne.Editor
             result.QteBreaker.Configure(4, 6, 1.15f, 7f, 5f, qteHit, result.ElectricCue, qteSuccess);
             result.QteDog = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.dog.asset");
             result.QteDog.Configure(5, 6, 1.15f, 6.5f, 6f, qteHit, result.DogBarkCue, qteSuccess);
+            // After the whistle the dog has backed off: shorter, slower sequences and a smaller penalty.
+            result.QteDogEasy = Asset<SixtyOne.QTE.QTEConfig>(QteDir + "/qte.dog_easy.asset");
+            result.QteDogEasy.Configure(3, 4, 1.4f, 7f, 4f, qteHit, result.DogBarkCue, qteSuccess);
 
             BuildFloor4();
             BuildFloor3();

@@ -19,7 +19,7 @@ namespace SixtyOne.Dialogue
         [Tooltip("State owner.")]
         [SerializeField] private GameManager gameManager;
 
-        [Tooltip("Component implementing IChoicePresenter (ChoicePanel).")]
+        [Tooltip("Component implementing IDialoguePresenter (DialoguePresenter).")]
         [SerializeField] private MonoBehaviour presenter;
 
         [Tooltip("Current room (finds the man's sprite).")]
@@ -39,7 +39,7 @@ namespace SixtyOne.Dialogue
         private Vector3 actorRest;
         private Coroutine running;
 
-        private IChoicePresenter Presenter => presenter as IChoicePresenter;
+        private IDialoguePresenter Presenter => presenter as IDialoguePresenter;
 
         private void Awake()
         {
@@ -111,8 +111,7 @@ namespace SixtyOne.Dialogue
 
         private void Say(TextKey speaker, TextKey line, Action next)
         {
-            Presenter?.PresentText(speaker.IsEmpty ? string.Empty : speaker.Display, line.Display, TextDB.GetDisplay(UiKeys.DialogueContinue), next,
-                new List<ChoiceView>(), null);
+            Presenter?.ShowLine(speaker.IsEmpty ? null : speaker.Key, line.Display, 0f, next, new List<ChoiceView>(), null);
         }
 
         private void RunOff()

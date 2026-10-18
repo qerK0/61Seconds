@@ -55,6 +55,11 @@ namespace SixtyOne.Editor
             Apply(target, field, p => p.rectValue = value);
         }
 
+        public static void SetVector2(Object target, string field, Vector2 value)
+        {
+            Apply(target, field, p => p.vector2Value = value);
+        }
+
         /// <summary>Replaces an array/List of object references.</summary>
         public static void SetArray(Object target, string field, Object[] values)
         {

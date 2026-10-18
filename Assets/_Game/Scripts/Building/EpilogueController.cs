@@ -12,7 +12,7 @@ namespace SixtyOne.Building
         [Tooltip("State owner.")]
         [SerializeField] private GameManager gameManager;
 
-        [Tooltip("Component implementing IChoicePresenter (ChoicePanel).")]
+        [Tooltip("Component implementing IDialoguePresenter (DialoguePresenter).")]
         [SerializeField] private MonoBehaviour presenter;
 
         private void Awake()
@@ -26,8 +26,8 @@ namespace SixtyOne.Building
         {
             var epilogue = (EpilogueNode)node;
             string title = epilogue.TitleKey.IsEmpty ? string.Empty : epilogue.TitleKey.Display;
-            (presenter as IChoicePresenter)?.PresentText(title, EpilogueText.Compose(epilogue, gameManager.State), null, null,
-                new List<ChoiceView>(), null);
+            string text = EpilogueText.Compose(epilogue, gameManager.State);
+            (presenter as IDialoguePresenter)?.ShowNarration(string.IsNullOrEmpty(title) ? text : $"<b>{title}</b>\n{text}", true);
         }
 
         public void OnTimeout()

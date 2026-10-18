@@ -173,3 +173,4 @@ MonoBehaviour:
     textKey:
       key: f2.robber.l4
     timeCost: 2
+  choicesAsThought: 1

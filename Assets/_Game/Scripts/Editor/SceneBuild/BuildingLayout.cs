@@ -126,6 +126,8 @@ namespace SixtyOne.Editor
             public bool HideWhenGone;
             /// <summary>NPC idle id (CharacterArt.NpcIdles: sevim, hasan, cemil, robber, dog): loops its frames when delivered, else a dark silhouette at its height.</summary>
             public string Idle;
+            /// <summary>Grid point the NPC looks toward (flips its idle art); null = as drawn.</summary>
+            public Vector2? Face;
             /// <summary>Prop art name (PropArtSet) for objects, e.g. "Valve"; null = tinted block.</summary>
             public string Art;
             /// <summary>More choice keys the same object plays in other nodes (prep / post-quake valve).</summary>
@@ -521,8 +523,13 @@ namespace SixtyOne.Editor
             WallLamp(corridor, 2.5f, "CorridorWallLampA");
             WallLamp(corridor, 5.5f, "CorridorWallLampB");
             corridor.Hotspots.Add(Person("Hasan", "f4.corridor.c_talk", 3.0f, 1.2f, new Color(0.55f, 0.7f, 0.5f, 1f), idle: "hasan"));
-            // Sevim Teyze: decorative (her dialogue starts on the way out of Flat 11), idle-animated.
-            corridor.Hotspots.Add(new HotspotSpec { Name = "Sevim", Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim" });
+            // Sevim Teyze: her dialogue starts on the way out of Flat 11; a click talks to her (or, after that, one
+            // short line). She never disappears.
+            corridor.Hotspots.Add(new HotspotSpec
+            {
+                Name = "Sevim", ChoiceKey = "f4.corridor.c_sevim", AlsoKeys = new[] { "f4.corridor.c_sevim_talk" },
+                Gx = 4.6f, Gy = 1.3f, Person = true, Color = Color.white, Idle = "sevim", HideWhenGone = false
+            });
 
             // Flat 12: the neighbours' open flat. Everything here is borrowed ("ödünç al").
             RoomSpec f12Hall = Art(Room(BuildingLevelsGenerator.Flat12, 3, 3, new Color(0.7f, 0.66f, 0.74f, 1f)), RoomArt.Home);
@@ -570,6 +577,8 @@ namespace SixtyOne.Editor
             corridor.Props.Add(P("stair_edge", "StairEdge", 6.8f, 1.0f, 0f, 0.9f, 0.35f, new Color(0.45f, 0.45f, 0.5f, 1f), drop: 0.7f));
             corridor.Props.Add(P("ceiling_debris", "CeilingDebris", 3.0f, 0.8f, 1.8f, 0.6f, 0.25f, new Color(0.6f, 0.58f, 0.55f, 1f), drop: 1.6f));
             corridor.Hotspots.Add(Person("Cemil", "f3.corridor.c_trader", 4.7f, 0.7f, new Color(0.75f, 0.6f, 0.35f, 1f), idle: "cemil"));
+            corridor.Hotspots[corridor.Hotspots.Count - 1].Face = new Vector2(corridor.Width * 0.5f, corridor.Height * 0.5f);
+            corridor.Hotspots[corridor.Hotspots.Count - 1].Face = new Vector2(corridor.Width * 0.5f, corridor.Height * 0.5f);
             WallLamp(corridor, 0.5f, "F3WallLamp");
 
             // Flat 9: fuse box in the hall, balcony (bedsheet rope) off the living room, hanging cables in the kitchen.
@@ -630,10 +639,10 @@ namespace SixtyOne.Editor
             f7Kitchen.Props.Add(P(null, "Stove", 1.5f, 3.4f, 0f, 0.8f, 0.7f, new Color(0.6f, 0.6f, 0.62f, 1f)));
             f7Kitchen.Hotspots.Add(Valve(2.3f, 3.6f, BuildingLevelsGenerator.F2Flat7 + ".c_valve"));
 
-            // Corridor: the frightened dog blocks the stairs (front-left exit).
+            // Corridor: the rabid dog blocks the stairs (front-left exit).
             RoomSpec corridor = Art(Room(BuildingLevelsGenerator.F2CorridorRoom, 7, 2, new Color(0.58f, 0.57f, 0.6f, 1f)), RoomArt.DamagedCorridor);
-            // The dog: decorative NPC (its choices are in the panel); idle art from Art/char/DOG_IDLE when delivered.
-            corridor.Hotspots.Add(new HotspotSpec { Name = "Dog", Gx = 1.0f, Gy = 1.0f, Person = true, Color = new Color(0.55f, 0.4f, 0.25f, 1f), Idle = "dog" });
+            // The rabid dog: decorative NPC (its choices are in the panel), facing the player's arrival door (L1).
+            corridor.Hotspots.Add(new HotspotSpec { Name = "Dog", Gx = 1.0f, Gy = 1.0f, Person = true, Color = new Color(0.55f, 0.4f, 0.25f, 1f), Idle = "dog", Face = EdgeInside(corridor, "L1") });
             WallLamp(corridor, 2.5f, "F2WallLamp");
             corridor.Props.Add(P(null, "StairsDown", 0.35f, 1.5f, 0f, 0.9f, 0.4f, new Color(0.45f, 0.45f, 0.5f, 1f)));
             // Elevators sit flush on the back-right wall line, centred on a wall segment (DoorArt fits them to it).

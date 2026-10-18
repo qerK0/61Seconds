@@ -87,20 +87,24 @@ namespace SixtyOne.Editor
             corridor.AddChoice(C(F3CorridorNode, "flat9").Move(2f).Then(Outcome.GoTo(flat9)));
             corridor.AddChoice(C(F3CorridorNode, "flat10").Move(2f).Then(Outcome.GoTo(flat10)));
 
-            // Trader: talking costs building time; gives the first thing you will need and lack.
+            // Trader (Cemil Bey, grumpy but fair): greeting → offer → thanks / grumble. Talking costs building time; he
+            // gives the first thing you will need and lack (TraderLogic), asking nothing in return.
             Setup(trader, F3Trader, F3Corridor, 2);
             trader.SetLines(new[]
             {
                 Line("npc.cemil.name", F3Trader, 1, 3f),
                 Line("npc.cemil.name", F3Trader, 2, 3f),
-                Line("npc.cemil.name", F3Trader, 3, 2f)
+                Line("npc.cemil.name", F3Trader, 3, 2f),
+                Line("npc.cemil.name", F3Trader, 4, 2f)
             });
             trader.AddChoice(C(F3Trader, "hurry").AsDuringDialogue()
                 .Then(Outcome.SetFlag(TraderLeft))
+                .Then(Outcome.Message($"{F3Trader}.msg_grumble"))
                 .Then(Outcome.GoTo(corridor)));
             trader.AddChoice(C(F3Trader, "take")
                 .Then(Outcome.GiveFromTrader(profile))
                 .Then(Outcome.SetFlag(TraderDone))
+                .Then(Outcome.Message($"{F3Trader}.msg_thanks"))
                 .Then(Outcome.GoTo(corridor)));
 
             // Flat 9: exposed cables + fuse box. Without (gloves or insulated grip) + tape: electrocution (micro rewind).

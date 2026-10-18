@@ -4,6 +4,76 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 03:20] LOCAL — Tasks 10 + 11: NPC art (dog, Cemil), rabid dog, Cemil's trade, Sevim / AFAD fixes, speech bubbles instead of the bottom panel
+### Done
+- **NPC art (task 10):**
+  - `kuduz it` → `Art/char/DOG_IDLE` and `cemil bey` → `Art/char/CEMIL_IDLE` (moved with their .meta files, no empty folders left).
+  - NPC idle import (`CharacterArt.ImportIdle`): every frame is trimmed to the opaque bounds shared by ALL frames (no jitter), pivot at the feet, max size 1024, 9 fps. Sevim uses the same import.
+  - Heights: the dog is 0.55 × the player, Cemil 1.0.
+  - Facing (`HotspotSpec.Face`): the dog faces the player's arrival door, Cemil faces the corridor centre (his art looks left).
+- **Rabid dog (F2 corridor):**
+  - "Yemeği uzağa fırlat" costs 1 food; the dog runs off-screen and fades (`RabidDogPresenter`); no QTE.
+  - "Düdüğü öttür" sets `DogScared`: the dog backs off and the QTE becomes 3–4 keys, slower, with a smaller penalty (`qte.dog_easy`).
+  - Slipping past: the 3rd failure is a bite that rewinds to the corridor (`QTENode.ConfigureFailLimit`).
+  - "Sakinleştirmeye çalış / sev" is a trap: instant bite.
+  - Both bites show `death.dog_bite` + `tip.rabies` (Tip asset generated). Bark plays on QTE start and on the bite; the dog trembles during the QTE; the growl loops in the corridor.
+- **Cemil Bey:** 4 grumpy-but-fair lines + a thanks / grumble line, art on his hotspot. TraderLogic asks nothing in return (unchanged). Male voice, pitch 1.0.
+- **Sevim (task 11 bug 1):** no logic failure reproduced. Through the real doors, the mover and UI raycasts, hall → corridor with SevimDone=false enters `f4.sevim`; "thanks" gives the whistle (key pocket) + KnowsFlat12; "Kısa kes" gives neither.
+  - Likely cause: with the old panel, "Kısa kes" was the only button while she talked.
+  - She is now clickable: the first click talks, afterwards "Hadi evladım, çabuk olun!".
+  - `NpcDialogueFlowTests` covers Sevim, Hasan, Cemil and the robber on the real generated nodes.
+- **AFAD popup (task 11 bug 2):**
+  - It only shows at the START of the prep (`PrepRules.ShowsStartAlert`); walking back into the salon re-showed it before.
+  - It hides after 4 s, on the first click anywhere, and on rewind or death; while hidden it blocks no clicks.
+  - The Floor 3 sighting was my own test: Play Mode was frozen while the editor was unfocused.
+- **Speech bubbles (task 11):** `SubtitleView`, `ChoicePanel`, `ChoiceButton` and `IChoicePresenter` are removed. The controllers use `IDialoguePresenter` (ShowLine / ShowNarration / ShowThought / ShowChoices / Clear), implemented by `DialoguePresenter`.
+  - Lines appear in one `SpeechBubble` on the speaker's head:
+    - paper card (#F7F3EA), ink outline, shadow;
+    - name tab in the speaker colour;
+    - typewriter + voice blips, ▼ when complete;
+    - "−N sn" LED chip in the building-timer colours;
+    - tail aimed at the head.
+  - Click anywhere / Space / Enter completes the line, then advances. Keys 1–4 pick rows. Every pick goes through the panic input delay.
+  - "Kısa kes" is a pill. After-dialogue rows hang under the last speaker; the robber's choices go on Mehmet (`DialogueNode.ChoicesAsThought`).
+  - A node with choices the world doesn't offer = Mehmet's thought bubble (grey, dotted tail) with its body and rows; it hides while he runs. Otherwise the body goes to the `NarrationCard` (top centre, under the panic meter), which also shows the placement / street hints (`UiKeys.IsNarration`; the toast skips them).
+  - `BubbleLayout` (pure, tested) keeps bubbles below the panic meter and left of the bag column; an off-screen speaker docks to the nearest edge.
+  - Pause, transitions and death clear or hide the bubble.
+- 0 compile errors. EditMode **213 / 213**. Validate Content 0 problems. Text > Validate 0 missing / empty / unused.
+
+### Files created / changed
+- New runtime:
+  - `UI/DialoguePresenter.cs`, `SpeechBubble.cs`, `BubbleChoiceRow.cs`, `BubbleLayout.cs`, `SpeakerAnchor.cs`, `NarrationCard.cs`;
+  - `Nodes/IDialoguePresenter.cs`, `World/RabidDogPresenter.cs`.
+- New editor: `Editor/SceneBuild/TestSceneDialogueUi.cs`.
+- New tests: `Tests/EditMode/NpcDialogueFlowTests.cs`, `BubbleLayoutTests.cs` (plus new cases in `QTETests`, `PrepTests`).
+- Removed: `UI/ChoicePanel.cs`, `UI/ChoiceButton.cs`, `UI/SubtitleView.cs`, `Nodes/IChoicePresenter.cs`.
+- Changed:
+  - controllers: `NodePlayer`, `DialogueController`, `RobberController`, `EpilogueController`, `DialogueNode`;
+  - QTE: `QTENode` (fail limit, easy config), `QTEController`;
+  - prep / UI: `PrepRules`, `PrepPhase`, `AfadAlertPopup`, `MessageToast`, `UiKeys`;
+  - art / builders: `CharacterArt`, `SceneKit`, `BuildingLayout`, `TestSceneUi`, `TestSceneBuilder`, `SerializedWire` (SetVector2);
+  - generators: Floor 2 / 3 / 4 and `BuildingLevelsGenerator`;
+  - `strings_tr.csv`, `CLAUDE.md`;
+  - generated nodes, the dog QTE configs, the `tip.rabies` asset and `Test_Building.unity` (rebuilt).
+- Screenshots (1080p): `Screenshots/t11_1080_*.png` (prep AFAD + card, placement card, hall thought, Sevim line / choices, Hasan, Cemil line / trade, Flat 7 thought).
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Bora playtests (he asked to do it himself): Sevim / Hasan / Cemil / robber bubbles, the street hint card, all 4 dog options, rewinds and tips.
+- [ ] Not done yet: the robber's 3 choices, the street hint and the 4 dog options in Play Mode; the 1280×720 pass.
+- [ ] Wife lines (if any are added) need an `npc.wife.name` CSV row. Her anchor already exists; nothing references the key yet.
+
+### Not verified / risks
+- I didn't drive real mouse hover / press / keyboard 1–4 by hand; rows were pressed through `PressRow`, lines through the presenter's click handler.
+- 720p not checked. The safe area uses the panic meter / bag column rects, so it should scale, but it is not checked.
+- Reason / name text is 16 px, not the 14 / 15 px in the brief, because the project rule is nothing below 16 px at 1080p.
+- Screenshots over MCP sometimes come back without UI right after the Game view resolution changes (a capture fallback, not the game).
+- Hasan has no art yet: his bubble tail points at a dark silhouette.
+
+### Next suggested step
+- Bora's playtest feedback on the bubble look (sizes, offsets, colours: all on `SpeechBubble` / `TestSceneDialogueUi`), then the 720p pass and the robber / street / dog checks.
+
+---
+
 ## [2026-10-18 01:00] LOCAL — Task 09: Layout Editor (hand placement that survives rebuilds) + F9 room jump
 ### Done
 - **Data: `Data/Layout/RoomLayoutOverrides.asset`** (`Editor/Layout/RoomLayoutOverrides.cs`).
