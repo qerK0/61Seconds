@@ -4,6 +4,31 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 17:35] LOCAL — Ending video (VideoPlayer) before the epilogue + Windows rebuild
+### Done
+- `EndingCinematic` plays `EndingCinematicConfig.Video` when one is set. A VideoPlayer renders to a RenderTexture on a full-screen RawImage (AspectRatioFitter FitInParent, so the black overlay letterboxes it), with its audio on its own AudioSource at volume 1 (ignoreListenerPause). The video is prepared (Prepare + prepareCompleted) during the 1 s fade to black while every other playing AudioSource fades out over 0.5 s. During the video the listener is paused, and afterwards those sources are stopped (the end screen restarts its own music). At the end (loopPointReached) or on a skip, there is a 0.5 s fade to black, then the existing epilogue → end screen. Skip: click / Space / Enter / Esc, only after 1 s. A prepare failure or a 10 s timeout falls back to frames or text.
+- The whole ending (video, frames or text) now holds a `ScreenHold`: every timer stops, world and choice input is blocked, and the pause menu ignores Esc, so Esc can skip.
+- `SixtyOne > Art > Import Ending Frames` also picks up `Art/anim/ending.mp4` (transcoding off) into the config. Ran it.
+- `Art/anim/ending.mp4` = a copy of `Art/WhatsApp Video 2026-10-18 at 17.12.14.mp4` (as the user chose): 1920x1080, 16.75 s, 4 fps, **no audio track**.
+- Windows build rebuilt (same path, release): `Builds/Windows/IstanbulAfetBolgesi.exe`, 0 errors. The MP4 is embedded in `IstanbulAfetBolgesi_Data/sharedassets1.resource`. Zipped to `Builds/IstanbulAfetBolgesi_Windows.zip` (55.8 MB, BackUpThisFolder excluded).
+### Files created / changed
+- Scripts/Cinematic/EndingCinematic.cs — video path, ScreenHold, audio fade, Esc skip
+- Scripts/Cinematic/EndingCinematicConfig.cs — `video` field
+- Scripts/Editor/Art/EndingArt.cs — imports ending.mp4 into the config
+- Art/anim/ending.mp4 (+ meta), Data/Cinematic/EndingCinematicConfig.asset (video reference)
+### Needs local wiring (checklist for the MCP session)
+- [ ] When the real ending video (H.264 + AAC) arrives: overwrite `Assets/_Game/Art/anim/ending.mp4` (keep the .meta), then run `SixtyOne > Art > Import Ending Frames`. No scene rebuild. Rebuild and zip.
+### Not verified / risks
+- Play Mode verified (driven by code: street + `f2.epilogue` entered directly, not by walking to the sign): prepare → play 67/67 frames → loopPointReached → fade → epilogue → end screen at ~20 s, timers held, listener paused during the video, 0 errors. Esc inside the 1 s guard correctly did not skip.
+- **Skip after 1 s not confirmed:** the injected key was dropped while the editor was unfocused (Game View focus routing). A second attempt with focus routing forced was cut short when the user asked to skip testing and build.
+- **Video sound not verified:** the current clip has no audio track.
+- **The .exe was not launched** (the user asked to skip testing).
+- A harmless WMF warning: "Color primaries 0 is unknown" (WhatsApp encode).
+### Next suggested step
+- Drop in the real ending.mp4 with sound, then click-test the skip in the Game View and launch the exe once.
+
+---
+
 ## [2026-10-18 22:30] LOCAL — Flat 11 salon balcony removed
 ### Done
 - Removed from the Flat 11 salon:

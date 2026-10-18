@@ -5,11 +5,13 @@ using SixtyOne.Audio;
 using SixtyOne.Cinematic;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Video;
 
 namespace SixtyOne.Editor
 {
     /// <summary>
-    /// SixtyOne > Art > Import Ending Frames. Imports every PNG in Art/anim/ENDING (frame0000.png ... any count) as an
+    /// SixtyOne > Art > Import Ending Frames. Puts Art/anim/ending.mp4 (if present; imported without transcoding) into
+    /// the config as the ending video, and imports every PNG in Art/anim/ENDING (frame0000.png ... any count) as an
     /// uncompressed full-rect sprite, sorts them numerically and writes them into Data/Cinematic/EndingCinematicConfig
     /// (the scene only references that asset, so nothing else is needed). An empty folder leaves the text fallback.
     /// </summary>
@@ -17,12 +19,13 @@ namespace SixtyOne.Editor
     {
         public const string FramesDir = "Assets/_Game/Art/anim/ENDING";
         public const string ConfigPath = "Assets/_Game/Data/Cinematic/EndingCinematicConfig.asset";
+        public const string VideoPath = "Assets/_Game/Art/anim/ending.mp4";
 
         [MenuItem("SixtyOne/Art/Import Ending Frames", priority = 33)]
         public static void ImportMenu()
         {
             EndingCinematicConfig config = Import();
-            Debug.Log($"[Ending] {config.Frames.Length} frame(s) at {config.Fps} fps in {ConfigPath}." + (config.Frames.Length == 0 ? " Fallback text plays until frames are dropped into " + FramesDir + "." : ""));
+            Debug.Log($"[Ending] Video: {(config.Video != null ? config.Video.name + $" ({config.Video.width}x{config.Video.height}, {config.Video.length:0.0} s)" : "none")}. {config.Frames.Length} frame(s) at {config.Fps} fps in {ConfigPath}." + (config.Frames.Length == 0 ? " Fallback text plays until frames are dropped into " + FramesDir + "." : ""));
         }
 
         /// <summary>The config asset (created on first use) with the frames currently in the folder.</summary>
@@ -59,11 +62,29 @@ namespace SixtyOne.Editor
                 }
             }
 
+            config.SetVideo(ImportVideo());
             config.SetFrames(frames.ToArray());
             if (cue != null) config.SetCue(cue);
             EditorUtility.SetDirty(config);
             AssetDatabase.SaveAssets();
             return config;
+        }
+
+        /// <summary>The ending video, imported as-is (H.264 + AAC play natively, so no transcode), or null.</summary>
+        private static VideoClip ImportVideo()
+        {
+            if (AssetImporter.GetAtPath(VideoPath) is VideoClipImporter importer)
+            {
+                VideoImporterTargetSettings settings = importer.defaultTargetSettings;
+                if (settings.enableTranscoding)
+                {
+                    settings.enableTranscoding = false;
+                    importer.defaultTargetSettings = settings;
+                    importer.SaveAndReimport();
+                }
+            }
+
+            return AssetDatabase.LoadAssetAtPath<VideoClip>(VideoPath);
         }
 
         private static long Number(string path)

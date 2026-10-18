@@ -12,6 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5cd1786878aa73f4982bf1e5b04f77d6, type: 3}
   m_Name: EndingCinematicConfig
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Cinematic.EndingCinematicConfig
+  video: {fileID: 32900000, guid: 7225c5802ea2f5c42ab42d397280fe4f, type: 3}
   frames: []
   fps: 12
   cue: {fileID: 11400000, guid: 7c8a173301cefae458efd7d79c6100ca, type: 2}
