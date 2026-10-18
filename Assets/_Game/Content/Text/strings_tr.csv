@@ -326,10 +326,35 @@ ui.door.unavailable,Şu an oradan geçemezsin.,door whose move is not available 
 ui.not_now,Şimdi olmaz.,hotspot with no matching choice
 ui.bag.collapse,›,bag column toggle (open)
 ui.bag.expand,‹,bag column toggle (collapsed)
-ui.menu.title,61 SECONDS,main menu title (game name; kept in English)
-ui.menu.start,Başla,main menu button
+ui.menu.title,İSTANBUL,main menu title (big line)
+ui.menu.start,Oyunu Başlat,main menu primary button
 ui.menu.settings,Ayarlar,main menu button
 ui.menu.quit,Çıkış,main menu button
+ui.menu.subtitle,AFET BÖLGESİ,main menu title (second line)
+ui.menu.gallery,Galeri,main menu button (collected Deprem Notları)
+ui.menu.quit_confirm,Oyundan çıkmak istediğine emin misin?,main menu quit confirmation
+ui.menu.hud_quake,KANDİLLİ // SON SARSINTI M 7.1 · {0},"menu corner readout; {0} = ticking clock mm:ss"
+ui.menu.hud_coords,"{1}° K, {2}° D","menu corner readout; {1} {2} = jittering coordinates (latitude, longitude)"
+ui.menu.hud_feed,SİSMİK AĞ // CANLI YAYIN · {0},"menu corner readout; {0} = ticking clock"
+ui.menu.hud_zone,BÖLGE 34 // ALARM SEVİYESİ 4,menu corner readout (static)
+ui.menu.version,Civil Game Jam 2026 · v1.0,menu version tag (bottom right)
+ui.menu.gallery_title,Deprem Notları,Galeri panel title
+ui.menu.gallery_count,Toplanan notlar: {0}/{1},"Galeri counter; {0} = collected, {1} = total"
+ui.end.title,SİMÜLASYON SONA ERDİ,end screen title (typed in)
+ui.end.line,"Bu bir simülasyondu. Tekrar oynayabilir, doğru seçimleri bulabilir ve",end screen first line (white part)
+ui.end.line_highlight,hayatta kalabilirdin.,end screen first line (amber end)
+ui.end.punchline,Ancak gerçek İstanbul depreminde 'Restart' (Yeniden Başlat) tuşu olmayacak.,end screen punchline (red; glitch + boom)
+ui.end.stat_loops,Döngü sayısı,end screen stat label
+ui.end.stat_tips,Toplanan Deprem Notları,end screen stat label
+ui.end.stat_time,Kalan bina süresi,end screen stat label
+ui.end.stat_time_value,{0} sn,"end screen stat value; {0} = building seconds left"
+ui.end.stat_collapsed,Bina arkanızda çöktü,end screen stat value when the building collapsed behind the family
+ui.end.stat_family,Aile,end screen stat label
+ui.end.family_safe,Herkes güvende,end screen family status (nobody injured)
+ui.end.family_injured,"Herkes dışarıda, {0} yaralı","end screen family status; {0} = injured count"
+ui.end.retry,YENİDEN DENE,end screen button (new run; notes are kept)
+ui.end.menu,MENÜYE DÖN,end screen button (main menu)
+ui.end.afad,Hazırlık için: afad.gov.tr · Deprem çantanı bugün hazırla.,end screen footer line
 ui.settings.title,Ayarlar,settings panel title
 ui.settings.master,Ana Ses,master volume slider
 ui.settings.music,Müzik,music volume slider

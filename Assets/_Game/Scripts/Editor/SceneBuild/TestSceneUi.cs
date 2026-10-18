@@ -79,6 +79,8 @@ namespace SixtyOne.Editor
             transitionOverlay = BuildTransitionOverlay(root);
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
+            // The end screen ("Simülasyon sona erdi") covers the HUD once the epilogue was read.
+            TestSceneEndScreen.Build(root, content);
             // Last: the ESC pause overlay draws over everything.
             BuildPauseMenu(root);
             EnforceReadableText(canvasGo);

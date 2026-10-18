@@ -30,6 +30,18 @@ namespace SixtyOne.UI
         [Tooltip("EB Garamond SemiBold: subtitle speaker names and the menu title.")]
         [SerializeField] private TMP_FontAsset serifSemiBold;
 
+        [Tooltip("Oswald Bold: the main menu title, the end screen title.")]
+        [SerializeField] private TMP_FontAsset displayBold;
+
+        [Tooltip("Oswald Medium: menu buttons and subtitles.")]
+        [SerializeField] private TMP_FontAsset displayMedium;
+
+        [Tooltip("IBM Plex Mono Regular: end screen body, HUD-like readouts.")]
+        [SerializeField] private TMP_FontAsset mono;
+
+        [Tooltip("IBM Plex Mono Bold: end screen emphasis.")]
+        [SerializeField] private TMP_FontAsset monoBold;
+
         [Header("Sizes (px at 1080p; nothing below 16)")]
         [SerializeField] private float timerSize = 64f;
         [SerializeField] private float titleSize = 30f;
@@ -76,6 +88,10 @@ namespace SixtyOne.UI
         public TMP_FontAsset Led => led != null ? led : Bold;
         public TMP_FontAsset SerifRegular => serifRegular != null ? serifRegular : Regular;
         public TMP_FontAsset SerifSemiBold => serifSemiBold != null ? serifSemiBold : SerifRegular;
+        public TMP_FontAsset DisplayBold => displayBold != null ? displayBold : Bold;
+        public TMP_FontAsset DisplayMedium => displayMedium != null ? displayMedium : SemiBold;
+        public TMP_FontAsset Mono => mono != null ? mono : Regular;
+        public TMP_FontAsset MonoBold => monoBold != null ? monoBold : Mono;
         public float TimerSize => timerSize;
         public float TitleSize => titleSize;
         public float SpeakerSize => speakerSize;
@@ -116,6 +132,15 @@ namespace SixtyOne.UI
             led = ledFont;
             serifRegular = serifRegularFont;
             serifSemiBold = serifSemiBoldFont;
+        }
+
+        /// <summary>Sets the main menu / end screen fonts (Oswald, IBM Plex Mono).</summary>
+        public void ConfigureMenuFonts(TMP_FontAsset oswaldBold, TMP_FontAsset oswaldMedium, TMP_FontAsset plexRegular, TMP_FontAsset plexBold)
+        {
+            displayBold = oswaldBold;
+            displayMedium = oswaldMedium;
+            mono = plexRegular;
+            monoBold = plexBold;
         }
 
         /// <summary>Applies a text role (font, size, colour, spacing) to a label.</summary>

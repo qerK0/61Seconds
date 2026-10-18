@@ -18,6 +18,10 @@ MonoBehaviour:
   led: {fileID: 11400000, guid: 565c5f555ff2bfa4abaf88b90deff28e, type: 2}
   serifRegular: {fileID: 11400000, guid: 14d172887e679e045a0fd48a77eefe9b, type: 2}
   serifSemiBold: {fileID: 11400000, guid: b86ae13f58f72864888510c0c34fef85, type: 2}
+  displayBold: {fileID: 11400000, guid: 3acc01d4efd992748b1dd1f70f89c710, type: 2}
+  displayMedium: {fileID: 11400000, guid: 78f23ca2c6671d347a96f007d3cc2791, type: 2}
+  mono: {fileID: 11400000, guid: eddf1a90a5f5d2346879747ae8837b32, type: 2}
+  monoBold: {fileID: 11400000, guid: 79750be53dd805a4e9649ed9b8706fa9, type: 2}
   timerSize: 64
   titleSize: 30
   speakerSize: 26

@@ -4,6 +4,90 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 10:20] LOCAL — Task 15: "İSTANBUL AFET BÖLGESİ" main menu + "SİMÜLASYON SONA ERDİ" end screen
+### Done
+- **Fonts:** TMP SDF assets for Oswald Bold / Medium and IBM Plex Mono Regular / Bold, with ASCII, full Turkish, ’ and ‹›.
+  - Each has the Inter dynamic fallback; Oswald has no arrow glyphs, so → falls back to Inter.
+  - The fonts are new slots on UITheme (`DisplayBold`, `DisplayMedium`, `Mono`, `MonoBold`), set by Generate Fonts + Theme.
+- **Main menu (`SixtyOne > Build Main Menu`, rebuilt):**
+  - Background: menu_bg with a Ken Burns move (1.0 → 1.06 plus a pan, 40 s ping-pong).
+  - Overlays: 6 pulsing alert pins, smoke and ash motes, screen corner brackets, scanlines, vignette.
+  - Readouts (IBM Plex Mono, 16 px): KANDİLLİ quake clock, coordinates with a jittering last digit, the seismic-feed clock, a zone line.
+  - A seismograph polyline (custom Graphic). Every 4–7 s it spikes, with a soft thud and a micro-shake.
+  - Title: "İSTANBUL" (Oswald Bold 150) uses a distressed TMP material (scratch face texture, #5A0A0A outline, dark red inner underlay) over a red haze. "AFET BÖLGESİ" is Oswald Medium 64 with 0.08em spacing.
+  - Title glitch every 5–8 s (0.15 s): red / cyan split, a masked horizontal slice that jumps aside, a flicker.
+  - **Oyunu Başlat** (primary): red gradient, 2 px bright border, glow, metal corner brackets.
+    - Idle: the glow pulses.
+    - Hover / selected: stronger glow, a diagonal shine sweep, scale 1.03.
+    - Press: 0.97, a micro-shake, the press click and a low thud.
+  - **Ayarlar / Galeri / Çıkış** (secondary): dark red rows, uppercase and letter-spaced. When hot, an accent bar and › slide in and the text brightens.
+  - A scrolling hazard stripe under the buttons.
+  - Mouse hover selects the button, so mouse and keyboard / gamepad share one "hot" state. Up/Down wrap; Enter submits; Esc / B closes panels.
+  - Intro: a 0.6 s fade from black; the title slams in (1.15 → 1, shake, thud, dust puff); the buttons slide in from the left, staggered. Any key or click skips.
+  - Start: 0.5 s fade to black with the quake rumble, then Test_Building.
+  - Ayarlar: the shared SettingsPanel, restyled (dark red panel, Oswald, red slider fills).
+  - Galeri: 18 note cards (locked = ???) and the "Toplanan notlar: X/18" counter. No "endings seen" data exists, so it shows only the notes.
+  - Çıkış: a confirm dialog, then `SceneFlow.Quit` (it also stops Play Mode in the Editor).
+  - Version tag bottom-right. Audio: prep music ducked to 60 % over a rumble bed.
+- **Notes persist:** new `Core/TipStore` (PlayerPrefs). GameManager saves a tip on every death and loads the saved tips into every new run, so Yeniden Dene keeps them.
+- **End screen** (Test_Building overlay, `TestSceneEndScreen` + `UI/Menu/EndScreen`):
+  - `EpilogueController` now raises `GameEvents.EpilogueDone` after the epilogue text: a key or click after 4 s, or 20 s.
+  - Visuals: end_bg pushing in (1.0 → 1.05), ash and smoke, film grain, scanlines, vignette.
+  - Reveal:
+    - the title types in (Plex Mono Bold 72, 0.06em) behind a blinking cursor, then glows;
+    - the line types in, ending in amber "hayatta kalabilirdin.";
+    - after 0.8 s the red punchline lands with one hard glitch, a boom and a shake.
+  - Stats count up one by one: Döngü sayısı, Toplanan Deprem Notları X/18, Kalan bina süresi (or "Bina arkanızda çöktü"), Aile.
+  - Buttons:
+    - **YENİDEN DENE** (amber text, the underline grows) reloads the game: a full new prep, notes kept.
+    - **MENÜYE DÖN** (framed, orange glow) fades out and loads MainMenu.
+  - Audio: the outro music fades in; soft type ticks; the boom on the punchline. The AFAD footer line is at the bottom. Space / Enter / click completes the reveal.
+- **New effect components** (`Scripts/UI/Menu`): KenBurns, UiShake, GlitchText, MenuButtonFx, UvScroll, HudReadout, AlertPin, Seismograph, UiParticles, ScreenOverlayFx, ScreenFader, MenuIntro, TipGalleryPanel, EndScreen.
+  - All run on unscaled time.
+  - Reduce Effects turns off the glitches, the shakes, the scanline flicker and the grain. Fades and particles stay (particles at 40 %).
+- **Audio:** `tools/gen_sfx.py` takes an optional name prefix. `py tools/gen_sfx.py Assets/_Game/Audio/Generated sfx_menu_` wrote only the 6 new sounds (hover, press, thud, boom, type, rumble loop); the existing WAVs are untouched. `MenuAudio` makes the cue_menu_* cues.
+- **Text:** final Turkish strings for every `ui.menu.*` / `ui.end.*` key. The menu title is now "İSTANBUL", the start button "Oyunu Başlat".
+- **Verify:**
+  - 0 compile errors.
+  - EditMode **226 / 226** (new: TipStoreTests).
+  - Validate Content: 0 problems. Text > Validate: 439 / 0 / 0 / 0.
+  - Played: MainMenu → Oyunu Başlat → Test_Building, where the saved notes loaded into the run → epilogue node → end screen after the 20 s read timeout → Yeniden Dene (fresh prep, notes kept) → end screen → Menüye Dön → MainMenu (Start selected).
+  - Screenshots in `Screenshots/`:
+    - `t15_menu_idle.png`, `t15_menu_hover_start.png`, `t15_menu_hover_settings_row.png`, `t15_menu_gallery.png`, `t15_menu_settings.png`;
+    - `t15_end_typewriter.png` (mid-reveal), `t15_end_final.png` (stats + buttons).
+
+### Files created / changed
+- New:
+  - runtime: `Scripts/Core/TipStore.cs`, `Scripts/UI/Menu/*.cs` (14 components);
+  - editor: `Scripts/Editor/Art/MenuArt.cs` (procedural UI art → `Art/Menu/Generated`), `Scripts/Editor/SceneBuild/MenuKit.cs`, `MenuAudio.cs`, `TestSceneEndScreen.cs`;
+  - `Tests/EditMode/TipStoreTests.cs`;
+  - Oswald / Plex SDF assets, the sfx_menu_* WAVs, the cue_menu_* cues, the menu art (bg, generated sprites, title material).
+- Changed:
+  - `UI/MainMenu.cs` (rewritten), `UI/UITheme.cs`, `Building/EpilogueController.cs`, `Core/GameEvents.cs` (EpilogueDone), `Core/GameManager.cs` (TipStore), `Text/UiKeys.cs`;
+  - `Editor/SceneBuild/MainMenuBuilder.cs` (rewritten), `TestSceneUi.cs`, `Editor/Text/FontAssetsGenerator.cs`;
+  - `strings_tr.csv`, `tools/gen_sfx.py`;
+  - `MainMenu.unity`, `Test_Building.unity` (rebuilt).
+  - Removed `UI/MenuDrift.cs`.
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] None. If the art changes: run SixtyOne > Build Main Menu and Build Test Scene.
+
+### Not verified / risks
+- **1280×720 was not captured.** The canvas scales with the screen (16:9, match 0.5), so the layout is the same, but nothing was looked at at that size.
+- **Keyboard navigation was driven through the EventSystem from code**, not by real key presses (same for the intro skip and Space / Enter on the end screen). The Up/Down / Enter wiring is explicit Navigation + InputSystemUIInputModule.
+- **The shine sweep was not caught on camera.** The hover screenshot shows the strong glow; the sweep (0.55 s) had already finished.
+- **The epilogue → end screen hand-off** was tested through the 20 s timeout, not a click after 4 s.
+- **The distressed title needs an over-1 face colour (1.45)** because the TMP face texture darkens the whole face; it reads off-white in the shots.
+- **Menu panels are fully opaque.** At 0.96 alpha the HDR title bled through.
+- **The "PlayerLoop called recursively" console warnings** came from my editor-side frame pumping during the checks, not from game code.
+- **I cleared the test notes I saved into PlayerPrefs** during the checks.
+- **Not committed:** your uncommitted `RoomLayoutOverrides.asset` change from before this session.
+
+### Next suggested step
+- Bora checks the menu at 1280×720 and with Reduce Effects on, and plays a real run to the end screen.
+
+---
+
 ## [2026-10-18 09:10] LOCAL — Task 14: new props/items, cut items, stairwell doors, Layout Editor v2, varnish pass
 ### Done
 - **1. New art** (Art/items):

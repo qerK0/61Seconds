@@ -9,7 +9,8 @@ namespace SixtyOne.Editor
 {
     /// <summary>
     /// SixtyOne > Text > Generate Fonts + Theme (re-runnable; Build Test Scene runs it too). Bakes TMP SDF assets
-    /// for Inter Regular / SemiBold / Bold (OFL, Assets/_Game/Art/Fonts) with ASCII + full Turkish coverage, gives
+    /// for Inter Regular / SemiBold / Bold, EB Garamond, Oswald Bold / Medium and IBM Plex Mono Regular / Bold (OFL,
+    /// Assets/_Game/Art/Fonts) with ASCII + full Turkish coverage (plus ’ and →), gives
     /// each a dynamic Inter fallback for anything else, makes Inter Regular the TMP default font and writes the
     /// UITheme asset (Assets/_Game/Data/UI/UITheme.asset).
     /// </summary>
@@ -30,6 +31,8 @@ namespace SixtyOne.Editor
         private const int LedPadding = 20;
         public const string LedFontPath = FontFolder + "/TrueType (.ttf)/E1234-Regular.ttf";
         public const string SerifFolder = FontFolder + "/EBGaramond";
+        public const string OswaldFolder = FontFolder + "/Oswald";
+        public const string PlexFolder = FontFolder + "/IBMPlexMono";
 
         [MenuItem("SixtyOne/Text/Generate Fonts + Theme", priority = 40)]
         public static void GenerateMenu()
@@ -58,6 +61,12 @@ namespace SixtyOne.Editor
             TMP_FontAsset serifRegular = Bake($"{SerifFolder}/EBGaramond-Regular.ttf", $"{SerifFolder}/EBGaramond-Regular SDF.asset", Characters, Padding, dynamicFallback);
             TMP_FontAsset serifSemiBold = Bake($"{SerifFolder}/EBGaramond-SemiBold.ttf", $"{SerifFolder}/EBGaramond-SemiBold SDF.asset", Characters, Padding, dynamicFallback);
             theme.ConfigureExtraFonts(led, serifRegular, serifSemiBold);
+            // Main menu / end screen: Oswald (titles, buttons) and IBM Plex Mono (end screen body, readouts).
+            TMP_FontAsset oswaldBold = Bake($"{OswaldFolder}/Oswald-Bold.ttf", $"{OswaldFolder}/Oswald-Bold SDF.asset", Characters, Padding, dynamicFallback);
+            TMP_FontAsset oswaldMedium = Bake($"{OswaldFolder}/Oswald-Medium.ttf", $"{OswaldFolder}/Oswald-Medium SDF.asset", Characters, Padding, dynamicFallback);
+            TMP_FontAsset plexRegular = Bake($"{PlexFolder}/IBMPlexMono-Regular.ttf", $"{PlexFolder}/IBMPlexMono-Regular SDF.asset", Characters, Padding, dynamicFallback);
+            TMP_FontAsset plexBold = Bake($"{PlexFolder}/IBMPlexMono-Bold.ttf", $"{PlexFolder}/IBMPlexMono-Bold SDF.asset", Characters, Padding, dynamicFallback);
+            theme.ConfigureMenuFonts(oswaldBold, oswaldMedium, plexRegular, plexBold);
             EditorUtility.SetDirty(theme);
             if (regular != null) SetTmpDefault(regular);
             AssetDatabase.SaveAssets();
@@ -130,7 +139,7 @@ namespace SixtyOne.Editor
             var chars = new System.Text.StringBuilder();
             for (char c = (char)32; c < 127; c++) chars.Append(c);
             chars.Append("çğıİöşüÇĞÖŞÜâîûÂÎÛéèêáàäëïôœß");
-            chars.Append("“”‘’„«»…–—•·°×÷±→←↑↓▲▼₺€%‰№§©®™");
+            chars.Append("“”‘’„«»‹›…–—•·°×÷±→←↑↓▲▼₺€%‰№§©®™");
             return chars.ToString();
         }
     }

@@ -41,6 +41,10 @@ namespace SixtyOne.Core
         /// <summary>The prep countdown reached zero: the quake starts.</summary>
         public static event Action PrepZero;
 
+        /// <summary>The epilogue text was read: the end screen ("Simülasyon sona erdi") takes over.</summary>
+        public static event Action EpilogueDone;
+
+        public static void RaiseEpilogueDone() => EpilogueDone?.Invoke();
         public static void RaiseNodeEntered(string nodeId) => NodeEntered?.Invoke(nodeId);
         public static void RaiseChoiceMade(string nodeId, string labelKey) => ChoiceMade?.Invoke(nodeId, labelKey);
         public static void RaiseDied(DeathInfo info) => Died?.Invoke(info);
@@ -86,6 +90,7 @@ namespace SixtyOne.Core
             BuildingAlarm = null;
             BuildingTick = null;
             TimeSpent = null;
+            EpilogueDone = null;
             InventoryEvents.ClearAll();
             NavigationEvents.ClearAll();
             LootEvents.ClearAll();

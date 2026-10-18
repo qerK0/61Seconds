@@ -31,6 +31,7 @@ namespace SixtyOne.Core
 
             Instance = this;
             UserSettings.Apply(settings);
+            TipStore.LoadInto(State);
         }
 
         private void OnDestroy()
@@ -45,6 +46,7 @@ namespace SixtyOne.Core
         public void ResetSession()
         {
             Session = new GameSession();
+            TipStore.LoadInto(State);
         }
 
         /// <summary>Snapshots the state for a decision/placement node.</summary>
@@ -66,6 +68,9 @@ namespace SixtyOne.Core
             {
                 return;
             }
+
+            // The tip is kept across runs (main menu Galeri, Yeniden Dene).
+            TipStore.Add(info.TipId);
 
             if (autoRewindSeconds > 0f)
             {
