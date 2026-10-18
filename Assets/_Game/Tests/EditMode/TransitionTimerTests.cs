@@ -44,20 +44,20 @@ namespace SixtyOne.Tests
         public void BuildingTimerOnlyPaysTheDoorCost()
         {
             var timer = new BuildingTimer();
-            timer.Configure(300f, 60f, 30f);
-            float building = timer.Advance(300f, DoorCost);
+            timer.Configure(480f, 60f, 30f);
+            float building = timer.Advance(480f, DoorCost);
             building = RunTransition(building, timer.Advance);
-            Assert.AreEqual(300f - DoorCost, building, 1e-4f);
+            Assert.AreEqual(480f - DoorCost, building, 1e-4f);
         }
 
         [Test]
         public void TimersRunAgainAfterTheTransition()
         {
             var timer = new BuildingTimer();
-            timer.Configure(300f, 60f, 30f);
-            float building = RunTransition(300f, timer.Advance);
+            timer.Configure(480f, 60f, 30f);
+            float building = RunTransition(480f, timer.Advance);
             building = timer.Advance(building, NavigationEvents.TimerDelta(1f));
-            Assert.AreEqual(299f, building, 1e-4f);
+            Assert.AreEqual(479f, building, 1e-4f);
         }
 
         // Ticks frames through a whole transition the way PrepPhase / SurvivalController do.

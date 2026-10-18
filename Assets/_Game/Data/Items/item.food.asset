@@ -20,7 +20,7 @@ MonoBehaviour:
   icon: {fileID: 21300000, guid: ea887c9e280ce9a4caed53897505c7a6, type: 3}
   uiIcon: {fileID: 21300000, guid: 831f337f5388f0843aa2e2687ed1dbbb, type: 3}
   isKeyItem: 0
-  staminaRestore: 35
+  staminaRestore: 33
   healsInjury: 0
   consumedOnUse: 1
   useSeconds: 2

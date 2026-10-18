@@ -18,8 +18,8 @@ namespace SixtyOne.Tests
         {
             GameEvents.ClearAll();
             timer = new BuildingTimer();
-            timer.Configure(300f, 60f, 30f);
-            timer.Sync(300f);
+            timer.Configure(480f, 60f, 30f);
+            timer.Sync(480f);
             pulses = alarms = zeros = 0;
             ticks = new List<int>();
             timer.Pulse += () => pulses++;
@@ -31,8 +31,8 @@ namespace SixtyOne.Tests
         [Test]
         public void ThresholdsFireOnceInOrder()
         {
-            float t = 300f;
-            for (int i = 0; i < 2400; i++) t = timer.Advance(t, 0.125f);
+            float t = 480f;
+            for (int i = 0; i < 3840; i++) t = timer.Advance(t, 0.125f);
             Assert.AreEqual(0f, t, 0.0001f);
             Assert.AreEqual(1, pulses);
             Assert.AreEqual(1, alarms);
@@ -81,8 +81,8 @@ namespace SixtyOne.Tests
         [Test]
         public void ElapsedFraction()
         {
-            Assert.AreEqual(0f, timer.ElapsedFraction(300f), 0.0001f);
-            Assert.AreEqual(0.5f, timer.ElapsedFraction(150f), 0.0001f);
+            Assert.AreEqual(0f, timer.ElapsedFraction(480f), 0.0001f);
+            Assert.AreEqual(0.5f, timer.ElapsedFraction(240f), 0.0001f);
             Assert.AreEqual(1f, timer.ElapsedFraction(0f), 0.0001f);
         }
 

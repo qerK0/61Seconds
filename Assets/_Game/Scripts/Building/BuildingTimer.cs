@@ -13,7 +13,7 @@ namespace SixtyOne.Building
         private bool alarmFired;
         private bool zeroFired;
 
-        public float Total { get; private set; } = 300f;
+        public float Total { get; private set; } = 480f;
         public float PulseAt { get; private set; } = 60f;
         public float AlarmAt { get; private set; } = 30f;
 

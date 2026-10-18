@@ -170,11 +170,11 @@ namespace SixtyOne.Editor
             BuildRecipes();
 
             result.Level = Asset<LevelConfig>(DataRoot + "/LevelConfig.asset");
-            result.Level.ConfigureTimer(300f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
+            result.Level.ConfigureTimer(480f, 60f, 30f, "death.collapse", Tip("tip.collapse"), alarm, tick);
             result.Level.ConfigurePoison(GasZones(), Item("wet_cloth"), "death.gas_poison", Tip("tip.gas_poison"));
             // Stamina 100, 0.42/s: no food or water = 0 at ~165s with the usual heavy climbs (~30); food +35 (~83s),
             // water +25 (~60s). At 0 exhaustion rises 0.03/s (~33s to death) and falls 0.2/s after eating.
-            result.Level.ConfigureStamina(100f, 0.42f, 1.5f, 0.03f, 0.2f, "death.exhaustion", Tip("tip.supplies"));
+            result.Level.ConfigureStamina(100f, 0.36f, 1.5f, 0.03f, 0.2f, "death.exhaustion", Tip("tip.supplies"));
             result.Level.ConfigurePrep(PrepSeconds, 10);
             result.Level.ConfigureBag(8, Item("bedsheet"), Item("bedsheet_rope"), 3, 5f, 3f);
             // Debris: 0 / 6 / 10 / 15 / 20 % of the free cells (+3 % per lower floor); cracks ~0 / 15 / 35 / 55 / 70 %.
@@ -233,8 +233,8 @@ namespace SixtyOne.Editor
                 result.Items[id] = item;
             }
 
-            Item("food").ConfigureUse(35f, false, 2f);
-            Item("water").ConfigureUse(25f, false, 2f);
+            Item("food").ConfigureUse(33f, false, 2f);
+            Item("water").ConfigureUse(32f, false, 2f);
             Item("first_aid").ConfigureUse(0f, true, 6f);
             foreach (string id in KeyItemIds) Item(id).ConfigureKeyItem();
         }

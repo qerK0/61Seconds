@@ -15,7 +15,7 @@ namespace SixtyOne.Building
     {
         [Header("Building timer")]
         [Tooltip("Seconds until the building collapses (whole game).")]
-        [SerializeField] private float buildingSeconds = 300f;
+        [SerializeField] private float buildingSeconds = 480f;
         [Tooltip("Seconds left when the timer UI starts to pulse.")]
         [SerializeField] private float pulseAtSeconds = 60f;
         [Tooltip("Seconds left when the alarm starts (ticks every second).")]

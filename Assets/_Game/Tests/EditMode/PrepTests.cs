@@ -13,7 +13,7 @@ namespace SixtyOne.Tests
         public void AfadAlertOnlyAtThePrepStart()
         {
             var state = new GameState();
-            PrepRules.ResetForPrep(state, 60f, 300f);
+            PrepRules.ResetForPrep(state, 60f, 480f);
             Assert.IsTrue(PrepRules.ShowsStartAlert(state, 60f), "prep start");
             state.PrepTime = 41f;
             Assert.IsFalse(PrepRules.ShowsStartAlert(state, 60f), "back in the salon later in the prep");
@@ -82,7 +82,7 @@ namespace SixtyOne.Tests
         public void CostsGoToPrepUntilTheQuakeThenToTheBuildingTimer()
         {
             var state = new GameState();
-            PrepRules.ResetForPrep(state, 60f, 300f);
+            PrepRules.ResetForPrep(state, 60f, 480f);
             Assert.IsTrue(PrepRules.SpendsPrep(state));
             Assert.IsFalse(state.BuildingTimerStarted);
 
@@ -90,14 +90,14 @@ namespace SixtyOne.Tests
             Assert.IsFalse(PrepRules.SpendsPrep(state));
             Assert.IsTrue(state.BuildingTimerStarted);
             Assert.AreEqual(0f, state.PrepTime);
-            Assert.AreEqual(300f, state.BuildingTime, "the building timer starts full at the quake");
+            Assert.AreEqual(480f, state.BuildingTime, "the building timer starts full at the quake");
         }
 
         [Test]
         public void NoPrepConfiguredMeansTheBuildingTimerRunsFromTheStart()
         {
             var state = new GameState();
-            PrepRules.ResetForPrep(state, 0f, 300f);
+            PrepRules.ResetForPrep(state, 0f, 480f);
             Assert.IsTrue(state.BuildingTimerStarted);
             Assert.IsFalse(PrepRules.SpendsPrep(state));
         }
@@ -106,9 +106,9 @@ namespace SixtyOne.Tests
         public void BuildingTimerDoesNotMoveDuringPrep()
         {
             var state = new GameState();
-            PrepRules.ResetForPrep(state, 60f, 300f);
+            PrepRules.ResetForPrep(state, 60f, 480f);
             var building = new BuildingTimer();
-            building.Configure(300f, 60f, 30f);
+            building.Configure(480f, 60f, 30f);
             building.Sync(state.BuildingTime);
 
             // SurvivalController only advances the building clock once SpendsPrep is false.
@@ -117,24 +117,24 @@ namespace SixtyOne.Tests
                 if (!PrepRules.SpendsPrep(state)) state.BuildingTime = building.Advance(state.BuildingTime, 1f);
             }
 
-            Assert.AreEqual(300f, state.BuildingTime);
+            Assert.AreEqual(480f, state.BuildingTime);
             PrepRules.StartBuildingTimer(state);
             if (!PrepRules.SpendsPrep(state)) state.BuildingTime = building.Advance(state.BuildingTime, 1f);
-            Assert.AreEqual(299f, state.BuildingTime, 0.0001f);
+            Assert.AreEqual(479f, state.BuildingTime, 0.0001f);
         }
 
         [Test]
         public void Floor4CheckpointRestoresBothTimersAndMicroRewindKeepsThePlacementTimer()
         {
             var session = new GameSession();
-            PrepRules.ResetForPrep(session.State, 60f, 300f);
+            PrepRules.ResetForPrep(session.State, 60f, 480f);
             session.TakeCheckpoint("f4.prep.salon");
 
             // Loot: prep spent, a bag item, then the quake.
             session.State.PrepTime = 12f;
             session.State.Inventory.TryAdd("wrench");
             PrepRules.StartBuildingTimer(session.State);
-            session.State.BuildingTime = 300f;
+            session.State.BuildingTime = 480f;
             session.TakeSnapshot("f4.quake");
 
             // Placement death: micro rewind back into the placement, building timer saved at that point.
@@ -142,7 +142,7 @@ namespace SixtyOne.Tests
             session.Die(new DeathInfo { RewindTarget = RewindTarget.LastNode });
             Assert.AreEqual("f4.quake", session.Rewind());
             Assert.IsTrue(session.State.BuildingTimerStarted);
-            Assert.AreEqual(300f, session.State.BuildingTime, 0.0001f);
+            Assert.AreEqual(480f, session.State.BuildingTime, 0.0001f);
             Assert.IsTrue(session.State.Inventory.Has("wrench"));
 
             // Later macro death on floor 4: back to the prep start with an empty bag and both timers reset.
@@ -151,7 +151,7 @@ namespace SixtyOne.Tests
             Assert.AreEqual("f4.prep.salon", session.Rewind());
             Assert.IsFalse(session.State.BuildingTimerStarted);
             Assert.AreEqual(60f, session.State.PrepTime, 0.0001f);
-            Assert.AreEqual(300f, session.State.BuildingTime, 0.0001f);
+            Assert.AreEqual(480f, session.State.BuildingTime, 0.0001f);
             Assert.AreEqual(0, session.State.Inventory.Count);
         }
     }

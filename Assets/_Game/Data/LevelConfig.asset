@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eddc4c879bc21e14eb4a3f0f82079cac, type: 3}
   m_Name: LevelConfig
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Building.LevelConfig
-  buildingSeconds: 300
+  buildingSeconds: 480
   pulseAtSeconds: 60
   alarmAtSeconds: 30
   realtimeTick: 1
@@ -32,7 +32,7 @@ MonoBehaviour:
   ropeCraftStamina: 3
   injuredMoveExtraPerMember: 0.25
   staminaMax: 100
-  staminaDrainPerSecond: 0.42
+  staminaDrainPerSecond: 0.36
   staminaZeroTimeMultiplier: 1.5
   exhaustionPerSecond: 0.03
   exhaustionDecayPerSecond: 0.2
