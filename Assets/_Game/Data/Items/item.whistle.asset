@@ -19,7 +19,6 @@ MonoBehaviour:
     key: item.whistle.desc
   icon: {fileID: 21300000, guid: 6b27add4598c79c40be5d4049fae7a44, type: 3}
   uiIcon: {fileID: 21300000, guid: 8992bb718faf1ba41ae97b2677a9d433, type: 3}
-  isTrap: 0
   isKeyItem: 1
   staminaRestore: 0
   healsInjury: 0

@@ -62,7 +62,7 @@ namespace SixtyOne.World
         public bool PrepOnly;
 
         [Header("Container")]
-        [Tooltip("wardrobe / cabinet / bookshelf / drawer / medicine / toolbox / nightstand / jewelry.")]
+        [Tooltip("wardrobe / wardrobe_v2 / cabinet / kitchen_cabinet / bookshelf / drawer / toolbox / nightstand.")]
         public string ContainerType;
 
         [Tooltip("Item ids inside.")]

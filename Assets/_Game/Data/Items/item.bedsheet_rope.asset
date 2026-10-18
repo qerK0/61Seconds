@@ -19,7 +19,6 @@ MonoBehaviour:
     key: item.bedsheet_rope.desc
   icon: {fileID: 21300000, guid: 7685fc123407d6b4eb66fb0052989845, type: 3}
   uiIcon: {fileID: 21300000, guid: 60f2ee330dfd99a4bba886f333b6012c, type: 3}
-  isTrap: 0
   isKeyItem: 0
   staminaRestore: 0
   healsInjury: 0

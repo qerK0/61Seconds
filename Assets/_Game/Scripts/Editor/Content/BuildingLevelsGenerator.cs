@@ -76,9 +76,7 @@ namespace SixtyOne.Editor
         public static readonly string[] ItemIds =
         {
             "food", "water", "cloth", "rope", "tape", "flashlight", "lighter", "first_aid", "gloves", "whistle",
-            "child_harness", "wet_cloth", "insulated_grip", "wrench", "bedsheet", "bedsheet_rope",
-            // Trap loot in our own flat: valuables that waste a bag slot and prep seconds.
-            "gold", "laptop", "console"
+            "child_harness", "wet_cloth", "insulated_grip", "wrench", "bedsheet", "bedsheet_rope"
         };
 
         /// <summary>Key items: no bag slot, not droppable, shown in the corner HUD.</summary>

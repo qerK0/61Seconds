@@ -19,7 +19,6 @@ MonoBehaviour:
     key: item.bedsheet.desc
   icon: {fileID: 21300000, guid: 7b24a62a9cdb7684985864c0ec99cce0, type: 3}
   uiIcon: {fileID: 21300000, guid: fe31cdedc2717d44cbf4d5f814229794, type: 3}
-  isTrap: 0
   isKeyItem: 0
   staminaRestore: 0
   healsInjury: 0

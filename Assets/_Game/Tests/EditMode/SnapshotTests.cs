@@ -35,7 +35,7 @@ namespace SixtyOne.Tests
             state.Inventory.TryAdd("wrench");
             Snapshot snapshot = Snapshot.Capture(state, "n1");
 
-            state.Inventory.TryAdd("gold");
+            state.Inventory.TryAdd("tape");
             state.Flags.Set("GasOff", true);
             state.GetMember(MemberType.Player).Health = MemberHealth.Dead;
             state.GetMember(MemberType.Wife).AnchorId = "lr_table";

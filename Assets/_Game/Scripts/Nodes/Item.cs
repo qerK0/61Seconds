@@ -5,8 +5,7 @@ namespace SixtyOne.Nodes
 {
     /// <summary>
     /// A bag item. Usable items (food, water, first aid) are used by selecting their slot twice.
-    /// Trap items are pickable but useless: they waste a slot and time. Key items (flashlight, whistle) never
-    /// take a bag slot, cannot be dropped and show in the corner HUD.
+    /// Key items (flashlight, whistle) never take a bag slot, cannot be dropped and show in the corner HUD.
     /// </summary>
     [CreateAssetMenu(menuName = "SixtyOne/Item", fileName = "item_new")]
     public sealed class Item : ScriptableObject
@@ -25,9 +24,6 @@ namespace SixtyOne.Nodes
 
         [Tooltip("UI icon: tight-cropped, centre pivot, square (bag, loot window, pockets). Falls back to the world icon.")]
         [SerializeField] private Sprite uiIcon;
-
-        [Tooltip("A valuable that is useless in an earthquake (wastes a bag slot and time).")]
-        [SerializeField] private bool isTrap;
 
         [Tooltip("Key item: kept outside the bag (no slot), cannot be dropped, shown in the corner HUD.")]
         [SerializeField] private bool isKeyItem;
@@ -53,7 +49,6 @@ namespace SixtyOne.Nodes
 
         /// <summary>The sprite every UI slot shows: the UI icon, else the world icon.</summary>
         public Sprite UiIcon => uiIcon != null ? uiIcon : icon;
-        public bool IsTrap => isTrap;
         public bool IsKeyItem => isKeyItem;
         public float StaminaRestore => staminaRestore;
         public bool HealsInjury => healsInjury;
@@ -76,7 +71,6 @@ namespace SixtyOne.Nodes
             nameKey = itemName;
             descriptionKey = description;
             if (itemIcon != null) icon = itemIcon;
-            isTrap = false;
             isKeyItem = false;
             staminaRestore = 0f;
             healsInjury = false;
@@ -97,12 +91,6 @@ namespace SixtyOne.Nodes
         public void ConfigureKeyItem()
         {
             isKeyItem = true;
-        }
-
-        /// <summary>Marks the item as a useless valuable.</summary>
-        public void ConfigureTrap()
-        {
-            isTrap = true;
         }
     }
 }

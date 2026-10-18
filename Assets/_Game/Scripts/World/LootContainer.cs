@@ -12,7 +12,7 @@ using UnityEngine.InputSystem;
 namespace SixtyOne.World
 {
     /// <summary>
-    /// Furniture you search (wardrobe, cabinet, bookshelf, drawers, medicine cabinet, toolbox, nightstand). Click:
+    /// Furniture you search (wardrobe, cabinet, kitchen cabinet, bookshelf, drawers, toolbox, nightstand). Click:
     /// the player runs to it (PlayerMover), then a radial ring fills over searchSeconds with a rummaging sound
     /// (input locked except Esc; any click cancels and refunds nothing). The first search costs buildingCost once.
     /// Then the LootWindow opens with what is inside (GameState.Containers); a second visit opens it at once, free.
@@ -34,7 +34,7 @@ namespace SixtyOne.World
         [Min(0f)]
         [SerializeField] private float buildingCost = 3f;
 
-        [Tooltip("Items inside (ids; may include trap valuables like gold).")]
+        [Tooltip("Items inside (ids).")]
         [SerializeField] private List<Item> contents = new List<Item>();
 
         [Tooltip("Hidden extras: only inside once this container was searched in an earlier loop (KnowledgeSet).")]

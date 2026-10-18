@@ -17,9 +17,8 @@ MonoBehaviour:
     key: item.wet_cloth.name
   descriptionKey:
     key: item.wet_cloth.desc
-  icon: {fileID: 0}
-  uiIcon: {fileID: 21300000, guid: 74300ac11734102438537502fb1a9c28, type: 3}
-  isTrap: 0
+  icon: {fileID: 21300000, guid: b583898b01f44344ead961b3d1291d4a, type: 3}
+  uiIcon: {fileID: 21300000, guid: d966afe5c96296b4c99899edab12fa63, type: 3}
   isKeyItem: 0
   staminaRestore: 0
   healsInjury: 0

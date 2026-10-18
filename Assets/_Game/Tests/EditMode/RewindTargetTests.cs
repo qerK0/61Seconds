@@ -27,7 +27,7 @@ namespace SixtyOne.Tests
 
             // Later decision node.
             session.TakeSnapshot("act1.n04_door");
-            session.State.Inventory.TryAdd("gold");
+            session.State.Inventory.TryAdd("tape");
         }
 
         [TearDown]

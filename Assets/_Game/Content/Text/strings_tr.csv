@@ -184,8 +184,6 @@ item.child_harness.desc,Bez ve ipten. Çocuğu sırtına bağlar.,
 item.child_harness.name,Çocuk taşıma kuşağı,
 item.cloth.desc,"Islatılabilir, sarılabilir.",
 item.cloth.name,Bez,
-item.console.desc,Şimdi oyun zamanı değil.,trap loot
-item.console.name,Oyun konsolu,trap loot
 item.first_aid.desc,Yaralar için.,
 item.first_aid.name,İlk yardım çantası,
 item.flashlight.desc,"Elektrik yok, ışık lazım.",
@@ -194,12 +192,8 @@ item.food.desc,Güç verir.,
 item.food.name,Ekmek,
 item.gloves.desc,Cam kırıklarına karşı.,
 item.gloves.name,Lastik eldiven,
-item.gold.desc,"Değerli, ama depremde işe yaramaz.",trap loot
-item.gold.name,Altınlar,trap loot
 item.insulated_grip.desc,Bant ve eldivenden. Elektriğe karşı.,
 item.insulated_grip.name,Yalıtımlı tutamak,
-item.laptop.desc,Ağır ve gereksiz.,trap loot
-item.laptop.name,Dizüstü bilgisayar,trap loot
 item.lighter.desc,Gaz varken asla.,
 item.lighter.name,Çakmak,
 item.rope.desc,Sağlam bir çamaşır ipi.,

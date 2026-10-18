@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using SixtyOne.Building;
 using SixtyOne.Core;
 using SixtyOne.Dialogue;
@@ -67,6 +68,7 @@ namespace SixtyOne.Editor
             problems += CheckPrep(nodes);
             problems += CheckTextKeys();
             problems += CheckLayoutOverrides();
+            problems += CheckProgressionItems();
 
             string summary = $"[Content] Validate: {nodes.Count} nodes checked, {problems} problem(s).";
             if (problems > 0) Debug.LogWarning(summary); else Debug.Log(summary);
@@ -728,6 +730,97 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Hand placement (RoomLayoutOverrides): unknown rooms / items, furniture on or cutting off a required cell.</summary>
+        /// <summary>
+        /// Progression-critical gear must be obtainable somewhere: in a room (pickup or container, overrides applied),
+        /// from a node outcome (AddItem / GiveItem / trader), by a recipe whose inputs are obtainable, or (the bedsheet
+        /// rope) by tying enough bedsheets. Each entry is a set of alternatives: gloves, or the grip + tape.
+        /// </summary>
+        private static int CheckProgressionItems()
+        {
+            var counts = new Dictionary<string, int>();
+            void Add(string id, int n = 1)
+            {
+                if (string.IsNullOrEmpty(id)) return;
+                counts.TryGetValue(id, out int c);
+                counts[id] = c + n;
+            }
+
+            foreach (BuildingLayout.RoomSpec room in LayoutOverrides.Rooms())
+            {
+                foreach (BuildingLayout.ItemSpec i in room.Items) Add(i.ItemId);
+                foreach (BuildingLayout.ContainerSpec c in room.Containers)
+                {
+                    foreach (string id in c.Items) Add(id);
+                    foreach (string id in c.Hidden) Add(id);
+                }
+            }
+
+            List<SceneNode> nodes = LoadAll<SceneNode>();
+            AddAll<PlacementNode>(nodes);
+            AddAll<DialogueNode>(nodes);
+            AddAll<QTENode>(nodes);
+            foreach (SceneNode node in nodes)
+            {
+                foreach (Choice choice in node.Choices)
+                {
+                    if (choice == null) continue;
+                    foreach (Outcome o in choice.Outcomes)
+                    {
+                        if (o == null) continue;
+                        if ((o.Type == OutcomeType.AddItem || o.Type == OutcomeType.GiveItem) && o.Item != null) Add(o.Item.Id);
+                    }
+                }
+            }
+
+            foreach (TraderProfile trader in LoadAll<TraderProfile>())
+            {
+                foreach (Item item in trader.Needs) if (item != null) Add(item.Id);
+                foreach (Item item in trader.Fallback) if (item != null) Add(item.Id);
+            }
+
+            // Recipes and the bedsheet rope until nothing new appears.
+            List<Recipe> recipes = LoadAll<Recipe>();
+            LevelConfig level = LoadAll<LevelConfig>().FirstOrDefault();
+            bool grew = true;
+            while (grew)
+            {
+                grew = false;
+                foreach (Recipe r in recipes)
+                {
+                    if (r.InputA == null || r.InputB == null || r.Output == null || counts.ContainsKey(r.Output.Id)) continue;
+                    if (!counts.ContainsKey(r.InputA.Id) || !counts.ContainsKey(r.InputB.Id)) continue;
+                    Add(r.Output.Id);
+                    grew = true;
+                }
+
+                if (level != null && level.BedsheetItem != null && level.BedsheetRopeItem != null && !counts.ContainsKey(level.BedsheetRopeItem.Id)
+                    && counts.TryGetValue(level.BedsheetItem.Id, out int sheets) && sheets >= level.RequiredBedsheetsForRope)
+                {
+                    Add(level.BedsheetRopeItem.Id);
+                    grew = true;
+                }
+            }
+
+            int problems = 0;
+            int needSheets = level != null ? level.RequiredBedsheetsForRope : 3;
+            counts.TryGetValue("bedsheet", out int sheetCount);
+            if (sheetCount < needSheets) problems += Report($"progression: only {sheetCount} bedsheet source(s), the rope needs {needSheets}.", level);
+            foreach (string[] alternatives in ProgressionItems)
+            {
+                bool ok = alternatives.Any(alt => alt.Split('+').All(counts.ContainsKey));
+                if (!ok) problems += Report($"progression: '{string.Join(" or ", alternatives)}' cannot be obtained anywhere (rooms, outcomes, traders, recipes).", null);
+            }
+
+            return problems;
+        }
+
+        /// <summary>Gear the escape needs; "a+b" = both, entries in one row are alternatives.</summary>
+        private static readonly string[][] ProgressionItems =
+        {
+            new[] { "bedsheet_rope" }, new[] { "rope" }, new[] { "gloves", "insulated_grip+tape" }, new[] { "flashlight" },
+            new[] { "child_harness" }, new[] { "whistle" }, new[] { "food" }, new[] { "water" }, new[] { "first_aid" }
+        };
+
         private static int CheckLayoutOverrides()
         {
             int problems = 0;

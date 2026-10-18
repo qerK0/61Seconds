@@ -57,7 +57,7 @@ namespace SixtyOne.Tests
         {
             var session = new GameSession();
             session.TakeSnapshot(explore.Id);
-            session.State.Inventory.TryAdd("gold");
+            session.State.Inventory.TryAdd("tape");
             session.TakeSnapshot("act1.n04_stairs");
 
             BombCheck bomb = BombCheckRunner.Run(act2Entry.BombChecks, session.State);

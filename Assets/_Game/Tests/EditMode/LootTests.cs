@@ -36,7 +36,7 @@ namespace SixtyOne.Tests
             Assert.IsFalse(state.Inventory.Has("wrench"));
             CollectionAssert.AreEquivalent(new[] { "tape", "wrench" }, state.Containers.ItemsIn("hall_toolbox"));
 
-            Assert.AreEqual(LootTakeResult.NotThere, LootLogic.Take(state, "hall_toolbox", "gold", false, false));
+            Assert.AreEqual(LootTakeResult.NotThere, LootLogic.Take(state, "hall_toolbox", "food", false, false));
         }
 
         [Test]

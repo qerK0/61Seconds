@@ -62,7 +62,7 @@ namespace SixtyOne.Editor
         public sealed class ContainerSpec
         {
             public string Id;
-            /// <summary>container.wardrobe / cabinet / bookshelf / drawer / medicine / toolbox / nightstand / jewelry.</summary>
+            /// <summary>container.wardrobe / cabinet / kitchen_cabinet / bookshelf / drawer / toolbox / nightstand.</summary>
             public string NameKey;
             /// <summary>Prop art name (PropArtSet): Wardrobe, NeighbourWardrobe, Bookshelf, Cabinet; others are tinted blocks.</summary>
             public string Art;
@@ -485,13 +485,10 @@ namespace SixtyOne.Editor
             salon.Props.Add(P("door_frame", "DoorLintel", 3.5f, 5.95f, 1.0f, 1.0f, 0.25f, new Color(0.35f, 0.22f, 0.12f, 1f), drop: 0.9f));
             salon.Props.Add(P("balcony_rail", "BalconyRail", 6.95f, 1.0f, 0f, 1.0f, 0.5f, Metal, drop: 0.6f));
             salon.Props.Add(P("ceiling_lamp", "CeilingLamp", 2.5f, 3.4f, 1.6f, 0.5f, 0.35f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
-            // Our flat (pre-quake loot only): useful gear, two traps that waste slots/time, a hidden food tin.
+            // Our flat (pre-quake loot only): a hidden food tin. Prep tension comes from time and bag slots only.
             salon.Items.Add(Own(I("food", 0.6f, 4.6f, new Color(0.9f, 0.7f, 0.35f, 1f), cost: 2f, surface: false, hidden: true, id: "salon_hidden_food")));
-            salon.Containers.Add(Own(Box("salon_cabinet", "medicine", 0.4f, 3.0f, new Color(0.92f, 0.92f, 0.9f, 1f), "first_aid")));
             // An empty bookshelf: searching it only costs prep seconds.
             salon.Containers.Add(Own(Box("salon_bookshelf", "bookshelf", 2.2f, 5.7f, Wood)));
-            salon.Items.Add(Own(I("laptop", 1.6f, 1.0f, new Color(0.25f, 0.25f, 0.3f, 1f))));
-            salon.Items.Add(Own(I("console", 3.6f, 1.2f, new Color(0.15f, 0.15f, 0.2f, 1f))));
             salon.Lights.Add(L("CeilingLamp", 2.5f, 3.4f, 1.6f, 3.2f));
             salon.Lights.Add(L("Window", 5.95f, 1.5f, 0.6f, 2.2f, new Color(1f, 0.86f, 0.62f, 1f)));
 
@@ -499,6 +496,8 @@ namespace SixtyOne.Editor
             kitchen.Props.Add(P(null, "Stove", 3.5f, 2.5f, 0f, 0.8f, 0.7f, new Color(0.75f, 0.75f, 0.78f, 1f)));
             kitchen.Hotspots.Add(Valve(3.7f, 1.6f, BuildingLevelsGenerator.F4PrepKitchen + ".c_valve", BuildingLevelsGenerator.F4Kitchen + ".c_valve"));
             kitchen.Containers.Add(Own(Box("kitchen_drawer", "drawer", 1.2f, 3.3f, Wood, "gloves")));
+            // The family's first aid kit lives in the kitchen cabinet (mutfak dolabı).
+            kitchen.Containers.Add(Own(Box("kitchen_cabinet", "kitchen_cabinet", 3.6f, 3.5f, Wood, "first_aid")));
             kitchen.Items.Add(Own(I("water", 2.6f, 3.4f, new Color(0.45f, 0.7f, 1f, 1f))));
             kitchen.Lights.Add(L("KitchenLamp", 2f, 2f, 1.5f, 2.8f));
 
@@ -509,8 +508,6 @@ namespace SixtyOne.Editor
             hall.Items.Add(Own(I("whistle", 0.6f, 0.6f, new Color(0.95f, 0.5f, 0.2f, 1f), cost: 2f, surface: false, hidden: true, id: "hall_hidden_whistle")));
             hall.Containers.Add(Own(Box("hall_nightstand", "nightstand", 1.6f, 3.4f, Wood, "flashlight")));
             hall.Containers.Add(Own(Box("hall_toolbox", "toolbox", 0.5f, 1.8f, new Color(0.75f, 0.2f, 0.15f, 1f), "wrench")));
-            // Trap: valuables waste a bag slot and prep seconds.
-            hall.Containers.Add(Own(Box("hall_jewelry_box", "jewelry", 2.4f, 1.4f, new Color(0.9f, 0.75f, 0.2f, 1f), "gold")));
 
             // Flat 11 bedroom: two bedsheets for the rope (bed = open surface, wardrobe = 3s).
             RoomSpec bedroom = Art(Room(BuildingLevelsGenerator.Flat11Bedroom, 4, 4, new Color(0.76f, 0.72f, 0.7f, 1f)), RoomArt.Home, windows: "R2");
