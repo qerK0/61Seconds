@@ -8,7 +8,8 @@ namespace SixtyOne.Editor
     /// <summary>
     /// Hand-placed room edits from the Layout Editor (Data/Layout/RoomLayoutOverrides.asset). One entry per room id,
     /// each a list of placed objects. An object with a code id (BuildingLayout) replaces that object's position,
-    /// flip, art and data, or removes it; a new id adds an object. Applied by every Build Test Scene. Plain text
+    /// flip, scale, art and data, or removes it; a new id adds an object; a door entry moves the door to another wall
+    /// gap (its link stays in code). Applied by every Build Test Scene. Plain text
     /// YAML, so git diffs show every change.
     /// </summary>
     public sealed class RoomLayoutOverrides : ScriptableObject
@@ -56,6 +57,21 @@ namespace SixtyOne.Editor
             [Header("Block (unmapped art)")]
             public Vector2 scale = Vector2.one;
             public Color tint = Color.white;
+
+            [Header("Transform")]
+            [Tooltip("Uniform scale on top of the built size (older entries without it load as 1).")]
+            public float objectScale = 1f;
+            [Tooltip("Sorting nudge (+ = in front).")]
+            public int sortNudge;
+
+            [Header("Door")]
+            [Tooltip("Wall-gap edge code the door sits in.")]
+            public string doorEdge;
+            [Tooltip("Door / Elevator / Stairwell.")]
+            public string doorArt;
+
+            /// <summary>The scale to build with: entries saved before scale existed (0) count as 1.</summary>
+            public float Scale1 => objectScale > 0.01f ? objectScale : 1f;
         }
 
         /// <summary>All edits of one room.</summary>

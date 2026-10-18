@@ -52,7 +52,7 @@ namespace SixtyOne.Editor
                 {
                     BuildingLayout.RoomSpec room = rooms.Find(r => r.Id == entry.roomId);
                     if (room == null) continue;
-                    foreach (PlacedObject o in entry.objects) ApplyOne(room, o);
+                    foreach (PlacedObject o in entry.objects) ApplyOne(rooms, room, o);
                 }
             }
 
@@ -66,7 +66,7 @@ namespace SixtyOne.Editor
             }
         }
 
-        private static void ApplyOne(BuildingLayout.RoomSpec room, PlacedObject o)
+        private static void ApplyOne(List<BuildingLayout.RoomSpec> rooms, BuildingLayout.RoomSpec room, PlacedObject o)
         {
             if (o == null || string.IsNullOrEmpty(o.id)) return;
             switch (o.kind)
@@ -87,6 +87,8 @@ namespace SixtyOne.Editor
                     p.Drop = o.drop;
                     p.Scale = o.scale;
                     p.Color = o.tint;
+                    p.ObjScale = o.Scale1;
+                    p.SortNudge = o.sortNudge;
                     return;
                 }
                 case LayoutKind.Pickup:
@@ -105,6 +107,8 @@ namespace SixtyOne.Editor
                     i.Hidden = o.kind == LayoutKind.HiddenItem;
                     i.FlipX = o.flipX;
                     i.Color = o.tint;
+                    i.ObjScale = o.Scale1;
+                    i.SortNudge = o.sortNudge;
                     return;
                 }
                 case LayoutKind.Container:
@@ -134,6 +138,8 @@ namespace SixtyOne.Editor
                     c.PrepOnly = o.prepOnly;
                     c.FlipX = o.flipX;
                     c.BlocksNav = o.blocksNav;
+                    c.ObjScale = o.Scale1;
+                    c.SortNudge = o.sortNudge;
                     return;
                 }
                 case LayoutKind.Light:
@@ -148,24 +154,69 @@ namespace SixtyOne.Editor
                     l.Color = o.lightColor;
                     return;
                 }
+                case LayoutKind.Door:
+                {
+                    // Doors are never removed or added here: only their wall edge, flip and art change.
+                    if (o.removed || string.IsNullOrEmpty(o.doorEdge) || !BuildingLayout.WallEdges(room).Contains(o.doorEdge)) return;
+                    BuildingLayout.DoorSpec d = room.Doors.Find(x => x.Id == o.id);
+                    if (d != null)
+                    {
+                        BuildingLayout.MoveDoor(rooms, room, d, o.doorEdge);
+                        d.FlipX = o.flipX;
+                        if (System.Enum.TryParse(o.doorArt, out BuildingLayout.DoorArtKind art)) d.Art = art;
+                        return;
+                    }
+
+                    BuildingLayout.HotspotSpec h = room.Hotspots.Find(x => !string.IsNullOrEmpty(x.Edge) && BuildingLayout.HotspotLayoutId(x) == o.id);
+                    if (h == null) return;
+                    BuildingLayout.MoveHotspot(room, h, o.doorEdge);
+                    h.FlipX = o.flipX;
+                    if (!string.IsNullOrEmpty(o.doorArt)) h.Art = o.doorArt;
+                    return;
+                }
             }
         }
 
-        /// <summary>Cells blocked by furniture that blocks nav, with the blocking object's id.</summary>
+        /// <summary>Cells blocked by furniture that blocks nav (its scaled footprint), with the blocking object's id.</summary>
         public static Dictionary<Vector2Int, string> BlockerCells(BuildingLayout.RoomSpec room)
         {
             var cells = new Dictionary<Vector2Int, string>();
             foreach (BuildingLayout.PropSpec p in room.Props)
             {
-                if (p.BlocksNav) cells[GridNav.CellOf(new Vector2(p.Gx, p.Gy))] = p.Id;
+                if (!p.BlocksNav) continue;
+                foreach (Vector2Int cell in BuildingLayout.Footprint(p.Gx, p.Gy, p.ObjScale)) cells[cell] = p.Id;
             }
 
             foreach (BuildingLayout.ContainerSpec c in room.Containers)
             {
-                if (c.BlocksNav) cells[GridNav.CellOf(new Vector2(c.Gx, c.Gy))] = c.Id;
+                if (!c.BlocksNav) continue;
+                foreach (Vector2Int cell in BuildingLayout.Footprint(c.Gx, c.Gy, c.ObjScale)) cells[cell] = c.Id;
             }
 
             return cells;
+        }
+
+        /// <summary>Door problems: an edge outside the room's walls, or two doors in one wall gap.</summary>
+        public static List<string> CheckDoors(BuildingLayout.RoomSpec room)
+        {
+            var problems = new List<string>();
+            List<string> walls = BuildingLayout.WallEdges(room);
+            var used = new Dictionary<string, string>();
+            var doors = new List<KeyValuePair<string, string>>();
+            foreach (BuildingLayout.DoorSpec d in room.Doors) doors.Add(new KeyValuePair<string, string>(d.Edge, d.Id));
+            foreach (BuildingLayout.HotspotSpec h in room.Hotspots)
+            {
+                if (!string.IsNullOrEmpty(h.Edge)) doors.Add(new KeyValuePair<string, string>(h.Edge, BuildingLayout.HotspotLayoutId(h)));
+            }
+
+            foreach (KeyValuePair<string, string> d in doors)
+            {
+                if (BuildingLayout.IsWallEdge(d.Key) && !walls.Contains(d.Key)) problems.Add($"room '{room.Id}': '{d.Value}' sits on edge {d.Key}, which is not one of its walls.");
+                if (used.TryGetValue(d.Key, out string other)) problems.Add($"room '{room.Id}': '{d.Value}' and '{other}' share the wall gap {d.Key}.");
+                else used[d.Key] = d.Value;
+            }
+
+            return problems;
         }
 
         // ---------- checks ----------
@@ -200,7 +251,8 @@ namespace SixtyOne.Editor
         /// </summary>
         public static List<string> Check(BuildingLayout.RoomSpec room)
         {
-            var problems = new List<string>();
+            // Doors first (a moved door brings its approach cell along; the reachability check below covers it).
+            List<string> problems = CheckDoors(room);
             Dictionary<Vector2Int, string> blockers = BlockerCells(room);
             if (blockers.Count == 0) return problems;
 
@@ -300,6 +352,7 @@ namespace SixtyOne.Editor
             tag.Drop = p.Drop;
             tag.Scale = p.Scale;
             tag.Tint = p.Color;
+            ApplyTransform(tag, p.ObjScale, p.SortNudge);
         }
 
         public static void Tag(GameObject go, BuildingLayout.ItemSpec i)
@@ -312,6 +365,7 @@ namespace SixtyOne.Editor
             tag.PrepOnly = i.PrepOnly;
             tag.FlipX = i.FlipX;
             tag.Tint = i.Color;
+            ApplyTransform(tag, i.ObjScale, i.SortNudge);
         }
 
         public static void Tag(GameObject go, BuildingLayout.ContainerSpec c)
@@ -327,6 +381,7 @@ namespace SixtyOne.Editor
             tag.PrepOnly = c.PrepOnly;
             tag.FlipX = c.FlipX;
             tag.BlocksNav = c.BlocksNav;
+            ApplyTransform(tag, c.ObjScale, c.SortNudge);
         }
 
         public static void Tag(GameObject go, BuildingLayout.LightSpec l)
@@ -335,6 +390,60 @@ namespace SixtyOne.Editor
             tag.Lift = l.Lift;
             tag.Radius = l.Radius;
             tag.LightColor = l.Color;
+        }
+
+        public static void Tag(GameObject go, BuildingLayout.DoorSpec d)
+        {
+            LayoutObject tag = Ensure(go, d.Id, LayoutKind.Door);
+            tag.DoorEdge = d.Edge;
+            tag.DoorArt = d.Art.ToString();
+            tag.FlipX = d.FlipX;
+            tag.DoorTarget = d.TargetRoom;
+            tag.DoorTwoWay = d.TwoWay;
+        }
+
+        /// <summary>A wall hotspot (the F2 stairwell door) is laid out like a door; it plays its choice instead.</summary>
+        public static void Tag(GameObject go, BuildingLayout.HotspotSpec h)
+        {
+            LayoutObject tag = Ensure(go, BuildingLayout.HotspotLayoutId(h), LayoutKind.Door);
+            tag.DoorEdge = h.Edge;
+            tag.DoorArt = h.Art;
+            tag.FlipX = h.FlipX;
+            tag.DoorTarget = h.ChoiceKey;
+            tag.DoorTwoWay = false;
+        }
+
+        /// <summary>
+        /// Applies the uniform layout scale (children named "Approach" keep their world position, so the player
+        /// still stands in front) and the sorting nudge (iso sorter offset, or the renderers' order without one).
+        /// </summary>
+        private static void ApplyTransform(LayoutObject tag, float scale, int nudge)
+        {
+            Transform t = tag.transform;
+            tag.BaseScale = t.localScale;
+            tag.ObjectScale = scale > 0.01f ? scale : 1f;
+            tag.SortNudge = nudge;
+            if (!Mathf.Approximately(tag.ObjectScale, 1f))
+            {
+                Transform approach = t.Find("Approach");
+                Vector3 stand = approach != null ? approach.position : Vector3.zero;
+                t.localScale = new Vector3(tag.BaseScale.x * tag.ObjectScale, tag.BaseScale.y * tag.ObjectScale, 1f);
+                if (approach != null) approach.position = stand;
+            }
+
+            if (nudge == 0) return;
+            SixtyOne.Iso.IsoSorter sorter = t.GetComponent<SixtyOne.Iso.IsoSorter>();
+            if (sorter != null)
+            {
+                var so = new SerializedObject(sorter);
+                so.FindProperty("offset").intValue += nudge;
+                so.ApplyModifiedPropertiesWithoutUndo();
+                sorter.Apply();
+            }
+            else
+            {
+                foreach (SpriteRenderer r in t.GetComponents<SpriteRenderer>()) r.sortingOrder += nudge;
+            }
         }
 
         private static LayoutObject Ensure(GameObject go, string id, LayoutKind kind)
@@ -380,8 +489,19 @@ namespace SixtyOne.Editor
                 radius = tag.Radius,
                 lightColor = tag.LightColor,
                 scale = tag.Scale,
-                tint = tag.Tint
+                tint = tag.Tint,
+                objectScale = ScaleOf(tag),
+                sortNudge = tag.SortNudge,
+                doorEdge = tag.DoorEdge,
+                doorArt = tag.DoorArt
             };
+        }
+
+        /// <summary>The uniform scale of a tagged object now (Scene scale tool or slider): localScale / the built scale.</summary>
+        public static float ScaleOf(LayoutObject tag)
+        {
+            if (tag.Kind == LayoutKind.Door || tag.Kind == LayoutKind.Light || Mathf.Abs(tag.BaseScale.x) < 1e-4f) return 1f;
+            return Round(tag.transform.localScale.x / tag.BaseScale.x);
         }
 
         private static float Round(float v) => Mathf.Round(v * 100f) / 100f;
@@ -444,6 +564,16 @@ namespace SixtyOne.Editor
             foreach (BuildingLayout.ItemSpec i in room.Items) yield return Placed(i.Gx, i.Gy, go => Tag(go, i));
             foreach (BuildingLayout.ContainerSpec c in room.Containers) yield return Placed(c.Gx, c.Gy, go => Tag(go, c));
             foreach (BuildingLayout.LightSpec l in room.Lights) yield return Placed(l.Gx, l.Gy, go => Tag(go, l), l.Lift);
+            foreach (BuildingLayout.DoorSpec d in room.Doors)
+            {
+                Vector2 c = BuildingLayout.EdgeCenter(room, d.Edge);
+                yield return Placed(c.x, c.y, go => Tag(go, d));
+            }
+
+            foreach (BuildingLayout.HotspotSpec h in room.Hotspots)
+            {
+                if (!string.IsNullOrEmpty(h.Edge)) yield return Placed(h.Gx, h.Gy, go => Tag(go, h));
+            }
         }
 
         private static PlacedObject Placed(float gx, float gy, System.Action<GameObject> tag, float lift = 0f)
@@ -464,6 +594,9 @@ namespace SixtyOne.Editor
         private static bool Same(PlacedObject a, PlacedObject b)
         {
             if (a.kind != b.kind) return false;
+            // A door is its wall edge (the dragged position only picks the edge), flip and art.
+            if (a.kind == LayoutKind.Door) return a.doorEdge == b.doorEdge && a.flipX == b.flipX && (a.doorArt ?? "") == (b.doorArt ?? "");
+            if (!Near(a.Scale1, b.Scale1) || a.sortNudge != b.sortNudge) return false;
             if (!Near(a.gx, b.gx) || !Near(a.gy, b.gy) || !Near(a.lift, b.lift) || a.flipX != b.flipX || a.blocksNav != b.blocksNav) return false;
             switch (a.kind)
             {

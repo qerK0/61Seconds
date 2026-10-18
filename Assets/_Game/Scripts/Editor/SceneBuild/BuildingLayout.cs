@@ -39,6 +39,10 @@ namespace SixtyOne.Editor
             public Vector2 Scale;
             public Color Color;
             public float Topple = -80f;
+            /// <summary>Uniform scale on top of the built size (Layout Editor; 1 = as built).</summary>
+            public float ObjScale = 1f;
+            /// <summary>Sorting nudge added to the iso order (+ = in front).</summary>
+            public int SortNudge;
             public float Drop = 0.8f;
         }
 
@@ -56,6 +60,10 @@ namespace SixtyOne.Editor
             public bool PrepOnly;
             public bool FlipX;
             public Color Color = Color.white;
+            /// <summary>Uniform scale on top of the built size (Layout Editor; 1 = as built).</summary>
+            public float ObjScale = 1f;
+            /// <summary>Sorting nudge added to the iso order (+ = in front).</summary>
+            public int SortNudge;
         }
 
         /// <summary>Furniture you search: a LootContainer with its contents (item ids).</summary>
@@ -78,6 +86,10 @@ namespace SixtyOne.Editor
             public bool BlocksNav;
             public Vector2 Scale = new Vector2(0.7f, 0.55f);
             public Color Color = Color.white;
+            /// <summary>Uniform scale on top of the built size (Layout Editor; 1 = as built).</summary>
+            public float ObjScale = 1f;
+            /// <summary>Sorting nudge added to the iso order (+ = in front).</summary>
+            public int SortNudge;
         }
 
         public sealed class LightSpec
@@ -117,6 +129,8 @@ namespace SixtyOne.Editor
             public bool TwoWay;
             /// <summary>Door, elevator or stairwell door (the door art + a "MERDİVEN ↓" sign).</summary>
             public DoorArtKind Art;
+            /// <summary>Mirrors the art (Layout Editor).</summary>
+            public bool FlipX;
             /// <summary>Stable id inside the room (layout overrides key on it): "door_" + target room.</summary>
             public string Id => "door_" + TargetRoom;
         }
@@ -143,6 +157,8 @@ namespace SixtyOne.Editor
             public string[] AlsoKeys = new string[0];
             /// <summary>Wall-gap edge code for a stairwell-door hotspot (Art = "Stairwell"): sits in the gap, approached from inside.</summary>
             public string Edge;
+            /// <summary>Mirrors the art (Layout Editor).</summary>
+            public bool FlipX;
         }
 
         public sealed class RoomSpec
@@ -279,6 +295,53 @@ namespace SixtyOne.Editor
             RoomSpec target = rooms.Find(r => r.Id == door.TargetRoom);
             DoorSpec back = target?.Doors.Find(d => d.TargetRoom == room.Id);
             if (back != null) back.Arrival = EdgeInside(room, edge);
+        }
+
+        /// <summary>Moves a stairwell-door hotspot to another wall edge (the gap follows it).</summary>
+        public static void MoveHotspot(RoomSpec room, HotspotSpec h, string edge)
+        {
+            if (string.IsNullOrEmpty(h.Edge) || h.Edge == edge) return;
+            string old = h.Edge;
+            h.Edge = edge;
+            Vector2 c = EdgeCenter(room, edge);
+            h.Gx = c.x;
+            h.Gy = c.y;
+            if (!room.Doors.Exists(d => d.Edge == old) && !room.Hotspots.Exists(x => x.Edge == old)) room.Gaps.Remove(old);
+            if (!room.Gaps.Contains(edge)) room.Gaps.Add(edge);
+        }
+
+        /// <summary>Layout id of a wall hotspot (the F2 stairwell door): "hotspot_" + its name.</summary>
+        public static string HotspotLayoutId(HotspotSpec h) => "hotspot_" + h.Name;
+
+        /// <summary>The wall-gap edge whose centre is nearest to a grid point (where a dragged door snaps to).</summary>
+        public static string NearestWallEdge(RoomSpec room, Vector2 grid)
+        {
+            string best = null;
+            float bestDistance = float.MaxValue;
+            foreach (string edge in WallEdges(room))
+            {
+                float d = (EdgeCenter(room, edge) - grid).sqrMagnitude;
+                if (d >= bestDistance) continue;
+                bestDistance = d;
+                best = edge;
+            }
+
+            return best;
+        }
+
+        /// <summary>
+        /// Nav cells an object of a uniform scale covers: its own cell at scale 1 (as before), growing by half a
+        /// cell per side for every extra unit of scale (scale 2 = 2 x 2 cells).
+        /// </summary>
+        public static IEnumerable<Vector2Int> Footprint(float gx, float gy, float scale)
+        {
+            float extra = Mathf.Max(0f, scale - 1f) * 0.5f;
+            int x0 = Mathf.FloorToInt(gx - extra), x1 = Mathf.FloorToInt(gx + extra);
+            int y0 = Mathf.FloorToInt(gy - extra), y1 = Mathf.FloorToInt(gy + extra);
+            for (int x = x0; x <= x1; x++)
+            {
+                for (int y = y0; y <= y1; y++) yield return new Vector2Int(x, y);
+            }
         }
 
         /// <summary>Wall-gap edge codes of a room (L0..L(w-1), R0..R(h-1)).</summary>

@@ -11,8 +11,9 @@ namespace SixtyOne.Editor
 {
     /// <summary>
     /// SixtyOne > Layout Editor: pick a room (it is isolated and framed), drag props / items / containers / lights
-    /// with the normal Scene tools, add new ones from the palette, then Save room. Saved edits live in
-    /// RoomLayoutOverrides.asset and every Build Test Scene applies them. Anchors, doors, hotspots, ropes and
+    /// with the normal Scene tools (scale: the slider or the Scale tool, uniform), move doors along their wall, add new
+    /// ones from the palette, then Save room. Saved edits live in
+    /// RoomLayoutOverrides.asset and every Build Test Scene applies them. Anchors, hotspots, ropes and
     /// spawns stay code-only and show as locked gizmos.
     /// </summary>
     public sealed class LayoutEditorWindow : EditorWindow
@@ -182,7 +183,7 @@ namespace SixtyOne.Editor
                         string k = kind;
                         BuildingLayout.ContainerSpec preset = BuildingLayout.ContainerPreset("x", k);
                         Sprite art = props != null ? props.Find(preset.Art) : null;
-                        entries.Add((k, art != null ? Thumb(art) : null, () => SpawnContainer(k)));
+                        entries.Add((ContainerLabel(k), art != null ? Thumb(art) : null, () => SpawnContainer(k)));
                     }
 
                     break;
@@ -210,6 +211,23 @@ namespace SixtyOne.Editor
             EditorGUILayout.EndScrollView();
         }
 
+        /// <summary>Palette name of a container preset (Turkish, as the team calls them).</summary>
+        private static string ContainerLabel(string kind)
+        {
+            switch (kind)
+            {
+                case "wardrobe": return "Gardırop";
+                case "wardrobe_v2": return "Gardırop v2";
+                case "cabinet": return "Dolap";
+                case "kitchen_cabinet": return "Mutfak dolabı";
+                case "bookshelf": return "Kitaplık";
+                case "drawer": return "Çekmece";
+                case "toolbox": return "Alet çantası";
+                case "nightstand": return "Komodin";
+                default: return kind;
+            }
+        }
+
         private static Texture Thumb(Sprite sprite)
         {
             Texture preview = AssetPreview.GetAssetPreview(sprite);
@@ -227,6 +245,13 @@ namespace SixtyOne.Editor
             }
 
             EditorGUILayout.LabelField($"{tag.Kind}  ·  {tag.Id}" + (tag.FromCode ? "  (kodda var)" : "  (yeni)") + (tag.Proxy ? "  · Rebuild sonrası gerçek obje" : ""), EditorStyles.boldLabel);
+            if (tag.Kind == LayoutKind.Door)
+            {
+                DrawDoorInspector(tag);
+                return;
+            }
+
+            if (tag.Kind != LayoutKind.Light) DrawTransformInspector(tag);
             EditorGUI.BeginChangeCheck();
             bool flip = EditorGUILayout.Toggle("Flip X", tag.FlipX);
             bool blocks = tag.BlocksNav;
@@ -314,6 +339,119 @@ namespace SixtyOne.Editor
             tag.HazardProp = hazard;
             tag.HazardPropId = hazardId;
             EditorUtility.SetDirty(tag);
+        }
+
+        /// <summary>Uniform scale (slider 0.5-2, Reset, Match prop height) and the sorting nudge of a placed object.</summary>
+        private void DrawTransformInspector(LayoutObject tag)
+        {
+            float current = LayoutOverrides.ScaleOf(tag);
+            EditorGUI.BeginChangeCheck();
+            float scale = EditorGUILayout.Slider("Ölçek", current, 0.5f, 2f);
+            EditorGUILayout.BeginHorizontal();
+            if (GUILayout.Button("Reset scale")) scale = 1f;
+            float target = PropArt.TargetHeight(tag.PropName);
+            SpriteRenderer r = MainRenderer(tag);
+            GUI.enabled = target > 0f && r != null && r.sprite != null;
+            if (GUILayout.Button(new GUIContent("Match prop height", target > 0f ? $"Hedef yükseklik {target:0.##} (PropArt tablosu)" : "Bu prop için tabloda yükseklik yok")))
+            {
+                // Height at scale 1 = sprite height x the renderer's scale relative to the object.
+                float unit = r.sprite.bounds.size.y * Mathf.Abs(r.transform.lossyScale.y / tag.transform.lossyScale.y) * Mathf.Abs(tag.BaseScale.y);
+                if (unit > 1e-4f) scale = Mathf.Round(target / unit * 100f) / 100f;
+            }
+
+            GUI.enabled = true;
+            EditorGUILayout.EndHorizontal();
+            EditorGUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField("Sıralama (önde +)", GUILayout.Width(146f));
+            int nudge = tag.SortNudge;
+            if (GUILayout.Button("–", GUILayout.Width(24f))) nudge -= 10;
+            nudge = EditorGUILayout.IntField(nudge, GUILayout.Width(60f));
+            if (GUILayout.Button("+", GUILayout.Width(24f))) nudge += 10;
+            EditorGUILayout.EndHorizontal();
+            if (!EditorGUI.EndChangeCheck()) return;
+
+            if (!Mathf.Approximately(scale, current))
+            {
+                Undo.RecordObject(tag.transform, "Scale");
+                SetScale(tag, Mathf.Clamp(scale, 0.25f, 4f));
+            }
+
+            if (nudge != tag.SortNudge)
+            {
+                Undo.RecordObject(tag, "Sorting nudge");
+                foreach (SpriteRenderer sr in tag.GetComponentsInChildren<SpriteRenderer>()) sr.sortingOrder += nudge - tag.SortNudge;
+                tag.SortNudge = nudge;
+                EditorUtility.SetDirty(tag);
+            }
+        }
+
+        /// <summary>Uniform scale against the built size; an "Approach" child keeps its world position.</summary>
+        private static void SetScale(LayoutObject tag, float scale)
+        {
+            Transform approach = tag.transform.Find("Approach");
+            Vector3 stand = approach != null ? approach.position : Vector3.zero;
+            tag.transform.localScale = new Vector3(tag.BaseScale.x * scale, tag.BaseScale.y * scale, 1f);
+            if (approach != null) approach.position = stand;
+            tag.ObjectScale = scale;
+            EditorUtility.SetDirty(tag);
+        }
+
+        /// <summary>The object's main sprite: a door's "Art", else the body / first sprite.</summary>
+        private static SpriteRenderer MainRenderer(LayoutObject tag)
+        {
+            Transform art = tag.transform.Find("Art") ?? tag.transform.Find("Body");
+            if (art != null && art.GetComponent<SpriteRenderer>() != null) return art.GetComponent<SpriteRenderer>();
+            return tag.GetComponentInChildren<SpriteRenderer>();
+        }
+
+        private static readonly string[] DoorArts = { "Door", "Elevator", "Stairwell" };
+
+        /// <summary>
+        /// A door: its wall gap (drag it along the wall, or pick the edge), flip and art. Where it leads, its choice
+        /// and costs are code-defined and shown read-only.
+        /// </summary>
+        private void DrawDoorInspector(LayoutObject tag)
+        {
+            BuildingLayout.RoomSpec spec = Spec;
+            if (spec == null) return;
+            EditorGUILayout.LabelField("Nereye", tag.DoorTwoWay ? tag.DoorTarget + "  (çift yönlü)" : tag.DoorTarget + "  (tek yön)");
+            EditorGUILayout.LabelField("Seçim / süre", "kodda (BuildingLayout + düğüm seçimi), değişmez");
+            string[] edges = BuildingLayout.WallEdges(spec).ToArray();
+            EditorGUI.BeginChangeCheck();
+            int edgeIndex = EditorGUILayout.Popup("Duvar boşluğu", Mathf.Max(0, System.Array.IndexOf(edges, tag.DoorEdge)), edges);
+            bool flip = EditorGUILayout.Toggle("Flip X", tag.FlipX);
+            int art = EditorGUILayout.Popup("Görsel", Mathf.Max(0, System.Array.IndexOf(DoorArts, tag.DoorArt)), DoorArts);
+            if (!EditorGUI.EndChangeCheck()) return;
+            Undo.RecordObject(tag, "Edit door");
+            Undo.RecordObject(tag.transform, "Move door");
+            if (flip != tag.FlipX)
+            {
+                SpriteRenderer r = MainRenderer(tag);
+                if (r != null)
+                {
+                    Undo.RecordObject(r, "Flip");
+                    r.flipX = !r.flipX;
+                }
+            }
+
+            tag.FlipX = flip;
+            tag.DoorArt = DoorArts[art];
+            PlaceDoor(tag, spec, edges[edgeIndex]);
+            EditorUtility.SetDirty(tag);
+        }
+
+        /// <summary>Puts a door proxy on a wall edge (its art faces that wall; the real door comes with Rebuild scene).</summary>
+        private static void PlaceDoor(LayoutObject tag, BuildingLayout.RoomSpec spec, string edge)
+        {
+            Vector2 c = BuildingLayout.EdgeCenter(spec, edge);
+            tag.transform.localPosition = IsoMath.GridToWorld(c.x, c.y);
+            if (tag.DoorEdge != edge)
+            {
+                SpriteRenderer r = MainRenderer(tag);
+                if (r != null) r.flipX = edge.StartsWith("R") != tag.FlipX;
+            }
+
+            tag.DoorEdge = edge;
         }
 
         // ---------- rooms ----------
@@ -441,7 +579,12 @@ namespace SixtyOne.Editor
             BuildingLayout.ContainerSpec preset = BuildingLayout.ContainerPreset("x", kind);
             Sprite art = props != null ? props.Find(preset.Art) : null;
             LayoutObject tag = Spawn("Container_" + kind, art, LayoutKind.Container, kind);
-            if (art == null) tag.transform.localScale = new Vector3(preset.Scale.x, preset.Scale.y, 1f);
+            if (art == null)
+            {
+                tag.transform.localScale = new Vector3(preset.Scale.x, preset.Scale.y, 1f);
+                tag.BaseScale = preset.Scale;
+            }
+
             tag.ContainerType = kind;
             tag.PropName = preset.Art;
             tag.BlocksNav = true;
@@ -496,15 +639,20 @@ namespace SixtyOne.Editor
             if (spec == null) return;
             Transform t = room.transform;
 
-            if (snap && Event.current.rawType == EventType.MouseUp) SnapSelection();
+            if (Event.current.rawType == EventType.MouseUp)
+            {
+                // Doors always snap to a wall gap; the Scene scale tool stays uniform; the rest snaps when enabled.
+                SyncSelection(spec);
+                if (snap) SnapSelection();
+            }
 
-            // Iso grid; blocked nav cells in red (code blocks + furniture that blocks nav right now).
+            // Iso grid; blocked nav cells in red (code blocks + furniture that blocks nav right now, scaled footprint).
             var blocked = new HashSet<Vector2Int>(spec.Blocked);
             foreach (LayoutObject tag in room.GetComponentsInChildren<LayoutObject>())
             {
                 if (!tag.BlocksNav) continue;
                 RoomLayoutOverrides.PlacedObject o = LayoutOverrides.FromTag(tag);
-                blocked.Add(GridNav.CellOf(new Vector2(o.gx, o.gy)));
+                foreach (Vector2Int cell in BuildingLayout.Footprint(o.gx, o.gy, o.Scale1)) blocked.Add(cell);
             }
 
             GridNav nav = BuildingLayout.NavFor(spec);
@@ -538,12 +686,41 @@ namespace SixtyOne.Editor
             }
         }
 
-        private void SnapSelection()
+        /// <summary>After a drag: a door jumps to the nearest wall gap; a scaled object becomes uniform again.</summary>
+        private void SyncSelection(BuildingLayout.RoomSpec spec)
         {
             foreach (GameObject go in Selection.gameObjects)
             {
                 LayoutObject tag = go.GetComponent<LayoutObject>();
                 if (tag == null || tag.transform.parent != room.transform) continue;
+                if (tag.Kind == LayoutKind.Door)
+                {
+                    string edge = BuildingLayout.NearestWallEdge(spec, IsoMath.WorldToGrid(tag.transform.localPosition));
+                    Vector3 at = IsoMath.GridToWorld(BuildingLayout.EdgeCenter(spec, edge).x, BuildingLayout.EdgeCenter(spec, edge).y);
+                    if (edge == tag.DoorEdge && (at - tag.transform.localPosition).sqrMagnitude < 1e-6f) continue;
+                    Undo.RecordObject(tag, "Move door");
+                    Undo.RecordObject(tag.transform, "Move door");
+                    PlaceDoor(tag, spec, edge);
+                    EditorUtility.SetDirty(tag);
+                    continue;
+                }
+
+                if (tag.Kind == LayoutKind.Light || Mathf.Abs(tag.BaseScale.x) < 1e-4f) continue;
+                float scale = LayoutOverrides.ScaleOf(tag);
+                Vector3 uniform = new Vector3(tag.BaseScale.x * scale, tag.BaseScale.y * scale, 1f);
+                if ((uniform - tag.transform.localScale).sqrMagnitude < 1e-6f && Mathf.Approximately(scale, tag.ObjectScale)) continue;
+                Undo.RecordObject(tag.transform, "Uniform scale");
+                Undo.RecordObject(tag, "Uniform scale");
+                SetScale(tag, scale);
+            }
+        }
+
+        private void SnapSelection()
+        {
+            foreach (GameObject go in Selection.gameObjects)
+            {
+                LayoutObject tag = go.GetComponent<LayoutObject>();
+                if (tag == null || tag.transform.parent != room.transform || tag.Kind == LayoutKind.Door) continue;
                 Vector3 local = tag.transform.localPosition - new Vector3(0f, tag.Lift, 0f);
                 Vector2 grid = IsoMath.WorldToGrid(local);
                 grid = new Vector2(Mathf.Round(grid.x / SnapStep) * SnapStep, Mathf.Round(grid.y / SnapStep) * SnapStep);
@@ -571,7 +748,10 @@ namespace SixtyOne.Editor
             var placed = new List<RoomLayoutOverrides.PlacedObject>();
             foreach (LayoutObject tag in sceneRoom.GetComponentsInChildren<LayoutObject>(true))
             {
-                if (tag.transform.parent == sceneRoom.transform) placed.Add(LayoutOverrides.FromTag(tag));
+                if (tag.transform.parent != sceneRoom.transform) continue;
+                // A door is saved by the wall gap nearest to where it was dragged.
+                if (tag.Kind == LayoutKind.Door && BuildingLayout.IsWallEdge(tag.DoorEdge ?? "F0")) tag.DoorEdge = BuildingLayout.NearestWallEdge(code, IsoMath.WorldToGrid(tag.transform.localPosition));
+                placed.Add(LayoutOverrides.FromTag(tag));
             }
 
             List<RoomLayoutOverrides.PlacedObject> edits = LayoutOverrides.Diff(code, placed);

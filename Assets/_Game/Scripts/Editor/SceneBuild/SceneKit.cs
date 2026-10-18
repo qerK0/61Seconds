@@ -435,7 +435,7 @@ namespace SixtyOne.Editor
                 art.transform.SetParent(go.transform, false);
                 SpriteRenderer artRenderer = art.AddComponent<SpriteRenderer>();
                 Sprite doorSprite = door.Art == BuildingLayout.DoorArtKind.Elevator ? DoorArt.Elevator : DoorArt.Door;
-                if (DoorArt.Apply(artRenderer, doorSprite, door.Edge.StartsWith("R")))
+                if (DoorArt.Apply(artRenderer, doorSprite, door.Edge.StartsWith("R") != door.FlipX))
                 {
                     artRenderer.sortingOrder = RoomTiles.WallOrder + 1;
                     Material litDoor = RoomTiles.LitMaterial;
@@ -476,6 +476,7 @@ namespace SixtyOne.Editor
             Door component = go.AddComponent<Door>();
             component.ConfigureLink(navigator, approach, matRenderer, hover, label);
             component.ConfigureDoor(door.TargetRoom, arrival);
+            LayoutOverrides.Tag(go, door);
             EditorUtility.SetDirty(component);
             return component;
         }
@@ -605,16 +606,20 @@ namespace SixtyOne.Editor
                 // flipped, wall-fitted elevator door art.
                 height = DoorArt.Height + DoorArt.Rise;
             }
-            else if (spec.Art == BuildingLayout.StairwellArt && DoorArt.Apply(r, DoorArt.Door, spec.Edge != null && spec.Edge.StartsWith("R")))
+            else if (!string.IsNullOrEmpty(spec.Edge) && DoorArt.Apply(r, spec.Art == "Elevator" ? DoorArt.Elevator : DoorArt.Door, spec.Edge.StartsWith("R") != spec.FlipX))
             {
-                // Stairwell door in its wall gap (no stairs art): the door art + the "MERDİVEN ↓" sign. A sorting
-                // group keeps the plate and its text over the door while the whole door sorts by its Y.
+                // A door in a wall gap that plays a choice (the F2 stairwell door; no stairs art): door or elevator
+                // art, and for a stairwell the "MERDİVEN ↓" sign. A sorting group keeps the plate and its text over
+                // the door while the whole door sorts by its Y.
                 height = DoorArt.Height + DoorArt.Rise;
-                go.AddComponent<UnityEngine.Rendering.SortingGroup>();
-                GameObject sign = StairwellSign(go.transform);
-                r.sortingOrder = 0;
-                sign.GetComponentInChildren<SpriteRenderer>().sortingOrder = 1;
-                sign.GetComponentInChildren<TextMeshPro>().sortingOrder = 2;
+                if (spec.Art == BuildingLayout.StairwellArt)
+                {
+                    go.AddComponent<UnityEngine.Rendering.SortingGroup>();
+                    GameObject sign = StairwellSign(go.transform);
+                    r.sortingOrder = 0;
+                    sign.GetComponentInChildren<SpriteRenderer>().sortingOrder = 1;
+                    sign.GetComponentInChildren<TextMeshPro>().sortingOrder = 2;
+                }
             }
             else
             {
@@ -656,6 +661,7 @@ namespace SixtyOne.Editor
             ChoiceHotspot hotspot = go.AddComponent<ChoiceHotspot>();
             hotspot.ConfigureLink(navigator, approach, r, hover, label);
             hotspot.ConfigureHotspot(spec.ChoiceKey, spec.HideWhenGone, spec.AlsoKeys);
+            if (!string.IsNullOrEmpty(spec.Edge)) LayoutOverrides.Tag(go, spec);
             EditorUtility.SetDirty(hotspot);
             return hotspot;
         }

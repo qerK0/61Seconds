@@ -10,7 +10,9 @@ namespace SixtyOne.World
         Pickup = 1,
         Container = 2,
         HiddenItem = 3,
-        Light = 4
+        Light = 4,
+        /// <summary>A door or stairwell door: moves along its wall (edge codes); link, choice and costs stay in code.</summary>
+        Door = 5
     }
 
     /// <summary>
@@ -94,5 +96,28 @@ namespace SixtyOne.World
         [Header("Block (unmapped prop art)")]
         public Vector2 Scale = Vector2.one;
         public Color Tint = Color.white;
+
+        [Header("Transform (every placed object)")]
+        [Tooltip("Uniform scale on top of the built size (1 = as built). The Scene scale tool and the window slider change it.")]
+        public float ObjectScale = 1f;
+
+        [Tooltip("Transform scale at ObjectScale 1 (what the builder made); the saved scale is localScale / this.")]
+        public Vector2 BaseScale = Vector2.one;
+
+        [Tooltip("Sorting nudge added to the iso sort order (+ = in front, - = behind).")]
+        public int SortNudge;
+
+        [Header("Door")]
+        [Tooltip("Wall-gap edge code (L0.., R0..) the door sits in.")]
+        public string DoorEdge;
+
+        [Tooltip("Door / Elevator / Stairwell (door art + MERDİVEN sign).")]
+        public string DoorArt;
+
+        [Tooltip("Read-only: the room this door leads to (code-defined, like its choice and costs).")]
+        public string DoorTarget;
+
+        [Tooltip("Read-only: two-way door (the arrival on the other side follows it) or a one-way exit.")]
+        public bool DoorTwoWay;
     }
 }
