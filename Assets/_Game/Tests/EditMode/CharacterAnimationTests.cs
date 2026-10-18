@@ -9,6 +9,34 @@ namespace SixtyOne.Tests
     public class CharacterAnimationTests
     {
         [Test]
+        public void CrouchBeatsRunBeatsIdle()
+        {
+            Vector2 running = new Vector2(1f, 0f);
+            Assert.AreEqual(CharacterAnimState.Crouch, CharacterAnimator.StateFor(true, running, true));
+            Assert.AreEqual(CharacterAnimState.Crouch, CharacterAnimator.StateFor(false, Vector2.zero, true));
+            Assert.AreEqual(CharacterAnimState.Run, CharacterAnimator.StateFor(true, running, false));
+            Assert.AreEqual(CharacterAnimState.Idle, CharacterAnimator.StateFor(false, Vector2.zero, false));
+        }
+
+        [Test]
+        public void CrouchPlaysOnceThenHoldsTheLastFrame()
+        {
+            const int frames = 10;
+            float clock = 0f;
+            for (int i = 0; i < 60; i++) clock = CharacterAnimator.CrouchClock(clock, 0.05f, true, 14f, 18f, frames);
+            Assert.AreEqual(frames - 1, CharacterAnimator.CrouchFrameIndex(clock, frames), "held on the last frame");
+            Assert.AreEqual(frames - 1, CharacterAnimator.CrouchFrameIndex(clock + 100f, frames), "never past it");
+
+            // Standing up plays it backwards (18 fps) down to frame 0 and stops there.
+            float half = CharacterAnimator.CrouchClock(clock, 0.25f, false, 14f, 18f, frames);
+            Assert.AreEqual(4.5f, half, 0.001f);
+            for (int i = 0; i < 20; i++) half = CharacterAnimator.CrouchClock(half, 0.05f, false, 14f, 18f, frames);
+            Assert.AreEqual(0f, half);
+            Assert.AreEqual(0, CharacterAnimator.CrouchFrameIndex(half, frames));
+            Assert.AreEqual(0f, CharacterAnimator.CrouchClock(3f, 1f, true, 14f, 18f, 0), "no frames = no crouch");
+        }
+
+        [Test]
         public void FramesSortNumericallyByTheNumberInParentheses()
         {
             var paths = new List<string>

@@ -4,6 +4,60 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 03:55] LOCAL — Drop-Cover-Hold (Çök-Kapan-Tutun) crouch animation for the family during quakes
+### Done
+- **Art:** `cro all/mehmet crouch`, `anne crouch` and `velet crouch` moved (AssetDatabase.MoveAsset, .meta kept) to `Art/char/CROUCH_MEHMET`, `CROUCH_ANNE` and `CROUCH_CHILD`; the empty `cro all` folder was removed.
+- **Import:** `CharacterArt.ImportCrouch(member)`, part of `SixtyOne > Art > Import Character Frames`; any frame count.
+  - Same settings as the run frames.
+  - Per character: ONE pivot (the lowest opaque row over all frames + frame 0's horizontal foot centre) and ONE scale (frame 0's visible height = the character's in-game height).
+  - No per-frame trim or re-pivot.
+  - Result: Mehmet 10 frames, the wife 10, the child 7.
+- **CharacterAnimator:**
+  - new `Crouch` state, priority crouch > run > idle (`StateFor(moving, velocity, crouching)`);
+  - forward at 14 fps, holds the last frame (`CrouchClock` / `CrouchFrameIndex`, pure), backwards at 18 fps to stand up;
+  - the crouch frames use their own body scale (`ConfigureCrouch`); flipX is kept.
+- **CrouchDirector** (new, on the Game object) reacts to `QuakeStarted` / `QuakeEnded`:
+  - every member who is not Dead or Trapped crouches; the end plays the stand-up;
+  - placement quakes (opening, F3, F2) set `CrouchGate.Frozen`, so `PlayerMover.CanMove` and the followers stop until everyone is standing again;
+  - the prep-zero onset rumble (raised while the prep node is still current) is ignored, because the family still has to be placed;
+  - a death or Trapped snaps that member to idle; rewinds snap everyone to idle with no reverse animation;
+  - Reduce Effects doesn't change it.
+  - `PlacementController.IsQuaking` was added so the director can tell the real shake from the onset.
+- **Street quake:** members crouch while standing still; running stands them up at once. The street mechanic is "run to the open area during the shake" (checked at the peak), so freezing there would make that death unavoidable.
+- **Tests:** `CrouchBeatsRunBeatsIdle`, `CrouchPlaysOnceThenHoldsTheLastFrame`. EditMode **215 / 215**. 0 compile errors.
+- **Play Mode** (a console logger on QuakeStarted / QuakeEnded):
+  - opening quake (table), F3 aftershock and F2 strong aftershock: all three crouched during the shake (still crouched at QuakeEnded), freeze on, then stood up, freeze off, everyone alive;
+  - street: all three crouched, no freeze, stood up after;
+  - the F3 detour died to the gas bomb because my shortcut skipped the F4 valve; the rewind snapped everyone to idle, as intended.
+- Screenshots: `Screenshots/t12_f4_crouch_mid.png`, `t12_f4_crouch_held_full.png` (salon, at the table), `t12_f2_crouch.png` (Flat 7 mid-shake), `t12_crouch_mid.png` / `t12_crouch_held.png` (all three, mid and held).
+
+### Files created / changed
+- New:
+  - `Scripts/Placement/CrouchDirector.cs`, `CrouchGate.cs`;
+  - `Art/char/CROUCH_MEHMET|ANNE|CHILD/` (moved art, reimported).
+- Changed:
+  - `Placement/CharacterAnimator.cs` (Crouch state);
+  - `PlayerMover.cs` / `FamilyFollower.cs` (CrouchGate);
+  - `PlacementController.cs` (IsQuaking);
+  - `Editor/Art/CharacterArt.cs` (ImportCrouch);
+  - `Editor/SceneBuild/SceneKit.cs` (ConfigureCrouch);
+  - `TestSceneBuilder.cs` (the director);
+  - `Tests/EditMode/CharacterAnimationTests.cs`;
+  - `Scenes/Test_Building.unity` (rebuilt).
+
+### Needs local wiring (checklist for the MCP session)
+- [ ] Bora: watch a real quake at normal speed. I stepped / paused for the stills, so the 14 / 18 fps feel is not judged by eye.
+
+### Not verified / risks
+- Placement anchors put the family next to the salon table, not under it (unchanged), so in the stills the table draws in front of them.
+- Floor 2 is very dark, so the crouch is hard to read there (lighting, not the animation).
+- The street was entered by a jump, so its follow-camera framing was off in my captures; the logs confirm the crouch.
+
+### Next suggested step
+- If Bora wants the street crouch to also freeze, decide what replaces the "run to the open" check first.
+
+---
+
 ## [2026-10-18 03:20] LOCAL — Tasks 10 + 11: NPC art (dog, Cemil), rabid dog, Cemil's trade, Sevim / AFAD fixes, speech bubbles instead of the bottom panel
 ### Done
 - **NPC art (task 10):**

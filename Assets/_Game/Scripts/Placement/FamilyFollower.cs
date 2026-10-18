@@ -77,7 +77,7 @@ namespace SixtyOne.Placement
         {
             bool ready = Ready;
             if (arriving && (motor == null || motor.Owner != (object)this)) arriving = false;
-            bool active = ready && (ExplorationGate.Allowed || arriving);
+            bool active = ready && (ExplorationGate.Allowed || arriving) && !CrouchGate.Frozen;
             if (!active)
             {
                 if (motor != null && motor.IsMoving && motor.Owner == (object)this) motor.Stop();

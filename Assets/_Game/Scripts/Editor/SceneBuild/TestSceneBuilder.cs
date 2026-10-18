@@ -137,6 +137,9 @@ namespace SixtyOne.Editor
                 family.Add(SceneKit.AnimatedMember(familyRoot, type, CharacterArt.Import(type), data.Movement, survival));
             }
 
+            // Drop-Cover-Hold: the family crouches by itself while a quake shakes.
+            systems.AddComponent<CrouchDirector>().Configure(gameManager, nodePlayer, placement, family);
+
             var rooms = new List<Room>();
             var practicals = new List<Light2D>();
             TileArt.TileSets tileSets = TileArt.Generate();

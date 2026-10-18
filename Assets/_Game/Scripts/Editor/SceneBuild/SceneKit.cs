@@ -665,6 +665,9 @@ namespace SixtyOne.Editor
             CharacterMotor motor = go.AddComponent<CharacterMotor>();
             CharacterAnimator animator = go.AddComponent<CharacterAnimator>();
             animator.Configure(body, frames.Sprites, CharacterArt.IdleFrame(type), CharacterArt.FacesRight(type), motor, movement, survival);
+            // Drop-Cover-Hold during quakes: its own scale so frame 0 matches the in-game height.
+            CharacterArt.Frames crouch = CharacterArt.ImportCrouch(type);
+            if (crouch.Sprites.Length > 0) animator.ConfigureCrouch(crouch.Sprites, frames.BodyScale > 0f ? crouch.BodyScale / frames.BodyScale : 1f);
 
             FamilyMember member = go.AddComponent<FamilyMember>();
             SerializedWire.SetInt(member, "type", (int)type);

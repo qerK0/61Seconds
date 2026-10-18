@@ -34,7 +34,7 @@ namespace SixtyOne.Placement
             get
             {
                 GameManager gm = gameManager != null ? gameManager : GameManager.Instance;
-                return gm != null && !gm.IsDead && ExplorationGate.Allowed && !InputGate.IsBlocked && player != null && rooms != null && rooms.Current != null;
+                return gm != null && !gm.IsDead && ExplorationGate.Allowed && !InputGate.IsBlocked && !CrouchGate.Frozen && player != null && rooms != null && rooms.Current != null;
             }
         }
 

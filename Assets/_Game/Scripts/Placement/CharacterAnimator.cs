@@ -10,7 +10,23 @@ namespace SixtyOne.Placement
         Idle,
 
         /// <summary>Looping the run frames.</summary>
-        Run
+        Run,
+
+        /// <summary>Drop-Cover-Hold: crouch frames forward (then hold the last) or backward to standing.</summary>
+        Crouch
+    }
+
+    /// <summary>How a quake crouch behaves.</summary>
+    public enum CrouchMode
+    {
+        /// <summary>No crouch.</summary>
+        Off,
+
+        /// <summary>Crouch and hold until released (placement quakes: nobody moves).</summary>
+        Hold,
+
+        /// <summary>Crouch while standing still; running stands up at once (the street quake: run to the open).</summary>
+        WhenStill
     }
 
     /// <summary>
@@ -42,12 +58,44 @@ namespace SixtyOne.Placement
         [Tooltip("Panic source for faster breathing. Optional.")]
         [SerializeField] private SurvivalController survival;
 
+        [Tooltip("Drop-Cover-Hold frames, standing (0) to the held crouch (last). Optional.")]
+        [SerializeField] private Sprite[] crouchFrames = new Sprite[0];
+
+        [Tooltip("Body scale for the crouch frames relative to the run frames (frame 0 = the same height).")]
+        [SerializeField] private float crouchScale = 1f;
+
+        [Tooltip("Crouch-down and stand-up speeds (frames per second).")]
+        [SerializeField] private Vector2 crouchFps = new Vector2(14f, 18f);
+
         private Vector3 baseScale = Vector3.one;
         private Vector3 basePosition;
         private float frameClock;
         private float breathPhase;
+        private CrouchMode crouchMode;
+        private float crouchClock;
 
         public int FrameCount => runFrames != null ? runFrames.Length : 0;
+
+        public bool HasCrouch => crouchFrames != null && crouchFrames.Length > 0;
+
+        /// <summary>True while any crouch frame is shown (going down, held, or standing back up).</summary>
+        public bool IsCrouching => HasCrouch && (crouchMode != CrouchMode.Off || crouchClock > 0f);
+
+        /// <summary>Starts the Drop-Cover-Hold (forward once, then hold the last frame).</summary>
+        public void StartCrouch(CrouchMode mode)
+        {
+            if (HasCrouch) crouchMode = mode;
+        }
+
+        /// <summary>Shaking ended: play the crouch backwards to standing.</summary>
+        public void StandUp() => crouchMode = CrouchMode.Off;
+
+        /// <summary>Straight back to the idle pose (rewind, death, Trapped): no reverse animation.</summary>
+        public void ResetCrouch()
+        {
+            crouchMode = CrouchMode.Off;
+            crouchClock = 0f;
+        }
 
         private void Awake()
         {
@@ -65,8 +113,14 @@ namespace SixtyOne.Placement
         {
             if (body == null || runFrames == null || runFrames.Length == 0) return;
             float dt = Time.deltaTime;
-            State = StateFor(motor != null && motor.IsMoving, motor != null ? motor.Velocity : Vector2.zero);
-            if (State == CharacterAnimState.Run) Run(dt);
+            bool moving = motor != null && motor.IsMoving;
+            Vector2 velocity = motor != null ? motor.Velocity : Vector2.zero;
+            // The street crouch gives way to running (stand up at once, run to the open).
+            if (crouchMode == CrouchMode.WhenStill && StateFor(moving, velocity) == CharacterAnimState.Run) crouchClock = 0f;
+            bool crouching = IsCrouching && !(crouchMode == CrouchMode.WhenStill && StateFor(moving, velocity) == CharacterAnimState.Run);
+            State = StateFor(moving, velocity, crouching);
+            if (State == CharacterAnimState.Crouch) Crouch(dt);
+            else if (State == CharacterAnimState.Run) Run(dt);
             else Idle(dt);
         }
 
@@ -77,6 +131,30 @@ namespace SixtyOne.Placement
         public static CharacterAnimState StateFor(bool moving, Vector2 velocity)
         {
             return moving && velocity.sqrMagnitude > 0.0001f ? CharacterAnimState.Run : CharacterAnimState.Idle;
+        }
+
+        /// <summary>Crouch beats run beats idle (pure).</summary>
+        public static CharacterAnimState StateFor(bool moving, Vector2 velocity, bool crouching)
+        {
+            return crouching ? CharacterAnimState.Crouch : StateFor(moving, velocity);
+        }
+
+        /// <summary>
+        /// Advances the crouch clock (in frames): forward at downFps while crouching, backward at upFps while
+        /// standing up; clamped to [0, last frame] so the last frame is held (pure).
+        /// </summary>
+        public static float CrouchClock(float clock, float dt, bool down, float downFps, float upFps, int frameCount)
+        {
+            if (frameCount <= 0) return 0f;
+            float next = down ? clock + dt * downFps : clock - dt * upFps;
+            return Mathf.Clamp(next, 0f, frameCount - 1);
+        }
+
+        /// <summary>Crouch frame for a clock: never past the last (held) frame (pure).</summary>
+        public static int CrouchFrameIndex(float clock, int frameCount)
+        {
+            if (frameCount <= 0) return 0;
+            return Mathf.Clamp(Mathf.FloorToInt(Mathf.Max(0f, clock)), 0, frameCount - 1);
         }
 
         /// <summary>Looping run frame for an accumulated frame clock (pure).</summary>
@@ -110,6 +188,16 @@ namespace SixtyOne.Placement
             body.transform.localPosition = basePosition;
         }
 
+        /// <summary>Crouch frames at their own scale on the shared foot pivot; the facing (flipX) stays as it was.</summary>
+        private void Crouch(float dt)
+        {
+            frameClock = 0f;
+            crouchClock = CrouchClock(crouchClock, dt, crouchMode != CrouchMode.Off, crouchFps.x, crouchFps.y, crouchFrames.Length);
+            body.sprite = crouchFrames[CrouchFrameIndex(crouchClock, crouchFrames.Length)];
+            body.transform.localScale = baseScale * crouchScale;
+            body.transform.localPosition = basePosition;
+        }
+
         private void Idle(float dt)
         {
             frameClock = 0f;
@@ -135,6 +223,13 @@ namespace SixtyOne.Placement
             motor = source;
             config = tuning;
             survival = panic;
+        }
+
+        /// <summary>Authoring helper: crouch frames and their body scale relative to the run frames.</summary>
+        public void ConfigureCrouch(Sprite[] frames, float scaleRelativeToRun)
+        {
+            crouchFrames = frames ?? new Sprite[0];
+            crouchScale = scaleRelativeToRun;
         }
     }
 }

@@ -37,6 +37,9 @@ namespace SixtyOne.Placement
         private bool active;
         private bool quaking;
 
+        /// <summary>True while the placement quake shakes (hazards resolving), not during the placement timer.</summary>
+        public bool IsQuaking => quaking;
+
         public bool IsActive => active;
         private GameState State => gameManager.State;
 

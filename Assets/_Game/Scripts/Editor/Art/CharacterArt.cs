@@ -115,6 +115,8 @@ namespace SixtyOne.Editor
             {
                 Frames frames = Import(member);
                 Debug.Log($"[CharacterArt] {Prefix(member)}: {frames.Sprites.Length} frames, visible height {frames.VisibleHeight:0.00}u, body scale {frames.BodyScale:0.000}.");
+                Frames crouch = ImportCrouch(member);
+                Debug.Log($"[CharacterArt] {member} crouch: {crouch.Sprites.Length} frames, frame 0 height {crouch.VisibleHeight:0.00}u, body scale {crouch.BodyScale:0.000}.");
             }
 
             foreach (var npc in NpcIdles)
@@ -243,6 +245,79 @@ namespace SixtyOne.Editor
             }
 
             return null;
+        }
+
+        /// <summary>Drop-Cover-Hold frames per character (frame 0 standing → last = held crouch).</summary>
+        public static string CrouchFolder(MemberType member)
+        {
+            switch (member)
+            {
+                case MemberType.Wife: return CharRoot + "/CROUCH_ANNE";
+                case MemberType.Child: return CharRoot + "/CROUCH_CHILD";
+                default: return CharRoot + "/CROUCH_MEHMET";
+            }
+        }
+
+        /// <summary>
+        /// Imports a character's crouch frames (any count) with the run frames' settings, ONE shared pivot (the
+        /// lowest opaque row over all frames, frame 0's horizontal foot centre) and ONE scale so frame 0 is as tall
+        /// as the character in game. No per-frame trim or pivot (the sequence would jitter). Empty when missing.
+        /// </summary>
+        public static Frames ImportCrouch(MemberType member)
+        {
+            var result = new Frames { Member = member };
+            List<string> paths = SortedFramePaths(CrouchFolder(member), "frame");
+            if (paths.Count == 0) return result;
+
+            int minY = int.MaxValue;
+            int width = 1, height = 1;
+            foreach (string path in paths)
+            {
+                Measure(path, out int w, out int h, out int bottom, out int _);
+                width = w;
+                height = h;
+                if (bottom < minY) minY = bottom;
+            }
+
+            Measure(paths[0], out int _, out int _, out int bottom0, out int top0);
+            float footX = FootCentreX(paths[0], bottom0, top0);
+            var pivot = new Vector2(Mathf.Clamp01(footX / width), Mathf.Clamp01(minY / (float)height));
+            var sprites = new List<Sprite>();
+            foreach (string path in paths)
+            {
+                ApplyImport(path, pivot);
+                Sprite sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+                if (sprite != null) sprites.Add(sprite);
+            }
+
+            result.Sprites = sprites.ToArray();
+            result.VisibleHeight = (top0 - bottom0 + 1) / PixelsPerUnit;
+            float target = PlayerHeight * TargetHeightRatio(member);
+            result.BodyScale = result.VisibleHeight > 0f ? target / result.VisibleHeight : 1f;
+            return result;
+        }
+
+        /// <summary>Horizontal centre (px) of the opaque pixels in the lowest 5% of a frame's figure: the feet.</summary>
+        private static float FootCentreX(string path, int bottom, int top)
+        {
+            var texture = new Texture2D(2, 2);
+            texture.LoadImage(File.ReadAllBytes(path));
+            int w = texture.width;
+            Color32[] pixels = texture.GetPixels32();
+            Object.DestroyImmediate(texture);
+            int band = Mathf.Max(2, Mathf.RoundToInt((top - bottom) * 0.05f));
+            int minX = w, maxX = -1;
+            for (int y = bottom; y <= bottom + band && y * w < pixels.Length; y++)
+            {
+                for (int x = 0; x < w; x++)
+                {
+                    if (pixels[y * w + x].a <= 20) continue;
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                }
+            }
+
+            return maxX < minX ? w * 0.5f : (minX + maxX) * 0.5f;
         }
 
         /// <summary>Imports (or re-imports) one character's frames and returns them in numeric order.</summary>
