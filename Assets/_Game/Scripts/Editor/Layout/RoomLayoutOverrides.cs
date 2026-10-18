@@ -67,7 +67,7 @@ namespace SixtyOne.Editor
             [Header("Door")]
             [Tooltip("Wall-gap edge code the door sits in.")]
             public string doorEdge;
-            [Tooltip("Door / Elevator / Stairwell.")]
+            [Tooltip("Door / Elevator / Stairwell / Stairs.")]
             public string doorArt;
 
             /// <summary>The scale to build with: entries saved before scale existed (0) count as 1.</summary>

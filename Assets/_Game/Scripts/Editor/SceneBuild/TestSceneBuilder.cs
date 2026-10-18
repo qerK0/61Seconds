@@ -403,6 +403,11 @@ namespace SixtyOne.Editor
                 SceneKit.Hotspot(t, spec, h, navigator);
             }
 
+            foreach (BuildingLayout.DecorStairsSpec s in spec.DecorStairs)
+            {
+                SceneKit.DecorStairs(t, spec, s);
+            }
+
             // The street's downed power line (blocked cells, click = electrocution) and the assembly-area sign label.
             if (spec.Id == BuildingLevelsGenerator.Street) streetLine = SceneKit.StreetExtras(t);
 

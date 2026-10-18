@@ -114,8 +114,15 @@ namespace SixtyOne.Editor
             public string TargetNodeId;
         }
 
-        /// <summary>Art in a door's wall gap.</summary>
-        public enum DoorArtKind { Door, Elevator, Stairwell }
+        /// <summary>Art in a door's wall gap: a door, an elevator, a stairwell door (door + sign) or stairs (steps down + sign).</summary>
+        public enum DoorArtKind { Door, Elevator, Stairwell, Stairs }
+
+        /// <summary>Decorative stairs in a back-wall gap (not clickable, no sign); broken = dark, with debris on top.</summary>
+        public sealed class DecorStairsSpec
+        {
+            public string Edge;
+            public bool Broken;
+        }
 
         /// <summary>A door on an edge of this room leading to another room (arrival = just inside it there).</summary>
         public sealed class DoorSpec
@@ -127,7 +134,7 @@ namespace SixtyOne.Editor
             public Vector2 Arrival;
             /// <summary>Two-way door: the target room has a door back, and the arrival follows that door when it moves.</summary>
             public bool TwoWay;
-            /// <summary>Door, elevator or stairwell door (the door art + a "MERDİVEN ↓" sign).</summary>
+            /// <summary>Door, elevator, stairwell door or stairs (stairwell and stairs carry a "MERDİVEN ↓" sign).</summary>
             public DoorArtKind Art;
             /// <summary>Mirrors the art (Layout Editor).</summary>
             public bool FlipX;
@@ -187,6 +194,8 @@ namespace SixtyOne.Editor
             public List<RopeSpec> Ropes = new List<RopeSpec>();
             public List<DoorSpec> Doors = new List<DoorSpec>();
             public List<HotspotSpec> Hotspots = new List<HotspotSpec>();
+            /// <summary>Decorative stairs in back-wall gaps (the F3 arrival, the F3 broken stairwell).</summary>
+            public List<DecorStairsSpec> DecorStairs = new List<DecorStairsSpec>();
             /// <summary>Floors below the top floor (0 = floor 4 ... 3 = street): more debris and cracks.</summary>
             public int Depth;
             /// <summary>Cells that are never walkable (the street's power line).</summary>
@@ -272,12 +281,19 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>
-        /// The way down: a stairwell door (door art + "MERDİVEN ↓" sign) on a back-wall gap. There is no stairs art;
-        /// clicking it plays the node's stairs move choice like any door into another zone.
+        /// The way down: stairs (Art/items/merdiven.png in the gap + "MERDİVEN ↓" sign) on a back-wall gap; clicking it
+        /// plays the node's stairs move choice like any door into another zone.
         /// </summary>
         private static void StairwellDoor(RoomSpec from, string edge, RoomSpec to, Vector2 arrival)
         {
-            OneWay(from, edge, to, arrival).Art = DoorArtKind.Stairwell;
+            OneWay(from, edge, to, arrival).Art = DoorArtKind.Stairs;
+        }
+
+        /// <summary>Decorative stairs in a back-wall gap (adds the gap).</summary>
+        private static void DecorStairs(RoomSpec room, string edge, bool broken)
+        {
+            if (!room.Gaps.Contains(edge)) room.Gaps.Add(edge);
+            room.DecorStairs.Add(new DecorStairsSpec { Edge = edge, Broken = broken });
         }
 
         /// <summary>
@@ -368,11 +384,14 @@ namespace SixtyOne.Editor
         {
             Vector2 c = EdgeCenter(room, edge);
             if (!room.Gaps.Contains(edge)) room.Gaps.Add(edge);
-            return new HotspotSpec { Name = "Stairwell", ChoiceKey = choiceKey, Gx = c.x, Gy = c.y, Art = StairwellArt, Edge = edge };
+            return new HotspotSpec { Name = "Stairwell", ChoiceKey = choiceKey, Gx = c.x, Gy = c.y, Art = StairsArt, Edge = edge };
         }
 
-        /// <summary>Hotspot art name of a stairwell door.</summary>
+        /// <summary>Hotspot art name of a stairwell door (door art + sign).</summary>
         public const string StairwellArt = "Stairwell";
+
+        /// <summary>Hotspot art name of stairs (steps down + sign).</summary>
+        public const string StairsArt = "Stairs";
 
         /// <summary>Where the player stands to use a hotspot: inside its wall gap, else in front of it (camera side).</summary>
         public static Vector2 HotspotApproach(RoomSpec room, HotspotSpec h)
@@ -430,7 +449,7 @@ namespace SixtyOne.Editor
                 case "kitchen_cabinet": spec.Art = "KitchenCabinet"; spec.Scale = new Vector2(0.9f, 0.9f); break;
                 case "toolbox": spec.Art = "Toolbox"; spec.Scale = new Vector2(0.55f, 0.35f); break;
                 case "drawer": spec.Scale = new Vector2(0.8f, 0.5f); break;
-                case "nightstand": spec.Scale = new Vector2(0.55f, 0.55f); break;
+                case "nightstand": spec.Art = "Nightstand"; spec.Scale = new Vector2(0.55f, 0.55f); break;
                 default: spec.Scale = new Vector2(0.55f, 0.35f); break;
             }
 
@@ -642,6 +661,8 @@ namespace SixtyOne.Editor
             bedroom.Props.Add(P(null, "Bed", 1.6f, 2.6f, -0.05f, 1.6f, 0.6f, new Color(0.85f, 0.85f, 0.9f, 1f)));
             bedroom.Items.Add(I("bedsheet", 1.6f, 2.6f, new Color(0.92f, 0.92f, 1f, 1f), id: "bedroom_bed_sheet"));
             bedroom.Containers.Add(Box("bedroom_wardrobe_sheet", "wardrobe", 3.6f, 3.3f, Wood, "bedsheet"));
+            // An empty nightstand by the bed (komodin): searching it only costs time.
+            bedroom.Containers.Add(Box("bedroom_nightstand", "nightstand", 0.5f, 3.4f, Wood));
             bedroom.Lights.Add(L("BedLamp", 0.6f, 3.4f, 0.8f, 2.4f));
 
             // Corridor: one door per flat, the stairwell door (L0), the elevator (trap) and Sevim Teyze.
@@ -672,6 +693,7 @@ namespace SixtyOne.Editor
             RoomSpec f12Bedroom = Art(Room(BuildingLevelsGenerator.Flat12Bedroom, 4, 4, new Color(0.72f, 0.68f, 0.76f, 1f), BuildingLevelsGenerator.Flat12), RoomArt.Home, windows: "R3");
             f12Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.85f, 0.82f, 0.9f, 1f)));
             f12Bedroom.Containers.Add(Lent(Box("flat12_wardrobe_sheet", "wardrobe", 2.6f, 3.4f, Wood, "bedsheet")));
+            f12Bedroom.Containers.Add(Lent(Box("flat12_nightstand", "nightstand", 0.5f, 3.3f, Wood)));
 
             Link(salon, "L3", hall, "L0");
             Link(salon, "L5", kitchen, "L0");
@@ -701,6 +723,10 @@ namespace SixtyOne.Editor
             corridor.Props.Add(P("corridor_lamp", "CorridorLamp", 3.6f, 1.4f, 1.6f, 0.45f, 0.3f, new Color(1f, 0.95f, 0.6f, 1f), drop: 1.4f));
             corridor.Props.Add(P("corridor_window", "CorridorWindow", 5.5f, 2.95f, 0.35f, 0.9f, 1.0f, new Color(0.6f, 0.85f, 1f, 0.9f)));
             corridor.Props.Add(P("stair_edge", "StairEdge", 6.8f, 1.0f, 0f, 0.9f, 0.35f, new Color(0.45f, 0.45f, 0.5f, 1f), drop: 0.7f));
+            // Decorative stairs: the flight we came down from Floor 4 (L0, by the arrival) and the collapsed flight
+            // below (R1: dark, debris on top; the stair-edge hazard anchor stays in front of it).
+            DecorStairs(corridor, "L0", false);
+            DecorStairs(corridor, "R1", true);
             corridor.Props.Add(P("ceiling_debris", "CeilingDebris", 3.0f, 0.8f, 1.8f, 0.6f, 0.25f, new Color(0.6f, 0.58f, 0.55f, 1f), drop: 1.6f));
             corridor.Hotspots.Add(Person("Cemil", "f3.corridor.c_trader", 4.7f, 0.7f, new Color(0.75f, 0.6f, 0.35f, 1f), idle: "cemil"));
             corridor.Hotspots[corridor.Hotspots.Count - 1].Face = new Vector2(corridor.Width * 0.5f, corridor.Height * 0.5f);
@@ -783,6 +809,7 @@ namespace SixtyOne.Editor
             f8Living.Containers.Add(Lent(Box("flat8_bookshelf", "bookshelf", 3.7f, 2.5f, Wood, "food")));
             RoomSpec f8Bedroom = Art(Room(BuildingLevelsGenerator.Flat8Bedroom, 4, 4, new Color(0.7f, 0.64f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
+            f8Bedroom.Containers.Add(Lent(Box("flat8_nightstand", "nightstand", 0.5f, 3.3f, Wood)));
 
             // The stairwell door down to the street (L1) and the elevator trap. The mugger (Tehlikeli Adam)
             // stands in front of it: going down starts the scripted robbery, then the street.

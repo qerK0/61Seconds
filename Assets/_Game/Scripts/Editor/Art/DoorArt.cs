@@ -11,6 +11,9 @@ namespace SixtyOne.Editor
     /// lines so that, at one shared PPU, the bottom edge lies exactly on the gap's floor edge (2:1 slant), the width
     /// fills one wall segment and the height is HeightOfWall x the stacked wall. Pivot = bottom-edge midpoint
     /// (the gap's edge centre). The art faces the back-left wall; callers flip X for back-right walls.
+    /// Stairs (Art/items/merdiven.png, steps going down into the opening) are fitted the same way, except that every
+    /// column is scaled by one shared factor (the tallest column reaches StairsHeightOfWall of the wall), so the
+    /// triangular flight keeps its shape.
     /// </summary>
     public static class DoorArt
     {
@@ -19,7 +22,11 @@ namespace SixtyOne.Editor
         public const string OldDoorPath = "Assets/_Game/Art/Concept/door.png";
         public static string DoorPath => File.Exists(NewDoorPath) ? NewDoorPath : OldDoorPath;
         public const string ElevatorPath = "Assets/_Game/Art/Concept/asansorkapı.png";
+        public const string StairsPath = "Assets/_Game/Art/items/merdiven.png";
         private const string OutFolder = "Assets/_Game/Art/Concept/Generated";
+
+        /// <summary>Stairs opening top as a fraction of the stacked wall height.</summary>
+        public const float StairsHeightOfWall = 0.97f;
 
         /// <summary>Door top as a fraction of the stacked wall height (per pixel column).</summary>
         public const float HeightOfWall = 0.9f;
@@ -33,6 +40,7 @@ namespace SixtyOne.Editor
         private static int wallRows = 2;
         private static Sprite door;
         private static Sprite elevator;
+        private static Sprite stairs;
 
         /// <summary>Visible door height (vertical, per column) for the configured wall rows.</summary>
         public static float Height => HeightOfWall * RoomTiles.WallColumnHeight(wallRows);
@@ -44,6 +52,7 @@ namespace SixtyOne.Editor
 
         public static Sprite Door => door != null ? door : door = Build(DoorPath, "door_wall");
         public static Sprite Elevator => elevator != null ? elevator : elevator = Build(ElevatorPath, "elevator_wall");
+        public static Sprite Stairs => stairs != null ? stairs : stairs = Build(StairsPath, "stairs_wall", true);
 
         /// <summary>Sets the wall rows the art is fitted to (the scene builder calls it before building rooms).</summary>
         public static void Configure(int rows)
@@ -53,6 +62,7 @@ namespace SixtyOne.Editor
             wallRows = rows;
             door = null;
             elevator = null;
+            stairs = null;
         }
 
         /// <summary>Puts the door or elevator art on a renderer (white, unscaled; pivot at the renderer's position).</summary>
@@ -66,7 +76,7 @@ namespace SixtyOne.Editor
             return true;
         }
 
-        private static Sprite Build(string sourcePath, string outName)
+        private static Sprite Build(string sourcePath, string outName, bool keepShape = false)
         {
             if (!File.Exists(sourcePath)) return null;
             var source = new Texture2D(2, 2);
@@ -104,6 +114,14 @@ namespace SixtyOne.Editor
             int outW = span + 1;
             float ppu = outW / Width;
             float doorPx = Height * ppu;
+            // Stairs: one vertical scale for every column (the tallest column above the bottom line fills the opening).
+            float tallest = 1f;
+            if (keepShape)
+            {
+                for (int x = x0; x <= x1; x++) if (top[x] >= 0) tallest = Mathf.Max(tallest, top[x] - (bA + bB * x));
+                doorPx = StairsHeightOfWall * RoomTiles.WallColumnHeight(wallRows) * ppu;
+            }
+
             float risePx = Rise * ppu;
             int margin = Mathf.CeilToInt(doorPx * 0.15f);
             int outH = Mathf.CeilToInt(doorPx + risePx) + 2 * margin;
@@ -118,7 +136,7 @@ namespace SixtyOne.Editor
                 for (int yo = 0; yo < outH; yo++)
                 {
                     float rel = (yo - outBottom) / doorPx;
-                    float ys = srcBottom + rel * (srcTop - srcBottom);
+                    float ys = srcBottom + rel * (keepShape ? tallest : srcTop - srcBottom);
                     Color c = ys < 0f || ys >= h ? clear : source.GetPixelBilinear((xs + 0.5f) / w, (ys + 0.5f) / h);
                     output.SetPixel(xo, yo, c);
                 }

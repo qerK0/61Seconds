@@ -162,7 +162,7 @@ namespace SixtyOne.Editor
                         {
                             if (e == null || e.Sprite == null || !seen.Add(e.Sprite)) continue;
                             string n = e.Name;
-                            entries.Add((n, Thumb(e.Sprite), () => SpawnProp(n)));
+                            entries.Add((PropArt.Label(n), Thumb(e.Sprite), () => SpawnProp(n)));
                         }
 
                         if (props.ChandelierFrames.Length > 0) entries.Add(("CeilingLamp", Thumb(props.ChandelierFrames[0]), () => SpawnProp("CeilingLamp")));
@@ -404,7 +404,10 @@ namespace SixtyOne.Editor
             return tag.GetComponentInChildren<SpriteRenderer>();
         }
 
-        private static readonly string[] DoorArts = { "Door", "Elevator", "Stairwell" };
+        private static readonly string[] DoorArts = { "Door", "Elevator", "Stairwell", "Stairs" };
+
+        /// <summary>Popup labels of DoorArts (same order).</summary>
+        private static readonly string[] DoorArtLabels = { "Door", "Elevator", "Stairwell door", "Stairs" };
 
         /// <summary>
         /// A door: its wall gap (drag it along the wall, or pick the edge), flip and art. Where it leads, its choice
@@ -420,7 +423,7 @@ namespace SixtyOne.Editor
             EditorGUI.BeginChangeCheck();
             int edgeIndex = EditorGUILayout.Popup("Duvar boşluğu", Mathf.Max(0, System.Array.IndexOf(edges, tag.DoorEdge)), edges);
             bool flip = EditorGUILayout.Toggle("Flip X", tag.FlipX);
-            int art = EditorGUILayout.Popup("Görsel", Mathf.Max(0, System.Array.IndexOf(DoorArts, tag.DoorArt)), DoorArts);
+            int art = EditorGUILayout.Popup("Görsel", Mathf.Max(0, System.Array.IndexOf(DoorArts, tag.DoorArt)), DoorArtLabels);
             if (!EditorGUI.EndChangeCheck()) return;
             Undo.RecordObject(tag, "Edit door");
             Undo.RecordObject(tag.transform, "Move door");

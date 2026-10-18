@@ -17,9 +17,15 @@ MonoBehaviour:
     Sprite: {fileID: -1343031814, guid: 292e9a1c3a44589488bfdbd40951c7de, type: 3}
   - Name: Desk
     Sprite: {fileID: -1343031814, guid: 292e9a1c3a44589488bfdbd40951c7de, type: 3}
-  - Name: Chair
-    Sprite: {fileID: 2129430607, guid: f1fb3dd31930b58489a56ab2d50ff00c, type: 3}
   - Name: Wardrobe
+    Sprite: {fileID: -1607909530, guid: b52614c46eee2db4da1ef364d036a5a3, type: 3}
+  - Name: Chair
+    Sprite: {fileID: -222007261, guid: 8b3b6bcb8c0392a45ae33459f935f2c8, type: 3}
+  - Name: Nightstand
+    Sprite: {fileID: -1342833835, guid: 69a60d7eff3815e4ca5b8f5eae249fb3, type: 3}
+  - Name: ChairOld
+    Sprite: {fileID: 2129430607, guid: f1fb3dd31930b58489a56ab2d50ff00c, type: 3}
+  - Name: WardrobeOld
     Sprite: {fileID: 1552390509, guid: 0a6ca84dbe3d2dc47a1ee4f4394d6947, type: 3}
   - Name: NeighbourWardrobe
     Sprite: {fileID: 1448007105, guid: 9950b7ce94c2f304eb643af617c868bd, type: 3}

@@ -4,6 +4,46 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 15:10] LOCAL — New furniture art (gardrop, komidin, sandalye) + stairs art (merdiven)
+### Done
+- **Props** (`PropArt`: bottom-centre pivot on the opaque pixels, PPU from the target height):
+  - `Wardrobe` uses gardrop.png (~1.1u); the old dolap.png is the `WardrobeOld` variant.
+  - `Chair` uses sandalye.png (~0.55u); masaa.png is `ChairOld`.
+  - New `Nightstand` from komidin.png (~0.32u).
+  - `WardrobeV2` is unchanged.
+  - Palette labels: "Wardrobe (eski)", "Wardrobe v2", "Chair (masaa)" (`PropArt.Label`).
+- **Overrides keep working:** prop names did not change, so overrides that use "Wardrobe" / "Chair" load the new art. Only an explicitly chosen variant (WardrobeV2 / WardrobeOld / ChairOld) keeps the old look.
+- **Container presets:** "Gardırop" uses the new wardrobe art. "Komodin" (container.nightstand) now has `Art = Nightstand`, which also covers `hall_nightstand` (the flashlight).
+- **New empty nightstands** next to each bed: `bedroom_nightstand` (Flat 11), `flat12_nightstand` and `flat8_nightstand` (borrowed).
+- The salon and F7 desk chairs are "Chair" props, so they switch to sandalye automatically.
+- **Stairs:** new `DoorArtKind.Stairs`. `DoorArt.Stairs` builds `Generated/stairs_wall.png` from merdiven.png:
+  - each column's bottom sits on the gap's 2:1 floor edge;
+  - one vertical scale for all columns, so the tallest column fills 97 % of the two-row wall and the steps keep their shape;
+  - the width is one wall segment;
+  - flipped on right-wall gaps.
+- **Usable stairs** (only the art changed; choices, costs and nodes are the same) keep the "MERDİVEN ↓" sign: F4 corridor L0 → F3, F2 corridor L0 → stairs room, F2 stairs room L1 → street (hotspot `Art = "Stairs"`; the robber still triggers there).
+- **Decorative stairs** (`RoomSpec.DecorStairs`, `SceneKit.DecorStairs`; no collider, no sign):
+  - F3 corridor L0, the flight down from F4 (new L0 gap);
+  - F3 corridor R1, the broken flight: dark tint plus 2 debris sprites. The stair-edge prop and its hazard anchor are unchanged.
+- **Layout Editor:** the door art popup is now Door / Elevator / Stairwell door / Stairs.
+### Files created / changed
+- `Scripts/Editor/Art/PropArt.cs`, `DoorArt.cs`, `Editor/SceneBuild/BuildingLayout.cs`, `SceneKit.cs`, `TestSceneBuilder.cs`, `Editor/Layout/LayoutEditorWindow.cs`, `RoomLayoutOverrides.cs` (tooltip).
+- `Data/Art/PropArtSet.asset`, the gardrop / komidin / sandalye / merdiven import settings, `Art/Concept/Generated/stairs_wall.png`, `Test_Building.unity` (rebuilt with the overrides).
+### Needs local wiring (checklist for the MCP session)
+- [ ] None.
+### Not verified / risks
+- **Step 3 (verify) was skipped at Bora's request.** No screenshots, no F4 → street walk, EditMode not run, Validate Content not run.
+- What was checked: 0 compile errors; Import Prop Art and Build Test Scene ran. The scene contains `Stairs_L0`, `Stairs_R1_broken` and the stair doors.
+- The first Build Test Scene attempt lost the MCP connection; the second one completed and the scene was saved.
+- **Look first if something seems off:**
+  - the stairs art is small (143 × 156) and stretched to the wall height, so it may look soft or tall;
+  - the debris offsets on the broken stairs were placed by numbers, not by eye;
+  - the nightstand spots (0.5, 3.3–3.4) may overlap a bed corner or a wall lamp.
+- Layout Editor door proxies still show the door sprite until Rebuild scene.
+### Next suggested step
+- Look at the F4 / F3 / F2 stairs and a bedroom in the editor, then run Validate Content + EditMode.
+
+
 ## [2026-10-18 13:30] LOCAL — Task 16: 8-minute timer, intro briefing, floor info cards, robber rework + idle animation
 ### Done
 - **8 minutes:** `buildingSeconds` 300 → 480; the pulse stays at 60 s, the alarm + ticks at 30 s, the prep at 60 s.

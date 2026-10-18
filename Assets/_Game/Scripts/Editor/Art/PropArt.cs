@@ -11,7 +11,8 @@ namespace SixtyOne.Editor
     /// SixtyOne > Art > Import Prop Art. Imports the furniture / fixture art in Art/Concept as sprites with a
     /// bottom-centre pivot on the opaque pixels, and a PPU that puts each prop at its target size in room-local
     /// world units (before RoomVisualConfig.WorldScale): table ~0.45 high, wardrobe / bookshelf ~1.1, stove ~0.5,
-    /// chair ~0.55, valve / fuse box ~0.25, wall lamp ~0.2, debris ~0.35 wide; from Art/items: wardrobe v2 ~1.1, kitchen cabinet ~0.6, toolbox ~0.25,
+    /// chair ~0.55, valve / fuse box ~0.25, wall lamp ~0.2, debris ~0.35 wide; from Art/items: wardrobe (gardrop, the
+    /// default) / wardrobe v2 ~1.1, chair (sandalye, the default) ~0.55, nightstand (komidin) ~0.32, kitchen cabinet ~0.6, toolbox ~0.25,
     /// armchair / sofa ~0.5, bed ~0.45, floor hole ~1.4 wide (centre-pivot floor decal). The chandelier frames keep their
     /// whole (shared) canvas so the swing and the fallen frame line up. Writes Data/Art/PropArtSet.asset
     /// (prop name → sprite). Safe to re-run; local tunes the targets by eye.
@@ -39,6 +40,18 @@ namespace SixtyOne.Editor
 
         private static Entry I(string file, float target, Measure by, params string[] names) => new Entry { File = file, Target = target, By = by, Names = names, Dir = ItemsDir };
 
+        /// <summary>Palette label of a prop name (variants of the default art get a readable name).</summary>
+        public static string Label(string name)
+        {
+            switch (name)
+            {
+                case "WardrobeOld": return "Wardrobe (eski)";
+                case "WardrobeV2": return "Wardrobe v2";
+                case "ChairOld": return "Chair (masaa)";
+                default: return name;
+            }
+        }
+
         /// <summary>Floor decals: centre pivot, sorted on the floor layer (under characters).</summary>
         public static bool IsFloorDecal(string name) => name == "FloorHole";
 
@@ -57,8 +70,12 @@ namespace SixtyOne.Editor
         private static readonly Entry[] Entries =
         {
             E("masA", 0.45f, Measure.Height, "Table", "Desk"),
-            E("masaa", 0.55f, Measure.Height, "Chair"),
-            E("dolap", 1.1f, Measure.Height, "Wardrobe"),
+            // New defaults from Art/items (gardrop, sandalye); the older art stays as palette variants.
+            I("gardrop", 1.1f, Measure.Height, "Wardrobe"),
+            I("sandalye", 0.55f, Measure.Height, "Chair"),
+            I("komidin", 0.32f, Measure.Height, "Nightstand"),
+            E("masaa", 0.55f, Measure.Height, "ChairOld"),
+            E("dolap", 1.1f, Measure.Height, "WardrobeOld"),
             E("ComfyUI_00021_", 1.1f, Measure.Height, "NeighbourWardrobe", "Cabinet"),
             E("bokkshelf", 1.1f, Measure.Height, "Bookshelf"),
             E("ocak", 0.5f, Measure.Height, "Stove"),

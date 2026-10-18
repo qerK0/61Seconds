@@ -461,13 +461,13 @@ namespace SixtyOne.Editor
                 var art = new GameObject("Art");
                 art.transform.SetParent(go.transform, false);
                 SpriteRenderer artRenderer = art.AddComponent<SpriteRenderer>();
-                Sprite doorSprite = door.Art == BuildingLayout.DoorArtKind.Elevator ? DoorArt.Elevator : DoorArt.Door;
+                Sprite doorSprite = DoorSprite(door.Art);
                 if (DoorArt.Apply(artRenderer, doorSprite, door.Edge.StartsWith("R") != door.FlipX))
                 {
                     artRenderer.sortingOrder = RoomTiles.WallOrder + 1;
                     Material litDoor = RoomTiles.LitMaterial;
                     if (litDoor != null) artRenderer.sharedMaterial = litDoor;
-                    if (door.Art == BuildingLayout.DoorArtKind.Stairwell) StairwellSign(go.transform);
+                    if (door.Art == BuildingLayout.DoorArtKind.Stairwell || door.Art == BuildingLayout.DoorArtKind.Stairs) StairwellSign(go.transform);
                 }
                 else
                 {
@@ -506,6 +506,67 @@ namespace SixtyOne.Editor
             LayoutOverrides.Tag(go, door);
             EditorUtility.SetDirty(component);
             return component;
+        }
+
+        /// <summary>Wall-fitted sprite of a door art kind (stairs fall back to the door art when merdiven.png is missing).</summary>
+        public static Sprite DoorSprite(BuildingLayout.DoorArtKind kind)
+        {
+            switch (kind)
+            {
+                case BuildingLayout.DoorArtKind.Elevator: return DoorArt.Elevator;
+                case BuildingLayout.DoorArtKind.Stairs: return DoorArt.Stairs != null ? DoorArt.Stairs : DoorArt.Door;
+                default: return DoorArt.Door;
+            }
+        }
+
+        /// <summary>Wall-fitted sprite for a wall hotspot's art name (Door / Elevator / Stairwell / Stairs).</summary>
+        private static Sprite HotspotDoorSprite(string art)
+        {
+            return System.Enum.TryParse(art, out BuildingLayout.DoorArtKind kind) ? DoorSprite(kind) : DoorArt.Door;
+        }
+
+        /// <summary>
+        /// Decorative stairs in a back-wall gap: the stairs art sorted with the wall, no collider, no sign. Broken
+        /// stairs are darkened and get two debris pieces on top so they read as blocked.
+        /// </summary>
+        public static GameObject DecorStairs(Transform room, BuildingLayout.RoomSpec spec, BuildingLayout.DecorStairsSpec stairs)
+        {
+            Vector2 c = BuildingLayout.EdgeCenter(spec, stairs.Edge);
+            var go = new GameObject($"Stairs_{stairs.Edge}" + (stairs.Broken ? "_broken" : string.Empty));
+            go.transform.SetParent(room, false);
+            go.transform.localPosition = IsoMath.GridToWorld(c.x, c.y);
+            SpriteRenderer r = go.AddComponent<SpriteRenderer>();
+            if (!DoorArt.Apply(r, DoorSprite(BuildingLayout.DoorArtKind.Stairs), stairs.Edge.StartsWith("R")))
+            {
+                UnityEngine.Object.DestroyImmediate(go);
+                return null;
+            }
+
+            r.sortingOrder = RoomTiles.WallOrder + 1;
+            Material lit = RoomTiles.LitMaterial;
+            if (lit != null) r.sharedMaterial = lit;
+            if (!stairs.Broken) return go;
+
+            r.color = new Color(0.38f, 0.36f, 0.36f, 1f);
+            Sprite[] debris = PropArt.Current != null ? PropArt.Current.Debris : new Sprite[0];
+            bool right = stairs.Edge.StartsWith("R");
+            Vector3[] spots = { new Vector3(right ? 0.06f : -0.06f, 0.22f, 0f), new Vector3(right ? -0.08f : 0.08f, 0.42f, 0f) };
+            for (int i = 0; i < spots.Length; i++)
+            {
+                var piece = new GameObject("Debris" + i);
+                piece.transform.SetParent(go.transform, false);
+                piece.transform.localPosition = spots[i];
+                piece.transform.localRotation = Quaternion.Euler(0f, 0f, i == 0 ? -12f : 18f);
+                piece.transform.localScale = Vector3.one * (i == 0 ? 0.9f : 0.75f);
+                SpriteRenderer d = piece.AddComponent<SpriteRenderer>();
+                d.sprite = debris.Length > 0 ? debris[i % debris.Length] : Art.Block;
+                d.color = debris.Length > 0 ? new Color(0.6f, 0.58f, 0.56f, 1f) : new Color(0.3f, 0.29f, 0.28f, 1f);
+                d.flipX = i == 1;
+                d.sortingOrder = RoomTiles.WallOrder + 2;
+                if (lit != null) d.sharedMaterial = lit;
+            }
+
+            return go;
         }
 
         /// <summary>
@@ -633,13 +694,13 @@ namespace SixtyOne.Editor
                 // flipped, wall-fitted elevator door art.
                 height = DoorArt.Height + DoorArt.Rise;
             }
-            else if (!string.IsNullOrEmpty(spec.Edge) && DoorArt.Apply(r, spec.Art == "Elevator" ? DoorArt.Elevator : DoorArt.Door, spec.Edge.StartsWith("R") != spec.FlipX))
+            else if (!string.IsNullOrEmpty(spec.Edge) && DoorArt.Apply(r, HotspotDoorSprite(spec.Art), spec.Edge.StartsWith("R") != spec.FlipX))
             {
-                // A door in a wall gap that plays a choice (the F2 stairwell door; no stairs art): door or elevator
-                // art, and for a stairwell the "MERDİVEN ↓" sign. A sorting group keeps the plate and its text over
-                // the door while the whole door sorts by its Y.
+                // A door in a wall gap that plays a choice (the F2 stairs down to the street): stairs, door or
+                // elevator art, and for stairs / a stairwell door the "MERDİVEN ↓" sign. A sorting group keeps the
+                // plate and its text over the art while the whole thing sorts by its Y.
                 height = DoorArt.Height + DoorArt.Rise;
-                if (spec.Art == BuildingLayout.StairwellArt)
+                if (spec.Art == BuildingLayout.StairwellArt || spec.Art == BuildingLayout.StairsArt)
                 {
                     go.AddComponent<UnityEngine.Rendering.SortingGroup>();
                     GameObject sign = StairwellSign(go.transform);
