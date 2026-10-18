@@ -88,11 +88,20 @@ namespace SixtyOne.Nodes
                 return;
             }
 
+            // A new run waits for the intro briefing before the AFAD alert and the prep.
+            if (RunStartGate.Held)
+            {
+                RunStartGate.Opened += () => { if (this != null) Enter(content.StartNode); };
+                return;
+            }
+
             Enter(content.StartNode);
         }
 
         private void Update()
         {
+            // A full-screen card (intro, floor info card) holds every countdown, node timers included.
+            if (ScreenHold.Active) return;
             if (gameManager.IsDead || !Timer.Tick(Time.deltaTime))
             {
                 return;

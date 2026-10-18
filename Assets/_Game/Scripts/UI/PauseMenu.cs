@@ -64,6 +64,8 @@ namespace SixtyOne.UI
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
             if (!PauseState.IsPaused)
             {
+                // No pause over a full-screen card (it holds the timers itself).
+                if (ScreenHold.Active) return;
                 SetPaused(true);
                 return;
             }

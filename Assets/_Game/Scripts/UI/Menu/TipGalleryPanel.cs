@@ -10,8 +10,9 @@ using UnityEngine.UI;
 namespace SixtyOne.UI
 {
     /// <summary>
-    /// Main menu "Galeri": every Deprem Notu as a card. Collected tips (TipStore, kept across runs) show their title
-    /// and text; the others show ???. A counter reads "Toplanan notlar: X/18".
+    /// Main menu "Galeri", two tabs. Deprem Notları: every Deprem Notu as a card; collected tips (TipStore, kept across
+    /// runs) show their title and text, the others ???; the counter reads "Toplanan notlar: X/18". Bilgi Kartları: the
+    /// 8 floor info cards, seen ones (InfoCardStore) with their title and text; "Görülen kartlar: X/8".
     /// </summary>
     public sealed class TipGalleryPanel : MonoBehaviour
     {
@@ -24,6 +25,18 @@ namespace SixtyOne.UI
         [SerializeField] private TMP_Text[] titles = new TMP_Text[0];
         [SerializeField] private TMP_Text[] bodies = new TMP_Text[0];
         [SerializeField] private Image[] cards = new Image[0];
+
+        [Header("Tabs (optional)")]
+        [SerializeField] private CanvasGroup tipsPage;
+        [SerializeField] private CanvasGroup infoPage;
+        [SerializeField] private Button tipsTab;
+        [SerializeField] private Button infoTab;
+        [Tooltip("Shown under the active tab.")]
+        [SerializeField] private GameObject tipsTabMarker;
+        [SerializeField] private GameObject infoTabMarker;
+        [SerializeField] private TMP_Text[] infoTitles = new TMP_Text[0];
+        [SerializeField] private TMP_Text[] infoBodies = new TMP_Text[0];
+        [SerializeField] private Image[] infoCards = new Image[0];
 
         [SerializeField] private Button back;
         [SerializeField] private AudioCue clickCue;
@@ -50,10 +63,78 @@ namespace SixtyOne.UI
             clickCue = click;
         }
 
+        /// <summary>Wires the Bilgi Kartları tab (builder).</summary>
+        public void ConfigureTabs(CanvasGroup tips, CanvasGroup info, Button tipsButton, Button infoButton, GameObject tipsMarker, GameObject infoMarker,
+            TMP_Text[] cardTitles, TMP_Text[] cardBodies, Image[] cardImages)
+        {
+            tipsPage = tips;
+            infoPage = info;
+            tipsTab = tipsButton;
+            infoTab = infoButton;
+            tipsTabMarker = tipsMarker;
+            infoTabMarker = infoMarker;
+            infoTitles = cardTitles;
+            infoBodies = cardBodies;
+            infoCards = cardImages;
+        }
+
+        private bool infoShown;
+
         private void Awake()
         {
             if (back != null) back.onClick.AddListener(Close);
+            if (tipsTab != null) tipsTab.onClick.AddListener(() => ShowTab(false));
+            if (infoTab != null) infoTab.onClick.AddListener(() => ShowTab(true));
             SetVisible(false);
+        }
+
+        private void ShowTab(bool info)
+        {
+            if (info != infoShown) AudioService.PlayUiCue(clickCue);
+            infoShown = info;
+            SetGroup(tipsPage, !info);
+            SetGroup(infoPage, info);
+            if (tipsTabMarker != null) tipsTabMarker.SetActive(!info);
+            if (infoTabMarker != null) infoTabMarker.SetActive(info);
+            if (counter == null) return;
+            if (info)
+            {
+                HashSet<int> seen = InfoCardStore.Load();
+                counter.text = TextDB.Format(UiKeys.MenuGalleryInfoCount, seen.Count, InfoCardRules.CardCount);
+            }
+            else
+            {
+                counter.text = TextDB.Format(UiKeys.MenuGalleryCount, CountCollected(), tipIds.Length);
+            }
+        }
+
+        private int CountCollected()
+        {
+            HashSet<string> collected = TipStore.Load();
+            int have = 0;
+            foreach (string id in tipIds) if (collected.Contains(id)) have++;
+            return have;
+        }
+
+        private void FillInfoCards()
+        {
+            HashSet<int> seen = InfoCardStore.Load();
+            for (int i = 0; i < infoTitles.Length; i++)
+            {
+                int card = i + 1;
+                bool unlocked = seen.Contains(card);
+                if (infoTitles[i] != null) infoTitles[i].text = unlocked ? TextDB.GetDisplay(UiKeys.InfoTitle(card)) : "???";
+                if (i < infoBodies.Length && infoBodies[i] != null) infoBodies[i].text = unlocked ? TextDB.GetDisplay(UiKeys.InfoBody(card)) : string.Empty;
+                if (i < infoCards.Length && infoCards[i] != null) infoCards[i].color = unlocked ? unlockedCard : lockedCard;
+            }
+        }
+
+        private static void SetGroup(CanvasGroup g, bool visible)
+        {
+            if (g == null) return;
+            g.alpha = visible ? 1f : 0f;
+            g.interactable = visible;
+            g.blocksRaycasts = visible;
         }
 
         public void Open()
@@ -70,7 +151,10 @@ namespace SixtyOne.UI
             }
 
             if (counter != null) counter.text = TextDB.Format(UiKeys.MenuGalleryCount, have, tipIds.Length);
+            FillInfoCards();
             SetVisible(true);
+            infoShown = false;
+            if (tipsPage != null || infoPage != null) ShowTab(false);
         }
 
         public void Close()

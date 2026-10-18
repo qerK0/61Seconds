@@ -152,6 +152,73 @@ namespace SixtyOne.Text
             return key == PlacementHint || key == PlacementPlayerLast || key == StreetDropOpen || key == StreetSafe || key == StreetCollapseBehind;
         }
 
+        /// <summary>Intro briefing (start of every new run).</summary>
+        public const string IntroTitle = "ui.intro.title";
+        public const string IntroBody = "ui.intro.body";
+        public const string IntroControls = "ui.intro.controls";
+        public const string IntroSource = "ui.intro.source";
+        public const string IntroStart = "ui.intro.start";
+
+        /// <summary>Floor info card: "DEPREM BİLGİSİ  {0}/{1}" and "Oyunda: {0}".</summary>
+        public const string InfoCounter = "ui.info.counter";
+        public const string InfoGamePrefix = "ui.info.game";
+
+        /// <summary>Galeri tabs: Deprem Notları / Bilgi Kartları, and the info-card counter.</summary>
+        public const string MenuGalleryTabTips = "ui.menu.gallery_tab_tips";
+        public const string MenuGalleryTabInfo = "ui.menu.gallery_tab_info";
+        public const string MenuGalleryInfoCount = "ui.menu.gallery_info_count";
+
+        /// <summary>The robber is gone (no one was hurt).</summary>
+        public const string RobberAfter = "ui.robber.after";
+
+        /// <summary>Destination label of an info card: stage 2 = 3. KAT, 3 = 2. KAT, 4 = SOKAK (stage 1 = 4. KAT).</summary>
+        public static string FloorLabel(int stage)
+        {
+            switch (stage)
+            {
+                case 2: return Floor3;
+                case 3: return Floor2;
+                case 4: return FloorStreet;
+                default: return Floor4;
+            }
+        }
+
+        public const string Floor4 = "ui.floor.4";
+        public const string Floor3 = "ui.floor.3";
+        public const string Floor2 = "ui.floor.2";
+        public const string FloorStreet = "ui.floor.street";
+
+        /// <summary>Info cards 1..8: title, body, "Oyunda" line (literal constants so Text > Validate sees them).</summary>
+        public const string Info1Title = "info.1.title";
+        public const string Info1Body = "info.1.body";
+        public const string Info1Game = "info.1.game";
+        public const string Info2Title = "info.2.title";
+        public const string Info2Body = "info.2.body";
+        public const string Info2Game = "info.2.game";
+        public const string Info3Title = "info.3.title";
+        public const string Info3Body = "info.3.body";
+        public const string Info3Game = "info.3.game";
+        public const string Info4Title = "info.4.title";
+        public const string Info4Body = "info.4.body";
+        public const string Info4Game = "info.4.game";
+        public const string Info5Title = "info.5.title";
+        public const string Info5Body = "info.5.body";
+        public const string Info5Game = "info.5.game";
+        public const string Info6Title = "info.6.title";
+        public const string Info6Body = "info.6.body";
+        public const string Info6Game = "info.6.game";
+        public const string Info7Title = "info.7.title";
+        public const string Info7Body = "info.7.body";
+        public const string Info7Game = "info.7.game";
+        public const string Info8Title = "info.8.title";
+        public const string Info8Body = "info.8.body";
+        public const string Info8Game = "info.8.game";
+
+        /// <summary>Info card N (1..8) title / body / "Oyunda" line.</summary>
+        public static string InfoTitle(int card) => "info." + card + ".title";
+        public static string InfoBody(int card) => "info." + card + ".body";
+        public static string InfoGame(int card) => "info." + card + ".game";
+
         /// <summary>Room name shown on door hover: room.&lt;roomId&gt;.</summary>
         public static string RoomName(string roomId) => "room." + roomId;
     }

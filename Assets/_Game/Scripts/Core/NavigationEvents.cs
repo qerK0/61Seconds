@@ -16,21 +16,23 @@ namespace SixtyOne.Core
         /// <summary>(roomId) the new room is shown and input is unlocked.</summary>
         public static event Action<string> OnTransitionComplete;
 
-        /// <summary>True from OnTransitionStart until OnTransitionComplete.</summary>
-        public static bool TimersPaused { get; private set; }
+        /// <summary>True from OnTransitionStart until OnTransitionComplete, and while a full-screen card holds (ScreenHold).</summary>
+        public static bool TimersPaused => transitioning || ScreenHold.Active;
+
+        private static bool transitioning;
 
         /// <summary>Real-time delta the prep / building timers may advance by this frame (0 mid-transition).</summary>
         public static float TimerDelta(float deltaSeconds) => TimersPaused ? 0f : deltaSeconds;
 
         public static void RaiseTransitionStart(string fromRoom, string toRoom)
         {
-            TimersPaused = true;
+            transitioning = true;
             OnTransitionStart?.Invoke(fromRoom, toRoom);
         }
 
         public static void RaiseTransitionComplete(string roomId)
         {
-            TimersPaused = false;
+            transitioning = false;
             OnTransitionComplete?.Invoke(roomId);
         }
 
@@ -39,7 +41,7 @@ namespace SixtyOne.Core
         {
             OnTransitionStart = null;
             OnTransitionComplete = null;
-            TimersPaused = false;
+            transitioning = false;
         }
     }
 }

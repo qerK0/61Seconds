@@ -438,3 +438,43 @@ ui.choice.heavy,+ağır,cost chip of a heavy choice (stamina)
 npc.mehmet.name,Mehmet,the player (thought bubble name)
 ui.gift.received,{0}: {1} verdi,"{0} = giver name, {1} = item name (queued toast, one per item)"
 ui.gift.dropped,"{0}: Çantan dolu evladım, {1} şuraya, yere bırakıyorum.","{0} = giver, {1} = item; the bag was full, the item lies at her feet"
+ui.intro.title,BİLGİLENDİRME,intro briefing title (start of every new run)
+ui.intro.body,"Bu oyun bir deprem simülasyonudur. 8 dakikan var: eşini ve çocuğunu 4. kattan sokağa, acil toplanma alanına ulaştır.
+AFAD uyarısı geldiğinde 60 saniyen olacak: işine yarayacak olanı al, gerisini bırak.
+Her yanlış karar seni geri sarar. Her ölüm sana gerçek bir Deprem Notu bırakır.",intro briefing body
+ui.intro.controls,Tıkla: yürü / etkileş · 1–4: seçim · W A S D: hızlı tepki · ESC: duraklat,intro briefing controls line
+ui.intro.source,Oyundaki deprem bilgileri AFAD önerilerine dayanır.,intro briefing source line
+ui.intro.start,ANLADIM,intro briefing button
+ui.floor.4,4. KAT,"info card destination label (floor 4, a macro rewind there)"
+ui.floor.3,3. KAT,info card destination label
+ui.floor.2,2. KAT,info card destination label
+ui.floor.street,SOKAK,info card destination label
+ui.info.counter,DEPREM BİLGİSİ  {0}/{1},"info card counter; {0} = card number, {1} = total"
+ui.info.game,Oyunda: {0},info card game link line; {0} = info.N.game
+ui.menu.gallery_tab_tips,Deprem Notları,Galeri tab
+ui.menu.gallery_tab_info,Bilgi Kartları,Galeri tab
+ui.menu.gallery_info_count,Görülen kartlar: {0}/{1},"Galeri info-card counter; {0} = seen, {1} = total"
+info.1.title,Çök – Kapan – Tutun,info card 1
+info.1.body,"Sarsıntı başladığında yere çök, sağlam bir masanın altına ya da yanına kapan, bir kolunla başını ve enseni koru, diğer elinle tutun. Sarsıntı bitene kadar yerinden ayrılma.",info card 1
+info.1.game,Deprem anında ailen otomatik olarak çöküp kapanıyor; onları sağlam masanın yanına yerleştir.,info card 1
+info.2.title,"""Hayat üçgeni"" bir efsane",info card 2
+info.2.body,"""Hayat üçgeni"" AFAD tarafından önerilmez. Kapı eşiği, pencere önü, balkon ve devrilebilecek dolap ya da kitaplıkların yanı güvenli yer değildir.",info card 2
+info.2.game,"Kapı, pencere, balkon ve dolap önü yerleştirmede tuzaktır.",info card 2
+info.3.title,Merdiven ve asansör,info card 3
+info.3.body,"Sarsıntı sırasında merdivenlere koşma, asansöre asla binme. Sarsıntı bittikten sonra binayı merdivenden, sakin ve hızlı bir şekilde terk et.",info card 3
+info.3.game,Asansör her katta bir tuzak; aşağı inmek için merdiveni kullan.,info card 3
+info.4.title,Gaz kokusu varsa,info card 4
+info.4.body,"Gaz kokusu alıyorsan çakmak ya da kibrit yakma, elektrik düğmelerine dokunma. Mümkünse vanayı kapat, kapı ve pencereleri açarak ortamı terk et.",info card 4
+info.4.game,"Gazlı odada çakmak patlama demek; önce vana, sonra fener.",info card 4
+info.5.title,Elektrik tesisatı,info card 5
+info.5.body,"Sarsıntı bittikten sonra elektrik sigortasını kapat. Kopmuş, sarkan kablolara ve hasarlı tesisata çıplak elle dokunma.",info card 5
+info.5.game,Sigorta kutusuna eldivensiz ya da yalıtımsız dokunmak çarpılmak demek.,info card 5
+info.6.title,Deprem çantası,info card 6
+info.6.body,"Her evde kişi başı en az 72 saat yetecek su ve bozulmayan gıda, el feneri ve yedek pil, düdük, ilk yardım malzemesi, kişisel ilaçlar ve önemli belgelerin kopyalarını içeren bir deprem çantası hazır olsun.",info card 6
+info.6.game,"Hazırlıktaki 60 saniye, hazır bir çantan olmadığı için bu kadar zor.",info card 6
+info.7.title,Enkaz altında kalırsan,info card 7
+info.7.body,"Sakin kal; ağzını ve burnunu bir bezle kapatarak tozdan korun. Bağırarak gücünü tüketme; düdük çal ya da borulara, duvara vurarak sesini duyur.",info card 7
+info.7.game,Sevim Teyze'nin verdiği düdük bu yüzden önemli.,info card 7
+info.8.title,Dışarıdaysan,info card 8
+info.8.body,"Binalardan, duvarlardan, elektrik direklerinden ve tellerden uzak, açık bir alana geç. Sarsıntı sonrası hasarlı binalara girme; bölgendeki acil toplanma alanına git. Toplanma alanını e-Devlet üzerinden öğrenebilirsin.",info card 8
+info.8.game,"Sokakta cephelerden ve kopuk telden uzak dur, açık alanda çök.",info card 8

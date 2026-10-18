@@ -81,6 +81,9 @@ namespace SixtyOne.Editor
             BuildClickFeedback(root, art);
             // The end screen ("Simülasyon sona erdi") covers the HUD once the epilogue was read.
             TestSceneEndScreen.Build(root, content);
+            // The floor-transition info card, then the intro briefing (up from the first frame of a new run).
+            TestSceneIntroCards.BuildInfoCards(root, nodePlayer);
+            TestSceneIntroCards.BuildIntro(root);
             // Last: the ESC pause overlay draws over everything.
             BuildPauseMenu(root);
             EnforceReadableText(canvasGo);

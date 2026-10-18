@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using SixtyOne.Audio;
+using SixtyOne.Core;
 using SixtyOne.Nodes;
 using SixtyOne.Text;
 using SixtyOne.UI;
@@ -278,8 +279,15 @@ namespace SixtyOne.Editor
             CanvasGroup group = panel.gameObject.AddComponent<CanvasGroup>();
             MenuKit.Brackets(panel.transform, art.Bracket, 34f, new Color(0.8f, 0.76f, 0.72f, 1f), -6f);
             Transform p = panel.transform;
-            TextMeshProUGUI title = MenuKit.Label("Title", p, new Vector2(0.04f, 0.9f), new Vector2(0.6f, 0.98f), UiKeys.MenuGalleryTitle, MenuKit.Font.DisplayBold, 52f, MenuKit.OffWhite);
-            title.fontStyle = FontStyles.UpperCase;
+            // Two tabs instead of one title: Deprem Notları / Bilgi Kartları, a red marker under the active one.
+            Button tipsTab = MenuKit.Text("TabTips", p, new Vector2(0.03f, 0.9f), new Vector2(0.29f, 0.98f), UiKeys.MenuGalleryTabTips, 36f, MenuKit.OffWhite, cues);
+            Button infoTab = MenuKit.Text("TabInfo", p, new Vector2(0.3f, 0.9f), new Vector2(0.56f, 0.98f), UiKeys.MenuGalleryTabInfo, 36f, MenuKit.OffWhite, cues);
+            Image tipsMarker = MenuKit.Image("Marker", tipsTab.transform, new Vector2(0.1f, 0f), new Vector2(0.9f, 0.05f), null, MenuKit.AlertRed);
+            Image infoMarker = MenuKit.Image("Marker", infoTab.transform, new Vector2(0.1f, 0f), new Vector2(0.9f, 0.05f), null, MenuKit.AlertRed);
+            RectTransform tipsPage = UiFactory.MakeRect("TipsPage", p, Vector2.zero, Vector2.one);
+            CanvasGroup tipsGroup = tipsPage.gameObject.AddComponent<CanvasGroup>();
+            RectTransform infoPage = UiFactory.MakeRect("InfoPage", p, Vector2.zero, Vector2.one);
+            CanvasGroup infoGroup = infoPage.gameObject.AddComponent<CanvasGroup>();
             TextMeshProUGUI counter = MenuKit.Label("Counter", p, new Vector2(0.55f, 0.9f), new Vector2(0.96f, 0.98f), null, MenuKit.Font.Mono, 22f, MenuKit.Amber, TextAlignmentOptions.Right);
 
             var ids = new List<string>();
@@ -298,7 +306,7 @@ namespace SixtyOne.Editor
                 int c = i % columns, r = i / columns;
                 float x0 = 0.03f + c * (0.94f / columns), x1 = x0 + 0.94f / columns - 0.01f;
                 float y1 = 0.87f - r * (0.74f / rows), y0 = y1 - 0.74f / rows + 0.012f;
-                Image card = MenuKit.Image("Card_" + ids[i], p, new Vector2(x0, y0), new Vector2(x1, y1), art.Panel, new Color(0.1f, 0.05f, 0.05f, 0.85f));
+                Image card = MenuKit.Image("Card_" + ids[i], tipsPage, new Vector2(x0, y0), new Vector2(x1, y1), art.Panel, new Color(0.1f, 0.05f, 0.05f, 0.85f));
                 TextMeshProUGUI cardTitle = MenuKit.Label("Title", card.transform, new Vector2(0.06f, 0.72f), new Vector2(0.94f, 0.96f), null, MenuKit.Font.DisplayMedium, 20f, MenuKit.OffWhite, TextAlignmentOptions.TopLeft);
                 cardTitle.enableAutoSizing = true;
                 cardTitle.fontSizeMin = 16f;
@@ -310,9 +318,32 @@ namespace SixtyOne.Editor
                 cards.Add(card);
             }
 
+            // Bilgi Kartları: the 8 info cards in a 4 x 2 grid.
+            var infoTitles = new List<TMP_Text>();
+            var infoBodies = new List<TMP_Text>();
+            var infoCards = new List<Image>();
+            const int infoColumns = 4;
+            for (int i = 0; i < InfoCardRules.CardCount; i++)
+            {
+                int c = i % infoColumns, r = i / infoColumns;
+                float x0 = 0.03f + c * (0.94f / infoColumns), x1 = x0 + 0.94f / infoColumns - 0.012f;
+                float y1 = 0.87f - r * 0.37f, y0 = y1 - 0.37f + 0.015f;
+                Image card = MenuKit.Image("Info_" + (i + 1), infoPage, new Vector2(x0, y0), new Vector2(x1, y1), art.Panel, new Color(0.1f, 0.05f, 0.05f, 0.85f));
+                TextMeshProUGUI cardTitle = MenuKit.Label("Title", card.transform, new Vector2(0.06f, 0.8f), new Vector2(0.94f, 0.96f), null, MenuKit.Font.DisplayMedium, 22f, MenuKit.OffWhite, TextAlignmentOptions.TopLeft);
+                cardTitle.enableAutoSizing = true;
+                cardTitle.fontSizeMin = 16f;
+                cardTitle.fontSizeMax = 22f;
+                TextMeshProUGUI body = MenuKit.Label("Body", card.transform, new Vector2(0.06f, 0.04f), new Vector2(0.94f, 0.79f), null, MenuKit.Font.Body, 16f, new Color(0.86f, 0.82f, 0.8f, 1f), TextAlignmentOptions.TopLeft);
+                body.overflowMode = TextOverflowModes.Ellipsis;
+                infoTitles.Add(cardTitle);
+                infoBodies.Add(body);
+                infoCards.Add(card);
+            }
+
             Button back = MenuKit.Secondary("Back", p, new Vector2(0.38f, 0.025f), new Vector2(0.62f, 0.095f), UiKeys.SettingsBack, 30f, art, cues);
             TipGalleryPanel gallery = panel.gameObject.AddComponent<TipGalleryPanel>();
             gallery.Configure(group, counter, ids.ToArray(), titles.ToArray(), bodies.ToArray(), cards.ToArray(), back, cues.Click);
+            gallery.ConfigureTabs(tipsGroup, infoGroup, tipsTab, infoTab, tipsMarker.gameObject, infoMarker.gameObject, infoTitles.ToArray(), infoBodies.ToArray(), infoCards.ToArray());
             return gallery;
         }
 
