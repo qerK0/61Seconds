@@ -4,6 +4,55 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-18 13:30] LOCAL — Task 16: 8-minute timer, intro briefing, floor info cards, robber rework + idle animation
+### Done
+- **8 minutes:** `buildingSeconds` 300 → 480; the pulse stays at 60 s, the alarm + ticks at 30 s, the prep at 60 s.
+  - Stamina retune: drain 0.42 → 0.36/s. With no food or water you hit 0 at ~278 s; heavy actions bring that a little earlier (~250–270 s).
+  - Food 35 → 33 (≈ 92 s), water 25 → 32 (≈ 89 s).
+  - No text said "5 dakika". The timer tests use 480.
+- **Intro briefing** (`UI/Menu/IntroBriefing`, built by `TestSceneIntroCards.BuildIntro`): BİLGİLENDİRME in the end-screen style.
+  - Input (ANLADIM, Enter, Space or a click) only counts after 1 s.
+  - It holds the first node through the new `Core/RunStartGate`, so the AFAD alert waits.
+  - It also holds every timer through the new `Core/ScreenHold`.
+  - It shows on every scene load (menu start and Yeniden Dene) and never on a rewind.
+- **Floor info cards** (`UI/Menu/InfoCardScreen` + pure `Core/InfoCardRules` + `Core/InfoCardStore` in PlayerPrefs):
+  - Shown on F4→F3 (card 3), F3→F2 (card 4) and F2→street (card 8), detected as the floor stage going up on NodeEntered.
+  - Also shown on every macro rewind, picked by the death tip: gas → 4, electric → 5, placement traps → 2, collapse / exhaustion / bag → 6. Extras: elevator → 3, street → 8.
+  - Otherwise it shows the next unseen card, cycling once all 8 are seen.
+  - Layout: 6 s progress bar, continue after 1.5 s, 0.3 s fades.
+  - `ScreenHold` makes `NavigationEvents.TimerDelta` return 0 and stops NodePlayer's node timer. Input is blocked and ESC is ignored while a card is up.
+- **Galeri:** two tabs, Deprem Notları / Bilgi Kartları (a 4×2 grid, "Görülen kartlar: X/8"), each with a red marker.
+- **Robber:** Tehlikeli Adam, a mugger with menacing lines. All 3 replies were rewritten:
+  - each reply's body now shows on the narration card;
+  - Ona bağır makes him step closer with a lunge while the family flinches (`RobberNode.stepsCloser`);
+  - after he runs off, Mehmet says `ui.robber.after`, then the game goes to the street;
+  - the epilogue line is updated and the son line is removed.
+  - No violence and no injury.
+- **Robber idle:** `hırt` was moved to `Art/char/ROBBER_IDLE` (AssetDatabase.MoveAsset). It loops at 8 fps for the 8-frame set and 24 fps for a set of 24 or more frames (`CharacterArt.NpcIdleFpsFor`). The art faces left and is flipped toward the family (`Face` = the stairs spawn). The run-off tween still goes to the stairwell door, then fades.
+- **Fix:** speech-bubble name tabs uppercase with the tr-TR culture ("TEHLİKELİ ADAM", not "TEHLIKELI").
+### Files created / changed
+- New: `Core/ScreenHold.cs`, `Core/RunStartGate.cs`, `Core/InfoCardRules.cs`, `Core/InfoCardStore.cs`, `UI/Menu/IntroBriefing.cs`, `UI/Menu/InfoCardScreen.cs`, `Editor/SceneBuild/TestSceneIntroCards.cs`, `Tests/EditMode/InfoCardRulesTests.cs`, `Art/char/ROBBER_IDLE/` (moved).
+- Changed:
+  - `Core/NavigationEvents.cs`, `Nodes/NodePlayer.cs`, `UI/PauseMenu.cs`, `UI/Menu/TipGalleryPanel.cs`, `UI/SpeechBubble.cs`, `Text/UiKeys.cs`;
+  - `Dialogue/RobberController.cs`, `RobberNode.cs`, `RobberSetup.cs`;
+  - `Building/LevelConfig.cs`, `BuildingTimer.cs`;
+  - `Editor/Art/CharacterArt.cs`, `Editor/SceneBuild/SceneKit.cs`, `BuildingLayout.cs`, `TestSceneUi.cs`, `MainMenuBuilder.cs`, `Editor/Content/BuildingLevelsGenerator(.Floor2).cs`;
+  - `strings_tr.csv` (intro, floor labels, 8 cards, tabs, robber). Python's csv writer also dropped unneeded quotes on a few unrelated rows; the content is the same.
+  - LevelConfig, food and water assets; the F2 robber node assets; both scenes rebuilt.
+### Needs local wiring (checklist for the MCP session)
+- [ ] None. If Bora copies the 101-frame robber set into `Art/char/ROBBER_IDLE` (frame0000…), run SixtyOne > Art > Import Character Frames, then Build Test Scene; it switches to 24 fps on its own.
+### Not verified / risks
+- **Bora stopped testing partway ("testi sal herşey okkey").** Verified:
+  - 0 compile errors.
+  - EditMode 230/230 after parts 1–3. Not re-run after parts 4–5.
+  - In Play Mode: the intro (1 s guard, holds the first node and the prep timer), the macro rewind after a gas death (kitchen fire) showing card 4, card 3 with the prep frozen, and the robber's menacing first line, the choice thought bubble, the Ona bağır reply and the food being taken (bag 3 → 1, RobbedAtExit).
+- **Not checked:** the step-closer and flinch on screen, the run-off and Mehmet's after line on screen, Yalvar / Kısa kes, card 8 on the real street arrival, the end screen, the Galeri tab in the menu, Validate Content and Text > Validate.
+- **Jumping nodes from code mixes stages.** The intro can also be dismissed by the click that focuses the Game view, which still counts as a real click after 1 s.
+- `Screenshots/t16_card_gas_rewind.png` shows the game after the card had already closed, not the card itself.
+### Next suggested step
+- Play one full run: intro → cards 3/4/8 → each robber reply → end screen. Then run Validate Content + Text > Validate and EditMode.
+
+
 ## [2026-10-18 10:20] LOCAL — Task 15: "İSTANBUL AFET BÖLGESİ" main menu + "SİMÜLASYON SONA ERDİ" end screen
 ### Done
 - **Fonts:** TMP SDF assets for Oswald Bold / Medium and IBM Plex Mono Regular / Bold, with ASCII, full Turkish, ’ and ‹›.
