@@ -392,6 +392,7 @@ container.drawer,Çekmece,container name
 container.kitchen_cabinet,Mutfak dolabı,container name
 container.toolbox,Alet çantası,container name
 container.nightstand,Komodin,container name
+container.tv_unit,TV ünitesi,container name (Layout Editor preset)
 npc.robber.name,Tehlikeli Adam,"threatening mugger on the F2 stairs; takes the food by force, never hurts anyone"
 f2.robber.title,Merdivende biri var,
 f2.robber.body,Elinde bıçak olan bir adam merdiveni kapatıyor. Gözünü çantanızdan ayırmıyor.,

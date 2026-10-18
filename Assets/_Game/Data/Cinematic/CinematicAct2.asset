@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c730ba9e59d95f348aaac0b95130afd6, type: 3}
   m_Name: CinematicAct2
   m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Cinematic.CinematicProfile
-  postExposure: -0.3
+  postExposure: -0.48
   contrast: 18
   saturation: -28
   colorFilter: {r: 0.84, g: 0.91, b: 1, a: 1}

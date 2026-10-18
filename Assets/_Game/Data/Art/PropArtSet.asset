@@ -55,6 +55,10 @@ MonoBehaviour:
     Sprite: {fileID: 1910851895, guid: 0a3e96f3a31747d4bbdcac1e768a4b6f, type: 3}
   - Name: FloorHole
     Sprite: {fileID: -745071331, guid: a7ea55dcc92539747bad44a261b32443, type: 3}
+  - Name: TvUnit
+    Sprite: {fileID: -1523006976, guid: 423a2311672c01048a191f3ad9141147, type: 3}
+  - Name: Tv
+    Sprite: {fileID: 444155236, guid: 4e5d62a4780dfb649a9dec6d93d62f8b, type: 3}
   - Name: RubbleMound
     Sprite: {fileID: -1501099593, guid: 7f984b80c2334cb4988fc66c724b6da4, type: 3}
   - Name: FacadeRuinA

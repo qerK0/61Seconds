@@ -126,8 +126,8 @@ namespace SixtyOne.Editor
         /// <summary>Bark played by the rabid dog when its QTE starts.</summary>
         public static AudioCue DogBark { get; set; }
 
-        /// <summary>Fixtures that hang on a wall and keep their authored lift when they get real art.</summary>
-        private static bool WallMounted(string objectName) => objectName == "FuseBox" || objectName == "WallLamp" || objectName == "Valve";
+        /// <summary>Fixtures that hang on a wall (or sit on furniture, the TV) and keep their authored lift when they get real art.</summary>
+        private static bool WallMounted(string objectName) => objectName == "FuseBox" || objectName == "WallLamp" || objectName == "Valve" || objectName == "Tv";
 
         /// <summary>The lift a prop really gets: mapped floor-standing art sits on the floor (lift 0).</summary>
         public static float EffectiveLift(string objectName, float lift)

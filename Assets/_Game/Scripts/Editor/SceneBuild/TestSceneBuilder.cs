@@ -39,6 +39,9 @@ namespace SixtyOne.Editor
         // Room fill light: keeps the real (dark) tile textures faintly visible after the quake kills the practicals.
         private const float AmbientFillIntensity = 0.6f;
 
+        /// <summary>EXPERIMENTAL: builds FX_WindDust (WindDustOverlay) under the CameraRig. false = no wind dust.</summary>
+        private static readonly bool WindDust = true;
+
         [MenuItem("SixtyOne/Build Test Scene", priority = 11)]
         public static void Build()
         {
@@ -81,6 +84,13 @@ namespace SixtyOne.Editor
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 
             Camera camera = BuildCamera(out Transform cameraRig);
+            // EXPERIMENTAL foreground wind dust: set WindDust false (or delete these lines + Cinematic/WindDustOverlay.cs).
+            if (WindDust)
+            {
+                var windDust = new GameObject("FX_WindDust");
+                windDust.transform.SetParent(cameraRig, false);
+                windDust.AddComponent<SixtyOne.Cinematic.WindDustOverlay>();
+            }
             BuildEventSystem();
 
             var systems = new GameObject("Game");

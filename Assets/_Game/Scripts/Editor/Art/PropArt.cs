@@ -22,6 +22,9 @@ namespace SixtyOne.Editor
         public const string ConceptDir = "Assets/_Game/Art/Concept";
         public const string SetPath = "Assets/_Game/Data/Art/PropArtSet.asset";
 
+        /// <summary>Target height of the TV unit (room-local units): the TV's default lift, so it sits on top.</summary>
+        public const float TvUnitHeight = 0.45f;
+
         private enum Measure { Height, Width, Canvas }
 
         private sealed class Entry
@@ -48,6 +51,8 @@ namespace SixtyOne.Editor
                 case "WardrobeOld": return "Wardrobe (eski)";
                 case "WardrobeV2": return "Wardrobe v2";
                 case "ChairOld": return "Chair (masaa)";
+                case "TvUnit": return "TV ünitesi";
+                case "Tv": return "TV";
                 default: return name;
             }
         }
@@ -89,6 +94,9 @@ namespace SixtyOne.Editor
             I("yatak", 0.45f, Measure.Height, "Bed"),
             I("zemin delik", 1.4f, Measure.Width, "FloorHole"),
             // The street finale: a large rubble mound and two collapsed façades (tall ruins along the back edge).
+            // Living-room TV: the unit (tv2: a stand with an old CRT on it) and a flat TV (tv1) that sits on top of it.
+            I("tv2", TvUnitHeight, Measure.Height, "TvUnit"),
+            I("tv1", 0.35f, Measure.Height, "Tv"),
             I("enkaz son 1", 1.2f, Measure.Width, "RubbleMound"),
             I("enkaz son 2", 3.3f, Measure.Height, "FacadeRuinA"),
             I("enkaz son 3", 3.2f, Measure.Height, "FacadeRuinB")

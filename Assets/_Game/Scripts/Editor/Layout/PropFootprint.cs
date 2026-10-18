@@ -21,7 +21,9 @@ namespace SixtyOne.Editor
         {
             "WallLamp", "Valve", "FuseBox", "Sign", "CeilingLamp", "CorridorLamp", "CeilingDebris", "CeilingPlaster",
             "Window", "CorridorWindow", "DoorLintel", "Cables", "HangingCables", "Shaft", "Kerb", "Facade", "OurBuilding",
-            "BuildingDoor", "FallenPole", "Elevator", "BalconyRail", "StairEdge", "Rug", "Car", "Debris"
+            "BuildingDoor", "FallenPole", "Elevator", "BalconyRail", "StairEdge", "Rug", "Car", "Debris",
+            // The TV sits on its unit (the unit blocks the cell).
+            "Tv"
         };
 
         /// <summary>Base widths are measured on this fraction of the opaque rows, from the bottom.</summary>

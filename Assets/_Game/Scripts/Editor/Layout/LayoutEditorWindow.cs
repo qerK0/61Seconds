@@ -224,6 +224,7 @@ namespace SixtyOne.Editor
                 case "drawer": return "Çekmece";
                 case "toolbox": return "Alet çantası";
                 case "nightstand": return "Komodin";
+                case "tv_unit": return "TV ünitesi";
                 default: return kind;
             }
         }
@@ -567,7 +568,13 @@ namespace SixtyOne.Editor
             if (props != null) sprite = propName == "CeilingLamp" && props.ChandelierFrames.Length > 0 ? props.ChandelierFrames[0] : props.Find(propName);
             LayoutObject tag = Spawn(propName, sprite, LayoutKind.Prop, propName);
             tag.PropName = propName;
-            tag.BlocksNav = true;
+            tag.BlocksNav = PropFootprint.IsSolid(propName);
+            if (propName == "Tv")
+            {
+                // The TV sits on top of the TV unit: start at the unit's height (drag it onto the unit).
+                tag.Lift = PropArt.TvUnitHeight;
+                tag.transform.localPosition += new Vector3(0f, tag.Lift, 0f);
+            }
         }
 
         private void SpawnPickup(Item item)

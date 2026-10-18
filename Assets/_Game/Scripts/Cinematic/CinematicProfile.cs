@@ -239,7 +239,7 @@ namespace SixtyOne.Cinematic
         public void ApplyActDefaults(int act)
         {
             int a = Mathf.Clamp(act, 1, 3) - 1;
-            postExposure = -0.25f - 0.2f * a;
+            postExposure = -0.43f - 0.2f * a;
             contrast = 15f + 8f * a;
             saturation = -20f - 8f * a;
             colorFilter = new Color(0.88f - 0.04f * a, 0.94f - 0.03f * a, 1f, 1f);
@@ -265,7 +265,7 @@ namespace SixtyOne.Cinematic
         public void ApplyStreetDefaults()
         {
             ApplyActDefaults(3);
-            postExposure = 0.15f;
+            postExposure = -0.03f;
             contrast = 30f;
             saturation = -30f;
             colorFilter = new Color(0.74f, 0.84f, 1f, 1f);

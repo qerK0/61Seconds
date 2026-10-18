@@ -433,7 +433,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Container kinds the Layout Editor palette offers (container.&lt;kind&gt; name keys).</summary>
-        public static readonly string[] ContainerKinds = { "wardrobe", "wardrobe_v2", "cabinet", "kitchen_cabinet", "bookshelf", "drawer", "toolbox", "nightstand" };
+        public static readonly string[] ContainerKinds = { "wardrobe", "wardrobe_v2", "cabinet", "kitchen_cabinet", "bookshelf", "drawer", "toolbox", "nightstand", "tv_unit" };
 
         /// <summary>A container of a kind with its art name and block size (position and contents left empty).</summary>
         public static ContainerSpec ContainerPreset(string id, string kind)
@@ -450,6 +450,7 @@ namespace SixtyOne.Editor
                 case "toolbox": spec.Art = "Toolbox"; spec.Scale = new Vector2(0.55f, 0.35f); break;
                 case "drawer": spec.Scale = new Vector2(0.8f, 0.5f); break;
                 case "nightstand": spec.Art = "Nightstand"; spec.Scale = new Vector2(0.55f, 0.55f); break;
+                case "tv_unit": spec.NameKey = SixtyOne.Text.UiKeys.ContainerTvUnit; spec.Art = "TvUnit"; spec.Scale = new Vector2(0.8f, 0.5f); break;
                 default: spec.Scale = new Vector2(0.55f, 0.35f); break;
             }
 

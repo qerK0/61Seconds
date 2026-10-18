@@ -46,6 +46,8 @@ namespace SixtyOne.Text
         public const string CraftHint = "ui.craft.hint";
         public const string CraftOpen = "ui.craft.open";
         public const string EndingFallback = "ui.ending.fallback";
+        /// <summary>Name of the "TV ünitesi" container preset (Layout Editor; placed by hand).</summary>
+        public const string ContainerTvUnit = "container.tv_unit";
         public const string BagSelectHint = "ui.bag.select_hint";
         public const string ItemUsed = "ui.bag.used";
         public const string ItemNotUsable = "ui.bag.not_usable";
