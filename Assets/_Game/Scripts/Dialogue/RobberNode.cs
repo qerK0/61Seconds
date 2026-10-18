@@ -6,10 +6,11 @@ using UnityEngine;
 namespace SixtyOne.Dialogue
 {
     /// <summary>
-    /// The scripted robbery on the F2 stairs (one per reply): the man's reply line(s), then the take outcomes run
-    /// (TakeItems: all the food, else one water; key items never; RobbedAtExit), one toast per item taken, a
-    /// closing line (or a bitter line when he found nothing), his sprite runs off down the stairs, and the player
-    /// continues to the next node (the street) automatically. No QTE, no death, no fight. Played by RobberController.
+    /// The scripted robbery on the F2 stairs (one per reply): the body as narration (what he does), the mugger's reply
+    /// line(s), then the take outcomes run (TakeItems: all the food, else one water; key items never; RobbedAtExit),
+    /// one toast per item taken, his closing line (another when he found nothing), his sprite runs off down the
+    /// stairs, and the player continues to the next node (the street) automatically. No QTE, no death, no fight, no
+    /// injury. Played by RobberController.
     /// </summary>
     [CreateAssetMenu(menuName = "SixtyOne/Robber Node", fileName = "robber_new")]
     public sealed class RobberNode : DialogueNode
@@ -38,6 +39,9 @@ namespace SixtyOne.Dialogue
         [Tooltip("Node after he has gone (the street).")]
         [SerializeField] private SceneNode nextNode;
 
+        [Tooltip("He steps toward the family as the reply starts (the knife glints) and the family flinches (Ona bağır).")]
+        [SerializeField] private bool stepsCloser;
+
         public IReadOnlyList<Outcome> TakeOutcomes => takeOutcomes;
         public TextKey SpeakerKey => speakerKey;
         public TextKey TakenLineKey => takenLineKey;
@@ -46,6 +50,10 @@ namespace SixtyOne.Dialogue
         public string ActorName => actorName;
         public Vector2 RunOffGrid => runOffGrid;
         public SceneNode NextNode => nextNode;
+        public bool StepsCloser => stepsCloser;
+
+        /// <summary>Authoring helper: the menacing step forward for this reply.</summary>
+        public void SetStepsCloser(bool on) => stepsCloser = on;
 
         /// <summary>The closing line for what was taken: the bitter line when nothing was.</summary>
         public TextKey ClosingLine(int takenCount) => takenCount > 0 ? takenLineKey : nothingLineKey;

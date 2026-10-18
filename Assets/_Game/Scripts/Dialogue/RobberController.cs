@@ -10,9 +10,10 @@ using UnityEngine;
 namespace SixtyOne.Dialogue
 {
     /// <summary>
-    /// Plays RobberNodes: the reply line(s) (each costs its building seconds, like any dialogue), then the take
-    /// outcomes, one queued toast per item taken, the closing or bitter line, his run down the stairs (sprite
-    /// tween + fade), and finally the next node (the street) without any choice. Rewinds put him back.
+    /// Plays RobberNodes (the mugger on the F2 stairs): the reply line(s) (each costs its building seconds, like any
+    /// dialogue), then the take outcomes, one queued toast per item taken, his closing line, his run down the stairs
+    /// (sprite tween toward the stairwell door + fade), Mehmet's "no one got hurt" line, and finally the next node
+    /// (the street) without any choice. No violence is shown. Rewinds put him back.
     /// </summary>
     public sealed class RobberController : MonoBehaviour, INodeHandler
     {
@@ -27,6 +28,9 @@ namespace SixtyOne.Dialogue
 
         [Tooltip("Item registry (names for the toasts).")]
         [SerializeField] private GameContent content;
+
+        [Tooltip("World units of his menacing step toward the family (replies that step closer).")]
+        [SerializeField] private float stepDistance = 0.35f;
 
         [Tooltip("Seconds of his run down the stairs.")]
         [Min(0.1f)]
@@ -64,6 +68,9 @@ namespace SixtyOne.Dialogue
             onFinished = done;
             lineIndex = -1;
             RestoreActor();
+            // What he does (sneers / grabs the bag / steps closer) goes to the narration card.
+            if (!node.BodyKey.IsEmpty) Presenter?.ShowNarration(node.BodyKey.Display);
+            if (node.StepsCloser && FindActor()) StartCoroutine(StepCloser());
             Advance();
         }
 
@@ -121,13 +128,51 @@ namespace SixtyOne.Dialogue
             running = StartCoroutine(RunOffRoutine());
         }
 
+        /// <summary>Finds his hotspot in the current room once per robbery and remembers where he stood.</summary>
+        private bool FindActor()
+        {
+            if (actor != null) return true;
+            Room room = rooms != null ? rooms.Current : null;
+            actor = room != null && node != null ? room.transform.Find("Hotspot_" + node.ActorName) : null;
+            if (actor != null) actorRest = actor.position;
+            return actor != null;
+        }
+
+        /// <summary>A quick step toward the player with a small lunge, and the family flinches. No contact.</summary>
+        private IEnumerator StepCloser()
+        {
+            CharacterMotor[] family = FindObjectsByType<CharacterMotor>(FindObjectsInactive.Exclude);
+            Vector3 from = actor.position;
+            Vector3 toward = from;
+            foreach (CharacterMotor motor in family)
+            {
+                if (motor.GetComponent<PlayerMover>() != null) toward = motor.transform.position;
+            }
+
+            Vector3 dir = toward - from;
+            dir.z = 0f;
+            Vector3 to = dir.sqrMagnitude > 0.0001f ? from + dir.normalized * stepDistance * (rooms != null && rooms.Current != null ? rooms.Current.Scale : 1f) : from;
+            Vector3 baseScale = actor.localScale;
+            yield return Tween.Run(0.22f, k =>
+            {
+                if (actor == null) return;
+                actor.position = Vector3.Lerp(from, to, k);
+                actor.localScale = baseScale * (1f + 0.06f * Mathf.Sin(k * Mathf.PI));
+            }, Ease.OutQuad);
+
+            foreach (CharacterMotor motor in family)
+            {
+                SpriteRenderer body = motor != null ? motor.GetComponentInChildren<SpriteRenderer>() : null;
+                if (body != null && body.transform != motor.transform) StartCoroutine(Tween.Shake(body.transform, 0.3f, 0.04f));
+            }
+        }
+
         private IEnumerator RunOffRoutine()
         {
-            Room room = rooms != null ? rooms.Current : null;
-            actor = room != null ? room.transform.Find("Hotspot_" + node.ActorName) : null;
-            if (actor != null)
+            if (FindActor())
             {
-                actorRest = actor.position;
+                Room room = rooms.Current;
+                Vector3 from = actor.position;
                 Vector3 target = room.GridToWorld(node.RunOffGrid, actor.position.z);
                 SpriteRenderer[] sprites = actor.GetComponentsInChildren<SpriteRenderer>(true);
                 var colors = new Color[sprites.Length];
@@ -135,7 +180,7 @@ namespace SixtyOne.Dialogue
                 yield return Tween.Run(runOffSeconds, k =>
                 {
                     if (actor == null) return;
-                    actor.position = Vector3.Lerp(actorRest, target, k);
+                    actor.position = Vector3.Lerp(from, target, k);
                     float fade = Mathf.Clamp01((k - 0.5f) * 2f);
                     for (int i = 0; i < sprites.Length; i++)
                     {
@@ -149,6 +194,15 @@ namespace SixtyOne.Dialogue
             }
 
             running = null;
+            // He is gone: one line from Mehmet, then the street.
+            Presenter?.ShowLine(UiKeys.PlayerName, TextDB.GetDisplay(UiKeys.RobberAfter), 0f, Finish, new List<ChoiceView>(), null);
+            if (Presenter == null) Finish();
+        }
+
+        private void Finish()
+        {
+            if (node == null) return;
+            Presenter?.Clear();
             SceneNode next = node != null ? node.NextNode : null;
             Action<SceneNode> done = onFinished;
             onFinished = null;

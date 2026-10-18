@@ -33,8 +33,18 @@ namespace SixtyOne.Editor
         /// <summary>Idle loop speed for every NPC (frames per second).</summary>
         public const float NpcIdleFps = 9f;
 
-        /// <summary>True if an NPC's idle art faces right (checked visually: Cemil looks left).</summary>
-        public static bool NpcFacesRight(string id) => id != "cemil";
+        /// <summary>
+        /// Idle loop speed for one NPC's frame set. The robber's art comes as a short 8-frame loop (~8 fps) or a smooth
+        /// 101-frame export (~24 fps): the speed follows the frame count, never a fixed count.
+        /// </summary>
+        public static float NpcIdleFpsFor(string id, int frameCount)
+        {
+            if (id == "robber") return frameCount >= 24 ? 24f : 8f;
+            return NpcIdleFps;
+        }
+
+        /// <summary>True if an NPC's idle art faces right (checked visually: Cemil and the robber look left).</summary>
+        public static bool NpcFacesRight(string id) => id != "cemil" && id != "robber";
 
         /// <summary>Max texture size of NPC idle frames (1080x1920 canvases; the trimmed sprite keeps its detail).</summary>
         private const int NpcMaxTextureSize = 1024;

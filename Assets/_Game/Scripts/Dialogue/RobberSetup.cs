@@ -42,6 +42,8 @@ namespace SixtyOne.Dialogue
                 robber.AddChoice(new Choice($"{NodeId}.c_{Replies[i]}").Then(Outcome.GoTo(replies[i])));
                 replies[i].ConfigureRobbery(TakeOutcomes(food, water), SpeakerKey, NodeId + ".taken", NodeId + ".empty", TakenItemKey, ActorName,
                     runOffGrid, street);
+                // Ona bağır: he steps closer, the knife glints, the family flinches.
+                replies[i].SetStepsCloser(Replies[i] == "shout");
             }
         }
     }

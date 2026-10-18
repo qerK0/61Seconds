@@ -784,13 +784,13 @@ namespace SixtyOne.Editor
             RoomSpec f8Bedroom = Art(Room(BuildingLevelsGenerator.Flat8Bedroom, 4, 4, new Color(0.7f, 0.64f, 0.62f, 1f), BuildingLevelsGenerator.Flat8), RoomArt.Home, windows: "R3");
             f8Bedroom.Props.Add(P(null, "Bed", 1.6f, 2.4f, -0.05f, 1.6f, 0.6f, new Color(0.8f, 0.8f, 0.85f, 1f)));
 
-            // The stairwell door down to the street (L1) and the elevator trap. The frightened man (Telaşlı Adam)
+            // The stairwell door down to the street (L1) and the elevator trap. The mugger (Tehlikeli Adam)
             // stands in front of it: going down starts the scripted robbery, then the street.
             RoomSpec stairs = Art(Room(BuildingLevelsGenerator.F2Stairs, 3, 5, new Color(0.5f, 0.5f, 0.54f, 1f)), RoomArt.DamagedCorridor);
             stairs.PlayerSpawn = new Vector2(1.5f, 0.8f);
             stairs.Hotspots.Add(StairwellHotspot(stairs, "L1", BuildingLevelsGenerator.F2Exit + ".c_out"));
             stairs.Hotspots.Add(Thing("Elevator", "f2.exit.c_elevator", 3.0f, 1.5f, 0.6f, 1.6f, Metal));
-            stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f), Idle = "robber" });
+            stairs.Hotspots.Add(new HotspotSpec { Name = SixtyOne.Dialogue.RobberSetup.ActorName, Gx = 1.6f, Gy = 3.5f, Person = true, Color = new Color(0.62f, 0.46f, 0.4f, 1f), Idle = "robber", Face = stairs.PlayerSpawn });
 
             RoomSpec street = Street();
 

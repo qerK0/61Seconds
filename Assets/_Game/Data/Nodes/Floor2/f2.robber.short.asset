@@ -74,3 +74,4 @@ MonoBehaviour:
   actorName: Robber
   runOffGrid: {x: 1.5, y: 4.6}
   nextNode: {fileID: 11400000, guid: 9b98e46f46a6421438092ad2b68a7b0d, type: 2}
+  stepsCloser: 0

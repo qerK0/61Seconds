@@ -272,15 +272,15 @@ ui.key_items.title,Anahtar eşyalar,
 ui.locked,Kilitli,
 ui.loop,LOOP #{0},{0} = loop count
 ui.needs_item,Bunun için bir alet lazım.,
-ui.panic.label,Panik,"panic meter under the timer; pulses when clicks get delayed"
+ui.panic.label,Panik,panic meter under the timer; pulses when clicks get delayed
 ui.placement.child_alone,Çocuk bir yetişkinin yanında olmalı.,
 ui.placement.hint,"Bir aile üyesine, sonra güvenli bir noktaya dokun.",
 ui.placement.invalid,Oraya geçilemez.,
 ui.placement.no_room,Orada yer kalmadı.,
 ui.placement.player_last,Önce eşini ve çocuğunu yerleştir.,
 ui.poison.warning,Gaz kokusu! Başın dönüyor.,
-ui.mask.worn,Maske takılı,"chip next to the gas darkening while the wet cloth is carried in a gas room"
-ui.sign.stairs,MERDİVEN ↓,"plate above every stairwell door (there is no stairs art)"
+ui.mask.worn,Maske takılı,chip next to the gas darkening while the wet cloth is carried in a gas room
+ui.sign.stairs,MERDİVEN ↓,plate above every stairwell door (there is no stairs art)
 ui.prep.label,Depreme kalan,caption under the prep countdown
 ui.qte.breaker,Sigorta kutusu,QTE title
 ui.qte.dog,Köpekten kaç!,QTE title
@@ -296,7 +296,7 @@ ui.rope.needs_sheets,Halat için daha fazla çarşaf topla.,
 ui.rope.tie,Halat yap,bag prompt button
 ui.rope.tied,Çarşafları düğümleyip halat yaptın.,
 ui.stamina.exhausted,Çok yorgunsun. Bir şey ye ya da iç.,heavy action locked at 0 stamina
-ui.stamina.label,Enerji,"stamina bar label (food/water energy; not panic)"
+ui.stamina.label,Enerji,stamina bar label (food/water energy; not panic)
 ui.time_spent,-{0} sn,{0} = seconds spent
 ui.tip_header,Deprem Notu,header above the safety tip on the death card
 room.flat11_salon,Salon,door hover label (target room name)
@@ -333,9 +333,9 @@ ui.menu.quit,Çıkış,main menu button
 ui.menu.subtitle,AFET BÖLGESİ,main menu title (second line)
 ui.menu.gallery,Galeri,main menu button (collected Deprem Notları)
 ui.menu.quit_confirm,Oyundan çıkmak istediğine emin misin?,main menu quit confirmation
-ui.menu.hud_quake,KANDİLLİ // SON SARSINTI M 7.1 · {0},"menu corner readout; {0} = ticking clock mm:ss"
+ui.menu.hud_quake,KANDİLLİ // SON SARSINTI M 7.1 · {0},menu corner readout; {0} = ticking clock mm:ss
 ui.menu.hud_coords,"{1}° K, {2}° D","menu corner readout; {1} {2} = jittering coordinates (latitude, longitude)"
-ui.menu.hud_feed,SİSMİK AĞ // CANLI YAYIN · {0},"menu corner readout; {0} = ticking clock"
+ui.menu.hud_feed,SİSMİK AĞ // CANLI YAYIN · {0},menu corner readout; {0} = ticking clock
 ui.menu.hud_zone,BÖLGE 34 // ALARM SEVİYESİ 4,menu corner readout (static)
 ui.menu.version,Civil Game Jam 2026 · v1.0,menu version tag (bottom right)
 ui.menu.gallery_title,Deprem Notları,Galeri panel title
@@ -347,11 +347,11 @@ ui.end.punchline,Ancak gerçek İstanbul depreminde 'Restart' (Yeniden Başlat) 
 ui.end.stat_loops,Döngü sayısı,end screen stat label
 ui.end.stat_tips,Toplanan Deprem Notları,end screen stat label
 ui.end.stat_time,Kalan bina süresi,end screen stat label
-ui.end.stat_time_value,{0} sn,"end screen stat value; {0} = building seconds left"
+ui.end.stat_time_value,{0} sn,end screen stat value; {0} = building seconds left
 ui.end.stat_collapsed,Bina arkanızda çöktü,end screen stat value when the building collapsed behind the family
 ui.end.stat_family,Aile,end screen stat label
 ui.end.family_safe,Herkes güvende,end screen family status (nobody injured)
-ui.end.family_injured,"Herkes dışarıda, {0} yaralı","end screen family status; {0} = injured count"
+ui.end.family_injured,"Herkes dışarıda, {0} yaralı",end screen family status; {0} = injured count
 ui.end.retry,YENİDEN DENE,end screen button (new run; notes are kept)
 ui.end.menu,MENÜYE DÖN,end screen button (main menu)
 ui.end.afad,Hazırlık için: afad.gov.tr · Deprem çantanı bugün hazırla.,end screen footer line
@@ -383,27 +383,27 @@ container.drawer,Çekmece,container name
 container.kitchen_cabinet,Mutfak dolabı,container name
 container.toolbox,Alet çantası,container name
 container.nightstand,Komodin,container name
-npc.robber.name,Telaşlı Adam,"injured, panicked man on the F2 stairs; desperate, not evil"
+npc.robber.name,Tehlikeli Adam,"threatening mugger on the F2 stairs; takes the food by force, never hurts anyone"
 f2.robber.title,Merdivende biri var,
-f2.robber.body,"Kolunu tutan, yüzü tozdan bembeyaz bir adam merdiveni kapatıyor.",
-f2.robber.l1,"Durun! Yaklaşmayın… Kolum, kolum kırıldı galiba.",robber line 1
-f2.robber.l2,"Ne kadar oldu, bilmiyorum. Kafam durdu, her yer toz.",robber line 2
-f2.robber.l3,"Aşağıda, toplanma alanında oğlum bekliyor. Daha beş yaşında. Sabahtan beri bir lokma yemedi.",robber line 3: he has a child waiting too
-f2.robber.l4,"Çantanızda yiyecek var, görüyorum. Lütfen… zorlaştırmayın.",robber line 4
-f2.robber.c_beg,Yalvar,flavour only: he takes the food anyway
-f2.robber.c_short,Kısa kes,flavour only: he takes the food anyway
-f2.robber.c_shout,Ona bağır,flavour only: he takes the food anyway
-f2.robber.beg.title,Telaşlı Adam,
-f2.robber.beg.body,Adam başını iki yana sallıyor.,
-f2.robber.beg.l1,"Ben de yalvarıyorum, anlamıyor musunuz? Onun da karnı aç!",reply to Yalvar
-f2.robber.short.title,Telaşlı Adam,
-f2.robber.short.body,Adam elini uzatıyor.,
-f2.robber.short.l1,"Kısa keseyim o zaman: verin şunu, herkes yoluna gitsin.",reply to Kısa kes
-f2.robber.shout.title,Telaşlı Adam,
-f2.robber.shout.body,Adam irkiliyor ama geri çekilmiyor.,
-f2.robber.shout.l1,"Bağırın, bağırın! Ben de saatlerce bağırdım, kimse duymadı.",reply to Ona bağır
-f2.robber.taken,Affedin… Allah'a emanet olun.,after he takes the food; then he runs down the stairs
-f2.robber.empty,"Hiçbir şey yok mu? Demek hepimiz aynı durumdayız… Hadi, gidin buradan.",bitter line when the bag has no food and no water
+f2.robber.body,Elinde bıçak olan bir adam merdiveni kapatıyor. Gözünü çantanızdan ayırmıyor.,
+f2.robber.l1,Dur orada. Bir adım daha atma.,robber line 1
+f2.robber.l2,Çantayı yere bırak. Yavaşça.,robber line 2
+f2.robber.l3,"Kahramanlık yapma, çocuğun izliyor.",robber line 3
+f2.robber.l4,"Yiyecekleri ver, yolunuza gidin. Kimsenin canı yanmasın.",robber line 4
+f2.robber.c_beg,Yalvar,flavour only: he sneers and takes the food anyway
+f2.robber.c_short,Kısa kes,flavour only: he grabs the bag and takes the food
+f2.robber.c_shout,Ona bağır,"flavour only: he steps closer, the knife glints; he takes the food anyway"
+f2.robber.beg.title,Tehlikeli Adam,
+f2.robber.beg.body,Adam dudağının kenarıyla sırıtıyor.,
+f2.robber.beg.l1,Yalvar bakalım. Yalvarmak karın doyurmuyor.,reply to Yalvar: he sneers
+f2.robber.short.title,Tehlikeli Adam,
+f2.robber.short.body,Adam tek hamlede çantayı kavrıyor.,
+f2.robber.short.l1,Akıllıca. Bırak şunu.,reply to Kısa kes: he grabs the bag
+f2.robber.shout.title,Tehlikeli Adam,
+f2.robber.shout.body,Adam bir adım yaklaşıyor; elindeki bıçak parlıyor. Eşin çocuğu kendine çekiyor.,
+f2.robber.shout.l1,Sesini alçalt. Bir daha bağırma.,"reply to Ona bağır: he steps closer, the family flinches"
+f2.robber.taken,Aferin. Şimdi çekilin önümden.,after he takes the food; then he runs down the stairs
+f2.robber.empty,Boş mu? Şanslısınız. Çekilin önümden.,when the bag has no food and no water; then he runs down the stairs
 ui.robbed.item,{0} elinden alındı.,toast per item the robber takes; {0} = item name
 f2.street.title,Sokak,
 f2.street.body,"Dışarıdasınız ama tehlike geçmedi. Sola, toplanma alanına doğru ilerleyin.",
@@ -420,7 +420,7 @@ death.street_glass,Binaların dibinde kaldın; camlar ve sıvalar yağmur gibi i
 death.street_power,Yerdeki kopuk kabloya dokundun. Kıvılcım hiç affetmedi.,downed power line / sparks
 tip.street,"Sarsıntı dışarıda yakalarsa binalardan, duvarlardan, direk ve tellerden uzak, açık alanda çök-kapan-tutun.",AFAD
 tip.street.title,Dışarıda binalardan uzaklaş,
-f2.epilogue.robbed,Merdivendeki adam yiyeceklerinizi aldı. Umarım oğluna yetmiştir.,RobbedAtExit
+f2.epilogue.robbed,Merdivende bir adam yiyeceklerinizi zorla aldı.,RobbedAtExit
 f2.epilogue.collapsed_behind,Siz uzaklaşırken bina arkanızda çöktü. Birkaç saniye daha oyalansaydınız…,building timer hit 0 while you were on the street
 f2.epilogue.time_left,Siz çıktığınızda binanın {0} saniyesi kalmıştı.,{0} = building seconds left
 f2.corridor.c_pet,Sakinleştirmeye çalış / sev,TRAP: instant bite death (comic for the player only)
@@ -478,3 +478,4 @@ info.7.game,Sevim Teyze'nin verdiği düdük bu yüzden önemli.,info card 7
 info.8.title,Dışarıdaysan,info card 8
 info.8.body,"Binalardan, duvarlardan, elektrik direklerinden ve tellerden uzak, açık bir alana geç. Sarsıntı sonrası hasarlı binalara girme; bölgendeki acil toplanma alanına git. Toplanma alanını e-Devlet üzerinden öğrenebilirsin.",info card 8
 info.8.game,"Sokakta cephelerden ve kopuk telden uzak dur, açık alanda çök.",info card 8
+ui.robber.after,Canınız yanmadı. Yiyecek bulunur; önemli olan ailen.,Mehmet's line after the robber ran off

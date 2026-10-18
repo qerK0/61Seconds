@@ -582,7 +582,7 @@ namespace SixtyOne.Editor
                 {
                     r.color = Color.white;
                     body.transform.localScale = Vector3.one * idle.BodyScale;
-                    body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, CharacterArt.NpcIdleFps);
+                    body.AddComponent<SpriteLoopAnimator>().Configure(r, idle.Sprites, CharacterArt.NpcIdleFpsFor(spec.Idle, idle.Sprites.Length));
                     if (spec.Face.HasValue)
                     {
                         // Face a grid point (the player's arrival, the corridor centre); flip art that looks the other way.

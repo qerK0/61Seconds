@@ -169,7 +169,7 @@ namespace SixtyOne.UI
             if (nameTab != null) nameTab.gameObject.SetActive(!asThought && !string.IsNullOrEmpty(speakerName));
             if (nameLabel != null)
             {
-                nameLabel.text = (speakerName ?? string.Empty).ToUpperInvariant();
+                nameLabel.text = (speakerName ?? string.Empty).ToUpper(System.Globalization.CultureInfo.GetCultureInfo("tr-TR"));
                 nameLabel.color = anchor != null ? anchor.Accent : accent;
             }
 

@@ -165,8 +165,8 @@ namespace SixtyOne.Editor
             Setup(flat8, F2Flat8, Flat8, 3);
             flat8.AddChoice(C(F2Flat8, "back").Move(2f).Then(Outcome.GoTo(corridor)));
 
-            // Stairs down (click the stairs). A frightened, injured man blocks the way: the robbery is scripted and
-            // unavoidable; the choices only change his reply. He takes all the food (else one water), never key items.
+            // Stairs down (click the stairs). A threatening mugger (Tehlikeli Adam) blocks the way: the robbery is scripted and
+            // unavoidable; the choices only change his reply. He takes all the food (else one water), never key items, and hurts no one.
             Setup(exit, F2Exit, F2Stairs, 3);
             exit.AddChoice(C(F2Exit, "out").Move(5f).Then(Outcome.GoTo(robber)));
             exit.AddChoice(C(F2Exit, "elevator", ChoiceType.Trap).Kills(Death("death.elevator", "tip.no_elevator")));

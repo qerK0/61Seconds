@@ -5,7 +5,7 @@ using SixtyOne.Core;
 namespace SixtyOne.Items
 {
     /// <summary>
-    /// What the frightened man on the F2 stairs takes (pure, unit-tested): every bag item in the take-all list
+    /// What the mugger on the F2 stairs takes (pure, unit-tested): every bag item in the take-all list
     /// (all the food); if there was none, up to fallbackCount of the fallback item (one water); if neither, nothing.
     /// Key items are never taken. The borrow ledger is not touched.
     /// </summary>
