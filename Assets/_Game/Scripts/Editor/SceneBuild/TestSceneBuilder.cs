@@ -74,6 +74,7 @@ namespace SixtyOne.Editor
             // Furniture / fixture art (coloured blocks stay for anything unmapped).
             SceneKit.Props = PropArt.Generate();
             SceneKit.DogBark = data.DogBarkCue;
+            TestSceneCraftNotebook.RustleCue = data.PaperCue;
             CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
             SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
 

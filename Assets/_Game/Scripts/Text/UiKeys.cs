@@ -37,6 +37,14 @@ namespace SixtyOne.Text
         public const string BuildingAlarm = "ui.building.alarm";
         public const string CraftFail = "ui.craft.fail";
         public const string CraftDone = "ui.craft.done";
+        public const string CraftTitle = "ui.craft.title";
+        public const string CraftCombine = "ui.craft.combine";
+        public const string CraftNeedsTwo = "ui.craft.needs_two";
+        public const string CraftTimes = "ui.craft.times";
+        public const string CraftUnknown = "ui.craft.unknown";
+        public const string CraftSlotEmpty = "ui.craft.slot_empty";
+        public const string CraftHint = "ui.craft.hint";
+        public const string CraftOpen = "ui.craft.open";
         public const string BagSelectHint = "ui.bag.select_hint";
         public const string ItemUsed = "ui.bag.used";
         public const string ItemNotUsable = "ui.bag.not_usable";

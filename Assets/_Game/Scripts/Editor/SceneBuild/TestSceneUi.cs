@@ -66,6 +66,7 @@ namespace SixtyOne.Editor
             BuildLoopCounter(root, gameManager);
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
             BuildLootWindow(root, gameManager, content, art);
+            TestSceneCraftNotebook.Build(root, gameManager, content, survival, recipes, art, theme);
             BuildSearchRing(root, camera, art);
             // Speech bubbles + the top narration card (after the HUD so it reads the panic meter / bag column rects).
             DialoguePresenter presenter = TestSceneDialogueUi.Build(root, art, theme, survival);

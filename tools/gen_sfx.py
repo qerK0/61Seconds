@@ -234,3 +234,12 @@ buf = np.zeros(int(SR*0.8))
 place(buf, x, 0.0)
 place(buf, lp(noise(0.12), 600, 3) * env(int(SR*0.12), 0.001, 0.03) * 2.5 + 0.6 * np.sin(2*np.pi*140*t(0.12)) * env(int(SR*0.12), 0.001, 0.05), 0.5)
 save('sfx_valve_creak', buf, 0.8)
+
+# Notebook page: a short dry paper rustle (two crinkly bursts)
+d = 0.42
+buf = np.zeros(int(SR*d))
+for at, ln in ((0.0, 0.16), (0.14, 0.24)):
+    n = int(SR*ln)
+    crinkle = bp(noise(ln), 1800, 7000, 2) * (rng.uniform(0, 1, n) > 0.55) * np.hanning(n)
+    place(buf, crinkle + 0.4 * bp(noise(ln), 400, 1500) * np.hanning(n), at)
+save('sfx_paper_rustle', buf, 0.6)

@@ -135,6 +135,15 @@ namespace SixtyOne.UI
                 return;
             }
 
+            // The craft notebook is open: a bag click fills one of its slots.
+            if (CraftNotebook.Open != null)
+            {
+                selected = -1;
+                CraftNotebook.Open.Take(item);
+                Refresh();
+                return;
+            }
+
             // A container window is open: a bag click puts the item back into it.
             if (LootEvents.IsOpen)
             {

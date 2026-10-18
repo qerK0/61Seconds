@@ -22,6 +22,8 @@ MonoBehaviour:
   displayMedium: {fileID: 11400000, guid: 78f23ca2c6671d347a96f007d3cc2791, type: 2}
   mono: {fileID: 11400000, guid: eddf1a90a5f5d2346879747ae8837b32, type: 2}
   monoBold: {fileID: 11400000, guid: 79750be53dd805a4e9649ed9b8706fa9, type: 2}
+  hand: {fileID: 11400000, guid: f0e33eb2cad1ce34da6ff13ad068823c, type: 2}
+  handBold: {fileID: 11400000, guid: 8d62e881d16a44a4784b67901f55d362, type: 2}
   timerSize: 64
   titleSize: 30
   speakerSize: 26

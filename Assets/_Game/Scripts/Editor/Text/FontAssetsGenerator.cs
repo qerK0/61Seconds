@@ -33,6 +33,7 @@ namespace SixtyOne.Editor
         public const string SerifFolder = FontFolder + "/EBGaramond";
         public const string OswaldFolder = FontFolder + "/Oswald";
         public const string PlexFolder = FontFolder + "/IBMPlexMono";
+        public const string CaveatFolder = FontFolder + "/Caveat";
 
         [MenuItem("SixtyOne/Text/Generate Fonts + Theme", priority = 40)]
         public static void GenerateMenu()
@@ -67,6 +68,10 @@ namespace SixtyOne.Editor
             TMP_FontAsset plexRegular = Bake($"{PlexFolder}/IBMPlexMono-Regular.ttf", $"{PlexFolder}/IBMPlexMono-Regular SDF.asset", Characters, Padding, dynamicFallback);
             TMP_FontAsset plexBold = Bake($"{PlexFolder}/IBMPlexMono-Bold.ttf", $"{PlexFolder}/IBMPlexMono-Bold SDF.asset", Characters, Padding, dynamicFallback);
             theme.ConfigureMenuFonts(oswaldBold, oswaldMedium, plexRegular, plexBold);
+            // Craft notebook handwriting (Caveat has no arrow glyph: recipes use "=").
+            TMP_FontAsset caveat = Bake($"{CaveatFolder}/Caveat-Medium.ttf", $"{CaveatFolder}/Caveat-Medium SDF.asset", Characters, Padding, dynamicFallback);
+            TMP_FontAsset caveatBold = Bake($"{CaveatFolder}/Caveat-Bold.ttf", $"{CaveatFolder}/Caveat-Bold SDF.asset", Characters, Padding, dynamicFallback);
+            theme.ConfigureHandFonts(caveat, caveatBold);
             EditorUtility.SetDirty(theme);
             if (regular != null) SetTmpDefault(regular);
             AssetDatabase.SaveAssets();

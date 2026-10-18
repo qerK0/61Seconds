@@ -62,6 +62,13 @@ namespace SixtyOne.UI
         {
             Keyboard keyboard = Keyboard.current;
             if (keyboard == null || !keyboard.escapeKey.wasPressedThisFrame) return;
+            if (!PauseState.IsPaused && CraftNotebook.Open != null)
+            {
+                // Esc closes the craft notebook first, then pauses on the next press.
+                CraftNotebook.Open.Close();
+                return;
+            }
+
             if (!PauseState.IsPaused)
             {
                 // No pause over a full-screen card (it holds the timers itself).

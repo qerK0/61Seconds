@@ -259,6 +259,14 @@ ui.building.alarm,BİNA ÇÖKÜYOR!,alarm banner
 ui.building.label,Bina çökmeden,caption under the building timer
 ui.craft.done,"Birleştirdin, yeni eşya çantada.",raised as a plain message (no argument)
 ui.craft.fail,Bunlar birleşmiyor.,
+ui.craft.title,Craft Defteri,spiral notebook title (handwriting)
+ui.craft.combine,Birleştir,notebook button
+ui.craft.needs_two,Önce iki eşya seç.,notebook: a slot is empty
+ui.craft.times,{0} ×{1},"notebook line: item name, count (Çarşaf ×3)"
+ui.craft.unknown,???,notebook: result not discovered yet
+ui.craft.slot_empty,boş,notebook slot without an item
+ui.craft.hint,Çantadan iki eşya seç (C = defter),notebook footer
+ui.craft.open,Defter,notebook button next to the bag header (C)
 ui.death.missing_item,Eksik: {0},"{0} = item name, death card"
 ui.dialogue.continue,Devam,dialogue continue button
 ui.journal.close,Kapat,

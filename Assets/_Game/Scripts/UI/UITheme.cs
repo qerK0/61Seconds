@@ -42,6 +42,12 @@ namespace SixtyOne.UI
         [Tooltip("IBM Plex Mono Bold: end screen emphasis.")]
         [SerializeField] private TMP_FontAsset monoBold;
 
+        [Tooltip("Handwriting (Caveat Medium): the craft notebook.")]
+        [SerializeField] private TMP_FontAsset hand;
+
+        [Tooltip("Handwriting bold (Caveat Bold): notebook titles.")]
+        [SerializeField] private TMP_FontAsset handBold;
+
         [Header("Sizes (px at 1080p; nothing below 16)")]
         [SerializeField] private float timerSize = 64f;
         [SerializeField] private float titleSize = 30f;
@@ -92,6 +98,8 @@ namespace SixtyOne.UI
         public TMP_FontAsset DisplayMedium => displayMedium != null ? displayMedium : SemiBold;
         public TMP_FontAsset Mono => mono != null ? mono : Regular;
         public TMP_FontAsset MonoBold => monoBold != null ? monoBold : Mono;
+        public TMP_FontAsset Hand => hand != null ? hand : Regular;
+        public TMP_FontAsset HandBold => handBold != null ? handBold : Hand;
         public float TimerSize => timerSize;
         public float TitleSize => titleSize;
         public float SpeakerSize => speakerSize;
@@ -141,6 +149,13 @@ namespace SixtyOne.UI
             displayMedium = oswaldMedium;
             mono = plexRegular;
             monoBold = plexBold;
+        }
+
+        /// <summary>Handwriting fonts (Caveat) for the craft notebook.</summary>
+        public void ConfigureHandFonts(TMP_FontAsset caveatMedium, TMP_FontAsset caveatBold)
+        {
+            hand = caveatMedium;
+            handBold = caveatBold;
         }
 
         /// <summary>Applies a text role (font, size, colour, spacing) to a label.</summary>
