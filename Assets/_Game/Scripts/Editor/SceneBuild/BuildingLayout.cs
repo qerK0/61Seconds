@@ -730,7 +730,7 @@ namespace SixtyOne.Editor
             f10Kitchen.Hotspots.Add(Valve(1.7f, 3.6f, BuildingLevelsGenerator.F3Flat10 + ".c_valve"));
             RoomSpec f10Living = Art(Room(BuildingLevelsGenerator.Flat10Living, 4, 4, new Color(0.4f, 0.4f, 0.44f, 1f), BuildingLevelsGenerator.Flat10), RoomArt.Home);
             // The collapsed floor: a hole decal on the floor layer (the way down still needs the rope + harness).
-            f10Living.Props.Add(P(null, "FloorHole", 2.0f, 2.2f, 0f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
+            f10Living.Props.Add(P(null, "FloorHole", 2.4f, 2.5f, 0f, 1.4f, 0.25f, new Color(0.05f, 0.05f, 0.06f, 1f)));
             f10Living.Props[f10Living.Props.Count - 1].BlocksNav = true;
             f10Living.Items.Add(I("tape", 0.6f, 3.4f, new Color(0.6f, 0.6f, 0.65f, 1f), cost: 2f, surface: false, hidden: true, id: "flat10_hidden_tape"));
             f10Living.Containers.Add(Lent(Box("flat10_bookshelf", "bookshelf", 2.6f, 3.7f, Wood, "cloth", "bedsheet")));

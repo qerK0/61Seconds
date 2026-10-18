@@ -24,14 +24,18 @@ namespace SixtyOne.Cinematic
         [SerializeField] private Color splitHighlights = new Color(1f, 0.84f, 0.64f, 1f);
         [Tooltip("Split toning balance (-100 = more shadows tone, 100 = more highlights tone).")]
         [Range(-100f, 100f)] [SerializeField] private float splitBalance = -15f;
-        [Tooltip("Vignette intensity at rest.")]
-        [Range(0f, 1f)] [SerializeField] private float vignette = 0.35f;
+        [Tooltip("Vignette intensity at rest (act 1 at most 0.3; later acts darker).")]
+        [Range(0f, 1f)] [SerializeField] private float vignette = 0.28f;
         [Tooltip("Vignette smoothness (higher = softer edge).")]
         [Range(0.01f, 1f)] [SerializeField] private float vignetteSmoothness = 0.45f;
-        [Tooltip("Film grain intensity (subtle).")]
-        [Range(0f, 1f)] [SerializeField] private float grainIntensity = 0.2f;
+        [Tooltip("Film grain (Thin1) intensity: subtle, it ties the pixel-art bag, the characters and the painted props together.")]
+        [Range(0f, 1f)] [SerializeField] private float grainIntensity = 0.12f;
         [Tooltip("Film grain luminance response (higher = less grain in bright areas).")]
         [Range(0f, 1f)] [SerializeField] private float grainResponse = 0.8f;
+        [Tooltip("URP Color Lookup strip (32 = 1024x32): the shared 'dust' grade under every act. Null = no LUT.")]
+        [SerializeField] private Texture lut;
+        [Tooltip("Color Lookup contribution (0 = off, 1 = full LUT).")]
+        [Range(0f, 1f)] [SerializeField] private float lutContribution = 0.6f;
         [Tooltip("Bloom threshold (gamma). Above 1 only bright spots (lamps, flash) bloom.")]
         [SerializeField] private float bloomThreshold = 1.1f;
         [Tooltip("Bloom intensity (keep low).")]
@@ -162,6 +166,8 @@ namespace SixtyOne.Cinematic
         public float VignetteSmoothness => vignetteSmoothness;
         public float GrainIntensity => grainIntensity;
         public float GrainResponse => grainResponse;
+        public Texture Lut => lut;
+        public float LutContribution => lutContribution;
         public float BloomThreshold => bloomThreshold;
         public float BloomIntensity => bloomIntensity;
         public float BloomScatter => bloomScatter;
@@ -223,6 +229,13 @@ namespace SixtyOne.Cinematic
         /// Starting values for an act (1-3): each act is darker, more desaturated and harsher than the last.
         /// Used by the profile generator; tune the assets afterwards.
         /// </summary>
+        /// <summary>Sets the shared Color Lookup (generator).</summary>
+        public void ConfigureLut(Texture strip, float contribution)
+        {
+            lut = strip;
+            lutContribution = Mathf.Clamp01(contribution);
+        }
+
         public void ApplyActDefaults(int act)
         {
             int a = Mathf.Clamp(act, 1, 3) - 1;
@@ -230,8 +243,8 @@ namespace SixtyOne.Cinematic
             contrast = 15f + 8f * a;
             saturation = -20f - 8f * a;
             colorFilter = new Color(0.88f - 0.04f * a, 0.94f - 0.03f * a, 1f, 1f);
-            vignette = 0.35f + 0.05f * a;
-            grainIntensity = 0.2f + 0.08f * a;
+            vignette = 0.28f + 0.05f * a;
+            grainIntensity = 0.12f + 0.02f * a;
             globalLightIntensity = 0.75f - 0.12f * a;
             prepVignetteEnd = 0.55f + 0.05f * a;
             prepSaturationEnd = -45f - 8f * a;

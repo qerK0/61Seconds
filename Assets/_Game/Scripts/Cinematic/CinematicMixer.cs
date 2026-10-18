@@ -62,7 +62,8 @@ namespace SixtyOne.Cinematic
 
             f.Contrast = Mathf.Lerp(p.Contrast, p.DeathContrast, s.Death);
             f.ColorFilter = Color.Lerp(p.ColorFilter, p.WinColorFilter, s.Win);
-            f.Grain = Mathf.Clamp01(Mathf.Lerp(p.GrainIntensity, p.RewindGrain, s.Rewind));
+            // Reduce Effects turns the film grain off (the rewind spike too).
+            f.Grain = s.ReduceEffects ? 0f : Mathf.Clamp01(Mathf.Lerp(p.GrainIntensity, p.RewindGrain, s.Rewind));
             f.Chromatic = s.ReduceEffects ? 0f : Mathf.Clamp01(Mathf.Max(s.Chromatic, p.RewindChromatic * s.Rewind));
             f.LensDistortion = s.ReduceEffects ? 0f : Mathf.Clamp(s.LensDistortion, -1f, 1f);
             f.Zoom = p.PrepZoomPercent * 0.01f * prep;

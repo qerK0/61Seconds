@@ -17,8 +17,9 @@ namespace SixtyOne.Editor
 
     /// <summary>
     /// SixtyOne > Cinematic > Generate Profiles. Creates Assets/_Game/Data/Cinematic/: CinematicAct1-3
-    /// (each act darker and harsher), CinematicBaseVolume (ACES, color adjustments, split toning, vignette,
-    /// grain, bloom, chromatic aberration, lens distortion) and the dust particle material.
+    /// (each act darker and harsher; all share the dust Color Lookup), CinematicBaseVolume (ACES, color adjustments,
+    /// split toning, vignette, Thin1
+    /// grain, bloom, color lookup, chromatic aberration, lens distortion) and the dust particle material.
     /// Existing profiles keep their tuned values; only missing ones get act defaults.
     /// </summary>
     public static class CinematicAssetsGenerator
@@ -66,6 +67,16 @@ namespace SixtyOne.Editor
                 result.ActProfiles[act - 1] = profile;
             }
 
+            // The shared dust LUT under every act (profiles that already have a LUT keep theirs).
+            Texture dust = ImportLut(DustLutPath);
+            ImportLut(NeutralLutPath);
+            foreach (CinematicProfile profile in result.ActProfiles)
+            {
+                if (profile.Lut != null || dust == null) continue;
+                profile.ConfigureLut(dust, DefaultLutContribution);
+                EditorUtility.SetDirty(profile);
+            }
+
             result.BaseVolume = BuildBaseVolume(result.ActProfiles[0]);
             result.DustMaterial = BuildDustMaterial(dustTexture);
             AssetDatabase.SaveAssets();
@@ -73,6 +84,43 @@ namespace SixtyOne.Editor
         }
 
         private static string ProfilePath(int act) => $"{Folder}/CinematicAct{act}.asset";
+
+        /// <summary>The "dust" grade: lifted blacks, slight desaturation, teal shadows, warm dusty highlights (32 strip).</summary>
+        public const string DustLutPath = "Assets/_Game/Art/LUT/LUT_61s_Dust_32.png";
+
+        /// <summary>Identity LUT for checking the import: at contribution 1 the image must not change.</summary>
+        public const string NeutralLutPath = "Assets/_Game/Art/LUT/LUT_Neutral_32.png";
+
+        public const float DefaultLutContribution = 0.6f;
+
+        /// <summary>
+        /// Imports a URP Color Lookup strip as URP expects it: Default texture, sRGB OFF (ColorLookup.ValidateLUT rejects
+        /// sRGB formats; with sRGB on the neutral LUT shifts the image), no mipmaps, no compression,
+        /// Clamp, Bilinear, no power-of-two rescale (a 32 strip is 1024 x 32), max size large enough to keep it 1:1.
+        /// </summary>
+        public static Texture ImportLut(string path)
+        {
+            if (!(AssetImporter.GetAtPath(path) is TextureImporter importer)) return null;
+            bool changed = importer.textureType != TextureImporterType.Default || importer.sRGBTexture || importer.mipmapEnabled
+                || importer.textureCompression != TextureImporterCompression.Uncompressed || importer.wrapMode != TextureWrapMode.Clamp
+                || importer.filterMode != FilterMode.Bilinear || importer.npotScale != TextureImporterNPOTScale.None || importer.maxTextureSize < 2048
+                || importer.alphaSource != TextureImporterAlphaSource.None;
+            if (changed)
+            {
+                importer.textureType = TextureImporterType.Default;
+                importer.sRGBTexture = false;
+                importer.mipmapEnabled = false;
+                importer.textureCompression = TextureImporterCompression.Uncompressed;
+                importer.wrapMode = TextureWrapMode.Clamp;
+                importer.filterMode = FilterMode.Bilinear;
+                importer.npotScale = TextureImporterNPOTScale.None;
+                importer.maxTextureSize = 2048;
+                importer.alphaSource = TextureImporterAlphaSource.None;
+                importer.SaveAndReimport();
+            }
+
+            return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+        }
 
         /// <summary>Base look as a VolumeProfile (preview of act 1; the director overrides values at runtime on a copy).</summary>
         private static VolumeProfile BuildBaseVolume(CinematicProfile look)
@@ -111,7 +159,7 @@ namespace SixtyOne.Editor
             vignette.smoothness.Override(look.VignetteSmoothness);
 
             FilmGrain grain = Add<FilmGrain>(profile);
-            grain.type.Override(FilmGrainLookup.Medium1);
+            grain.type.Override(FilmGrainLookup.Thin1);
             grain.intensity.Override(look.GrainIntensity);
             grain.response.Override(look.GrainResponse);
 
@@ -119,6 +167,10 @@ namespace SixtyOne.Editor
             bloom.threshold.Override(look.BloomThreshold);
             bloom.intensity.Override(look.BloomIntensity);
             bloom.scatter.Override(look.BloomScatter);
+
+            ColorLookup lookup = Add<ColorLookup>(profile);
+            lookup.texture.Override(look.Lut);
+            lookup.contribution.Override(look.Lut != null ? look.LutContribution : 0f);
 
             Add<ChromaticAberration>(profile).intensity.Override(0f);
             Add<LensDistortion>(profile).intensity.Override(0f);

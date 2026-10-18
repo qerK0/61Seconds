@@ -19,10 +19,12 @@ MonoBehaviour:
   splitShadows: {r: 0.32, g: 0.42, b: 0.62, a: 1}
   splitHighlights: {r: 1, g: 0.84, b: 0.64, a: 1}
   splitBalance: -15
-  vignette: 0.42
+  vignette: 0.38
   vignetteSmoothness: 0.45
-  grainIntensity: 0.36
+  grainIntensity: 0.16
   grainResponse: 0.8
+  lut: {fileID: 2800000, guid: a97703cd46d9a3541b77777b662fee17, type: 3}
+  lutContribution: 0.6
   bloomThreshold: 1.1
   bloomIntensity: 0.3
   bloomScatter: 0.6

@@ -193,6 +193,9 @@ namespace SixtyOne.Editor
                 sorter.Apply();
             }
 
+            // Floor-standing mapped art gets a soft contact shadow (not wall fixtures, the chandelier or floor decals).
+            if (mapped != null && !chandelier && !WallMounted(objectName) && !PropArt.IsFloorDecal(objectName)) ContactShadow(go.transform, mapped.bounds.size.x * 0.85f);
+
             if (!string.IsNullOrEmpty(propId))
             {
                 HazardProp prop = go.AddComponent<HazardProp>();
@@ -202,6 +205,27 @@ namespace SixtyOne.Editor
             }
 
             return go;
+        }
+
+        /// <summary>Alpha of the soft contact shadow under props and furniture.</summary>
+        public const float ContactShadowAlpha = 0.35f;
+
+        /// <summary>
+        /// A soft contact shadow (ph_shadow, 1 x 0.5 units) under a floor-standing object, scaled to its footprint
+        /// width. Its own sorting group keeps it on the floor layer even under an iso sorter that sorts children.
+        /// It grounds the mismatched art styles more than any filter.
+        /// </summary>
+        public static void ContactShadow(Transform parent, float width)
+        {
+            var shadow = new GameObject("Shadow");
+            shadow.transform.SetParent(parent, false);
+            float w = Mathf.Max(0.2f, width);
+            shadow.transform.localScale = new Vector3(w, w * 0.8f, 1f);
+            var group = shadow.AddComponent<UnityEngine.Rendering.SortingGroup>();
+            group.sortingOrder = DecalOrder + 5;
+            SpriteRenderer s = shadow.AddComponent<SpriteRenderer>();
+            s.sprite = Art.Shadow;
+            s.color = new Color(1f, 1f, 1f, ContactShadowAlpha);
         }
 
         /// <summary>World-space TMP label using the shared readable material.</summary>
@@ -302,6 +326,9 @@ namespace SixtyOne.Editor
 
             Material lit = RoomTiles.LitMaterial;
             if (lit != null) r.sharedMaterial = lit;
+
+            // Furniture stands on the floor: a soft contact shadow under it.
+            ContactShadow(go.transform, width * 0.9f);
 
             BoxCollider2D box = go.AddComponent<BoxCollider2D>();
             box.size = new Vector2(Mathf.Max(0.35f, width * 0.8f), Mathf.Max(0.3f, height));

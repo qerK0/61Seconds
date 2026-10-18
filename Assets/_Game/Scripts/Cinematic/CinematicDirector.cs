@@ -69,6 +69,7 @@ namespace SixtyOne.Cinematic
         private Vignette vignette;
         private FilmGrain filmGrain;
         private Bloom bloom;
+        private ColorLookup colorLookup;
         private ChromaticAberration chromatic;
         private LensDistortion lensDistortion;
 
@@ -181,11 +182,12 @@ namespace SixtyOne.Cinematic
             vignette = Ensure<Vignette>();
             filmGrain = Ensure<FilmGrain>();
             bloom = Ensure<Bloom>();
+            colorLookup = Ensure<ColorLookup>();
             chromatic = Ensure<ChromaticAberration>();
             lensDistortion = Ensure<LensDistortion>();
 
             tonemapping.mode.Override(TonemappingMode.ACES);
-            filmGrain.type.Override(FilmGrainLookup.Medium1);
+            filmGrain.type.Override(FilmGrainLookup.Thin1);
             vignette.color.Override(Color.black);
             vignette.rounded.Override(false);
 
@@ -293,6 +295,9 @@ namespace SixtyOne.Cinematic
             bloom.threshold.Override(p.BloomThreshold);
             bloom.intensity.Override(p.BloomIntensity);
             bloom.scatter.Override(p.BloomScatter);
+            // The dust LUT is the shared base grade under every act (Reduce Effects keeps it; only the grain goes).
+            colorLookup.texture.Override(p.Lut);
+            colorLookup.contribution.Override(p.Lut != null ? p.LutContribution : 0f);
             chromatic.intensity.Override(f.Chromatic);
             lensDistortion.intensity.Override(f.LensDistortion);
         }

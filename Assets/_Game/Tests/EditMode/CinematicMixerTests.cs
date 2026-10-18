@@ -81,6 +81,23 @@ namespace SixtyOne.Tests
             Assert.AreEqual(profile.PostExposure, f.PostExposure, 0.0001f, "no white flash");
             Assert.AreEqual(0f, f.Chromatic, 0.0001f);
             Assert.AreEqual(0f, f.LensDistortion, 0.0001f);
+            Assert.AreEqual(0f, f.Grain, 0.0001f, "Reduce Effects turns the film grain off (rewind spike included)");
+        }
+
+        [Test]
+        public void ActOneVignetteStaysLightAndActsGetDarker()
+        {
+            var acts = new CinematicProfile[3];
+            for (int a = 0; a < 3; a++)
+            {
+                acts[a] = ScriptableObject.CreateInstance<CinematicProfile>();
+                acts[a].ApplyActDefaults(a + 1);
+            }
+
+            Assert.LessOrEqual(acts[0].Vignette, 0.3f);
+            Assert.Less(acts[0].Vignette, acts[1].Vignette);
+            Assert.Less(acts[1].Vignette, acts[2].Vignette);
+            foreach (CinematicProfile p in acts) Object.DestroyImmediate(p);
         }
 
         [Test]
