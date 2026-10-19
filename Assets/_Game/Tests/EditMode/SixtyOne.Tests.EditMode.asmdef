@@ -1,0 +1,25 @@
+{
+    "name": "SixtyOne.Tests.EditMode",
+    "rootNamespace": "SixtyOne.Tests",
+    "references": [
+        "SixtyOne.Runtime",
+        "SixtyOne.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

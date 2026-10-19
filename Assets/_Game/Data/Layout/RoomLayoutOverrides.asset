@@ -1,0 +1,3291 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ab852bd44c3384a83ff4a12b5c0c18, type: 3}
+  m_Name: RoomLayoutOverrides
+  m_EditorClassIdentifier: SixtyOne.Editor::SixtyOne.Editor.RoomLayoutOverrides
+  rooms:
+  - roomId: f3_corridor
+    objects:
+    - id: CeilingDebris
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: CorridorLamp
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: CorridorWindow
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: walllamp_5f9a6
+      kind: 0
+      removed: 0
+      gx: 6
+      gy: 4
+      lift: 0
+      flipX: 1
+      propName: WallLamp
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: F3WallLamp
+      kind: 4
+      removed: 0
+      gx: 0.5
+      gy: 3
+      lift: 0.8
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat10
+    objects:
+    - id: ceilinglamp_77c41
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 1.5
+      lift: 0
+      flipX: 0
+      propName: CeilingLamp
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobe_v2_67dff
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: WardrobeV2
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe_v2
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 0.61
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat10_kitchen
+    objects:
+    - id: Stove
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: Stove
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.8, y: 0.7}
+      tint: {r: 0.6, g: 0.6, b: 0.62, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: ceilinglamp_fa55e
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 2
+      lift: 0
+      flipX: 0
+      propName: CeilingLamp
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: kitchencabinet_dc2e8
+      kind: 0
+      removed: 0
+      gx: 3
+      gy: 5
+      lift: 0
+      flipX: 0
+      propName: KitchenCabinet
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat10_living
+    objects:
+    - id: armchair_26496
+      kind: 0
+      removed: 0
+      gx: 1
+      gy: 2
+      lift: 0
+      flipX: 0
+      propName: Armchair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.55
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: nightstand_e1d38
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: Nightstand
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.12
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat10_bookshelf
+      kind: 2
+      removed: 0
+      gx: 3.5
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bookshelf
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents:
+      - food
+      - water
+      - cloth
+      - bedsheet
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat11_bedroom
+    objects:
+    - id: Bed
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bed_a53bc
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Bed
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 2.18
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bedroom_bed_sheet
+      kind: 1
+      removed: 0
+      gx: 2.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: bedsheet
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.92, g: 0.92, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bedroom_nightstand
+      kind: 2
+      removed: 0
+      gx: 3.5
+      gy: 0.5
+      lift: 0
+      flipX: 1
+      propName: Nightstand
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: nightstand
+      contents:
+      - food
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bedroom_wardrobe_sheet
+      kind: 2
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobe_39b29
+      kind: 2
+      removed: 0
+      gx: 3
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Wardrobe
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe
+      contents:
+      - cloth
+      - bedsheet
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat11_hall
+    objects:
+    - id: FuseBox
+      kind: 0
+      removed: 0
+      gx: 3
+      gy: 1.5
+      lift: 0.4
+      flipX: 0
+      propName: FuseBox
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.5, y: 0.6}
+      tint: {r: 0.6, g: 0.6, b: 0.65, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: cabinet_070a8
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Cabinet
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: cabinet
+      contents:
+      - lighter
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: hall_nightstand
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 2
+      lift: 0
+      flipX: 1
+      propName: Nightstand
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: nightstand
+      contents:
+      - flashlight
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: hall_toolbox
+      kind: 2
+      removed: 0
+      gx: 0.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: Toolbox
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: toolbox
+      contents:
+      - wrench
+      - tape
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: nightstand_88183
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 2.5
+      lift: 0
+      flipX: 1
+      propName: Nightstand
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: nightstand
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: hall_hidden_whistle
+      kind: 3
+      removed: 0
+      gx: 0.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: whistle
+      cost: 2
+      borrowed: 0
+      surface: 0
+      prepOnly: 1
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.95, g: 0.5, b: 0.2, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat11_kitchen
+    objects:
+    - id: Stove
+      kind: 0
+      removed: 0
+      gx: 3.5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: Stove
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.8, y: 0.7}
+      tint: {r: 0.75, g: 0.75, b: 0.78, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_1cad6
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 1.5
+      lift: 0
+      flipX: 0
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: table_2683b
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: Table
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.31
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: water
+      kind: 1
+      removed: 0
+      gx: 2.5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: water
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.45, g: 0.7, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: kitchen_cabinet
+      kind: 2
+      removed: 0
+      gx: 3.6
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: KitchenCabinet
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: kitchen_cabinet
+      contents:
+      - water
+      - water
+      - food
+      - first_aid
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: kitchen_drawer
+      kind: 2
+      removed: 0
+      gx: 1.2
+      gy: 3.3
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: drawer
+      contents:
+      - gloves
+      - lighter
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat11_salon
+    objects:
+    - id: BalconyRail
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: CeilingLamp
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Chair
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Chair#2
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: DoorLintel
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Table
+      kind: 0
+      removed: 0
+      gx: 3
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: Table
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1.5, y: 0.45}
+      tint: {r: 0.55, g: 0.38, b: 0.22, a: 1}
+      objectScale: 1.64
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Wardrobe
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Window
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: armchair_2ed5f
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Armchair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.71
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: ceilinglamp_b9611
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 3.4
+      lift: 0
+      flipX: 0
+      propName: CeilingLamp
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 1
+      hazardPropId: ceiling_lamp
+      topple: -80
+      drop: 1.4
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.5, y: 0.35}
+      tint: {r: 1, g: 0.95, b: 0.6, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_5d7a1
+      kind: 0
+      removed: 0
+      gx: 3
+      gy: 1.5
+      lift: 0
+      flipX: 0
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_799b5
+      kind: 0
+      removed: 0
+      gx: 4
+      gy: 1
+      lift: 0
+      flipX: 1
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_fa323
+      kind: 0
+      removed: 0
+      gx: 4
+      gy: 0
+      lift: 0
+      flipX: 1
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobeold_b08d0
+      kind: 0
+      removed: 0
+      gx: 5.5
+      gy: 4.5
+      lift: 0
+      flipX: 0
+      propName: WardrobeOld
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bookshelf_07a7c
+      kind: 2
+      removed: 0
+      gx: 2
+      gy: 5.5
+      lift: 0
+      flipX: 1
+      propName: Bookshelf
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: cabinet_6b054
+      kind: 2
+      removed: 0
+      gx: 5.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: Cabinet
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: cabinet
+      contents:
+      - water
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: salon_bookshelf
+      kind: 2
+      removed: 0
+      gx: 1.5
+      gy: 5.5
+      lift: 0
+      flipX: 1
+      propName: Bookshelf
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 1
+      containerType: bookshelf
+      contents:
+      - gloves
+      - whistle
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: tv_unit_aa6b7
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 4
+      lift: 0
+      flipX: 0
+      propName: TvUnit
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: tv_unit
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.88
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat12
+    objects:
+    - id: tape
+      kind: 1
+      removed: 0
+      gx: 1
+      gy: 1.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: tape
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.6, g: 0.6, b: 0.65, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobe_ecb31
+      kind: 2
+      removed: 0
+      gx: 2.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Wardrobe
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe
+      contents:
+      - whistle
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 0.75
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat12_bedroom
+    objects:
+    - id: Bed
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bed_8ce87
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bed
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.7
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bookshelf_86a19
+      kind: 2
+      removed: 0
+      gx: 0
+      gy: 3
+      lift: 0
+      flipX: 1
+      propName: Bookshelf
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents:
+      - bedsheet
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 0.81
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat12_nightstand
+      kind: 2
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat12_wardrobe_sheet
+      kind: 2
+      removed: 0
+      gx: 2.6
+      gy: 3.4
+      lift: 0
+      flipX: 0
+      propName: NeighbourWardrobe
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe
+      contents:
+      - bedsheet
+      - child_harness
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat12_living
+    objects:
+    - id: Sofa
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_8dd30
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 1.5
+      lift: 0
+      flipX: 0
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chairold_649af
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 3.5
+      lift: 0
+      flipX: 1
+      propName: ChairOld
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.79
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: table_04709
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: Table
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.42
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: cloth
+      kind: 1
+      removed: 0
+      gx: 0.5
+      gy: 0.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: cloth
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.85, g: 0.85, b: 0.9, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: lighter
+      kind: 1
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat12_bookshelf
+      kind: 2
+      removed: 0
+      gx: 3
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bookshelf
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents:
+      - water
+      - food
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 0.82
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat12_cabinet
+      kind: 2
+      removed: 0
+      gx: 0.6
+      gy: 3.2
+      lift: 0
+      flipX: 0
+      propName: Cabinet
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: cabinet
+      contents:
+      - first_aid
+      - lighter
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat7
+    objects:
+    - id: Bookshelf
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Cables
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: CeilingPlaster
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Chair
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Desk
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Window
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: armchair_da7c0
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 0.5
+      lift: 0
+      flipX: 1
+      propName: Armchair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.51
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: chair_594c4
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Chair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: table_d800d
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 2.5
+      lift: 0
+      flipX: 1
+      propName: Table
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.41
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: tv_81b6b
+      kind: 0
+      removed: 0
+      gx: 4.5
+      gy: 0.5
+      lift: 0.45
+      flipX: 1
+      propName: Tv
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.71
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobeold_24368
+      kind: 0
+      removed: 0
+      gx: 4.5
+      gy: 4.5
+      lift: 0
+      flipX: 0
+      propName: WardrobeOld
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat7_kitchen
+    objects:
+    - id: Stove
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: Stove
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.8, y: 0.7}
+      tint: {r: 0.6, g: 0.6, b: 0.62, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat7_kitchen_cabinet
+      kind: 2
+      removed: 0
+      gx: 3
+      gy: 5
+      lift: 0
+      flipX: 0
+      propName: KitchenCabinet
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: kitchen_cabinet
+      contents:
+      - water
+      - first_aid
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat8_bedroom
+    objects:
+    - id: Bed
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Bed
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1.6, y: 0.6}
+      tint: {r: 0.8, g: 0.8, b: 0.85, a: 1}
+      objectScale: 1.91
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat8_nightstand
+      kind: 2
+      removed: 0
+      gx: 3.5
+      gy: 3.5
+      lift: 0
+      flipX: 1
+      propName: Nightstand
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: nightstand
+      contents:
+      - cloth
+      - food
+      - bedsheet
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobe_7e3a8
+      kind: 2
+      removed: 0
+      gx: 0
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Wardrobe
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe
+      contents:
+      - food
+      - cloth
+      - first_aid
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat8_living
+    objects:
+    - id: Sofa
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: armchair_d9ed6
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Armchair
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.34
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: kitchencabinet_fff19
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 5
+      lift: 0
+      flipX: 0
+      propName: KitchenCabinet
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: toolbox_3355c
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 0.5
+      lift: 0
+      flipX: 1
+      propName: Toolbox
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: tv_24b11
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 3.5
+      lift: 0.45
+      flipX: 0
+      propName: Tv
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.53
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: walllamp_2bb44
+      kind: 0
+      removed: 0
+      gx: 5
+      gy: 3.5
+      lift: 0
+      flipX: 0
+      propName: WallLamp
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat8_bookshelf
+      kind: 2
+      removed: 0
+      gx: 3.5
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bookshelf
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents:
+      - food
+      - water
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat9
+    objects:
+    - id: FuseBox
+      kind: 0
+      removed: 0
+      gx: 1.5
+      gy: 3
+      lift: 0.5
+      flipX: 1
+      propName: FuseBox
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 0.6, y: 0.7}
+      tint: {r: 0.6, g: 0.6, b: 0.65, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat9_kitchen
+    objects:
+    - id: HangingCables
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Shaft
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: kitchencabinet_8bcd5
+      kind: 0
+      removed: 0
+      gx: 3
+      gy: 4
+      lift: 0
+      flipX: 0
+      propName: KitchenCabinet
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: stove_4d5ae
+      kind: 0
+      removed: 0
+      gx: 2.5
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: Stove
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.11
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: walllamp_43538
+      kind: 0
+      removed: 0
+      gx: 4
+      gy: 4
+      lift: 0
+      flipX: 0
+      propName: WallLamp
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: flat9_living
+    objects:
+    - id: BalconyRail
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: Sofa
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bed_022a5
+      kind: 0
+      removed: 0
+      gx: 0.5
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bed
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.61
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: bed_84a63
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 3
+      lift: 0
+      flipX: 0
+      propName: Bed
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.51
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: floorhole_23a77
+      kind: 0
+      removed: 0
+      gx: 4
+      gy: 1
+      lift: 0
+      flipX: 0
+      propName: FloorHole
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: tv_c8687
+      kind: 0
+      removed: 0
+      gx: 2
+      gy: 4
+      lift: 0.45
+      flipX: 0
+      propName: Tv
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1.64
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat9_sofa_sheet
+      kind: 1
+      removed: 0
+      gx: 1
+      gy: 2.5
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: bedsheet
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 0.92, g: 0.92, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: flat9_bookshelf
+      kind: 2
+      removed: 0
+      gx: 3.1
+      gy: 3.7
+      lift: 0
+      flipX: 0
+      propName: Bookshelf
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: bookshelf
+      contents:
+      - food
+      - water
+      - bedsheet
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+    - id: wardrobe_8cb45
+      kind: 2
+      removed: 0
+      gx: 3.5
+      gy: 3.5
+      lift: 0
+      flipX: 1
+      propName: Wardrobe
+      blocksNav: 1
+      itemId: 
+      cost: 1
+      borrowed: 1
+      surface: 1
+      prepOnly: 0
+      containerType: wardrobe
+      contents:
+      - bedsheet
+      - cloth
+      - tape
+      - gloves
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 0.75
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 
+  - roomId: street
+    objects:
+    - id: BuildingDoor
+      kind: 0
+      removed: 1
+      gx: 0
+      gy: 0
+      lift: 0
+      flipX: 0
+      propName: 
+      blocksNav: 0
+      itemId: 
+      cost: 1
+      borrowed: 0
+      surface: 1
+      prepOnly: 0
+      containerType: 
+      contents: []
+      hiddenContents: []
+      searchSeconds: 1.5
+      buildingCost: 3
+      hazardProp: 0
+      hazardPropId: 
+      topple: -80
+      drop: 0.8
+      radius: 2.4
+      lightColor: {r: 1, g: 0.78, b: 0.5, a: 1}
+      scale: {x: 1, y: 1}
+      tint: {r: 1, g: 1, b: 1, a: 1}
+      objectScale: 1
+      sortNudge: 0
+      doorEdge: 
+      doorArt: 

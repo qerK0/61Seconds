@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59021af6126971049b928ac1b8b5c9a5, type: 3}
+  m_Name: f2.epilogue
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Building.EpilogueNode
+  id: f2.epilogue
+  titleKey:
+    key: f2.epilogue.title
+  bodyKey:
+    key: f2.epilogue.body
+  roomId: street
+  act: 3
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices: []
+  onEnter: []
+  bombChecks: []
+  familyHealthyKey:
+    key: f2.epilogue.family_ok
+  familyInjuredKey:
+    key: f2.epilogue.family_hurt
+  borrowNoneKey:
+    key: f2.epilogue.borrow_none
+  borrowWithNoteKey:
+    key: f2.epilogue.borrow_note
+  borrowWithoutNoteKey:
+    key: f2.epilogue.borrow_no_note
+  loopsKey:
+    key: f2.epilogue.loops
+  robbedKey:
+    key: f2.epilogue.robbed
+  collapsedBehindKey:
+    key: f2.epilogue.collapsed_behind
+  timeLeftKey:
+    key: f2.epilogue.time_left

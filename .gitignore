@@ -112,3 +112,12 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+.~lock.*#
+
+# Local MCP screenshots
+/[Cc]aptures/
+
+# 95 MB raw recording; the cue uses Audio/Trimmed/electric_short.wav
+/Assets/_Game/Audio/elektrik kacag*.wav
+/Assets/_Game/Audio/elektrik kacag*.wav.meta

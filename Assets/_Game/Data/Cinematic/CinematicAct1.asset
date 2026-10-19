@@ -1,0 +1,100 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c730ba9e59d95f348aaac0b95130afd6, type: 3}
+  m_Name: CinematicAct1
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Cinematic.CinematicProfile
+  postExposure: -0.33
+  contrast: 12
+  saturation: -20
+  colorFilter: {r: 0.88, g: 0.94, b: 1, a: 1}
+  splitShadows: {r: 0.32, g: 0.42, b: 0.62, a: 1}
+  splitHighlights: {r: 1, g: 0.84, b: 0.64, a: 1}
+  splitBalance: -15
+  vignette: 0.28
+  vignetteSmoothness: 0.55
+  grainIntensity: 0.12
+  grainResponse: 0.8
+  lut: {fileID: 2800000, guid: a97703cd46d9a3541b77777b662fee17, type: 3}
+  lutContribution: 0.6
+  bloomThreshold: 1.1
+  bloomIntensity: 0.3
+  bloomScatter: 0.6
+  globalLightIntensity: 0.8
+  globalLightColor: {r: 0.8, g: 0.85, b: 1, a: 1}
+  practicalLightIntensity: 1.1
+  prepCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  prepVignetteEnd: 0.5
+  prepSaturationEnd: -45
+  prepZoomPercent: 8
+  letterboxAspect: 2.35
+  letterboxSlideSeconds: 0.4
+  heartbeatVignette: 0.08
+  heartbeatSeconds: 0.35
+  placementLowPassHz: 1800
+  flashExposure: 2.5
+  flashSeconds: 0.08
+  chromaticPeak: 0.8
+  chromaticSettle: 0.1
+  chromaticPulseSeconds: 0.6
+  lensWobbleAmplitude: 0.2
+  lensWobbleFrequency: 5
+  flickerCountMin: 3
+  flickerCountMax: 5
+  lightsOffAfterQuake: 1
+  keepLightsFlag: 
+  rotationalShakeDegrees: 0.5
+  dutchTiltDegrees: 0
+  dustBurstCount: 80
+  postQuakeExposureOffset: -0.3
+  postQuakeSaturation: -45
+  postQuakeVignette: 0.48
+  postQuakeGlobalLight: 0.4
+  flashlightItemId: flashlight
+  flashlightIntensity: 1.2
+  flashlightRadius: 2.4
+  poisonExposure: -0.9
+  poisonSaturation: -35
+  poisonVignette: 0.25
+  deathBlendSeconds: 0.5
+  deathSaturation: -100
+  deathContrast: 40
+  deathVignette: 0.6
+  rewindChromatic: 0.7
+  rewindGrain: 0.9
+  rewindSeconds: 0.9
+  winColorFilter: {r: 1, g: 0.95, b: 0.85, a: 1}
+  winSaturation: -5
+  winVignette: 0.2
+  winBlendSeconds: 2

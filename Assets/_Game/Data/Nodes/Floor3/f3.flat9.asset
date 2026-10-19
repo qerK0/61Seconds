@@ -1,0 +1,226 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
+  m_Name: f3.flat9
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
+  id: f3.flat9
+  titleKey:
+    key: f3.flat9.title
+  bodyKey:
+    key: f3.flat9.body
+  roomId: flat9
+  act: 2
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f3.flat9.c_repair
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: PowerCut_F3
+      member: 0
+      health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat9
+    conditions:
+    - type: 5
+      item: {fileID: 0}
+      anyItems:
+      - {fileID: 11400000, guid: 58e91e545b90dde4a87cd6c2250a9761, type: 2}
+      - {fileID: 11400000, guid: 8a64092b88da83c468696fcfab5c41e4, type: 2}
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    - type: 0
+      item: {fileID: 11400000, guid: 85fd1875cc48fd447a9dbd08ec6e69e5, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 2
+    lockedReasonKey:
+      key: f3.flat9.c_repair.locked
+    missingItem: {fileID: 11400000, guid: 58e91e545b90dde4a87cd6c2250a9761, type: 2}
+    missingItemTextKey:
+      key: death.electrocuted
+    missingItemRewind: 0
+    timeCost: 4
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: cb28008d26e97fc4fb6dca23902c8aa0, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: death.electrocuted
+      tip: {fileID: 11400000, guid: c630e389d0298224c837d67ad2f26313, type: 2}
+      cue: {fileID: 11400000, guid: 3e0071d4ab6d3b047951995b048e7ea7, type: 2}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat9.c_cables
+    type: 0
+    showIf:
+    - type: 2
+      item: {fileID: 0}
+      anyItems: []
+      flag: PowerCut_F3
+      member: 0
+      health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat9_kitchen
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    - type: 0
+      item: {fileID: 11400000, guid: 48838efbe712b134b896f19053a5c45c, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 2
+    lockedReasonKey:
+      key: f3.flat9.c_cables.locked
+    missingItem: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+    missingItemTextKey:
+      key: death.descent_no_gear
+    missingItemRewind: 1
+    timeCost: 12
+    staminaCost: 25
+    heavy: 1
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 4
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 0
+      targetNode: {fileID: 11400000, guid: feebeebcbc62ec54cb82bc47cfeb6ab0, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: death.descent_no_gear
+      tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat9.c_back
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []

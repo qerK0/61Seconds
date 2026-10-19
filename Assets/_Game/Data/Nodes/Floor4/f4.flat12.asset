@@ -1,0 +1,133 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
+  m_Name: f4.flat12
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
+  id: f4.flat12
+  titleKey:
+    key: f4.flat12.title
+  bodyKey:
+    key: f4.flat12.body
+  roomId: flat12
+  act: 1
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f4.flat12.c_note
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: LeftNote
+      member: 0
+      health: 0
+      room: 
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: LeftNote
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f4.flat12.msg_note
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f4.flat12.c_back
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: e303dfb2a48f04944b7431b398d391e1, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []

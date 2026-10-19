@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a660faac40cc608498dd729794162c18, type: 3}
+  m_Name: hz.f7_open
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Placement.Hazard
+  id: hz.f7_open
+  acts: 7
+  playerEffect: 3
+  wifeEffect: 1
+  childEffect: 2
+  textKey:
+    key: death.open_room
+  wifeTextKey:
+    key: death.wife.open_room
+  childTextKey:
+    key: death.child.open_room
+  tip: {fileID: 11400000, guid: 643b2d67efc04ad409b3c711259a0f4f, type: 2}
+  cue: {fileID: 11400000, guid: 9bde3d74722af2048b1540ce2f4d22f2, type: 2}
+  motion: 2
+  targetPropId: f7_ceiling

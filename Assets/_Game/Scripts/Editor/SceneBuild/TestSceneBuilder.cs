@@ -1,0 +1,506 @@
+using System.Collections.Generic;
+using SixtyOne.Audio;
+using SixtyOne.Building;
+using SixtyOne.Cinematic;
+using SixtyOne.Core;
+using SixtyOne.Dialogue;
+using SixtyOne.Iso;
+using SixtyOne.Nodes;
+using SixtyOne.Placement;
+using SixtyOne.QTE;
+using SixtyOne.Text;
+using SixtyOne.UI;
+using SixtyOne.World;
+using TMPro;
+using UnityEditor;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
+using UnityEngine.Rendering.Universal;
+using UnityEngine.SceneManagement;
+
+namespace SixtyOne.Editor
+{
+    /// <summary>
+    /// SixtyOne > Build Test Scene. Builds Assets/_Game/Scenes/Test_Building.unity from code: ONE scene with
+    /// every floor's rooms (RoomSwitcher shows one room at a time; floors are groups of rooms), the family,
+    /// all systems and the full UI, wired to the generated building data. One scene keeps a single GameManager,
+    /// GameState and UI, so checkpoints and rewinds need no scene loading. Room changes play the
+    /// RoomTransitionController (old tiles rise, new tiles drop in). CameraRig (per-room framing) → Main Camera
+    /// (shake/tilt), so framing and shake never fight. Rooms and the family sit under one World root scaled by
+    /// RoomVisualConfig.WorldScale.
+    /// </summary>
+    public static class TestSceneBuilder
+    {
+        public const string ScenePath = "Assets/_Game/Scenes/Test_Building.unity";
+        private const string OldScenePath = "Assets/_Game/Scenes/Test_Act1.unity";
+
+        // Room fill light: keeps the real (dark) tile textures faintly visible after the quake kills the practicals.
+        private const float AmbientFillIntensity = 0.6f;
+
+        /// <summary>EXPERIMENTAL: builds FX_WindDust (WindDustOverlay) under the CameraRig. false = no wind dust.</summary>
+        private static readonly bool WindDust = true;
+
+        [MenuItem("SixtyOne/Build Test Scene", priority = 11)]
+        public static void Build()
+        {
+            if (Resources.Load<TMP_Settings>("TMP Settings") == null)
+            {
+                EditorUtility.DisplayDialog("TextMeshPro resources missing",
+                    "Import them first: Window > TextMeshPro > Import TMP Essential Resources. Then run SixtyOne > Build Test Scene again.", "OK");
+                return;
+            }
+
+            if (EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("[TestScene] Leave Play Mode before building the scene.");
+                return;
+            }
+
+            // No modal "save changes?" dialog (it blocks the editor and MCP): the test scene is regenerated anyway, so
+            // its unsaved edits are dropped (hand placement is saved through the Layout Editor); other saved scenes
+            // with changes are saved silently.
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                Scene open = SceneManager.GetSceneAt(i);
+                if (!open.isDirty || open.path == ScenePath || string.IsNullOrEmpty(open.path)) continue;
+                EditorSceneManager.SaveScene(open);
+            }
+
+            // NewScene(Single) unloads unused assets, so open it before loading the data we wire in.
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            if (AssetDatabase.LoadMainAssetAtPath(OldScenePath) != null) AssetDatabase.DeleteAsset(OldScenePath);
+
+            BuildingAssets data = BuildingLevelsGenerator.Generate();
+            SceneKit.Art = PlaceholderArt.Generate();
+            // Furniture / fixture art (coloured blocks stay for anything unmapped).
+            SceneKit.Props = PropArt.Generate();
+            SceneKit.DogBark = data.DogBarkCue;
+            TestSceneCraftNotebook.RustleCue = data.PaperCue;
+            TestSceneEnding.Outro = data.MusicOutro;
+            TestSceneEnding.EndingCue = data.EndingCue;
+            CinematicAssets cinematic = CinematicAssetsGenerator.Generate(SceneKit.Art.Dot.texture);
+            SixtyOne.UI.UITheme theme = FontAssetsGenerator.Generate();
+
+            Camera camera = BuildCamera(out Transform cameraRig);
+            // EXPERIMENTAL foreground wind dust: set WindDust false (or delete these lines + Cinematic/WindDustOverlay.cs).
+            if (WindDust)
+            {
+                var windDust = new GameObject("FX_WindDust");
+                windDust.transform.SetParent(cameraRig, false);
+                windDust.AddComponent<SixtyOne.Cinematic.WindDustOverlay>();
+            }
+            BuildEventSystem();
+
+            var systems = new GameObject("Game");
+            GameManager gameManager = systems.AddComponent<GameManager>();
+            SerializedWire.Set(gameManager, "settings", data.Settings);
+
+            TextDBLoader loader = systems.AddComponent<TextDBLoader>();
+            SerializedWire.Set(loader, "settings", data.TextSettings);
+
+            AudioService audio = systems.AddComponent<AudioService>();
+            SerializedWire.SetArray(audio, "library", data.Cues.ToArray());
+            AudioEventHooks hooks = systems.AddComponent<AudioEventHooks>();
+            SerializedWire.Set(hooks, "map", data.AudioMap);
+            SerializedWire.Set(hooks, "service", audio);
+            MusicService music = systems.AddComponent<MusicService>();
+            SerializedWire.Set(music, "gameManager", gameManager);
+            SerializedWire.Set(music, "prepMusic", data.MusicPrep);
+            SerializedWire.Set(music, "tensionMusic", data.MusicTension);
+            SerializedWire.Set(music, "outroMusic", data.MusicOutro);
+            AmbienceService ambience = systems.AddComponent<AmbienceService>();
+            SerializedWire.Set(ambience, "gameManager", gameManager);
+            SerializedWire.Set(ambience, "damagedBuilding", data.DripCue);
+            SerializedWire.Set(ambience, "dogGrowl", data.DogGrowlCue);
+            SerializedWire.Set(ambience, "dogBark", data.DogBarkCue);
+            SerializedWire.Set(ambience, "heartbeat", data.HeartbeatCue);
+            SerializedWire.SetString(ambience, "dogRoomId", BuildingLevelsGenerator.F2CorridorRoom);
+            SerializedWire.SetString(ambience, "dogGoneFlag", BuildingLevelsGenerator.DogGone);
+
+            IsoPicker picker = systems.AddComponent<IsoPicker>();
+            SerializedWire.Set(picker, "worldCamera", camera);
+
+            RoomSwitcher switcher = systems.AddComponent<RoomSwitcher>();
+            PlacementController placement = systems.AddComponent<PlacementController>();
+            DialogueController dialogue = systems.AddComponent<DialogueController>();
+            QTEController qte = systems.AddComponent<QTEController>();
+            RoomTransitionController transition = systems.AddComponent<RoomTransitionController>();
+            DroppedItemsPresenter dropped = systems.AddComponent<DroppedItemsPresenter>();
+            DebrisPresenter debris = systems.AddComponent<DebrisPresenter>();
+            SurvivalController survival = systems.AddComponent<SurvivalController>();
+            SixtyOne.Prep.PrepPhase prepPhase = systems.AddComponent<SixtyOne.Prep.PrepPhase>();
+            EpilogueController epilogue = systems.AddComponent<EpilogueController>();
+            NodePlayer nodePlayer = systems.AddComponent<NodePlayer>();
+            RoomNavigator navigator = systems.AddComponent<RoomNavigator>();
+            RobberController robber = systems.AddComponent<RobberController>();
+            StreetQuakeDirector streetQuake = systems.AddComponent<StreetQuakeDirector>();
+            streetLine = null;
+            PlayerMover mover = systems.AddComponent<PlayerMover>();
+            SerializedWire.Set(picker, "router", mover);
+            DevRoomJump roomJump = systems.AddComponent<DevRoomJump>();
+            SerializedWire.Set(roomJump, "rooms", switcher);
+            SerializedWire.Set(roomJump, "gameManager", gameManager);
+
+            var familyRoot = new GameObject("Family").transform;
+            var family = new List<FamilyMember>();
+            foreach (MemberType type in new[] { MemberType.Player, MemberType.Wife, MemberType.Child })
+            {
+                family.Add(SceneKit.AnimatedMember(familyRoot, type, CharacterArt.Import(type), data.Movement, survival));
+            }
+
+            // Drop-Cover-Hold: the family crouches by itself while a quake shakes.
+            systems.AddComponent<CrouchDirector>().Configure(gameManager, nodePlayer, placement, family);
+
+            var rooms = new List<Room>();
+            var practicals = new List<Light2D>();
+            TileArt.TileSets tileSets = TileArt.Generate();
+            // Code layout plus Bora's hand placement (Data/Layout/RoomLayoutOverrides.asset, SixtyOne > Layout Editor).
+            List<BuildingLayout.RoomSpec> specs = LayoutOverrides.Rooms();
+            foreach (string problem in LayoutOverrides.CheckAll()) Debug.LogWarning("[Layout] " + problem);
+            DoorArt.Configure(WallRows(data));
+            foreach (BuildingLayout.RoomSpec spec in specs)
+            {
+                rooms.Add(BuildRoom(spec, data, practicals, tileSets, nodePlayer, navigator));
+            }
+
+            BuildDoors(specs, rooms, navigator);
+            GasValves.Build(specs, rooms, data);
+            int streetIndex = specs.FindIndex(s => s.Id == BuildingLevelsGenerator.Street);
+            if (streetIndex >= 0) StreetDressing.Build(rooms[streetIndex], specs[streetIndex], data, family[0].transform, switcher, gameManager);
+
+            for (int i = 1; i < rooms.Count; i++) rooms[i].gameObject.SetActive(false);
+
+            // Room view bounds were measured at scale 1 (room-local); now scale everything together.
+            ApplyWorldScale(rooms, familyRoot, data.Visual != null ? data.Visual.WorldScale : 1f);
+
+            SerializedWire.Set(switcher, "gameManager", gameManager);
+            SerializedWire.SetArray(switcher, "rooms", rooms.ToArray());
+            SerializedWire.SetArray(switcher, "members", family.ToArray());
+            SerializedWire.Set(switcher, "transition", transition);
+
+            SerializedWire.Set(navigator, "gameManager", gameManager);
+            SerializedWire.Set(navigator, "nodePlayer", nodePlayer);
+            SerializedWire.Set(navigator, "rooms", switcher);
+            SerializedWire.Set(navigator, "config", data.Movement);
+            SerializedWire.Set(mover, "gameManager", gameManager);
+            SerializedWire.Set(mover, "player", family[0].GetComponent<CharacterMotor>());
+            SerializedWire.Set(mover, "rooms", switcher);
+            SerializedWire.Set(mover, "config", data.Movement);
+            FootstepsAudio steps = systems.AddComponent<FootstepsAudio>();
+            SerializedWire.Set(steps, "player", family[0].GetComponent<CharacterMotor>());
+            SerializedWire.Set(steps, "footsteps", data.Cues.Find(c => c != null && c.Id == "cue_footsteps"));
+            for (int i = 1; i < family.Count; i++)
+            {
+                FamilyFollower follower = family[i].gameObject.AddComponent<FamilyFollower>();
+                SerializedWire.Set(follower, "member", family[i]);
+                SerializedWire.Set(follower, "motor", family[i].GetComponent<CharacterMotor>());
+                SerializedWire.Set(follower, "leader", family[0].transform);
+                SerializedWire.Set(follower, "rooms", switcher);
+                SerializedWire.Set(follower, "config", data.Movement);
+            }
+
+            SerializedWire.Set(dropped, "gameManager", gameManager);
+            SerializedWire.Set(dropped, "rooms", switcher);
+            SerializedWire.Set(dropped, "content", data.Content);
+            SerializedWire.Set(dropped, "fallbackSprite", SceneKit.Art.Dot);
+
+            debris.Configure(gameManager, switcher, data.Level, DebrisSprites(), SceneKit.Art.Block, SceneKit.Art.Dot, RoomTiles.LitMaterial,
+                data.CrashCue);
+            EditorUtility.SetDirty(debris);
+
+            SerializedWire.Set(placement, "gameManager", gameManager);
+            SerializedWire.Set(placement, "rooms", switcher);
+            SerializedWire.Set(placement, "movement", data.Movement);
+
+            SerializedWire.Set(survival, "gameManager", gameManager);
+            SerializedWire.Set(survival, "nodePlayer", nodePlayer);
+            SerializedWire.Set(survival, "config", data.Level);
+            SerializedWire.Set(survival, "dialogue", dialogue);
+            SerializedWire.Set(survival, "prep", prepPhase);
+
+            SerializedWire.Set(prepPhase, "gameManager", gameManager);
+            SerializedWire.Set(prepPhase, "nodePlayer", nodePlayer);
+            SerializedWire.Set(prepPhase, "config", data.Level);
+            SerializedWire.Set(prepPhase, "rooms", switcher);
+            SerializedWire.Set(prepPhase, "alertCue", data.Cues.Find(c => c != null && c.Id == "cue_afad_alert"));
+
+            SixtyOne.UI.DialoguePresenter choicePanel = TestSceneUi.Build(gameManager, nodePlayer, data.Content, camera, SceneKit.Art, survival, data.RecipeBook, prepPhase,
+                data.Level.MaxInventorySlots, KeyItems(data), theme, out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay);
+            // Voice blips follow the speech bubble's line.
+            SixtyOne.UI.SpeechBubble bubble = choicePanel.GetComponentInChildren<SixtyOne.UI.SpeechBubble>(true);
+            SixtyOne.UI.TypewriterText typewriter = bubble != null ? bubble.Typewriter : null;
+            if (typewriter != null)
+            {
+                DialogueVoice voice = typewriter.gameObject.AddComponent<DialogueVoice>();
+                SerializedWire.Set(voice, "typewriter", typewriter);
+                SerializedWire.Set(voice, "profile", data.Voices);
+            }
+
+            SerializedWire.Set(qte, "gameManager", gameManager);
+            SerializedWire.Set(qte, "view", qteView);
+            SerializedWire.Set(qte, "cameraShake", camera.GetComponent<CameraShake>());
+            SerializedWire.Set(transition, "config", data.Transition);
+            SerializedWire.Set(transition, "overlay", transitionOverlay);
+            var familyTransforms = new Object[family.Count];
+            for (int i = 0; i < family.Count; i++) familyTransforms[i] = family[i].transform;
+            SerializedWire.SetArray(transition, "characters", familyTransforms);
+            CinematicDirector director = TestSceneCinematic.Build(cinematic, camera, gameManager, nodePlayer, survival, letterbox, family[0].transform, practicals,
+                BuildingLevelsGenerator.ExitNodeIds);
+
+            RoomCameraFraming framing = cameraRig.gameObject.AddComponent<RoomCameraFraming>();
+            SerializedWire.Set(framing, "rooms", switcher);
+            SerializedWire.Set(framing, "targetCamera", camera);
+            SerializedWire.Set(framing, "director", director);
+            SerializedWire.Set(framing, "followTarget", family[0].transform);
+            SerializedWire.Set(choicePanel, "runner", family[0].GetComponent<CharacterMotor>());
+            // Mehmet speaks his thoughts / decisions; the wife can speak too.
+            family[0].gameObject.AddComponent<SixtyOne.UI.SpeakerAnchor>().Configure(SixtyOne.UI.SpeakerAnchor.PlayerKey, SceneKit.SpeakerColor("player"));
+            if (family.Count > 1) family[1].gameObject.AddComponent<SixtyOne.UI.SpeakerAnchor>().Configure("npc.wife.name", SceneKit.SpeakerColor("wife"));
+            LootWindow lootWindow = choicePanel.transform.parent.GetComponentInChildren<LootWindow>(true);
+            if (lootWindow != null) SerializedWire.Set(lootWindow, "runner", family[0].GetComponent<CharacterMotor>());
+            // Playfield = full screen left of the HUD column, above the panel peek strip, below the timer; the room fills 97% of it (RoomCameraFraming.fill).
+            SerializedWire.SetRect(framing, "freeViewport", new Rect(0f, 0.065f, TestSceneUi.ColumnLeft - 0.01f, 0.845f));
+            if (rooms.Count > 0) framing.Frame(rooms[0]);
+
+            SerializedWire.Set(dialogue, "gameManager", gameManager);
+            SerializedWire.Set(dialogue, "nodePlayer", nodePlayer);
+            SerializedWire.Set(dialogue, "presenter", choicePanel);
+
+            SerializedWire.Set(epilogue, "gameManager", gameManager);
+            SerializedWire.Set(epilogue, "presenter", choicePanel);
+            if (TestSceneEnding.Last != null) SerializedWire.Set(epilogue, "ending", TestSceneEnding.Last);
+
+            SerializedWire.Set(nodePlayer, "gameManager", gameManager);
+            SerializedWire.Set(nodePlayer, "content", data.Content);
+            SerializedWire.Set(nodePlayer, "presenter", choicePanel);
+            SerializedWire.Set(nodePlayer, "roomPresenter", switcher);
+            SerializedWire.Set(nodePlayer, "choiceFilter", navigator);
+            // The robber handler comes before the dialogue handler (a RobberNode is a DialogueNode).
+            SerializedWire.SetArray(nodePlayer, "nodeHandlers", new Object[] { robber, dialogue, placement, qte, epilogue });
+            SerializedWire.Set(robber, "gameManager", gameManager);
+            SerializedWire.Set(robber, "presenter", choicePanel);
+            SerializedWire.Set(robber, "rooms", switcher);
+            SerializedWire.Set(robber, "content", data.Content);
+
+            streetQuake.Configure(gameManager, switcher, debris, camera.GetComponent<CameraShake>(), BuildingLevelsGenerator.Street, BuildingLevelsGenerator.F2Street,
+                data.Hazards["hz.street_facade"], streetLine, SceneKit.Art.Tile, RubbleSprites(), SceneKit.Art.Dot, RoomTiles.LitMaterial, data.GlassCue, data.CrashCue,
+                data.CarAlarmCue);
+            EditorUtility.SetDirty(streetQuake);
+
+            AssetUtil.EnsureFolder("Assets/_Game/Scenes");
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            Debug.Log("[TestScene] Built " + ScenePath + " with " + rooms.Count + " rooms. Press Play.");
+        }
+
+        /// <summary>
+        /// Puts every room and the family under one World root and scales it (RoomVisualConfig.WorldScale), so tiles,
+        /// walls, props, anchors, hotspots, spawns and characters stay aligned and the tile PPU never changes.
+        /// Light2D radii are world-space values, so they are scaled to match.
+        /// </summary>
+        internal static void ApplyWorldScale(List<Room> rooms, Transform familyRoot, float scale)
+        {
+            var world = new GameObject("World").transform;
+            foreach (Room room in rooms) room.transform.SetParent(world, false);
+            familyRoot.SetParent(world, false);
+            world.localScale = new Vector3(scale, scale, 1f);
+            foreach (Light2D light in world.GetComponentsInChildren<Light2D>(true))
+            {
+                light.pointLightInnerRadius *= scale;
+                light.pointLightOuterRadius *= scale;
+            }
+        }
+
+        private static Item[] KeyItems(BuildingAssets data)
+        {
+            var items = new List<Item>();
+            foreach (string id in BuildingLevelsGenerator.KeyItemIds) items.Add(data.Items[id]);
+            return items.ToArray();
+        }
+
+        /// <summary>Furniture art for a container (PropArtSet); null = tinted block.</summary>
+        private static Sprite ContainerArt(string artName) => SceneKit.Props != null ? SceneKit.Props.Find(artName) : null;
+
+        /// <summary>Debris sprites (enkaz 1 / 2) from the prop art set; empty = tinted blocks.</summary>
+        private static Sprite[] DebrisSprites() => SceneKit.Props != null ? SceneKit.Props.Debris : new Sprite[0];
+
+        /// <summary>The façade-drop rubble: the large mound (enkaz son 1, scaled down by the director), else the small debris.</summary>
+        private static Sprite[] RubbleSprites()
+        {
+            Sprite mound = SceneKit.Props != null ? SceneKit.Props.Find("RubbleMound") : null;
+            return mound != null ? new[] { mound } : DebrisSprites();
+        }
+
+        internal static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
+
+        private static StreetPowerLine streetLine;
+
+        internal static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
+            RoomNavigator navigator)
+        {
+            Room room = SceneKit.NewRoom("Room_" + spec.Id, spec.Id);
+            Transform t = room.transform;
+            var extraCells = new List<Vector2Int>();
+            foreach (Vector2 extra in spec.ExtraTiles) extraCells.Add(new Vector2Int(Mathf.FloorToInt(extra.x), Mathf.FloorToInt(extra.y)));
+            room.ConfigureLayout(spec.Zone, new FloorArea(spec.Width, spec.Height, extraCells), spec.Depth, spec.Blocked);
+
+            room.ConfigureFollow(spec.FollowCamera, 7f);
+            RoomTileSet tileSet = spec.Art == BuildingLayout.RoomArt.DamagedCorridor ? tileSets.DamagedCorridor
+                : spec.Art == BuildingLayout.RoomArt.Corridor ? tileSets.Corridor
+                : spec.Art == BuildingLayout.RoomArt.Street && tileSets.Street != null ? tileSets.Street : tileSets.Home;
+            if (tileSet != null && tileSet.FloorTile != null)
+            {
+                RoomTiles.Floor(t, spec, tileSet);
+                if (spec.Walls) RoomTiles.Walls(t, spec, tileSet, WallRows(data));
+                // The open street has no walls to bounce light: a stronger fill keeps the walkway readable at night.
+                RoomTiles.AmbientFill(t, spec, spec.Id == BuildingLevelsGenerator.Street ? AmbientFillIntensity * 1.5f : AmbientFillIntensity);
+            }
+            else
+            {
+                // No tile art at all: keep the placeholder diamonds so the scene still builds.
+                for (int x = 0; x < spec.Width; x++)
+                {
+                    for (int y = 0; y < spec.Height; y++)
+                    {
+                        SceneKit.Tile(t, x + 0.5f, y + 0.5f, spec.Floor);
+                    }
+                }
+
+                foreach (Vector2 extra in spec.ExtraTiles)
+                {
+                    SceneKit.Tile(t, extra.x, extra.y, spec.Floor * 0.8f);
+                }
+            }
+
+            var anchors = new Dictionary<string, Anchor>();
+            foreach (BuildingLayout.AnchorSpec a in spec.Anchors)
+            {
+                Hazard hazard = a.HazardId != null ? data.Hazards[a.HazardId] : null;
+                anchors[a.Id] = SceneKit.MakeAnchor(t, a.Id, a.Gx, a.Gy, a.Tag, a.Capacity, hazard, a.LabelKey);
+            }
+
+            foreach (BuildingLayout.AnchorSpec a in spec.Anchors)
+            {
+                var neighbours = new List<Anchor>();
+                foreach (string id in a.Adjacent) neighbours.Add(anchors[id]);
+                SceneKit.Link(anchors[a.Id], neighbours);
+            }
+
+            foreach (BuildingLayout.PropSpec p in spec.Props)
+            {
+                SceneKit.Prop(t, p);
+            }
+
+            // Every hand-placeable object gets a LayoutObject tag (Layout Editor); flipX mirrors its main sprite.
+            foreach (BuildingLayout.ItemSpec i in spec.Items)
+            {
+                if (!data.Items.TryGetValue(i.ItemId ?? "", out Item item))
+                {
+                    Debug.LogError($"[TestScene] Room '{spec.Id}': item '{i.Id}' grants unknown item '{i.ItemId}' (layout override?).");
+                    continue;
+                }
+
+                GameObject go = i.Hidden ? HiddenItems.Build(t, i, item).gameObject
+                    : SceneKit.Interactable(t, i.Id, item, i.Gx, i.Gy, i.Cost, i.Surface, i.Borrowed, i.Color, i.PrepOnly).gameObject;
+                Flip(go, i.FlipX);
+                LayoutOverrides.Tag(go, i);
+            }
+
+            foreach (BuildingLayout.ContainerSpec c in spec.Containers)
+            {
+                var items = new List<Item>();
+                foreach (string id in c.Items) if (data.Items.TryGetValue(id, out Item it)) items.Add(it);
+                var hidden = new List<Item>();
+                foreach (string id in c.Hidden) if (data.Items.TryGetValue(id, out Item it)) hidden.Add(it);
+                GameObject go = SceneKit.Container(t, spec, c, items, hidden, ContainerArt(c.Art), data.SearchCue, data.Content).gameObject;
+                Flip(go, c.FlipX);
+                LayoutOverrides.Tag(go, c);
+            }
+
+            foreach (BuildingLayout.RopeSpec rope in spec.Ropes)
+            {
+                SceneKit.RopeDescent(t, rope.Id, rope.Gx, rope.Gy, data.Items["bedsheet_rope"], data.Items["child_harness"], data.Nodes[rope.TargetNodeId], nodePlayer);
+            }
+
+            foreach (BuildingLayout.HotspotSpec h in spec.Hotspots)
+            {
+                SceneKit.Hotspot(t, spec, h, navigator);
+            }
+
+            foreach (BuildingLayout.DecorStairsSpec s in spec.DecorStairs)
+            {
+                SceneKit.DecorStairs(t, spec, s);
+            }
+
+            // The street's downed power line (blocked cells, click = electrocution) and the assembly-area sign label.
+            if (spec.Id == BuildingLevelsGenerator.Street) streetLine = SceneKit.StreetExtras(t);
+
+            foreach (BuildingLayout.LightSpec l in spec.Lights)
+            {
+                Light2D light = TestSceneCinematic.PracticalLight(t, l.Name, l.Gx, l.Gy, l.Lift, l.Color, l.Radius);
+                LayoutOverrides.Tag(light.gameObject, l);
+                practicals.Add(light);
+            }
+
+            SceneKit.SetSpawns(room, spec.PlayerSpawn, spec.WifeSpawn, spec.ChildSpawn);
+            SerializedWire.SetRect(room, "viewBounds", RoomTiles.ViewBounds(t, spec, WallRows(data)));
+            return room;
+        }
+
+        /// <summary>Mirrors an object's first sprite (the body or icon).</summary>
+        private static void Flip(GameObject go, bool flip)
+        {
+            if (!flip) return;
+            SpriteRenderer r = go.GetComponentInChildren<SpriteRenderer>();
+            if (r != null) r.flipX = !r.flipX;
+        }
+
+        /// <summary>Second pass (every room exists): doors with arrival points inside their target rooms.</summary>
+        internal static void BuildDoors(List<BuildingLayout.RoomSpec> specs, List<Room> rooms, RoomNavigator navigator)
+        {
+            for (int i = 0; i < specs.Count; i++)
+            {
+                foreach (BuildingLayout.DoorSpec door in specs[i].Doors)
+                {
+                    Room target = rooms.Find(r => r.RoomId == door.TargetRoom);
+                    if (target == null)
+                    {
+                        Debug.LogError($"[TestScene] Door in '{specs[i].Id}' leads to unknown room '{door.TargetRoom}'.");
+                        continue;
+                    }
+
+                    Transform arrival = SceneKit.Point(target.transform, "Arrive_from_" + specs[i].Id, door.Arrival);
+                    SceneKit.Door(rooms[i].transform, specs[i], door, arrival, navigator);
+                }
+            }
+        }
+
+        internal static Camera BuildCamera(out Transform rig)
+        {
+            // CameraRig moves per room (RoomCameraFraming); the camera keeps its local pose for shake and tilt.
+            rig = new GameObject("CameraRig").transform;
+            rig.position = new Vector3(0.3f, 0.4f, 0f);
+            var go = new GameObject("Main Camera") { tag = "MainCamera" };
+            go.transform.SetParent(rig, false);
+            go.transform.localPosition = new Vector3(0f, 0f, -10f);
+            Camera camera = go.AddComponent<Camera>();
+            camera.orthographic = true;
+            camera.orthographicSize = 3f;
+            camera.clearFlags = CameraClearFlags.SolidColor;
+            camera.backgroundColor = new Color(0.09f, 0.09f, 0.12f, 1f);
+            camera.nearClipPlane = 0.1f;
+            camera.farClipPlane = 50f;
+            go.AddComponent<AudioListener>();
+            go.AddComponent<CameraShake>();
+            return camera;
+        }
+
+        internal static void BuildEventSystem()
+        {
+            var go = new GameObject("EventSystem", typeof(EventSystem));
+            InputSystemUIInputModule module = go.AddComponent<InputSystemUIInputModule>();
+            module.AssignDefaultActions();
+        }
+    }
+}

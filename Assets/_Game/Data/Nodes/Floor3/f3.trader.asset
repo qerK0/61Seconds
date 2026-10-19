@@ -1,0 +1,204 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1a45025b91bd4c41b761ea89f195d29, type: 3}
+  m_Name: f3.trader
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Dialogue.DialogueNode
+  id: f3.trader
+  titleKey:
+    key: f3.trader.title
+  bodyKey:
+    key: f3.trader.body
+  roomId: f3_corridor
+  act: 2
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f3.trader.c_hurry
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 0
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 1
+    timeoutOnly: 0
+    outcomes:
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: TraderLeft
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f3.trader.msg_grumble
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 0
+      targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.trader.c_take
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 0
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 6
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 11400000, guid: 762c85bad95bd4a4dacb5733b2405b41, type: 2}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: TraderDone
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 7
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: f3.trader.msg_thanks
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 0
+      targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []
+  lines:
+  - speakerKey:
+      key: npc.cemil.name
+    textKey:
+      key: f3.trader.l1
+    timeCost: 3
+  - speakerKey:
+      key: npc.cemil.name
+    textKey:
+      key: f3.trader.l2
+    timeCost: 3
+  - speakerKey:
+      key: npc.cemil.name
+    textKey:
+      key: f3.trader.l3
+    timeCost: 2
+  - speakerKey:
+      key: npc.cemil.name
+    textKey:
+      key: f3.trader.l4
+    timeCost: 2
+  choicesAsThought: 0

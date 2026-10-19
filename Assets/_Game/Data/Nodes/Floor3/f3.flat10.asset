@@ -1,0 +1,329 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ee493e236f1733c4eb88a41065ab0f00, type: 3}
+  m_Name: f3.flat10
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.SceneNode
+  id: f3.flat10
+  titleKey:
+    key: f3.flat10.title
+  bodyKey:
+    key: f3.flat10.body
+  roomId: flat10
+  act: 2
+  timerSeconds: 0
+  timeoutChoiceIndex: -1
+  isCheckpoint: 0
+  afadAlertOnEnter: 0
+  choices:
+  - labelKey:
+      key: f3.flat10.c_lighter
+    type: 1
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: GasOff_F3_10
+      member: 0
+      health: 0
+      room: 
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: dc9b9c3554d23bf41bf971e122667ed2, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 0
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 1
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: death.lighter_explosion
+      tip: {fileID: 11400000, guid: bf1c0e7548de60b45819bdbf646b02b4, type: 2}
+      cue: {fileID: 11400000, guid: 9cc098823089f7248b8ba26ceb3bd612, type: 2}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat10.c_flashlight
+    type: 0
+    showIf:
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: Flat10Lit
+      member: 0
+      health: 0
+      room: 
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: 0eb29b0e752b79f4e96399d14d638dfb, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 1
+    lockedReasonKey:
+      key: f3.flat10.c_flashlight.locked
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 1
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: Flat10Lit
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat10.c_valve
+    type: 0
+    showIf:
+    - type: 2
+      item: {fileID: 0}
+      anyItems: []
+      flag: Flat10Lit
+      member: 0
+      health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat10_kitchen
+    - type: 3
+      item: {fileID: 0}
+      anyItems: []
+      flag: GasOff_F3_10
+      member: 0
+      health: 0
+      room: 
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 5
+    staminaCost: 0
+    heavy: 0
+    isMove: 0
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 2
+      targetNode: {fileID: 0}
+      flag: GasOff_F3_10
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat10.c_hole
+    type: 0
+    showIf:
+    - type: 2
+      item: {fileID: 0}
+      anyItems: []
+      flag: Flat10Lit
+      member: 0
+      health: 0
+      room: 
+    - type: 6
+      item: {fileID: 0}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: flat10_living
+    conditions:
+    - type: 0
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    - type: 0
+      item: {fileID: 11400000, guid: 48838efbe712b134b896f19053a5c45c, type: 2}
+      anyItems: []
+      flag: 
+      member: 0
+      health: 0
+      room: 
+    failBehaviour: 2
+    lockedReasonKey:
+      key: f3.flat10.c_hole.locked
+    missingItem: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+    missingItemTextKey:
+      key: death.descent_no_gear
+    missingItemRewind: 1
+    timeCost: 10
+    staminaCost: 20
+    heavy: 1
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 4
+      targetNode: {fileID: 0}
+      flag: 
+      flagValue: 1
+      item: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    - type: 0
+      targetNode: {fileID: 11400000, guid: feebeebcbc62ec54cb82bc47cfeb6ab0, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: death.descent_no_gear
+      tip: {fileID: 11400000, guid: fcfa205683fa63e44b24730e634925a6, type: 2}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  - labelKey:
+      key: f3.flat10.c_back
+    type: 0
+    showIf: []
+    conditions: []
+    failBehaviour: 0
+    lockedReasonKey:
+      key: 
+    missingItem: {fileID: 0}
+    missingItemTextKey:
+      key: 
+    missingItemRewind: 1
+    timeCost: 2
+    staminaCost: 0
+    heavy: 0
+    isMove: 1
+    duringDialogue: 0
+    timeoutOnly: 0
+    outcomes:
+    - type: 0
+      targetNode: {fileID: 11400000, guid: c0ae2e9c75c4595469a27557983b8b6b, type: 2}
+      flag: 
+      flagValue: 1
+      item: {fileID: 0}
+      trader: {fileID: 0}
+      messageKey:
+        key: 
+      member: 0
+      health: 0
+      takeItems: []
+      fallbackItem: {fileID: 0}
+      fallbackCount: 1
+      excludeKeyItems: 1
+    death:
+      textKey:
+        key: 
+      tip: {fileID: 0}
+      cue: {fileID: 0}
+      victim: 0
+      rewindTarget: 0
+      rewindTo: {fileID: 0}
+    cue: {fileID: 0}
+  onEnter: []
+  bombChecks: []

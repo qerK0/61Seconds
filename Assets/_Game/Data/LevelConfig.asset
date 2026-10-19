@@ -1,0 +1,98 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: eddc4c879bc21e14eb4a3f0f82079cac, type: 3}
+  m_Name: LevelConfig
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Building.LevelConfig
+  buildingSeconds: 480
+  pulseAtSeconds: 60
+  alarmAtSeconds: 30
+  realtimeTick: 1
+  pauseInDialogue: 1
+  collapseTextKey:
+    key: death.collapse
+  collapseTip: {fileID: 11400000, guid: 88079bf52ac55f847ae52b3943f031e6, type: 2}
+  alarmCue: {fileID: 11400000, guid: 7ce406087b2e171438a379a086325082, type: 2}
+  tickCue: {fileID: 11400000, guid: 4503d0c4867fe2849985c11230b6e118, type: 2}
+  prepSeconds: 60
+  prepTickFrom: 10
+  maxInventorySlots: 8
+  requiredBedsheetsForRope: 3
+  bedsheetItem: {fileID: 11400000, guid: 416800530de0b804fb25c450fd812c4b, type: 2}
+  bedsheetRopeItem: {fileID: 11400000, guid: e001621387a4d7c44949d0b18f7c2a14, type: 2}
+  ropeCraftSeconds: 5
+  ropeCraftStamina: 3
+  injuredMoveExtraPerMember: 0.25
+  staminaMax: 100
+  staminaDrainPerSecond: 0.36
+  staminaZeroTimeMultiplier: 1.5
+  exhaustionPerSecond: 0.03
+  exhaustionDecayPerSecond: 0.2
+  exhaustionTextKey:
+    key: death.exhaustion
+  exhaustionTip: {fileID: 11400000, guid: aa4d5eb86f477fa4685427903e12470c, type: 2}
+  gasZones:
+  - roomId: flat11_kitchen
+    valveFlag: GasOff
+    poisonPerSecond: 0.025
+  - roomId: flat10
+    valveFlag: GasOff_F3_10
+    poisonPerSecond: 0.03
+  - roomId: flat7
+    valveFlag: GasOff_F2_7
+    poisonPerSecond: 0.035
+  poisonDecayPerSecond: 0.03
+  wetClothItem: {fileID: 11400000, guid: 2ca871432eb396741bc8889595946001, type: 2}
+  wetClothFactor: 0.5
+  poisonTextKey:
+    key: death.gas_poison
+  poisonTip: {fileID: 11400000, guid: c4f8909e25ecf4e4da25a12ffaec0ce9, type: 2}
+  panicFromTimer:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0.85
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  panicFromPoison: 0.6
+  aftershockPanic: 0.45
+  panicCalmPerSecond: 0.04
+  debrisDensityPerQuake:
+  - 0
+  - 0.06
+  - 0.1
+  - 0.15
+  - 0.2
+  debrisDepthBonus: 0.03
+  crackChancePerQuake:
+  - 0
+  - 0.15
+  - 0.35
+  - 0.55
+  - 0.7
+  crackDepthBonus: 0.05

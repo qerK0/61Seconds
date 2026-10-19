@@ -1,0 +1,26 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a5bdf55a6fd9c40419290f6873e7141d, type: 3}
+  m_Name: item.whistle
+  m_EditorClassIdentifier: SixtyOne.Runtime::SixtyOne.Nodes.Item
+  id: whistle
+  nameKey:
+    key: item.whistle.name
+  descriptionKey:
+    key: item.whistle.desc
+  icon: {fileID: 21300000, guid: 6b27add4598c79c40be5d4049fae7a44, type: 3}
+  uiIcon: {fileID: 21300000, guid: 8992bb718faf1ba41ae97b2677a9d433, type: 3}
+  isKeyItem: 1
+  staminaRestore: 0
+  healsInjury: 0
+  consumedOnUse: 1
+  useSeconds: 2

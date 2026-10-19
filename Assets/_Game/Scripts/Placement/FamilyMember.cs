@@ -1,0 +1,134 @@
+using System;
+using System.Collections.Generic;
+using SixtyOne.Core;
+using SixtyOne.Iso;
+using UnityEngine;
+
+namespace SixtyOne.Placement
+{
+    /// <summary>A clickable family member in the world. Placement rules live in PlacementRules.</summary>
+    public sealed class FamilyMember : MonoBehaviour, IClickable
+    {
+        [Tooltip("Player, Wife or Child.")]
+        [SerializeField] private MemberType type;
+
+        [Tooltip("Main sprite (tinted for injured/trapped).")]
+        [SerializeField] private SpriteRenderer body;
+
+        [Tooltip("Shown while selected.")]
+        [SerializeField] private GameObject selectionMarker;
+
+        [Tooltip("Tint when injured.")]
+        [SerializeField] private Color injuredTint = new Color(1f, 0.55f, 0.55f, 1f);
+
+        [Tooltip("Tint when dead/trapped.")]
+        [SerializeField] private Color downTint = new Color(0.35f, 0.35f, 0.35f, 1f);
+
+        /// <summary>Raised when IsoPicker clicks this member.</summary>
+        public event Action<FamilyMember> Clicked;
+
+        private Color baseColor = Color.white;
+
+        public MemberType Type => type;
+        // Only while something listens (placement), so members never block prep interactables underneath.
+        public bool IsClickable => isActiveAndEnabled && Clicked != null;
+
+        private void Awake()
+        {
+            if (body != null) baseColor = body.color;
+            SetSelected(false);
+        }
+
+        private void OnEnable()
+        {
+            GameEvents.MemberStateChanged += OnMemberStateChanged;
+            GameEvents.Rewound += OnRewound;
+        }
+
+        private void OnDisable()
+        {
+            GameEvents.MemberStateChanged -= OnMemberStateChanged;
+            GameEvents.Rewound -= OnRewound;
+        }
+
+        public void OnClicked()
+        {
+            Clicked?.Invoke(this);
+        }
+
+        /// <summary>Snaps to an anchor's ground point (small offset so shared anchors don't overlap).</summary>
+        public void PlaceAt(Anchor anchor)
+        {
+            PlaceAt(SlotPoint(anchor));
+        }
+
+        /// <summary>This member's standing point on an anchor (ground point + a per-member slot offset).</summary>
+        public Vector3 SlotPoint(Anchor anchor)
+        {
+            // Slot offsets are tuned at world scale 1.
+            float scale = transform.parent != null ? Mathf.Abs(transform.parent.lossyScale.x) : 1f;
+            return anchor.GroundPoint + SlotOffset(type) * scale;
+        }
+
+        /// <summary>Runs along world waypoints (run frames, flip by direction); arrived fires at the end.</summary>
+        public void RunAlong(IReadOnlyList<Vector3> path, float unitsPerSecond, Action arrived, object owner)
+        {
+            CharacterMotor motor = GetComponent<CharacterMotor>();
+            if (motor == null)
+            {
+                if (path != null && path.Count > 0) PlaceAt(path[path.Count - 1]);
+                arrived?.Invoke();
+                return;
+            }
+
+            motor.RunPath(path, unitsPerSecond, arrived, owner);
+        }
+
+        /// <summary>Snaps to a world point (instant, no walk).</summary>
+        public void PlaceAt(Vector3 point)
+        {
+            CharacterMotor motor = GetComponent<CharacterMotor>();
+            if (motor != null) motor.Stop();
+            transform.position = new Vector3(point.x, point.y, transform.position.z);
+        }
+
+        public void SetSelected(bool selected)
+        {
+            if (selectionMarker != null) selectionMarker.SetActive(selected);
+        }
+
+        /// <summary>Applies the health tint.</summary>
+        public void ShowHealth(MemberHealth health)
+        {
+            if (body == null) return;
+            switch (health)
+            {
+                case MemberHealth.Injured: body.color = baseColor * injuredTint; break;
+                case MemberHealth.Trapped:
+                case MemberHealth.Dead: body.color = baseColor * downTint; break;
+                default: body.color = baseColor; break;
+            }
+        }
+
+        private static Vector3 SlotOffset(MemberType member)
+        {
+            switch (member)
+            {
+                case MemberType.Player: return new Vector3(-0.22f, 0.04f, 0f);
+                case MemberType.Wife: return new Vector3(0.22f, 0.04f, 0f);
+                default: return new Vector3(0f, -0.1f, 0f);
+            }
+        }
+
+        private void OnMemberStateChanged(MemberType member, MemberHealth health)
+        {
+            if (member == type) ShowHealth(health);
+        }
+
+        private void OnRewound(string nodeId)
+        {
+            GameManager gm = GameManager.Instance;
+            if (gm != null) ShowHealth(gm.State.GetMember(type).Health);
+        }
+    }
+}
