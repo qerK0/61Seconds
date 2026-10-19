@@ -97,6 +97,35 @@ namespace SixtyOne.Text
         public const string MenuVersion = "ui.menu.version";
         public const string MenuGalleryTitle = "ui.menu.gallery_title";
         public const string MenuGalleryCount = "ui.menu.gallery_count";
+        public const string MenuTutorial = "ui.menu.tutorial";
+        public const string MenuTutorialAsk = "ui.menu.tutorial_ask";
+
+        // Tutorial (Scenes/Tutorial.unity): hint panel, steps, the quake decision and the end panel.
+        public const string TutorialTag = "ui.tutorial.tag";
+        public const string TutorialStep = "ui.tutorial.step";
+        public const string TutorialSkipStep = "ui.tutorial.skip";
+        public const string TutorialContinue = "ui.tutorial.continue";
+        public const string TutorialWalk = "ui.tutorial.walk";
+        public const string TutorialLootOpen = "ui.tutorial.loot_open";
+        public const string TutorialLootTake = "ui.tutorial.loot_take";
+        public const string TutorialBagSlots = "ui.tutorial.bag_slots";
+        public const string TutorialBagPockets = "ui.tutorial.bag_pockets";
+        public const string TutorialCraftOpen = "ui.tutorial.craft_open";
+        public const string TutorialCraftCombine = "ui.tutorial.craft_combine";
+        public const string TutorialUiClock = "ui.tutorial.ui_clock";
+        public const string TutorialUiPanic = "ui.tutorial.ui_panic";
+        public const string TutorialUiEnergy = "ui.tutorial.ui_energy";
+        public const string TutorialQuake = "ui.tutorial.quake";
+        public const string TutorialQuakeRight = "ui.tutorial.quake.right";
+        public const string TutorialQuakeWrongRun = "ui.tutorial.quake.wrong_run";
+        public const string TutorialQuakeWrongWindow = "ui.tutorial.quake.wrong_window";
+        public const string TutorialExit = "ui.tutorial.exit";
+        public const string TutorialDoneTitle = "ui.tutorial.done.title";
+        public const string TutorialDoneBody = "ui.tutorial.done.body";
+        public const string TutorialDonePlay = "ui.tutorial.done.play";
+        public const string TutorialDoneMenu = "ui.tutorial.done.menu";
+        public const string TutorialKeyClick = "ui.tutorial.key.click";
+        public const string TutorialKeyTap = "ui.tutorial.key.tap";
         public const string EndTitle = "ui.end.title";
         public const string EndLine = "ui.end.line";
         public const string EndLineHighlight = "ui.end.line_highlight";
@@ -116,6 +145,7 @@ namespace SixtyOne.Text
         public const string SettingsMaster = "ui.settings.master";
         public const string SettingsMusic = "ui.settings.music";
         public const string SettingsSfx = "ui.settings.sfx";
+        public const string SettingsBrightness = "ui.settings.brightness";
         public const string SettingsReduce = "ui.settings.reduce";
         public const string SettingsBack = "ui.settings.back";
         public const string PauseTitle = "ui.pause.title";
@@ -126,6 +156,7 @@ namespace SixtyOne.Text
         public const string PauseConfirm = "ui.pause.confirm";
         public const string PauseYes = "ui.pause.yes";
         public const string PauseNo = "ui.pause.no";
+        public const string PauseSkipTutorial = "ui.pause.skip_tutorial";
         public const string FlashlightOn = "ui.pocket.flashlight_on";
         public const string FlashlightOff = "ui.pocket.flashlight_off";
 

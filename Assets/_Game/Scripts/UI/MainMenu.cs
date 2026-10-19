@@ -1,5 +1,7 @@
+using System;
 using SixtyOne.Audio;
 using SixtyOne.Core;
+using SixtyOne.Tutorial;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
@@ -8,7 +10,8 @@ using UnityEngine.UI;
 namespace SixtyOne.UI
 {
     /// <summary>
-    /// "İSTANBUL AFET BÖLGESİ" main menu: Oyunu Başlat (0.5 s fade to black with a rumble, then the game), Ayarlar
+    /// "İSTANBUL AFET BÖLGESİ" main menu: Oyunu Başlat (0.5 s fade to black with a rumble, then the game; the first
+    /// time it asks "Önce öğreticiyi oynamak ister misin?"), Öğretici (the tutorial scene), Ayarlar
     /// (shared SettingsPanel), Galeri (collected Deprem Notları) and Çıkış (confirm, then quit). Plays the calm prep
     /// music ducked over a low rumble bed. Keyboard / gamepad: the first button is selected after the intro and
     /// whenever a panel closes; Esc closes the open panel. Button sounds and hover looks live on MenuButtonFx.
@@ -16,6 +19,10 @@ namespace SixtyOne.UI
     public sealed class MainMenu : MonoBehaviour
     {
         [SerializeField] private Button start;
+
+        [Tooltip("Öğretici: opens the tutorial scene.")]
+        [SerializeField] private Button tutorial;
+
         [SerializeField] private Button settings;
         [SerializeField] private Button gallery;
         [SerializeField] private Button quit;
@@ -30,6 +37,11 @@ namespace SixtyOne.UI
         [SerializeField] private CanvasGroup confirm;
         [SerializeField] private Button confirmYes;
         [SerializeField] private Button confirmNo;
+
+        [Header("First Oyunu Başlat: 'Önce öğreticiyi oynamak ister misin?'")]
+        [SerializeField] private CanvasGroup tutorialAsk;
+        [SerializeField] private Button askYes;
+        [SerializeField] private Button askNo;
 
         [SerializeField] private ScreenFader fader;
         [SerializeField] private MenuIntro intro;
@@ -58,6 +70,9 @@ namespace SixtyOne.UI
         {
             UserSettings.Apply();
             if (start != null) start.onClick.AddListener(StartGame);
+            if (tutorial != null) tutorial.onClick.AddListener(StartTutorial);
+            if (askYes != null) askYes.onClick.AddListener(() => Leave(SceneFlow.StartTutorial));
+            if (askNo != null) askNo.onClick.AddListener(() => Leave(SceneFlow.StartGame));
             if (settings != null) settings.onClick.AddListener(OpenSettings);
             if (gallery != null) gallery.onClick.AddListener(OpenGallery);
             if (quit != null) quit.onClick.AddListener(OpenConfirm);
@@ -67,6 +82,7 @@ namespace SixtyOne.UI
             if (galleryPanel != null) galleryPanel.Closed += PanelClosed;
             if (intro != null) intro.Finished += SelectFirst;
             SetGroup(confirm, false);
+            SetGroup(tutorialAsk, false);
         }
 
         private void Start()
@@ -97,6 +113,7 @@ namespace SixtyOne.UI
                 if (settingsPanel != null && settingsPanel.IsOpen) settingsPanel.Close();
                 else if (galleryPanel != null && galleryPanel.IsOpen) galleryPanel.Close();
                 else if (confirm != null && confirm.alpha > 0.5f) CloseConfirm();
+                else if (tutorialAsk != null && tutorialAsk.alpha > 0.5f) CloseAsk();
             }
 
             // Keyboard / gamepad: arrows with nothing selected (after a mouse click on empty space) pick a button again.
@@ -115,14 +132,46 @@ namespace SixtyOne.UI
             if (AudioService.Instance != null && music != null) AudioService.Instance.SetMusicVolume(music.Volume * UserSettings.Music * musicDuck);
         }
 
+        /// <summary>Oyunu Başlat: the very first time asks whether to play the tutorial first (once, ever).</summary>
         private void StartGame()
+        {
+            if (leaving) return;
+            if (!TutorialProgress.Asked && tutorialAsk != null)
+            {
+                TutorialProgress.Asked = true;
+                AudioService.PlayUiCue(clickCue);
+                SetButtons(false);
+                SetGroup(tutorialAsk, true);
+                if (askYes != null) Select(askYes.gameObject);
+                return;
+            }
+
+            Leave(SceneFlow.StartGame);
+        }
+
+        private void StartTutorial()
+        {
+            TutorialProgress.Asked = true;
+            Leave(SceneFlow.StartTutorial);
+        }
+
+        /// <summary>0.5 s fade to black with the low rumble, then the scene.</summary>
+        private void Leave(Action load)
         {
             if (leaving) return;
             leaving = true;
             AudioService.PlayUiCue(startRumble);
             SetButtons(false);
-            if (fader != null) fader.FadeOut(startFadeSeconds, SceneFlow.StartGame);
-            else SceneFlow.StartGame();
+            SetGroup(tutorialAsk, false);
+            if (fader != null) fader.FadeOut(startFadeSeconds, load);
+            else load();
+        }
+
+        private void CloseAsk()
+        {
+            AudioService.PlayUiCue(clickCue);
+            SetGroup(tutorialAsk, false);
+            PanelClosed();
         }
 
         private void OpenSettings()

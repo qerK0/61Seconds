@@ -62,7 +62,9 @@ namespace SixtyOne.Editor
             problems += CheckBagConfig();
             problems += CheckQteConfigs();
             problems += CheckRopeDescents();
-            problems += CheckDoors(nodes);
+            // The tutorial scene's doors and hotspots play the tutorial's own nodes (skipped above): check the building only.
+            if (SceneManager.GetActiveScene().path == TutorialSceneBuilder.ScenePath) Debug.Log("[Content] Tutorial scene open: door / hotspot checks skipped (open Test_Building to run them).");
+            else problems += CheckDoors(nodes);
             problems += CheckNoTodoStrings();
             problems += CheckReachability(nodes);
             problems += CheckPrep(nodes);
@@ -662,7 +664,10 @@ namespace SixtyOne.Editor
             var list = new List<T>();
             foreach (string guid in AssetDatabase.FindAssets("t:" + typeof(T).Name, new[] { Root }))
             {
-                T asset = AssetDatabase.LoadAssetAtPath<T>(AssetDatabase.GUIDToAssetPath(guid));
+                string path = AssetDatabase.GUIDToAssetPath(guid);
+                // The tutorial is its own small content (own start node, no prep): the building checks skip it.
+                if (path.StartsWith(TutorialContentGenerator.DataDir + "/")) continue;
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
                 if (asset != null) list.Add(asset);
             }
 

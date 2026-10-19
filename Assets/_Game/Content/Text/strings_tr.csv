@@ -485,3 +485,38 @@ info.8.title,Dışarıdaysan,info card 8
 info.8.body,"Binalardan, duvarlardan, elektrik direklerinden ve tellerden uzak, açık bir alana geç. Sarsıntı sonrası hasarlı binalara girme; bölgendeki acil toplanma alanına git. Toplanma alanını e-Devlet üzerinden öğrenebilirsin.",info card 8
 info.8.game,"Sokakta cephelerden ve kopuk telden uzak dur, açık alanda çök.",info card 8
 ui.robber.after,Canınız yanmadı. Yiyecek bulunur; önemli olan ailen.,Mehmet's line after the robber ran off
+ui.settings.brightness,Parlaklık,settings slider (middle = default look)
+ui.pause.skip_tutorial,Öğreticiyi atla,pause menu button (tutorial only): straight to the end panel
+ui.menu.tutorial,Öğretici,main menu button (opens the tutorial)
+ui.menu.tutorial_ask,Önce öğreticiyi oynamak ister misin?,asked once on the very first Oyunu Başlat (Evet / Hayır)
+ui.tutorial.tag,ÖĞRETİCİ,tutorial hint card name tab
+ui.tutorial.step,Adım {0}/{1},tutorial hint card step counter; {0} = step; {1} = total
+ui.tutorial.skip,Geç,tutorial hint card button: skip this step
+ui.tutorial.continue,{0}: devam,"tutorial hint footer; {0} = the controls read from the Input System (e.g. Sol tık / Space)"
+ui.tutorial.walk,Zemindeki parlayan işarete git. Yürümek için: {0}.,tutorial step 1; {0} = the pointer control (Sol tık / Dokun)
+ui.tutorial.loot_open,"Dolaba tıkla. Mehmet gidip arar, arama bitince içindekiler açılır.",tutorial step 2 (search the container)
+ui.tutorial.loot_take,Eşyaları tek tek al ya da Hepsini al düğmesine bas.,tutorial step 2 (loot window)
+ui.tutorial.bag_slots,"Bu senin çantan: 8 yeri var. Dolunca yeni eşya alamazsın, gereksizi bırakman gerekir.",tutorial step 2 (bag slots)
+ui.tutorial.bag_pockets,"Fener ve düdük yan ceplerde durur, çantada yer kaplamaz. Cebe tıklayınca kullanılır.",tutorial step 2 (key item pockets)
+ui.tutorial.craft_open,Craft Defteri'ni aç: çantanın üstündeki Defter düğmesine tıkla ya da {0} tuşuna bas.,tutorial step 3; {0} = the notebook key (C)
+ui.tutorial.craft_combine,"Çantada önce beze, sonra suya tıkla. İkisi deftere yazılınca Birleştir'e bas: ıslak bez olur.",tutorial step 3 (cloth + water = wet cloth)
+ui.tutorial.ui_clock,Bu saat binanın kalan süresi. Sıfıra inerse bina çöker. Oyunda her eylem buradan süre yer.,tutorial step 4 (LED clock)
+ui.tutorial.ui_panic,Panik: süre azaldıkça ve sarsıntılarda yükselir. Çok yükselirse tıklamaların gecikir.,tutorial step 4 (panic meter)
+ui.tutorial.ui_energy,Enerji: zamanla ve ağır işlerde azalır. Yiyecek ve su yeniden doldurur.,tutorial step 4 (stamina bar)
+ui.tutorial.quake,Deprem! Sarsıntı sürerken ne yapacağına karar ver.,tutorial step 5 (scripted quake starts)
+ui.tutorial.quake.body,"Yer sallanıyor, camlar titriyor! Ne yapmalıyım?",tutorial step 5 decision (Mehmet's thought bubble)
+ui.tutorial.quake.c_cover,Masada Çök-Kapan-Tutun,tutorial quake choice (correct)
+ui.tutorial.quake.c_run,Merdivenden dışarı koş,tutorial quake choice (wrong: stairs during shaking)
+ui.tutorial.quake.c_window,Pencerenin yanında dur,tutorial quake choice (wrong: window / balcony)
+ui.tutorial.quake.wrong_run,"Yanlış. Sarsıntı sürerken merdivene koşma: düşebilir, enkaz altında kalabilirsin. Olduğun yerde çök, kapan, tutun.",tutorial wrong choice explanation (AFAD)
+ui.tutorial.quake.wrong_window,"Yanlış. Pencere ve balkondan uzak dur: camlar kırılabilir. Sağlam bir eşyanın yanında çök, kapan, tutun.",tutorial wrong choice explanation (AFAD)
+ui.tutorial.quake.right,"Doğru! Sağlam bir eşyanın yanında çöktün, başını ve enseni korudun. Sarsıntı bitene kadar böyle kal.",tutorial step 5 (correct choice)
+ui.tutorial.exit,Sarsıntı durdu. Çantan sırtında: antreye geç ve çıkış kapısına tıkla.,tutorial step 6
+ui.tutorial.exit.c_exit,Dışarı çık,tutorial exit door (hover label / choice)
+ui.tutorial.node.title,Öğretici,tutorial node title
+ui.tutorial.done.title,Eğitim tamamlandı,tutorial end panel title
+ui.tutorial.done.body,"Hazırsın. Unutma: önce çök, kapan, tutun; sarsıntı bitince sakince çık.",tutorial end panel text
+ui.tutorial.done.play,Oyuna başla,tutorial end panel button (starts the real game)
+ui.tutorial.done.menu,Ana menü,tutorial end panel button
+ui.tutorial.key.click,Sol tık,name of the mouse walk / use control
+ui.tutorial.key.tap,Dokun,name of the touch walk / use control

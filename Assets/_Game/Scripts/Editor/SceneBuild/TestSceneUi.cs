@@ -33,7 +33,7 @@ namespace SixtyOne.Editor
         /// <summary>Builds the canvas and returns the DialoguePresenter (speech bubbles + narration card).</summary>
         public static DialoguePresenter Build(GameManager gameManager, NodePlayer nodePlayer, GameContent content, Camera camera, PlaceholderSprites art,
             SurvivalController survival, RecipeBook recipes, SixtyOne.Prep.PrepPhase prep, int bagSlots, Item[] keyItems, UITheme uiTheme,
-            out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay)
+            out LetterboxBars letterbox, out QTEView qteView, out CanvasGroup transitionOverlay, bool tutorial = false)
         {
             theme = uiTheme;
             UiFactory.Theme = uiTheme;
@@ -63,7 +63,7 @@ namespace SixtyOne.Editor
             BuildBuildingTimer(root, survival);
             BuildPanicMeter(root, survival);
             BuildPrepCountdown(root, prep, survival);
-            BuildLoopCounter(root, gameManager);
+            if (!tutorial) BuildLoopCounter(root, gameManager);
             BuildRightColumn(root, gameManager, content, art, survival, recipes, bagSlots, keyItems, nodePlayer);
             BuildLootWindow(root, gameManager, content, art);
             TestSceneCraftNotebook.Build(root, gameManager, content, survival, recipes, art, theme);
@@ -71,23 +71,28 @@ namespace SixtyOne.Editor
             // Speech bubbles + the top narration card (after the HUD so it reads the panic meter / bag column rects).
             DialoguePresenter presenter = TestSceneDialogueUi.Build(root, art, theme, survival);
             BuildAfadPopup(root);
-            BuildJournal(root, gameManager, content);
+            if (!tutorial) BuildJournal(root, gameManager, content);
             qteView = BuildQteView(root, art);
             // After the QTE panel so miss / timeout messages draw on top of it.
             BuildToast(root);
-            BuildDeathCard(root, gameManager, content, art);
+            if (!tutorial) BuildDeathCard(root, gameManager, content, art);
             BuildPoisonOverlay(root, survival);
             transitionOverlay = BuildTransitionOverlay(root);
             BuildRewindFx(root, camera);
             BuildClickFeedback(root, art);
-            // The end screen ("Simülasyon sona erdi") covers the HUD once the epilogue was read.
-            TestSceneEnding.Build(root, theme);
-            TestSceneEndScreen.Build(root, content);
-            // The floor-transition info card, then the intro briefing (up from the first frame of a new run).
-            TestSceneIntroCards.BuildInfoCards(root, nodePlayer);
-            TestSceneIntroCards.BuildIntro(root);
+            // The tutorial has no loop counter, journal, death card, ending, end screen, info cards or intro briefing.
+            if (!tutorial)
+            {
+                // The end screen ("Simülasyon sona erdi") covers the HUD once the epilogue was read.
+                TestSceneEnding.Build(root, theme);
+                TestSceneEndScreen.Build(root, content);
+                // The floor-transition info card, then the intro briefing (up from the first frame of a new run).
+                TestSceneIntroCards.BuildInfoCards(root, nodePlayer);
+                TestSceneIntroCards.BuildIntro(root);
+            }
+
             // Last: the ESC pause overlay draws over everything.
-            BuildPauseMenu(root);
+            BuildPauseMenu(root, tutorial);
             EnforceReadableText(canvasGo);
             UiFactory.Theme = null;
             return presenter;
@@ -221,7 +226,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>ESC pause: dim overlay, centred serif panel (Devam Et / Ayarlar / Ana Menü / Oyundan Çık), settings, confirm.</summary>
-        private static void BuildPauseMenu(Transform root)
+        private static void BuildPauseMenu(Transform root, bool tutorial)
         {
             var click = UnityEditor.AssetDatabase.LoadAssetAtPath<SixtyOne.Audio.AudioCue>("Assets/_Game/Data/Audio/cue_choice_click.asset");
             Image dim = UiFactory.MakeImage("PauseMenu", root, Vector2.zero, Vector2.one, new Color(0f, 0f, 0f, 0.8f), raycast: true);
@@ -230,10 +235,23 @@ namespace SixtyOne.Editor
             Image panel = UiFactory.MakePanel("Panel", dim.transform, new Vector2(0.38f, 0.26f), new Vector2(0.62f, 0.74f), MenuUi.PanelColor, raycast: true);
             CanvasGroup buttons = panel.gameObject.AddComponent<CanvasGroup>();
             MenuUi.KeyLabel("Title", panel.transform, new Vector2(0.08f, 0.8f), new Vector2(0.92f, 0.95f), UiKeys.PauseTitle, 44f, TextAlignmentOptions.Center, true, true);
-            Button resume = MenuUi.Button("Resume", panel.transform, new Vector2(0.12f, 0.61f), new Vector2(0.88f, 0.75f), UiKeys.PauseResume);
-            Button settings = MenuUi.Button("Settings", panel.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.57f), UiKeys.PauseSettings);
-            Button mainMenu = MenuUi.Button("MainMenu", panel.transform, new Vector2(0.12f, 0.25f), new Vector2(0.88f, 0.39f), UiKeys.PauseMainMenu);
-            Button quit = MenuUi.Button("Quit", panel.transform, new Vector2(0.12f, 0.07f), new Vector2(0.88f, 0.21f), UiKeys.PauseQuit);
+            Button resume, settings, mainMenu, quit;
+            if (!tutorial)
+            {
+                resume = MenuUi.Button("Resume", panel.transform, new Vector2(0.12f, 0.61f), new Vector2(0.88f, 0.75f), UiKeys.PauseResume);
+                settings = MenuUi.Button("Settings", panel.transform, new Vector2(0.12f, 0.43f), new Vector2(0.88f, 0.57f), UiKeys.PauseSettings);
+                mainMenu = MenuUi.Button("MainMenu", panel.transform, new Vector2(0.12f, 0.25f), new Vector2(0.88f, 0.39f), UiKeys.PauseMainMenu);
+                quit = MenuUi.Button("Quit", panel.transform, new Vector2(0.12f, 0.07f), new Vector2(0.88f, 0.21f), UiKeys.PauseQuit);
+            }
+            else
+            {
+                // Five rows: "Öğreticiyi atla" (wired by TutorialDirector) sits under Ayarlar.
+                resume = MenuUi.Button("Resume", panel.transform, new Vector2(0.12f, 0.63f), new Vector2(0.88f, 0.75f), UiKeys.PauseResume, 30f);
+                settings = MenuUi.Button("Settings", panel.transform, new Vector2(0.12f, 0.485f), new Vector2(0.88f, 0.605f), UiKeys.PauseSettings, 30f);
+                MenuUi.Button("SkipTutorial", panel.transform, new Vector2(0.12f, 0.34f), new Vector2(0.88f, 0.46f), UiKeys.PauseSkipTutorial, 30f);
+                mainMenu = MenuUi.Button("MainMenu", panel.transform, new Vector2(0.12f, 0.195f), new Vector2(0.88f, 0.315f), UiKeys.PauseMainMenu, 30f);
+                quit = MenuUi.Button("Quit", panel.transform, new Vector2(0.12f, 0.05f), new Vector2(0.88f, 0.17f), UiKeys.PauseQuit, 30f);
+            }
 
             SettingsPanel settingsPanel = MenuUi.Settings(dim.transform, click);
             CanvasGroup confirm = MenuUi.Confirm(dim.transform, out Button yes, out Button no);

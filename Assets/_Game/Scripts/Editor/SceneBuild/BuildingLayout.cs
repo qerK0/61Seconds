@@ -244,7 +244,7 @@ namespace SixtyOne.Editor
 
         // ---------- builders ----------
 
-        private static RoomSpec Room(string id, int w, int h, Color floor, string zone = null)
+        internal static RoomSpec Room(string id, int w, int h, Color floor, string zone = null)
         {
             float cx = w * 0.5f;
             float cy = h * 0.5f;
@@ -255,7 +255,7 @@ namespace SixtyOne.Editor
             };
         }
 
-        private static RoomSpec Art(RoomSpec room, RoomArt art, string gaps = "", string windows = "", bool walls = true)
+        internal static RoomSpec Art(RoomSpec room, RoomArt art, string gaps = "", string windows = "", bool walls = true)
         {
             room.Art = art;
             room.Walls = walls;
@@ -265,7 +265,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Two-way door: a's edge ⇄ b's edge (wall gaps opened on both sides).</summary>
-        private static void Link(RoomSpec a, string edgeA, RoomSpec b, string edgeB)
+        internal static void Link(RoomSpec a, string edgeA, RoomSpec b, string edgeB)
         {
             OneWay(a, edgeA, b, EdgeInside(b, edgeB)).TwoWay = true;
             OneWay(b, edgeB, a, EdgeInside(a, edgeA)).TwoWay = true;
@@ -404,7 +404,7 @@ namespace SixtyOne.Editor
             return new AnchorSpec { Id = id, Gx = gx, Gy = gy, Tag = tag, Capacity = cap, HazardId = hazard, LabelKey = label, Adjacent = adjacent };
         }
 
-        private static PropSpec P(string propId, string name, float gx, float gy, float lift, float sx, float sy, Color color, float topple = -80f, float drop = 0.8f)
+        internal static PropSpec P(string propId, string name, float gx, float gy, float lift, float sx, float sy, Color color, float topple = -80f, float drop = 0.8f)
         {
             return new PropSpec { PropId = propId, Name = name, Gx = gx, Gy = gy, Lift = lift, Scale = new Vector2(sx, sy), Color = color, Topple = topple, Drop = drop };
         }
@@ -422,7 +422,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>A searchable piece of furniture (first search 3 s of building time + 1.5 s real time).</summary>
-        private static ContainerSpec Box(string id, string kind, float gx, float gy, Color color, params string[] items)
+        internal static ContainerSpec Box(string id, string kind, float gx, float gy, Color color, params string[] items)
         {
             ContainerSpec spec = ContainerPreset(id, kind);
             spec.Gx = gx;
@@ -482,13 +482,13 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>A wall lamp on the back-left wall at segment x (a Light2D practical sits on it).</summary>
-        private static void WallLamp(RoomSpec room, float x, string lightName)
+        internal static void WallLamp(RoomSpec room, float x, string lightName)
         {
             room.Props.Add(P(null, "WallLamp", x, room.Height, 0.72f, 0.25f, 0.25f, new Color(1f, 0.9f, 0.6f, 1f)));
             room.Lights.Add(L(lightName, x, room.Height - 0.2f, 0.8f, 2.4f));
         }
 
-        private static LightSpec L(string name, float gx, float gy, float lift, float radius, Color? color = null)
+        internal static LightSpec L(string name, float gx, float gy, float lift, float radius, Color? color = null)
         {
             return new LightSpec { Name = name, Gx = gx, Gy = gy, Lift = lift, Radius = radius, Color = color ?? Warm };
         }
@@ -510,7 +510,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Gives every prop a stable id: its name, then Name#2, Name#3 ... for repeats in the same room.</summary>
-        private static void AssignPropIds(RoomSpec room)
+        internal static void AssignPropIds(RoomSpec room)
         {
             var counts = new Dictionary<string, int>();
             foreach (PropSpec p in room.Props)

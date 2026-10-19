@@ -82,6 +82,9 @@ namespace SixtyOne.UI
             else SetPaused(false);
         }
 
+        /// <summary>Closes the pause menu and resumes (e.g. after the tutorial's "Öğreticiyi atla").</summary>
+        public void Resume() => SetPaused(false);
+
         private void SetPaused(bool paused)
         {
             PauseState.Set(paused);

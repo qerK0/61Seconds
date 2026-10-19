@@ -299,7 +299,7 @@ namespace SixtyOne.Editor
         /// walls, props, anchors, hotspots, spawns and characters stay aligned and the tile PPU never changes.
         /// Light2D radii are world-space values, so they are scaled to match.
         /// </summary>
-        private static void ApplyWorldScale(List<Room> rooms, Transform familyRoot, float scale)
+        internal static void ApplyWorldScale(List<Room> rooms, Transform familyRoot, float scale)
         {
             var world = new GameObject("World").transform;
             foreach (Room room in rooms) room.transform.SetParent(world, false);
@@ -332,11 +332,11 @@ namespace SixtyOne.Editor
             return mound != null ? new[] { mound } : DebrisSprites();
         }
 
-        private static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
+        internal static int WallRows(BuildingAssets data) => data.Visual != null ? data.Visual.WallRows : 2;
 
         private static StreetPowerLine streetLine;
 
-        private static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
+        internal static Room BuildRoom(BuildingLayout.RoomSpec spec, BuildingAssets data, List<Light2D> practicals, TileArt.TileSets tileSets, NodePlayer nodePlayer,
             RoomNavigator navigator)
         {
             Room room = SceneKit.NewRoom("Room_" + spec.Id, spec.Id);
@@ -457,7 +457,7 @@ namespace SixtyOne.Editor
         }
 
         /// <summary>Second pass (every room exists): doors with arrival points inside their target rooms.</summary>
-        private static void BuildDoors(List<BuildingLayout.RoomSpec> specs, List<Room> rooms, RoomNavigator navigator)
+        internal static void BuildDoors(List<BuildingLayout.RoomSpec> specs, List<Room> rooms, RoomNavigator navigator)
         {
             for (int i = 0; i < specs.Count; i++)
             {
@@ -476,7 +476,7 @@ namespace SixtyOne.Editor
             }
         }
 
-        private static Camera BuildCamera(out Transform rig)
+        internal static Camera BuildCamera(out Transform rig)
         {
             // CameraRig moves per room (RoomCameraFraming); the camera keeps its local pose for shake and tilt.
             rig = new GameObject("CameraRig").transform;
@@ -496,7 +496,7 @@ namespace SixtyOne.Editor
             return camera;
         }
 
-        private static void BuildEventSystem()
+        internal static void BuildEventSystem()
         {
             var go = new GameObject("EventSystem", typeof(EventSystem));
             InputSystemUIInputModule module = go.AddComponent<InputSystemUIInputModule>();

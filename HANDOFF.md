@@ -4,6 +4,69 @@ Newest entry on top. Every Claude Code session (cloud or local) appends an entry
 
 ---
 
+## [2026-10-19 19:25] LOCAL — Brighter grade + Parlaklık slider; tutorial scene (Öğretici) + menu entries; Windows rebuild
+### Done
+- **Brightness (one place: `Data/Cinematic/Resources/BrightnessConfig.asset`)**, read by CinematicDirector from Resources, so Test_Building needed no rebuild:
+  - +0.35 EV on every act / street profile;
+  - vignette x0.7 (every vignette value: rest, tension, poison, death);
+  - dust LUT contribution x0.85;
+  - Shadows/Midtones/Highlights: shadows +0.15, midtones +0.05. Lift Gamma Gain was tried first, but it greyed out the black void, so SMH is used instead: black stays black.
+- **Parlaklık slider** (0..1; 0.5 = the config look; the ends = ±0.6 EV) saved in PlayerPrefs `61s.brightness`.
+  - The main menu panel builds it (MenuUi).
+  - Older scenes (Test_Building's pause menu) get it at runtime: SettingsPanel copies the Efekt row and re-lays the rows. Verified in Play Mode.
+- **Before/after screenshots**: `docs/ref/brightness/{before,after}_{apartment,stairwell,street}.png`. They are camera renders at 1920x1080, pre-quake, UI hidden. "Before" = the config neutralised in memory.
+- **Tutorial** = `Scenes/Tutorial.unity`, built by `SixtyOne > Tutorial > Build Tutorial Scene`:
+  - Own layout (`TutorialLayout`: salon + hall, one zone) and own content (`Data/Tutorial`: tut.start → tut.quake → tut.after → tut.done).
+  - Never reads or writes RoomLayoutOverrides; LayoutObject tags are stripped. The building data is only read (`TutorialAssets`).
+  - Reuses the real HUD, bag, loot window, Craft Defteri, NodePlayer thought bubble, CrouchDirector, CameraShake, quake audio and cinematic look.
+  - `TutorialDirector` runs the 6 steps:
+    1. Walk to the floor marker. The hint shows the pointer binding read from the Input System.
+    2. Search the dolap, take cloth / water / flashlight / whistle, then the bag-slots and pocket hints.
+    3. Craft Defteri: cloth + water = ıslak bez (C key name read from the Input System).
+    4. LED clock, Panik, Enerji; each continues on click / Space / Enter.
+    5. Scripted quake + the 3-choice node. A wrong choice shows the AFAD reason and offers the choices again (no death, no rewind). The right one keeps shaking until read.
+    6. Through the hall door to the exit door (a ChoiceHotspot playing the exit choice), then the end panel "Eğitim tamamlandı" with Oyuna başla / Ana menü.
+  - No timer pressure: SurvivalController is disabled, the clock shows 08:00 frozen and actions cost nothing.
+  - Geç skips a step and grants what it would have given. The pause menu has an extra "Öğreticiyi atla" in the tutorial only (TestSceneUi `tutorial` flag).
+- **Main menu**:
+  - New "Öğretici" button under Oyunu Başlat.
+  - The first Oyunu Başlat asks "Önce öğreticiyi oynamak ister misin?" (Evet / Hayır) once. PlayerPrefs keys: `61s.tutorial.asked` / `.done`.
+  - Build Settings: MainMenu, Test_Building, Tutorial.
+- **Strings**: all new text is under `ui.tutorial.*`, plus `ui.menu.tutorial(_ask)`, `ui.settings.brightness` and `ui.pause.skip_tutorial`.
+- **Verified in the editor (MCP)**:
+  - The full tutorial ran in Play Mode with real input paths: mover routes, loot buttons, bag slots → notebook → Birleştir, two real Space presses, a wrong choice then the right one, hall door, exit door.
+  - Geç ×3 and Öğreticiyi atla (Esc → pause) worked; both end buttons worked; Evet in the first-run question loaded the tutorial.
+  - Results: 0 console errors, LoopCount 0, BuildingTime stayed 480.
+  - Validate Content on Test_Building: 0 problems. Text Validate: 0 missing. EditMode tests: 240/240 (4 new BrightnessTests).
+- **Windows build** (same path, release): `Builds/Windows/IstanbulAfetBolgesi.exe`, built in 38 s.
+  - Launched once: the main menu shows Öğretici, and Player.log has no errors.
+  - Zipped to `Builds/IstanbulAfetBolgesi_Windows.zip` (56.4 MB, BackUpThisFolder excluded).
+- `Test_Building.unity` and `RoomLayoutOverrides.asset` are byte-identical to before this session (md5 checked; their older uncommitted edits are Bora's and were not committed).
+### Files created / changed
+- Scripts/Cinematic/BrightnessConfig.cs (new), CinematicDirector.cs — brightness on top of the profiles
+- Scripts/Core/UserSettings.cs (Brightness), SceneFlow.cs (StartTutorial)
+- Scripts/UI/SettingsPanel.cs (Parlaklık row + runtime row for old scenes), MainMenu.cs (Öğretici, first-run question), PauseMenu.cs (Resume()), CollapsiblePanel.cs (Expand())
+- Scripts/Tutorial/* (new): TutorialDirector, TutorialHintPanel, TutorialHighlight, TutorialMarker, TutorialBindings, TutorialProgress, TutorialIds
+- Scripts/Editor/Tutorial/* (new): TutorialSceneBuilder, TutorialLayout, TutorialContentGenerator, TutorialAssets, TutorialUi
+- Scripts/Editor/Cinematic/BrightnessConfigAsset.cs (new, menu SixtyOne > Cinematic > Create Brightness Config)
+- Scripts/Editor/SceneBuild: TestSceneUi (`tutorial` flag), TestSceneBuilder + BuildingLayout (helpers internal), MenuUi (Parlaklık row), MainMenuBuilder (Öğretici + question, build scenes, no save prompt for the tutorial scene)
+- Scripts/Editor/Content/ContentValidator.cs — skips Data/Tutorial and the tutorial scene's door checks
+- Scripts/Text/UiKeys.cs, Content/Text/strings_tr.csv — new keys
+- Tests/EditMode/BrightnessTests.cs (new)
+- Data/Cinematic/Resources/BrightnessConfig.asset, Data/Tutorial/*, Scenes/Tutorial.unity, Scenes/MainMenu.unity (rebuilt), ProjectSettings/EditorBuildSettings.asset, docs/ref/brightness/*.png
+### Needs local wiring (checklist for the MCP session)
+- [ ] Nothing required. To tweak brightness, select `Data/Cinematic/Resources/BrightnessConfig.asset` (it applies live in Play Mode).
+- [ ] After changing the tutorial layout or flow: run SixtyOne > Tutorial > Build Tutorial Scene (it refuses to run while another open scene has unsaved changes, so Test_Building is never saved by it).
+### Not verified / risks
+- **The .exe was launched but not clicked through.** Posted window messages do not reach the Input System, and I did not take over the real mouse or foreground. The tutorial itself was verified in the editor's Play Mode; please click Öğretici once in the build.
+- The build log shows 2 "More than one global light" messages from scene switching in the editor. Each scene has exactly one global Light2D, and Play Mode showed no such error.
+- Key injection only works while Unity has OS focus, so most click-through hints were advanced with Geç in testing; real Space presses worked twice.
+- Bora's uncommitted edits were left out of the commit: strings_tr.csv `f2.robber.c_short` = "Umursama..", Test_Building, RoomLayoutOverrides, URP / TMP / font assets, CinematicBaseVolume, VersionControlSettings, the WhatsApp mp4 and Caveat.meta.
+### Next suggested step
+- Click through the tutorial once in the .exe. If the grade is still too dark or too bright, nudge `exposureBoost` in BrightnessConfig.
+
+---
+
 ## [2026-10-18 17:35] LOCAL — Ending video (VideoPlayer) before the epilogue + Windows rebuild
 ### Done
 - `EndingCinematic` plays `EndingCinematicConfig.Video` when one is set. A VideoPlayer renders to a RenderTexture on a full-screen RawImage (AspectRatioFitter FitInParent, so the black overlay letterboxes it), with its audio on its own AudioSource at volume 1 (ignoreListenerPause). The video is prepared (Prepare + prepareCompleted) during the 1 s fade to black while every other playing AudioSource fades out over 0.5 s. During the video the listener is paused, and afterwards those sources are stopped (the end screen restarts its own music). At the end (loopPointReached) or on a skip, there is a 0.5 s fade to black, then the existing epilogue → end screen. Skip: click / Space / Enter / Esc, only after 1 s. A prepare failure or a 10 s timeout falls back to frames or text.

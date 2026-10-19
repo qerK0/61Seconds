@@ -37,7 +37,7 @@ namespace SixtyOne.Editor
             // The generated test scene never needs a prompt (it is rebuilt from code): save it silently, so the
             // menu item also works from MCP without a modal dialog.
             Scene active = SceneManager.GetActiveScene();
-            if (active.isDirty && active.path == TestSceneBuilder.ScenePath) EditorSceneManager.SaveScene(active);
+            if (active.isDirty && (active.path == TestSceneBuilder.ScenePath || active.path == TutorialSceneBuilder.ScenePath)) EditorSceneManager.SaveScene(active);
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
 
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -96,16 +96,17 @@ namespace SixtyOne.Editor
             dustGroup.alpha = 0f;
             GlitchText glitch = BuildTitle(titleRoot, art);
 
-            // Left column: Oyunu Başlat, Ayarlar, Galeri, Çıkış, hazard stripe.
+            // Left column: Oyunu Başlat, Öğretici, Ayarlar, Galeri, Çıkış, hazard stripe.
             RectTransform column = UiFactory.MakeRect("Buttons", shake, new Vector2(0.055f, 0.2f), new Vector2(0.28f, 0.6f));
             CanvasGroup buttons = column.gameObject.AddComponent<CanvasGroup>();
-            Button start = MenuKit.Primary("Start", column, new Vector2(0f, 0.74f), new Vector2(1f, 0.97f), UiKeys.MenuStart, 46f, art, cues);
-            Button settings = MenuKit.Secondary("Settings", column, new Vector2(0f, 0.55f), new Vector2(1f, 0.68f), UiKeys.MenuSettings, 34f, art, cues);
-            Button gallery = MenuKit.Secondary("Gallery", column, new Vector2(0f, 0.39f), new Vector2(1f, 0.52f), UiKeys.MenuGallery, 34f, art, cues);
-            Button quit = MenuKit.Secondary("Quit", column, new Vector2(0f, 0.23f), new Vector2(1f, 0.36f), UiKeys.MenuQuit, 34f, art, cues);
-            RawImage stripe = MenuKit.Tiled("HazardStripe", column, new Vector2(0f, 0.11f), new Vector2(1f, 0.17f), art.Hazard, new Color(1f, 1f, 1f, 0.9f), new Vector2(430f / 32f / 2f, 1f));
+            Button start = MenuKit.Primary("Start", column, new Vector2(0f, 0.78f), new Vector2(1f, 0.99f), UiKeys.MenuStart, 46f, art, cues);
+            Button tutorial = MenuKit.Secondary("Tutorial", column, new Vector2(0f, 0.63f), new Vector2(1f, 0.74f), UiKeys.MenuTutorial, 34f, art, cues);
+            Button settings = MenuKit.Secondary("Settings", column, new Vector2(0f, 0.49f), new Vector2(1f, 0.6f), UiKeys.MenuSettings, 34f, art, cues);
+            Button gallery = MenuKit.Secondary("Gallery", column, new Vector2(0f, 0.35f), new Vector2(1f, 0.46f), UiKeys.MenuGallery, 34f, art, cues);
+            Button quit = MenuKit.Secondary("Quit", column, new Vector2(0f, 0.21f), new Vector2(1f, 0.32f), UiKeys.MenuQuit, 34f, art, cues);
+            RawImage stripe = MenuKit.Tiled("HazardStripe", column, new Vector2(0f, 0.1f), new Vector2(1f, 0.16f), art.Hazard, new Color(1f, 1f, 1f, 0.9f), new Vector2(430f / 32f / 2f, 1f));
             stripe.gameObject.AddComponent<UvScroll>().Configure(stripe, new Vector2(0.25f, 0f));
-            MenuKit.VerticalNavigation(start, settings, gallery, quit);
+            MenuKit.VerticalNavigation(start, tutorial, settings, gallery, quit);
 
             // Panels (centre) and the quit confirmation.
             SettingsPanel settingsPanel = MenuUi.Settings(shake, cues.Click);
@@ -118,14 +119,26 @@ namespace SixtyOne.Editor
             yes.navigation = Horizontal(no);
             no.navigation = Horizontal(yes);
 
+            // First Oyunu Başlat: "Önce öğreticiyi oynamak ister misin?" (Evet = tutorial, Hayır = the game).
+            CanvasGroup ask = MenuUi.Confirm(shake, out Button askYes, out Button askNo);
+            ask.name = "TutorialAsk";
+            SerializedWire.SetTextKey(ask.transform.Find("Question").GetComponent<LocalizedText>(), "key", UiKeys.MenuTutorialAsk);
+            RestylePanel(ask.gameObject, art);
+            askYes.navigation = Horizontal(askNo);
+            askNo.navigation = Horizontal(askYes);
+
             MenuKit.Overlays(shake, art, 0.1f, grain: false);
             ScreenFader fader = MenuKit.Fader(canvas, 0.6f);
 
             MenuIntro intro = systems.AddComponent<MenuIntro>();
-            intro.Configure(fader, titleRoot, titleGroup, dustGroup, new[] { (RectTransform)start.transform, (RectTransform)settings.transform, (RectTransform)gallery.transform, (RectTransform)quit.transform, stripe.rectTransform }, cues.Thud);
+            intro.Configure(fader, titleRoot, titleGroup, dustGroup, new[] { (RectTransform)start.transform, (RectTransform)tutorial.transform, (RectTransform)settings.transform, (RectTransform)gallery.transform, (RectTransform)quit.transform, stripe.rectTransform }, cues.Thud);
 
             MainMenu menu = systems.AddComponent<MainMenu>();
             SerializedWire.Set(menu, "start", start);
+            SerializedWire.Set(menu, "tutorial", tutorial);
+            SerializedWire.Set(menu, "tutorialAsk", ask);
+            SerializedWire.Set(menu, "askYes", askYes);
+            SerializedWire.Set(menu, "askNo", askNo);
             SerializedWire.Set(menu, "settings", settings);
             SerializedWire.Set(menu, "gallery", gallery);
             SerializedWire.Set(menu, "quit", quit);
@@ -388,17 +401,18 @@ namespace SixtyOne.Editor
             }
         }
 
-        /// <summary>MainMenu first, Test_Building second; other scenes keep their place after them.</summary>
+        /// <summary>MainMenu first, Test_Building second, Tutorial third; other scenes keep their place after them.</summary>
         public static void SetBuildScenes()
         {
             var scenes = new List<EditorBuildSettingsScene>
             {
                 new EditorBuildSettingsScene(ScenePath, true),
-                new EditorBuildSettingsScene(TestSceneBuilder.ScenePath, true)
+                new EditorBuildSettingsScene(TestSceneBuilder.ScenePath, true),
+                new EditorBuildSettingsScene(TutorialSceneBuilder.ScenePath, true)
             };
             foreach (EditorBuildSettingsScene s in EditorBuildSettings.scenes)
             {
-                if (s.path != ScenePath && s.path != TestSceneBuilder.ScenePath) scenes.Add(s);
+                if (s.path != ScenePath && s.path != TestSceneBuilder.ScenePath && s.path != TutorialSceneBuilder.ScenePath) scenes.Add(s);
             }
 
             EditorBuildSettings.scenes = scenes.ToArray();

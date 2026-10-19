@@ -78,6 +78,7 @@ namespace SixtyOne.Cinematic
         private ColorLookup colorLookup;
         private ChromaticAberration chromatic;
         private LensDistortion lensDistortion;
+        private ShadowsMidtonesHighlights shadowsMidtones;
 
         private CinematicState state;
         private float baseOrthoSize;
@@ -192,6 +193,7 @@ namespace SixtyOne.Cinematic
             colorLookup = Ensure<ColorLookup>();
             chromatic = Ensure<ChromaticAberration>();
             lensDistortion = Ensure<LensDistortion>();
+            shadowsMidtones = Ensure<ShadowsMidtonesHighlights>();
 
             tonemapping.mode.Override(TonemappingMode.ACES);
             filmGrain.type.Override(FilmGrainLookup.Thin1);
@@ -288,14 +290,16 @@ namespace SixtyOne.Cinematic
         private void Apply(CinematicProfile p, CinematicFrame f)
         {
             volume.weight = volumeWeight;
-            colorAdjustments.postExposure.Override(f.PostExposure);
+            // Overall brightness (BrightnessConfig + the player's Parlaklık slider) sits on top of every act.
+            BrightnessConfig b = BrightnessConfig.Current;
+            colorAdjustments.postExposure.Override(f.PostExposure + b.ExposureFor(UserSettings.Brightness));
             colorAdjustments.contrast.Override(f.Contrast);
             colorAdjustments.saturation.Override(f.Saturation);
             colorAdjustments.colorFilter.Override(f.ColorFilter);
             splitToning.shadows.Override(p.SplitShadows);
             splitToning.highlights.Override(p.SplitHighlights);
             splitToning.balance.Override(p.SplitBalance);
-            vignette.intensity.Override(f.Vignette);
+            vignette.intensity.Override(Mathf.Clamp01(f.Vignette * b.VignetteScale));
             vignette.smoothness.Override(p.VignetteSmoothness);
             filmGrain.intensity.Override(f.Grain);
             filmGrain.response.Override(p.GrainResponse);
@@ -304,7 +308,9 @@ namespace SixtyOne.Cinematic
             bloom.scatter.Override(p.BloomScatter);
             // The dust LUT is the shared base grade under every act (Reduce Effects keeps it; only the grain goes).
             colorLookup.texture.Override(p.Lut);
-            colorLookup.contribution.Override(p.Lut != null ? p.LutContribution : 0f);
+            colorLookup.contribution.Override(p.Lut != null ? Mathf.Clamp01(p.LutContribution * b.LutScale) : 0f);
+            shadowsMidtones.shadows.Override(new Vector4(1f, 1f, 1f, b.ShadowLift));
+            shadowsMidtones.midtones.Override(new Vector4(1f, 1f, 1f, b.MidtoneLift));
             chromatic.intensity.Override(f.Chromatic);
             lensDistortion.intensity.Override(f.LensDistortion);
         }

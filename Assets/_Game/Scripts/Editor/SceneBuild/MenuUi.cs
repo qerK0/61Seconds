@@ -37,7 +37,7 @@ namespace SixtyOne.Editor
             return button;
         }
 
-        /// <summary>Settings panel centred in the parent: title, three volume sliders, the Reduce Effects toggle, Geri.</summary>
+        /// <summary>Settings panel centred in the parent: title, three volume sliders, Parlaklık, the Reduce Effects toggle, Geri.</summary>
         public static SettingsPanel Settings(Transform parent, AudioCue click)
         {
             Image panel = UiFactory.MakePanel("SettingsPanel", parent, new Vector2(0.33f, 0.24f), new Vector2(0.67f, 0.76f), PanelColor, raycast: true);
@@ -45,10 +45,12 @@ namespace SixtyOne.Editor
             Transform t = panel.transform;
             KeyLabel("Title", t, new Vector2(0.08f, 0.84f), new Vector2(0.92f, 0.97f), UiKeys.SettingsTitle, 44f, TextAlignmentOptions.Center, true, true);
 
-            Slider master = SliderRow(t, "Master", UiKeys.SettingsMaster, 0.68f);
-            Slider music = SliderRow(t, "Music", UiKeys.SettingsMusic, 0.53f);
-            Slider sfx = SliderRow(t, "Sfx", UiKeys.SettingsSfx, 0.38f);
-            Toggle reduce = ToggleRow(t, UiKeys.SettingsReduce, 0.23f);
+            Slider master = SliderRow(t, "Master", UiKeys.SettingsMaster, SettingsPanel.RowY[0]);
+            Slider music = SliderRow(t, "Music", UiKeys.SettingsMusic, SettingsPanel.RowY[1]);
+            Slider sfx = SliderRow(t, "Sfx", UiKeys.SettingsSfx, SettingsPanel.RowY[2]);
+            Slider brightness = SliderRow(t, "Brightness", UiKeys.SettingsBrightness, SettingsPanel.RowY[3]);
+            brightness.value = 0.5f;
+            Toggle reduce = ToggleRow(t, UiKeys.SettingsReduce, SettingsPanel.ToggleY);
             Button back = Button("Back", t, new Vector2(0.32f, 0.04f), new Vector2(0.68f, 0.15f), UiKeys.SettingsBack, 30f);
 
             SettingsPanel settings = panel.gameObject.AddComponent<SettingsPanel>();
@@ -56,6 +58,7 @@ namespace SixtyOne.Editor
             SerializedWire.Set(settings, "master", master);
             SerializedWire.Set(settings, "music", music);
             SerializedWire.Set(settings, "sfx", sfx);
+            SerializedWire.Set(settings, "brightness", brightness);
             SerializedWire.Set(settings, "reduceEffects", reduce);
             SerializedWire.Set(settings, "back", back);
             SerializedWire.Set(settings, "clickCue", click);

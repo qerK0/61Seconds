@@ -48,6 +48,12 @@ namespace SixtyOne.UI
             TextDB.Changed -= RefreshLabel;
         }
 
+        /// <summary>Slides the panel open if it is collapsed (the tutorial points at the bag).</summary>
+        public void Expand()
+        {
+            if (collapsed) Toggle();
+        }
+
         public void Toggle()
         {
             collapsed = !collapsed;
